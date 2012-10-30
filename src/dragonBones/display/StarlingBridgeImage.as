@@ -27,8 +27,8 @@ package dragonBones.display
 				matrix.tx = tx - matrix.a * pX - matrix.c * pY;
 				matrix.ty = ty - matrix.b * pX - matrix.d * pY;
 			}
-			//TODO:this may be optimized:
-			super.transformationMatrix = matrix;
+			
+			super.transformationMatrix.copyFrom(matrix);
         }
 		
 	}
