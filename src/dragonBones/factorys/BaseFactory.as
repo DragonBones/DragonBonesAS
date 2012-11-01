@@ -144,6 +144,7 @@ package dragonBones.factorys {
 				_bone.changeDisplay(_i);
 				if (_displayData.isArmature) {
 					var _childArmature:Armature = buildArmature(_displayData.name);
+					_childArmature.name = "__childArmature";
 					if(this["constructor"] == BaseFactory){
 						_childArmature.display.mouseChildren = false;
 					}
