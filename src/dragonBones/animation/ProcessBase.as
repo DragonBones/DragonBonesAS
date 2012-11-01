@@ -23,7 +23,7 @@ package dragonBones.animation {
 		protected var toIndex:int;
 
 		public function get isPlaying():Boolean{
-			return !__isComplete || !__isPause;
+			return !__isComplete && !__isPause;
 		}
 		
 		protected var __isComplete:Boolean;
@@ -55,7 +55,7 @@ package dragonBones.animation {
 			
 		}
 		
-		public function play(_animation:Object, _durationTo:int = 0, _durationTween:int = 0, _loop:* = false, _tweenEasing:Number = NaN):void {
+		public function gotoAndPlay(_animation:Object, _durationTo:int = 0, _durationTween:int = 0, _loop:* = false, _tweenEasing:Number = NaN):void {
 			__isComplete = false;
 			__isPause = false;
 			currentFrame = 0;
@@ -63,17 +63,16 @@ package dragonBones.animation {
 			tweenEasing = _tweenEasing;
 		}
 		
-		public function pause():void {
-			__isPause = true;
-		}
-		
-		public function resume():void {
+		public function play():void {
+			if(__isComplete){
+				__isComplete = false;
+				currentFrame = 0;
+			}
 			__isPause = false;
 		}
 		
 		public function stop():void {
-			__isComplete = true;
-			currentFrame = 0;
+			__isPause = true;
 		}
 		
 		final public function update():void {

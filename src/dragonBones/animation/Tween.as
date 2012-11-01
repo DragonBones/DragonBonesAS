@@ -54,7 +54,7 @@ package dragonBones.animation {
 			nextKeyFrame = null;
 		}
 		
-		override public function play(_movementBoneData:Object, _durationTo:int = 0, _durationTween:int = 0, _loop:* = false, _tweenEasing:Number = NaN):void {
+		override public function gotoAndPlay(_movementBoneData:Object, _durationTo:int = 0, _durationTween:int = 0, _loop:* = false, _tweenEasing:Number = NaN):void {
 			movementBoneData = _movementBoneData as MovementBoneData;
 			if(!movementBoneData){
 				return;
@@ -62,7 +62,7 @@ package dragonBones.animation {
 			currentKeyFrame = null;
 			nextKeyFrame = null;
 			isTweenKeyFrame = false;
-			super.play(null, _durationTo, _durationTween, _loop, _tweenEasing);
+			super.gotoAndPlay(null, _durationTo, _durationTween, _loop, _tweenEasing);
 			//
 			totalDuration = 0;
 			betweenDuration = 0;
@@ -91,6 +91,18 @@ package dragonBones.animation {
 					setBetween(node, nextKeyFrame);
 					isTweenKeyFrame = true;
 				}
+			}
+		}
+		
+		override public function play():void {
+			if (!movementBoneData) {
+				return;
+			}
+			
+			if(__isPause){
+				super.play();
+			}else if(__isComplete){
+				gotoAndPlay(movementBoneData);
 			}
 		}
 		
@@ -171,7 +183,7 @@ package dragonBones.animation {
 				if(_childAramture){
 					_childAramture.origin.z = currentKeyFrame.z;
 					if(currentKeyFrame.movement){
-						_childAramture.animation.play(currentKeyFrame.movement);
+						_childAramture.animation.gotoAndPlay(currentKeyFrame.movement);
 					}
 				}
 				

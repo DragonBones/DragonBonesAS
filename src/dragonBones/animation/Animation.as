@@ -64,15 +64,8 @@ package dragonBones.animation{
 			movementList = animationData.getSearchList();
 		}
 		
-		public function autoPlay(_movementID:Object, _durationTo:int = -1, _durationTween:int = -1, _loop:* = null, _tweenEasing:Number = NaN):void{
-			if(movementID == _movementID as String){
-				return;
-			}
-			play(_movementID, _durationTo, _durationTween, _loop, _tweenEasing);
-		}
-		
 		private var tempArgs:Array = [];
-		override public function play(_movementID:Object, _durationTo:int = -1, _durationTween:int = -1, _loop:* = null, _tweenEasing:Number = NaN):void {
+		override public function gotoAndPlay(_movementID:Object, _durationTo:int = -1, _durationTween:int = -1, _loop:* = null, _tweenEasing:Number = NaN):void {
 			if (!animationData) {
 				return;
 			}
@@ -89,7 +82,7 @@ package dragonBones.animation{
 			_loop = _loop === null?movementData.loop:_loop;
 			_tweenEasing = isNaN(_tweenEasing)?movementData.tweenEasing:_tweenEasing;
 			
-			super.play(null, _durationTo, _durationTween);
+			super.gotoAndPlay(null, _durationTo, _durationTween);
 			duration = movementData.duration;
 			if (duration == 1) {
 				loop = SINGLE;
@@ -107,44 +100,44 @@ package dragonBones.animation{
 			tempArgs[2] = _durationTween;
 			tempArgs[3] = _loop;
 			tempArgs[4] = _tweenEasing;
-			armature.eachChild(playBone, tempArgs, true);
+			armature.eachChild(gotoAndPlayBone, tempArgs, true);
 			armature.dispatchEventWith(Event.MOVEMENT_CHANGE, movementID);
 		}
-		private function playBone(_bone:Bone, _args:Array):Boolean{
+		private function gotoAndPlayBone(_bone:Bone, _args:Array):Boolean{
 			var _movementBoneData:MovementBoneData = movementData.getData(_bone.name);
 			if (_movementBoneData) {
-				_bone.tween.play(_movementBoneData, _args[1], _args[2], _args[3], _args[4]);
+				_bone.tween.gotoAndPlay(_movementBoneData, _args[1], _args[2], _args[3], _args[4]);
 			}else {
 				_bone.changeDisplay(-1);
 				_bone.tween.stop();
 			}
 			if(_bone is Armature){
-				(_bone as Armature).animation.play(_args[0]);
+				(_bone as Armature).animation.gotoAndPlay(_args[0]);
 			}
 			return false;
 		}
 		
-		
-		override public function pause():void {
-			super.pause();
-			armature.eachChild(pauseBone, null, true);
-		}
-		private function pauseBone(_bone:Bone, _args:Array):Boolean {
-			_bone.tween.pause();
-			if(_bone is Armature){
-				(_bone as Armature).animation.pause();
+		override public function play():void {
+			if (!animationData) {
+				return;
 			}
-			return false;
+			
+			if(!movementID){
+				gotoAndPlay(movementList[0]);
+				return;
+			}
+			
+			if(__isPause){
+				super.play();
+				armature.eachChild(playBone, null, true);
+			}else if(__isComplete){
+				gotoAndPlay(movementID);
+			}
 		}
-		
-		override public function resume():void {
-			super.resume();
-			armature.eachChild(resumeBone, null, true);
-		}
-		private function resumeBone(_bone:Bone, _args:Array):Boolean {
-			_bone.tween.resume();
+		private function playBone(_bone:Bone, _args:Array):Boolean {
+			_bone.tween.play();
 			if(_bone is Armature){
-				(_bone as Armature).animation.resume();
+				(_bone as Armature).animation.play();
 			}
 			return false;
 		}
@@ -224,7 +217,7 @@ package dragonBones.animation{
 					soundManager.dispatchEventWith(Event.SOUND_FRAME, currentFrameData.sound);
 				}
 				if(currentFrameData.movement){
-					play(currentFrameData.movement);
+					gotoAndPlay(currentFrameData.movement);
 				}
 			}
 		}
