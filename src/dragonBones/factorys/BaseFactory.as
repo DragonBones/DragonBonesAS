@@ -144,7 +144,7 @@ package dragonBones.factorys {
 				_bone.changeDisplay(_i);
 				if (_displayData.isArmature) {
 					var _childArmature:Armature = buildArmature(_displayData.name);
-					_childArmature.name = "__childArmature";
+					_childArmature.name = _boneName + "__childArmature";
 					_bone.display = _childArmature;
 				}else {
 					_bone.display = generateBoneDisplay(_armature, _bone, _displayData.name);

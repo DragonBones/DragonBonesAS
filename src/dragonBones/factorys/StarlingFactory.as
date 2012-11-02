@@ -95,7 +95,7 @@ package dragonBones.factorys {
 			}
 		}
 		
-		private static function updateDisplay(_display:Image, matrix:Matrix):void {
+		private static function updateDisplay(_display:Object, matrix:Matrix):void {
 			_display.transformationMatrix = matrix;
 		}
 	}
