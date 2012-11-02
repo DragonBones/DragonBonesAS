@@ -209,6 +209,12 @@ package dragonBones.animation {
 		
 		private function setBetween(_from:Node, _to:Node):void {
 			from.copy(_from);
+			if(_to is FrameData){
+				if((_to as FrameData).displayIndex < 0){
+					between.subtract(_from, _from);
+					return;
+				}
+			}
 			between.subtract(_from, _to);
 		}
 		

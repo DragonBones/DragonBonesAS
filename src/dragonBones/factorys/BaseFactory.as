@@ -145,9 +145,6 @@ package dragonBones.factorys {
 				if (_displayData.isArmature) {
 					var _childArmature:Armature = buildArmature(_displayData.name);
 					_childArmature.name = "__childArmature";
-					if(this["constructor"] == BaseFactory){
-						_childArmature.display.mouseChildren = false;
-					}
 					_bone.display = _childArmature;
 				}else {
 					_bone.display = generateBoneDisplay(_armature, _bone, _displayData.name);
@@ -163,13 +160,12 @@ package dragonBones.factorys {
 				_clip.gotoAndStop(_clip.totalFrames);
 				_clip.gotoAndStop(String(_imageName));
 				if (_clip.numChildren > 0) {
-					_display = _clip.getChildAt(0);
-					if (_display) {
-						_display.mouseChildren = false;
+					try{
+						_display = _clip.getChildAt(0);
 						_display.x = 0;
 						_display.y = 0;
-					}else{
-						//trace("无法获取影片剪辑，请确认骨骼 FLA 源文件导出 player 版本，与当前程序版本一致！");
+					}catch(_e:Error){
+						trace("无法获取影片剪辑，请确认骨骼 FLA 源文件导出 player 版本，与当前程序版本一致！");
 					}
 				}
 			}else if(textureData.bitmap){
