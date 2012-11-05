@@ -29,6 +29,9 @@ package dragonBones.objects
 		public var clip:MovieClip;
 		
 		private var __bitmap:Bitmap;
+		
+		private var _subTextureXMLs:Object;
+		
 		public function get bitmap():Bitmap{
 			if (!__bitmap && clip) {
 				clip.gotoAndStop(1);
@@ -73,6 +76,12 @@ package dragonBones.objects
 			name = __xml.attribute(ConstValues.A_NAME);
 			width = uint(__xml.attribute(ConstValues.A_WIDTH));
 			height = uint(__xml.attribute(ConstValues.A_HEIGHT));
+			_subTextureXMLs = new Object;
+			
+			for each(var subTexture:XML in __xml.elements(ConstValues.SUB_TEXTURE))
+			{
+				_subTextureXMLs[String(subTexture.attribute(ConstValues.A_NAME))] = subTexture;
+			}
 			
 			__dataType = BytesType.getType(rawData);
 			
@@ -96,7 +105,7 @@ package dragonBones.objects
 		}
 		
 		public function getSubTextureXML(_id:String):XML {
-			return __xml.elements(ConstValues.SUB_TEXTURE).(attribute(ConstValues.A_NAME) == _id)[0];
+			return _subTextureXMLs[_id];
 		}
 		
 		public function dispose():void{
