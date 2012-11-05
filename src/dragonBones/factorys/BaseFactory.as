@@ -139,11 +139,12 @@ package dragonBones.factorys {
 			
 			var _length:uint = _boneData.displayLength;
 			var _displayData:DisplayData;
-			for(var _i:int = 0;_i < _length;_i ++){
+			for(var _i:int = _length - 1;_i >=0;_i --){
 				_displayData = _boneData.getDisplayData(_i);
 				_bone.changeDisplay(_i);
 				if (_displayData.isArmature) {
 					var _childArmature:Armature = buildArmature(_displayData.name);
+					_childArmature.animation.play();
 					_childArmature.name = _boneName + "__childArmature";
 					_bone.display = _childArmature;
 				}else {
