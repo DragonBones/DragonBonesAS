@@ -13,8 +13,8 @@ package dragonBones.utils {
 		private static var helpMatrix1:Matrix = new Matrix();
 		private static var helpMatrix2:Matrix = new Matrix();
 		
-		private static var heloPoint1:Point = new Point();
-		private static var heloPoint2:Point = new Point();
+		private static var helpPoint1:Point = new Point();
+		private static var helpPoint2:Point = new Point();
 		
 		public static function transfromPointWidthParent(_boneData:Node, _parentData:Node):void {
 			nodeToMatrix(_boneData, helpMatrix1);
@@ -37,15 +37,15 @@ package dragonBones.utils {
 		}
 		
 		private static function matrixToNode(_matrix:Matrix, _node:Node):void{
-			heloPoint1.x = 0;
-			heloPoint1.y = 1;
-			heloPoint1 = _matrix.deltaTransformPoint(heloPoint1);
-			heloPoint2.x = 1;
-			heloPoint2.y = 0;
-			heloPoint2 = _matrix.deltaTransformPoint(heloPoint2);
+			helpPoint1.x = 0;
+			helpPoint1.y = 1;
+			helpPoint1 = _matrix.deltaTransformPoint(helpPoint1);
+			helpPoint2.x = 1;
+			helpPoint2.y = 0;
+			helpPoint2 = _matrix.deltaTransformPoint(helpPoint2);
 			
-			_node.skewX = Math.atan2(heloPoint1.y, heloPoint1.x) - Math.PI * 0.5;
-			_node.skewY = Math.atan2(heloPoint2.y, heloPoint2.x);
+			_node.skewX = Math.atan2(helpPoint1.y, helpPoint1.x) - Math.PI * 0.5;
+			_node.skewY = Math.atan2(helpPoint2.y, helpPoint2.x);
 			_node.scaleX = Math.sqrt(_matrix.a * _matrix.a + _matrix.b * _matrix.b);
 			_node.scaleY = Math.sqrt(_matrix.c * _matrix.c + _matrix.d * _matrix.d);
 			_node.x = _matrix.tx;
