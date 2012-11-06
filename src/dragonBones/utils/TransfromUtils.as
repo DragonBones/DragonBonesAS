@@ -16,7 +16,7 @@ package dragonBones.utils {
 		private static var helpPoint1:Point = new Point();
 		private static var helpPoint2:Point = new Point();
 		
-		public static function transfromPointWidthParent(_boneData:Node, _parentData:Node):void {
+		public static function transfromPointWithParent(_boneData:Node, _parentData:Node):void {
 			nodeToMatrix(_boneData, helpMatrix1);
 			nodeToMatrix(_parentData, helpMatrix2);
 			

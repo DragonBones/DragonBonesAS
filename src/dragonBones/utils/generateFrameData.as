@@ -35,7 +35,7 @@ package dragonBones.utils {
 			//Help.helpNode.scaleX = Number(_parentFrameXML.attribute(ConstValues.A_SCALE_X));
 			//Help.helpNode.scaleY = Number(_parentFrameXML.attribute(ConstValues.A_SCALE_Y));
 			
-			TransfromUtils.transfromPointWidthParent(_frameData, Help.helpNode);
+			TransfromUtils.transfromPointWithParent(_frameData, Help.helpNode);
 		}
 		
 		_frameData.x -=	_boneData.x;
