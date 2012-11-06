@@ -166,7 +166,7 @@ package dragonBones.factorys {
 						_display.x = 0;
 						_display.y = 0;
 					}catch(_e:Error){
-						trace("无法获取影片剪辑，请确认骨骼 FLA 源文件导出 player 版本，与当前程序版本一致！");
+						trace("can not get the clip, please make sure the version of the resource compatible with app version！");
 					}
 				}
 			}else if(textureData.bitmap){

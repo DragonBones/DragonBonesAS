@@ -157,7 +157,7 @@ package dragonBones {
 				
 				if (children.length > 0)
 				{
-					//如何让斜切只传递给children的 x y rotation呢？
+					//no scale transform for children
 					_transformMatrixForChildren.a = cosY;
 					_transformMatrixForChildren.b = sinY;
 					_transformMatrixForChildren.c = -sinX;

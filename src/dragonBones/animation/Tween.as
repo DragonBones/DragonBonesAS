@@ -11,7 +11,7 @@ package dragonBones.animation {
 	use namespace skeletonNamespace;
 	
 	/**
-	 * 
+	 *
 	 * @author Akdcl
 	 */
 	final public class Tween extends ProcessBase {
@@ -122,7 +122,7 @@ package dragonBones.animation {
 							currentPrecent = (currentPrecent - 1) * totalFrames / durationTween;
 						}
 						if (currentPrecent >= 1) {
-							//播放速度太快或durationTween时间太短
+							//the speed of playing is too fast or the durationTween is too short
 							currentPrecent = 1;
 							__isComplete = true;
 							break;
@@ -146,7 +146,7 @@ package dragonBones.animation {
 						currentPrecent %= 1;
 						break;
 					default:
-						//循环
+						//change the loop
 						loop += int(currentPrecent);
 						currentPrecent %= 1;
 						
@@ -159,7 +159,7 @@ package dragonBones.animation {
 				currentPrecent = Math.sin(currentPrecent * HALF_PI);
 			}
 			if (loop >= LIST) {
-				//多关键帧动画过程
+				//multiple key frame process
 				currentPrecent = updateFrameData(currentPrecent, true);
 			}
 			if (!isNaN(frameTweenEasing)) {
@@ -235,7 +235,7 @@ package dragonBones.animation {
 			var _from:FrameData;
 			var _to:FrameData;
 			var _isListEnd:Boolean;
-			//播放头到达当前帧的前面或后面则重新寻找当前帧
+			//refind the current frame
 			if (_played >= totalDuration || _played < totalDuration - betweenDuration) {
 				var _length:int = movementBoneData.length;
 				do {
@@ -265,7 +265,7 @@ package dragonBones.animation {
 			}
 			_currentPrecent = 1 - (totalDuration - _played) / betweenDuration;
 			
-			//frameTweenEasing为NaN则不会补间，-1~0~1~2、淡出、线性、淡入、淡入淡出
+			//NaN: no tweens;  -1: ease out; 0: linear; 1: ease in; 2: ease in&out
 			var _tweenEasing:Number;
 			if (!isNaN(frameTweenEasing)) {
 				_tweenEasing = isNaN(tweenEasing)?frameTweenEasing:tweenEasing;

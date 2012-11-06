@@ -21,7 +21,7 @@ package dragonBones.objects {
 			super();
 			
 			duration = 1;
-			//为NaN则不会补间，-1~0~1~2淡出、线性、淡入、淡入淡出
+			//NaN: no tweens;  -1: ease out; 0: linear; 1: ease in; 2: ease in&out
 			tweenEasing = 0;
 		}
 	}

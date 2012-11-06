@@ -13,7 +13,7 @@ package dragonBones.animation{
 	use namespace skeletonNamespace;
 	
 	/**
-	 * 
+	 *
 	 * @author Akdcl
 	 */
 	final public class Animation extends ProcessBase {
@@ -199,7 +199,7 @@ package dragonBones.animation{
 				return;
 			}
 			var _played:Number = duration * _currentPrecent;
-			//播放头到达当前帧的前面或后面则重新寻找当前帧
+			//refind the current frame
 			if (!currentFrameData || _played >= currentFrameData.duration + currentFrameData.start || _played < currentFrameData.start) {
 				while (true) {
 					currentFrameData =  movementData.getFrame(toIndex);

@@ -24,7 +24,7 @@ package dragonBones.objects {
 			durationTo = _durationTo >= 0?_durationTo:0;
 			durationTween = _durationTween >= 0?_durationTween:0;
 			loop = _loop;
-			//为NaN则不启用
+			//the default NaN means no tween
 			tweenEasing = _tweenEasing;
 		}
 		
