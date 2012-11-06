@@ -4,6 +4,18 @@ package dragonBones {
 	
 	use namespace skeletonNamespace;
 	
+	[Event(name="movementChange", type="dragonBones.events.Event")]
+	
+	[Event(name="start", type="dragonBones.events.Event")]
+	
+	[Event(name="complete", type="dragonBones.events.Event")]
+	
+	[Event(name="loopComplete", type="dragonBones.events.Event")]
+	
+	[Event(name="movementEventFrame", type="dragonBones.events.Event")]
+	
+	[Event(name="boneEventFrame", type="dragonBones.events.Event")]
+	
 	/**
 	 * 
 	 * @author Akdcl

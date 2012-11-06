@@ -89,11 +89,17 @@ package dragonBones {
 				return;
 			}
 			
+			var _display:Object = displayList[displayIndex];
+			if (_display is Armature) {
+				removeChild(_display as Bone);
+			}
+			
 			displayIndex = _displayIndex;
-			if(displayIndex < 0){
+			
+			if(_displayIndex < 0){
 				display = null;
 			}else{
-				var _display:Object = displayList[displayIndex];
+				_display = displayList[displayIndex];
 				if(_display){
 					display = _display;
 				}else if (_display === false) {

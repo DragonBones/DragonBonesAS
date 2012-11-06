@@ -53,6 +53,8 @@ package dragonBones.factorys {
 			}
 		}
 		
+		public var autoDisposeBitmapData:Boolean = true;
+		
 		public function StarlingFactory(_skeletonData:SkeletonData = null, _textureData:TextureData = null):void {
 			super(_skeletonData, _textureData);
 		}
@@ -64,7 +66,9 @@ package dragonBones.factorys {
 				}else{
 					textureData.texture = Texture.fromBitmap(textureData.bitmap);
 					//no need to keep the bitmapData
-					textureData.bitmap.bitmapData.dispose();
+					if (autoDisposeBitmapData) {
+						textureData.bitmap.bitmapData.dispose();
+					}
 				}
 			}
 			
@@ -95,7 +99,7 @@ package dragonBones.factorys {
 			}
 		}
 		
-		private static function updateDisplay(_display:Image, matrix:Matrix):void {
+		private static function updateDisplay(_display:Object, matrix:Matrix):void {
 			_display.transformationMatrix = matrix;
 		}
 	}
