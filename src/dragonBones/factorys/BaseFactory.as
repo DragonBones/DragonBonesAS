@@ -124,6 +124,9 @@ package dragonBones.factorys {
 				return null;
 			}
 			var _boneData:BoneData = _armatureData.getData(_boneName);
+			if(!_boneData){
+				return null;
+			}
 			var _parentName:String = _boneData.parent;
 			if (_parentName) {
 				generateBone(_armature, _armatureData, _parentName);
