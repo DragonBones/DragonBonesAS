@@ -2,6 +2,7 @@ package dragonBones.factorys {
 	import dragonBones.Armature;
 	import dragonBones.Bone;
 	import dragonBones.display.StarlingBridgeImage;
+	import dragonBones.display.StarlingBridgeSprite;
 	import dragonBones.objects.Node;
 	import dragonBones.objects.SkeletonData;
 	import dragonBones.objects.TextureData;
@@ -72,7 +73,7 @@ package dragonBones.factorys {
 				}
 			}
 			
-			var _armature:Armature = new Armature(new Sprite());
+			var _armature:Armature = new Armature(new StarlingBridgeSprite());
 			_armature.addDisplayChild = addDisplayChild;
 			_armature.removeDisplayChild = removeDisplayChild;
 			_armature.updateDisplay = updateDisplay;
