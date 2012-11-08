@@ -161,7 +161,7 @@ package dragonBones.animation{
 						loop = LIST;
 						currentPrecent = (currentPrecent - 1) * totalFrames / durationTween;
 						if (currentPrecent >= 1) {
-							//播放速度太快或durationTween时间太短，进入下面的case
+							//the speed of playing is too fast or the durationTween is too short
 						}else {
 							totalFrames = durationTween;
 							armature.dispatchEventWith(Event.START, movementID);
@@ -180,7 +180,7 @@ package dragonBones.animation{
 						armature.dispatchEventWith(Event.START, movementID);
 						break;
 					default:
-						//继续循环
+						//change the loop
 						loop += int(currentPrecent);
 						currentPrecent %= 1;
 						toIndex = 0;
