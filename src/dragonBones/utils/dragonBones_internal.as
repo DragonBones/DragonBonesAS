@@ -5,5 +5,5 @@ package dragonBones.utils
 	 * ...
 	 * @author Akdcl
 	 */
-	public namespace skeletonNamespace;
+	public namespace dragonBones_internal;
 }

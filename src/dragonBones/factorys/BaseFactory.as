@@ -1,6 +1,8 @@
-package dragonBones.factorys {
+package dragonBones.factorys 
+{
 	import dragonBones.Armature;
 	import dragonBones.Bone;
+	import dragonBones.display.NativeDisplayBridge;
 	import dragonBones.display.PivotBitmap;
 	import dragonBones.events.Event;
 	import dragonBones.events.EventDispatcher;
@@ -14,16 +16,17 @@ package dragonBones.factorys {
 	import dragonBones.objects.SkeletonData;
 	import dragonBones.objects.TextureData;
 	import dragonBones.utils.ConstValues;
-	import dragonBones.utils.skeletonNamespace;
+	import dragonBones.utils.dragonBones_internal;
 	import dragonBones.utils.uncompressionData;
 	
+	import flash.display.Bitmap;
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
 	
-	use namespace skeletonNamespace;
+	use namespace dragonBones_internal;
 	
 	/** Dispatched when the textureData init completed. */
 	[Event(name="textureComplete", type="dragonBones.events.Event")]
@@ -32,177 +35,173 @@ package dragonBones.factorys {
 	 *
 	 * @author Akdcl
 	 */
-	public class BaseFactory extends EventDispatcher {
-		public static function getTextureDisplay(_textureData:TextureData, _fullName:String):PivotBitmap {
-			var _subTextureXML:XML = _textureData.getSubTextureXML(_fullName);
-			if (_subTextureXML) {
-				var _rect:Rectangle = new Rectangle(
-					int(_subTextureXML.attribute(ConstValues.A_X)),
-					int(_subTextureXML.attribute(ConstValues.A_Y)),
-					int(_subTextureXML.attribute(ConstValues.A_WIDTH)),
-					int(_subTextureXML.attribute(ConstValues.A_HEIGHT))
-				);
-				var _img:PivotBitmap = new PivotBitmap(_textureData.bitmap.bitmapData);
-				_img.smoothing = true;
-				_img.scrollRect = _rect;
-				_img.pX = int(_subTextureXML.attribute(ConstValues.A_PIVOT_X));
-				_img.pY = int(_subTextureXML.attribute(ConstValues.A_PIVOT_Y));
-				return _img;
+	public class BaseFactory extends EventDispatcher 
+	{
+		public static function getTextureDisplay(textureData:TextureData, fullName:String):Object 
+		{
+			var clip:MovieClip = textureData.clip;
+			if (clip) 
+			{
+				clip.gotoAndStop(clip.totalFrames);
+				clip.gotoAndStop(fullName);
+				if (clip.numChildren > 0) 
+				{
+					try
+					{
+						var displaySWF:Object = clip.getChildAt(0);
+						displaySWF.x = 0;
+						displaySWF.y = 0;
+						return displaySWF;
+					}
+					catch(e:Error)
+					{
+						trace("can not get the clip, please make sure the version of the resource compatible with app version！");
+					}
+				}
+			}
+			else if(textureData.bitmap)
+			{
+				var subTextureXML:XML = textureData.getSubTextureXML(fullName);
+				if (subTextureXML) 
+				{
+					var rect:Rectangle = new Rectangle(
+						int(subTextureXML.attribute(ConstValues.A_X)),
+						int(subTextureXML.attribute(ConstValues.A_Y)),
+						int(subTextureXML.attribute(ConstValues.A_WIDTH)),
+						int(subTextureXML.attribute(ConstValues.A_HEIGHT))
+					);
+					var displayBitmap:PivotBitmap = new PivotBitmap(textureData.bitmap.bitmapData);
+					displayBitmap.smoothing = true;
+					displayBitmap.scrollRect = rect;
+					displayBitmap.pivotX = int(subTextureXML.attribute(ConstValues.A_PIVOT_X));
+					displayBitmap.pivotY = int(subTextureXML.attribute(ConstValues.A_PIVOT_Y));
+					return displayBitmap;
+				}
 			}
 			return null;
 		}
 		
-		private var __skeletonData:SkeletonData;
-		public function get skeletonData():SkeletonData {
-			return __skeletonData;
+		protected var _skeletonData:SkeletonData;
+		public function get skeletonData():SkeletonData
+		{
+			return _skeletonData;
 		}
-		public function set skeletonData(_skeletonData:SkeletonData):void {
-			__skeletonData = _skeletonData;
-		}
-		
-		private var __textureData:TextureData;
-		public function get textureData():TextureData {
-			return __textureData;
-		}
-		public function set textureData(_textureData:TextureData):void {
-			if(__textureData){
-				__textureData.removeEventListener(Event.TEXTURE_COMPLETE, textureCompleteHandler);
-			}
-			__textureData = _textureData;
-			if(__textureData){
-				__textureData.addEventListener(Event.TEXTURE_COMPLETE, textureCompleteHandler);
-			}
+		public function set skeletonData(value:SkeletonData):void 
+		{
+			_skeletonData = value;
 		}
 		
-		public function BaseFactory(_skeletonData:SkeletonData = null, _textureData:TextureData = null):void {
+		protected var _textureData:TextureData;
+		public function get textureData():TextureData 
+		{
+			return _textureData;
+		}
+		public function set textureData(value:TextureData):void 
+		{
+			if(_textureData)
+			{
+				_textureData.removeEventListener(Event.TEXTURE_COMPLETE, textureCompleteHandler);
+			}
+			_textureData = value;
+			if(_textureData)
+			{
+				_textureData.addEventListener(Event.TEXTURE_COMPLETE, textureCompleteHandler);
+			}
+		}
+		
+		public function BaseFactory() 
+		{
 			super();
-			skeletonData = _skeletonData;
-			textureData = _textureData;
 		}
 		
-		public function fromRawData(_data:ByteArray, _completeCallback:Function = null):void{
-			var _sat:SkeletonAndTextureRawData = uncompressionData(_data);
-			skeletonData = new SkeletonData(_sat.skeletonXML);
-			textureData = new TextureData(_sat.textureAtlasXML, _sat.textureBytes, _completeCallback);
-			_sat.dispose();
+		public function parseData(bytes:ByteArray, completeCallback:Function = null):void
+		{
+			var sat:SkeletonAndTextureRawData = uncompressionData(bytes);
+			skeletonData = new SkeletonData(sat.skeletonXML);
+			textureData = new TextureData(sat.textureAtlasXML, sat.textureBytes, completeCallback);
+			sat.dispose();
 		}
 		
-		public function dispose():void{
+		public function dispose():void
+		{
 			removeEventListeners();
 			skeletonData = null;
 			textureData = null;
 		}
 		
-		public function buildArmature(_armatureName:String, _animationName:String = null):Armature {
-			var _armatureData:ArmatureData = skeletonData.getArmatureData(_armatureName);
-			if(!_armatureData){
+		public function buildArmature(armatureName:String):Armature 
+		{
+			var armatureData:ArmatureData = skeletonData.getArmatureData(armatureName);
+			if(!armatureData)
+			{
 				return null;
 			}
-			var _animationData:AnimationData = skeletonData.getAnimationData(_animationName || _armatureName);
-			var _armature:Armature = generateArmature(_armatureName, _animationName);
-			if (_armature) {
-				_armature.origin.name = _armatureName;
-				_armature.animation.setData(_animationData);
-				for each(var _boneName:String in _armatureData.getSearchList()) {
-					generateBone(_armature, _armatureData, _boneName);
-				}
-			}
-			return _armature;
-		}
-		
-		protected function generateArmature(_armatureName:String, _animationName:String = null):Armature {
-			var _display:Sprite = new Sprite();
-			var _armature:Armature = new Armature(_display);
-			_armature.addDisplayChild = addDisplayChild;
-			_armature.removeDisplayChild = removeDisplayChild;
-			_armature.updateDisplay = updateDisplay;
-			return _armature;
-		}
-		
-		protected function generateBone(_armature:Armature, _armatureData:ArmatureData, _boneName:String):Bone {
-			if(_armature.getBone(_boneName)){
-				return null;
-			}
-			var _boneData:BoneData = _armatureData.getData(_boneName);
-			if(!_boneData){
-				return null;
-			}
-			var _parentName:String = _boneData.parent;
-			if (_parentName) {
-				generateBone(_armature, _armatureData, _parentName);
-			}
-			
-			var _bone:Bone = new Bone();
-			_bone.addDisplayChild = _armature.addDisplayChild;
-			_bone.removeDisplayChild = _armature.removeDisplayChild;
-			_bone.updateDisplay = _armature.updateDisplay;
-			_bone.origin.copy(_boneData);
-			
-			_armature.addBone(_bone, _boneName, _parentName);
-			
-			var _length:uint = _boneData.displayLength;
-			var _displayData:DisplayData;
-			for(var _i:int = _length - 1;_i >=0;_i --){
-				_displayData = _boneData.getDisplayData(_i);
-				_bone.changeDisplay(_i);
-				if (_displayData.isArmature) {
-					var _childArmature:Armature = buildArmature(_displayData.name);
-					_childArmature.animation.play();
-					_childArmature.name = _boneName + "__childArmature";
-					_bone.display = _childArmature;
-				}else {
-					_bone.display = generateBoneDisplay(_armature, _bone, _displayData.name);
-				}
-			}
-			return _bone;
-		}
-		
-		public function generateBoneDisplay(_armature:Armature, _bone:Bone, _imageName:String):Object {
-			var _display:Object;
-			var _clip:MovieClip = textureData.clip;
-			if (_clip) {
-				_clip.gotoAndStop(_clip.totalFrames);
-				_clip.gotoAndStop(String(_imageName));
-				if (_clip.numChildren > 0) {
-					try{
-						_display = _clip.getChildAt(0);
-						_display.x = 0;
-						_display.y = 0;
-					}catch(_e:Error){
-						trace("can not get the clip, please make sure the version of the resource compatible with app version！");
+			var animationData:AnimationData = skeletonData.getAnimationData(armatureName);
+			var armature:Armature = generateArmature();
+			armature._originName = armatureName;
+			if (armature) 
+			{
+				armature.animation.setData(animationData);
+				var boneList:Array = armatureData.getSearchList();
+				for each(var boneName:String in boneList) 
+				{
+					var boneData:BoneData = armatureData.getData(boneName);
+					var bone:Bone = buildBone(boneData);
+					if(bone)
+					{
+						armature.addBone(bone, boneData.parent);
 					}
 				}
-			}else if(textureData.bitmap){
-				_display = getTextureDisplay(textureData, _imageName);
 			}
-			return _display;
+			return armature;
 		}
 		
-		private function textureCompleteHandler(_e:Event):void{
-			dispatchEvent(_e);
+		protected function generateArmature():Armature 
+		{
+			var display:Sprite = new Sprite();
+			var armature:Armature = new Armature(display);
+			return armature;
 		}
 		
-		private static function addDisplayChild(_child:Object, _parent:Object, _index:int = -1):void {
-			if (_parent) {
-				if(_index < 0){
-					_parent.addChild(_child);
-				}else{
-					_parent.addChildAt(_child, Math.min(_index, _parent.numChildren));
+		protected function buildBone(boneData:BoneData):Bone
+		{
+			var bone:Bone = generateBone();
+			bone.origin.copy(boneData);
+			
+			var length:uint = boneData.displayLength;
+			var displayData:DisplayData;
+			for(var i:int = length - 1;i >=0;i --)
+			{
+				displayData = boneData.getDisplayData(i);
+				bone.changeDisplay(i);
+				if (displayData.isArmature) 
+				{
+					var childArmature:Armature = buildArmature(displayData.name);
+					childArmature.animation.play();
+					bone.display = childArmature;
+				}
+				else 
+				{
+					bone.display = getBoneTextureDisplay(displayData.name);
 				}
 			}
+			return bone;
 		}
 		
-		private static function removeDisplayChild(_child:Object):void {
-			if(_child.parent){
-				_child.parent.removeChild(_child);
-			}
+		protected function getBoneTextureDisplay(textureName:String):Object
+		{
+			return getTextureDisplay(_textureData, textureName);
 		}
 		
-		private static function updateDisplay(_display:Object, matrix:Matrix):void {
-			if (_display is PivotBitmap)
-				_display.update(matrix);
-			else
-				_display.transform.matrix = matrix;
+		protected function generateBone():Bone 
+		{
+			var bone:Bone = new Bone(new NativeDisplayBridge());
+			return bone;
+		}
+		
+		private function textureCompleteHandler(e:Event):void
+		{
+			dispatchEvent(e);
 		}
 	}
 }

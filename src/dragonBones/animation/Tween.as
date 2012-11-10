@@ -1,4 +1,5 @@
-package dragonBones.animation {
+package dragonBones.animation 
+{
 	import dragonBones.Armature;
 	import dragonBones.Bone;
 	import dragonBones.events.Event;
@@ -6,196 +7,263 @@ package dragonBones.animation {
 	import dragonBones.objects.FrameData;
 	import dragonBones.objects.MovementBoneData;
 	import dragonBones.objects.Node;
-	import dragonBones.utils.skeletonNamespace;
+	import dragonBones.utils.dragonBones_internal;
 	
-	use namespace skeletonNamespace;
+	use namespace dragonBones_internal;
 	
 	/**
 	 *
 	 * @author Akdcl
 	 */
-	final public class Tween extends ProcessBase {
+	final public class Tween extends ProcessBase 
+	{
 		private static const HALF_PI:Number = Math.PI * 0.5;
 		
-		private static var soundManager:SoundEventManager = SoundEventManager.getInstance();
+		private static var _soundManager:SoundEventManager = SoundEventManager.getInstance();
 		
-		private var bone:Bone;
+		private var _bone:Bone;
 		
-		skeletonNamespace var node:Node;
-		private var from:Node;
-		private var between:Node;
+		dragonBones_internal var _node:Node;
+		private var _from:Node;
+		private var _between:Node;
 		
-		private var movementBoneData:MovementBoneData;
+		private var _movementBoneData:MovementBoneData;
 		
-		private var currentKeyFrame:FrameData;
-		private var nextKeyFrame:FrameData;
-		private var isTweenKeyFrame:Boolean;
-		private var betweenDuration:int;
-		private var totalDuration:int;
-		private var frameTweenEasing:Number;
+		private var _currentKeyFrame:FrameData;
+		private var _nextKeyFrame:FrameData;
+		private var _isTweenKeyFrame:Boolean;
+		private var _betweenDuration:int;
+		private var _totalDuration:int;
+		private var _frameTweenEasing:Number;
 		
-		public function Tween(_bone:Bone) {
+		override public function set timeScale(value:Number):void
+		{
+			super.timeScale = value;
+			
+			var childArmature:Armature = _bone.childArmature;
+			if(childArmature)
+			{
+				childArmature.animation.timeScale = value;
+			}
+		}
+		
+		public function Tween(bone:Bone) 
+		{
 			super();
-			bone = _bone;
-			node = new Node();
-			from = new Node();
-			between = new Node();
+			_bone = bone;
+			_node = new Node();
+			_from = new Node();
+			_between = new Node();
 		}
 		
-		override public function dispose():void{
+		override public function dispose():void
+		{
 			super.dispose();
-			bone = null;
-			node = null;
-			from = null;
-			between = null;
+			_bone = null;
+			_node = null;
+			_from = null;
+			_between = null;
 			
-			movementBoneData = null;
-			currentKeyFrame = null;
-			nextKeyFrame = null;
+			_movementBoneData = null;
+			_currentKeyFrame = null;
+			_nextKeyFrame = null;
 		}
 		
-		override public function gotoAndPlay(_movementBoneData:Object, _durationTo:int = 0, _durationTween:int = 0, _loop:* = false, _tweenEasing:Number = NaN):void {
-			movementBoneData = _movementBoneData as MovementBoneData;
-			if(!movementBoneData){
+		override public function gotoAndPlay(movementBoneData:Object, durationTo:int = 0, durationTween:int = 0, loop:* = false, tweenEasing:Number = NaN):void 
+		{
+			_movementBoneData = movementBoneData as MovementBoneData;
+			if(!_movementBoneData)
+			{
 				return;
 			}
-			currentKeyFrame = null;
-			nextKeyFrame = null;
-			isTweenKeyFrame = false;
-			super.gotoAndPlay(null, _durationTo, _durationTween, _loop, _tweenEasing);
+			_currentKeyFrame = null;
+			_nextKeyFrame = null;
+			_isTweenKeyFrame = false;
+			super.gotoAndPlay(null, durationTo, durationTween, loop, tweenEasing);
 			//
-			totalDuration = 0;
-			betweenDuration = 0;
-			toIndex = 0;
-			node.skewY %= 360;
-			var _frameData:FrameData;
-			if (movementBoneData.length == 1) {
-				loop = SINGLE;
-				nextKeyFrame = movementBoneData.getData(0);
-				setBetween(node, nextKeyFrame);
-				isTweenKeyFrame = true;
-				frameTweenEasing = 1;
-			}else if (movementBoneData.length > 1) {
-				if (_loop) {
-					loop = LIST_LOOP_START;
-					duration = movementBoneData.duration;
+			_totalDuration = 0;
+			_betweenDuration = 0;
+			_toIndex = 0;
+			_node.skewY %= 360;
+			var frameData:FrameData;
+			if (_movementBoneData.length == 1) 
+			{
+				_loop = SINGLE;
+				_nextKeyFrame = _movementBoneData.getData(0);
+				setBetween(_node, _nextKeyFrame);
+				_isTweenKeyFrame = true;
+				_frameTweenEasing = 1;
+			}else if (_movementBoneData.length > 1)
+			{
+				if (loop) {
+					_loop = LIST_LOOP_START;
+					_duration = _movementBoneData.duration;
 				}else {
-					loop = LIST_START;
-					duration = movementBoneData.duration - 1;
+					_loop = LIST_START;
+					_duration = _movementBoneData.duration - 1;
 				}
-				durationTween = _durationTween * movementBoneData.scale;
-				if (_loop && movementBoneData.delay != 0) {
-					setBetween(node, tweenNodeTo(updateFrameData(1 -movementBoneData.delay), between));
-				}else {
-					nextKeyFrame = movementBoneData.getData(0);
-					setBetween(node, nextKeyFrame);
-					isTweenKeyFrame = true;
+				_durationTween = durationTween * _movementBoneData.scale;
+				if (loop && _movementBoneData.delay != 0) 
+				{
+					setBetween(_node, tweenNodeTo(updateFrameData(1 -_movementBoneData.delay), _between));
+				}
+				else 
+				{
+					_nextKeyFrame = _movementBoneData.getData(0);
+					setBetween(_node, _nextKeyFrame);
+					_isTweenKeyFrame = true;
 				}
 			}
 		}
 		
-		override public function play():void {
-			if (!movementBoneData) {
+		override public function play():void 
+		{
+			if (!_movementBoneData)
+			{
 				return;
 			}
 			
-			if(__isPause){
+			if(_isPause)
+			{
 				super.play();
-			}else if(__isComplete){
-				gotoAndPlay(movementBoneData);
+				var childArmature:Armature = _bone.childArmature;
+				if(childArmature)
+				{
+					childArmature.animation.play();
+				}
+			}
+			else if(_isComplete)
+			{
+				gotoAndPlay(_movementBoneData);
 			}
 		}
 		
-		override protected function updateHandler():void {
-			if (currentPrecent >= 1) {
-				switch(loop) {
+		override public function stop():void 
+		{
+			super.stop();
+			var childArmature:Armature = _bone.childArmature;
+			if(childArmature)
+			{
+				childArmature.animation.stop();
+			}
+		}
+		
+		override protected function updateHandler():void 
+		{
+			if (_currentPrecent >= 1) 
+			{
+				switch(_loop) 
+				{
 					case SINGLE:
-						currentKeyFrame = nextKeyFrame;
-						currentPrecent = 1;
-						__isComplete = true;
+						_currentKeyFrame = _nextKeyFrame;
+						_currentPrecent = 1;
+						_isComplete = true;
 						break;
 					case LIST_START:
-						loop = LIST;
-						if (durationTween <= 0) {
-							currentPrecent = 1;
-						}else {
-							currentPrecent = (currentPrecent - 1) * totalFrames / durationTween;
+						_loop = LIST;
+						if (_durationTween <= 0) 
+						{
+							_currentPrecent = 1;
 						}
-						if (currentPrecent >= 1) {
+						else
+						{
+							_currentPrecent = (_currentPrecent - 1) * _totalFrames / _durationTween;
+						}
+						
+						if (_currentPrecent >= 1)
+						{
 							//the speed of playing is too fast or the durationTween is too short
-							currentPrecent = 1;
-							__isComplete = true;
-							break;
-						}else {
-							totalFrames = durationTween;
-							totalDuration = 0;
+							_currentPrecent = 1;
+							_isComplete = true;
 							break;
 						}
+						_totalFrames = _durationTween;
+						_totalDuration = 0;
+						break;
 					case LIST:
-						currentPrecent = 1;
-						__isComplete = true;
+						_currentPrecent = 1;
+						_isComplete = true;
 						break;
 					case LIST_LOOP_START:
-						loop = 0;
-						totalFrames = durationTween > 0?durationTween:1;
-						if (movementBoneData.delay != 0) {
+						_loop = 0;
+						_totalFrames = _durationTween > 0?_durationTween:1;
+						if (_movementBoneData.delay != 0) 
+						{
 							//
-							currentFrame = (1 - movementBoneData.delay) * totalFrames;
-							currentPrecent += currentFrame / totalFrames;
+							_currentFrame = (1 - _movementBoneData.delay) * _totalFrames;
+							_currentPrecent += _currentFrame / _totalFrames;
 						}
-						currentPrecent %= 1;
+						_currentPrecent %= 1;
 						break;
 					default:
 						//change the loop
-						loop += int(currentPrecent);
-						currentPrecent %= 1;
+						_loop += int(_currentPrecent);
+						_currentPrecent %= 1;
 						
-						totalDuration = 0;
-						betweenDuration = 0;
-						toIndex = 0;
+						_totalDuration = 0;
+						_betweenDuration = 0;
+						_toIndex = 0;
 						break;
 				}
-			}else if (loop < -1) {
-				currentPrecent = Math.sin(currentPrecent * HALF_PI);
 			}
-			if (loop >= LIST) {
+			else if (_loop < -1) 
+			{
+				_currentPrecent = Math.sin(_currentPrecent * HALF_PI);
+			}
+			
+			if (_loop >= LIST) 
+			{
 				//multiple key frame process
-				currentPrecent = updateFrameData(currentPrecent, true);
+				_currentPrecent = updateFrameData(_currentPrecent, true);
 			}
-			if (!isNaN(frameTweenEasing)) {
-				tweenNodeTo(currentPrecent);
-			}else if(currentKeyFrame) {
+			
+			if (!isNaN(_frameTweenEasing))
+			{
+				tweenNodeTo(_currentPrecent);
+			}
+			else if(_currentKeyFrame) 
+			{
 				tweenNodeTo(0);
 			}
-			if(currentKeyFrame){
+			
+			if(_currentKeyFrame)
+			{
 				//arrived
-				var _displayIndex:int = currentKeyFrame.displayIndex;
-				var _childAramture:Armature = bone.childArmature;
-				if(_displayIndex >= 0){
-					if(bone.origin.z != currentKeyFrame.z){
-						bone.origin.z = currentKeyFrame.z;
-						if(bone.armature){
-							bone.armature.bonesIndexChanged = true;
+				var displayIndex:int = _currentKeyFrame.displayIndex;
+				if(displayIndex >= 0)
+				{
+					if(_bone.global.z != _currentKeyFrame.z)
+					{
+						_bone.global.z = _currentKeyFrame.z;
+						if(_bone.armature)
+						{
+							_bone.armature._bonesIndexChanged = true;
 						}
 					}
 				}
-				bone.changeDisplay(_displayIndex);
-				if(_childAramture){
-					_childAramture.origin.z = currentKeyFrame.z;
-					if(currentKeyFrame.movement){
-						_childAramture.animation.gotoAndPlay(currentKeyFrame.movement);
+				_bone.changeDisplay(displayIndex);
+				
+				if(_currentKeyFrame.movement)
+				{
+					var childAramture:Armature = _bone.childArmature;
+					if(childAramture)
+					{
+						childAramture.animation.gotoAndPlay(_currentKeyFrame.movement);
 					}
 				}
 				
-				if(currentKeyFrame.event){
-					bone.dispatchEventWith(Event.BONE_EVENT_FRAME, currentKeyFrame.event);
+				if(_currentKeyFrame.event)
+				{
+					_bone.dispatchEventWith(Event.BONE_EVENT_FRAME, _currentKeyFrame.event);
 				}
-				if(currentKeyFrame.sound){
-					soundManager.dispatchEventWith(Event.SOUND_FRAME, currentKeyFrame.sound);
+				if(_currentKeyFrame.sound)
+				{
+					_soundManager.dispatchEventWith(Event.SOUND_FRAME, _currentKeyFrame.sound);
 				}
-				currentKeyFrame = null;
+				_currentKeyFrame = null;
 			}
-			if(isTweenKeyFrame){
+			if(_isTweenKeyFrame)
+			{
 				//to
 				/*if(nextKeyFrame.displayIndex < 0){
 					//bone.changeDisplay(nextKeyFrame.displayIndex);
@@ -203,90 +271,108 @@ package dragonBones.animation {
 						//bone.armature.bonesIndexChanged = true;
 					}
 				}*/
-				isTweenKeyFrame = false;
+				_isTweenKeyFrame = false;
 			}
 		}
 		
-		private function setBetween(_from:Node, _to:Node):void {
-			from.copy(_from);
-			if(_to is FrameData){
-				if((_to as FrameData).displayIndex < 0){
-					between.subtract(_from, _from);
+		private function setBetween(from:Node, to:Node):void
+		{
+			_from.copy(from);
+			if(to is FrameData)
+			{
+				if((to as FrameData).displayIndex < 0)
+				{
+					_between.subtract(from, from);
 					return;
 				}
 			}
-			between.subtract(_from, _to);
+			_between.subtract(from, to);
 		}
 		
-		private function tweenNodeTo(_value:Number, _node:Node = null):Node {
-			_node = _node || node;
-			_node.x = from.x + _value * between.x;
-			_node.y = from.y + _value * between.y;
-			_node.scaleX = from.scaleX + _value * between.scaleX;
-			_node.scaleY = from.scaleY + _value * between.scaleY;
-			_node.skewX = from.skewX + _value * between.skewX;
-			_node.skewY = from.skewY + _value * between.skewY;
-			return _node;
+		private function tweenNodeTo(value:Number, node:Node = null):Node 
+		{
+			node = node || _node;
+			node.x = _from.x + value * _between.x;
+			node.y = _from.y + value * _between.y;
+			node.scaleX = _from.scaleX + value * _between.scaleX;
+			node.scaleY = _from.scaleY + value * _between.scaleY;
+			node.skewX = _from.skewX + value * _between.skewX;
+			node.skewY = _from.skewY + value * _between.skewY;
+			return node;
 		}
 		
-		private function updateFrameData(_currentPrecent:Number, _activeFrame:Boolean = false):Number {
-			var _played:Number = duration * _currentPrecent;
-			var _fromIndex:int;
-			var _from:FrameData;
-			var _to:FrameData;
-			var _isListEnd:Boolean;
+		private function updateFrameData(currentPrecent:Number, activeFrame:Boolean = false):Number 
+		{
+			var played:Number = _duration * currentPrecent;
+			var from:FrameData;
+			var to:FrameData;
 			//refind the current frame
-			if (_played >= totalDuration || _played < totalDuration - betweenDuration) {
-				var _length:int = movementBoneData.length;
+			if (played >= _totalDuration || played < _totalDuration - _betweenDuration) 
+			{
+				var _length:int = _movementBoneData.length;
 				do {
-					betweenDuration = movementBoneData.getData(toIndex).duration;
-					totalDuration += betweenDuration;
-					_fromIndex = toIndex;
-					if (++toIndex >= _length) {
-						toIndex = 0;
+					_betweenDuration = _movementBoneData.getData(_toIndex).duration;
+					_totalDuration += _betweenDuration;
+					var fromIndex:int = _toIndex;
+					if (++_toIndex >= _length)
+					{
+						_toIndex = 0;
 					}
-				}while (_played >= totalDuration);
-				_isListEnd = loop == LIST && toIndex == 0;
-				if(_isListEnd){
-					_to = _from = movementBoneData.getData(_fromIndex);
-				}else{
-					_from = movementBoneData.getData(_fromIndex);
-					_to = movementBoneData.getData(toIndex);
+				}while (played >= _totalDuration);
+				var isListEnd:Boolean = _loop == LIST && _toIndex == 0;
+				if(isListEnd)
+				{
+					to = from = _movementBoneData.getData(fromIndex);
 				}
-				frameTweenEasing = _from.tweenEasing;
-				if (_activeFrame) {
-					currentKeyFrame = nextKeyFrame;
-					if(!_isListEnd){
-						nextKeyFrame = _to;
-						isTweenKeyFrame = true;
+				else
+				{
+					from = _movementBoneData.getData(fromIndex);
+					to = _movementBoneData.getData(_toIndex);
+				}
+				_frameTweenEasing = from.tweenEasing;
+				if (activeFrame)
+				{
+					_currentKeyFrame = _nextKeyFrame;
+					if(!isListEnd)
+					{
+						_nextKeyFrame = to;
+						_isTweenKeyFrame = true;
 					}
 				}
-				setBetween(_from, _to);
+				setBetween(from, to);
 			}
-			_currentPrecent = 1 - (totalDuration - _played) / betweenDuration;
+			currentPrecent = 1 - (_totalDuration - played) / _betweenDuration;
 			
 			//NaN: no tweens;  -1: ease out; 0: linear; 1: ease in; 2: ease in&out
-			var _tweenEasing:Number;
-			if (!isNaN(frameTweenEasing)) {
-				_tweenEasing = isNaN(tweenEasing)?frameTweenEasing:tweenEasing;
-				if (_tweenEasing) {
-					_currentPrecent = getEaseValue(_currentPrecent, _tweenEasing);
+			var tweenEasing:Number;
+			if (!isNaN(_frameTweenEasing))
+			{
+				tweenEasing = isNaN(_tweenEasing)?_frameTweenEasing:_tweenEasing;
+				if (tweenEasing)
+				{
+					currentPrecent = getEaseValue(currentPrecent, tweenEasing);
 				}
 			}
-			return _currentPrecent;
+			return currentPrecent;
 		}
 		
-		private static function getEaseValue(_value:Number, _easing:Number):Number {
-			if (_easing > 1) {
-				_value = 0.5 * (1 - Math.cos(_value * Math.PI ));
-				_easing -= 1;
-			}else if (_easing > 0) {
-				_value = Math.sin(_value * HALF_PI);
-			}else {
-				_value = 1 - Math.cos(_value * HALF_PI);
-				_easing = -_easing;
+		private function getEaseValue(value:Number, easing:Number):Number
+		{
+			if (easing > 1) 
+			{
+				value = 0.5 * (1 - Math.cos(value * Math.PI ));
+				easing -= 1;
 			}
-			return _value * _easing + (1 - _easing);
+			else if (easing > 0) 
+			{
+				value = Math.sin(value * HALF_PI);
+			}
+			else
+			{
+				value = 1 - Math.cos(value * HALF_PI);
+				easing = -easing;
+			}
+			return value * easing + (1 - easing);
 		}
 	}
 }

@@ -1,9 +1,9 @@
 package dragonBones.utils {
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.BoneData;
-	import dragonBones.utils.skeletonNamespace;
+	import dragonBones.utils.dragonBones_internal;
 	
-	use namespace skeletonNamespace;
+	use namespace dragonBones_internal;
 	
 	/**
 	 * ...

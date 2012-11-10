@@ -1,8 +1,10 @@
-package dragonBones {
+package dragonBones
+{
 	import dragonBones.animation.Animation;
-	import dragonBones.utils.skeletonNamespace;
+	import dragonBones.events.EventDispatcher;
+	import dragonBones.utils.dragonBones_internal;
 	
-	use namespace skeletonNamespace;
+	use namespace dragonBones_internal;
 	
 	[Event(name="movementChange", type="dragonBones.events.Event")]
 	
@@ -20,99 +22,185 @@ package dragonBones {
 	 * 
 	 * @author Akdcl
 	 */
-	public class Armature extends Bone {
-		
+	public class Armature extends EventDispatcher 
+	{
 		public var animation:Animation;
 		
-		protected var bones:Object;
-		skeletonNamespace var bonesIndexChanged:Boolean;
+		dragonBones_internal var _bonesIndexChanged:Boolean;
+		dragonBones_internal var _boneDepthList:Vector.<Bone>;
 		
-		override public function set display(_display:Object):void {
-			//warn
-			//__display = _display;
+		private var _rootBoneList:Vector.<Bone>;
+		
+		protected var _display:Object;
+		public function get display():Object{
+			return _display;
 		}
 		
-		public function Armature(_display:Object) {
+		dragonBones_internal var _originName:String;
+		public function get originName():String{
+			return _originName;
+		}
+		
+		public function Armature(display:Object) 
+		{
 			super();
-			__display = _display;
+			_display = display;
 			
-			bones = { };
+			_boneDepthList = new Vector.<Bone>;
+			_rootBoneList = new Vector.<Bone>;
+			
 			animation = new Animation(this);
-			bonesIndexChanged = false;
+			_bonesIndexChanged = false;
 		}
 		
-		override public function update():void{
-			super.update();
+		public function dispose():void
+		{
+			removeEventListeners();
+		}
+		
+		public function update():void
+		{
+			for each(var bone:Bone in _rootBoneList)
+			{
+				bone.update();
+			}
 			animation.update();
-			if(bonesIndexChanged){
+			
+			if(_bonesIndexChanged)
+			{
 				updateBonesZ();
 			}
 		}
 		
-		override public function dispose():void{
-			super.dispose();
-			animation = null;
-			bones = null;
+		public function getBone(name:String):Bone 
+		{
+			if(name)
+			{
+				for each(var bone:Bone in _boneDepthList)
+				{
+					if(bone.originName == name)
+					{
+						return bone;
+					}
+				}
+			}
+			return null;
 		}
 		
-		override skeletonNamespace function changeDisplay(_displayIndex:int):void{
-		}
-		
-		public function getBone(_name:String):Bone {
-			return bones[_name];
+		public function getBoneByDisplay(display:Object):Bone
+		{
+			for each(var eachBone:Bone in _boneDepthList)
+			{
+				if(eachBone.display == display)
+				{
+					return eachBone;
+				}
+				var bone:Bone = eachBone.getChildByDisplay(display, true);
+				if(bone)
+				{
+					return bone;
+				}
+			}
+			return null;
 		}
 
-		public function addBone(_bone:Bone, _boneName:String = null, _parentName:String = null):void {
-			_bone.name = _boneName || _bone.name;
-			var _boneParent:Bone = bones[_parentName];
-			if (_boneParent) {
-				_boneParent.addChild(_bone);
-			}else {
-				addChild(_bone);
+		public function addBone(bone:Bone, parentName:String = null):void 
+		{
+			var boneParent:Bone = getBone(parentName);
+			if (boneParent)
+			{
+				boneParent.addChild(bone);
+			}
+			else
+			{
+				bone.removeFromParent();
+				addToBones(bone, true);
 			}
 		}
 		
-		public function removeBone(_name:String):void {
-			var _bone:Bone = bones[_name];
-			if (_bone) {
-				_bone.parent.removeChild(_bone);
-			}
-		}
-		
-		skeletonNamespace function addToBones(_bone:Bone):void{
-			var _boneName:String = _bone.name;
-			if(_boneName){
-				var _boneAdded:Bone = bones[_boneName];
-				if (_boneAdded) {
+		public function removeBone(boneName:String):void 
+		{
+			var bone:Bone = getBone(boneName);
+			if (bone) 
+			{
+				if(bone.parent)
+				{
+					bone.removeFromParent();
 				}
-				bones[_boneName] = _bone;
-			}
-		}
-		
-		skeletonNamespace function removeFromBones(_bone:Bone):void{
-			var _boneName:String = _bone.name;
-			if(_boneName){
-				delete bones[_boneName];
-			}
-		}
-		
-		public function updateBonesZ():void {
-			var _boneList:Vector.<Bone> = new Vector.<Bone>;
-			var _bone:Bone;
-			for each(_bone in bones) {
-				_boneList.push(_bone);
-			}
-			_boneList.sort(sortBoneZIndex);
-			for each(_bone in _boneList) {
-				if (_bone.display) {
-					addDisplayChild(_bone.display, __display);
+				else
+				{
+					removeFromBones(bone);
 				}
 			}
-			bonesIndexChanged = false;
 		}
 		
-		private function sortBoneZIndex(_bone1:Bone, _bone2:Bone):int {
-			return _bone1.origin.z >= _bone2.origin.z?1: -1;
+		dragonBones_internal function addToBones(bone:Bone, _root:Boolean = false):void
+		{
+			var boneIndex:int = _boneDepthList.indexOf(bone);
+			if(boneIndex < 0)
+			{
+				_boneDepthList.push(bone);
+			}
+			
+			boneIndex = _rootBoneList.indexOf(bone);
+			if(_root)
+			{
+				if(boneIndex < 0)
+				{
+					_rootBoneList.push(bone);
+				}
+			}else if(boneIndex >= 0)
+			{
+				_rootBoneList.splice(boneIndex, 1);
+			}
+			
+			bone._armature = this;
+			bone._displayBrideg.addDisplay(_display, bone.global.z);
+			for each(var child:Bone in bone._children)
+			{
+				addToBones(child);
+			}
+		}
+		
+		dragonBones_internal function removeFromBones(bone:Bone):void
+		{
+			var boneIndex:int = _boneDepthList.indexOf(bone);
+			if(boneIndex >= 0)
+			{
+				_boneDepthList.splice(boneIndex, 1);
+			}
+			
+			boneIndex = _rootBoneList.indexOf(bone);
+			if(boneIndex >= 0)
+			{
+				_rootBoneList.splice(boneIndex, 1);
+			}
+			
+			bone._armature = null;
+			bone._displayBrideg.removeDisplay();
+			for each(var child:Bone in bone._children)
+			{
+				removeFromBones(child);
+			}
+		}
+		
+		
+		public function updateBonesZ():void 
+		{
+			_boneDepthList.sort(sortBoneZIndex);
+			for each(var bone:Bone in _boneDepthList) 
+			{
+				if(bone._displayVisible)
+				{
+					bone._displayBrideg.addDisplay(_display);
+				}
+			}
+			_bonesIndexChanged = false;
+		}
+		
+		private function sortBoneZIndex(bone1:Bone, bone2:Bone):int 
+		{
+			return bone1.global.z >= bone2.global.z?1: -1;
 		}
 	}
 }

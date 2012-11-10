@@ -1,15 +1,15 @@
 package dragonBones.objects{
 	
-	import dragonBones.utils.skeletonNamespace;
+	import dragonBones.utils.dragonBones_internal;
 	
-	use namespace skeletonNamespace;
+	use namespace dragonBones_internal;
 	
 	/**
 	 * ...
 	 * @author Akdcl
 	 */
 	final public class BoneData extends Node {
-		public var name:String;
+		dragonBones_internal var name:String;
 		public var parent:String;
 		
 		public function BoneData(_x:Number = 0, _y:Number = 0, _skewX:Number = 0, _skewY:Number = 0) {
@@ -34,15 +34,15 @@ package dragonBones.objects{
 		
 		private var displayList:Array;
 		
-		skeletonNamespace function get displayLength():uint{
+		dragonBones_internal function get displayLength():uint{
 			return displayList?displayList.length:0;
 		}
 		
-		skeletonNamespace function getDisplayData(_index:int):DisplayData{
+		dragonBones_internal function getDisplayData(_index:int):DisplayData{
 			return displayList?displayList[_index]:null;
 		}
 		
-		skeletonNamespace function setDisplayAt(_name:String, _isArmature:Boolean = false, _index:int = 0):void{
+		dragonBones_internal function setDisplayAt(_name:String, _isArmature:Boolean = false, _index:int = 0):void{
 			if(!displayList){
 				displayList = [];
 			}
