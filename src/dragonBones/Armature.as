@@ -24,6 +24,9 @@ package dragonBones
 	 */
 	public class Armature extends EventDispatcher 
 	{
+		public var name:String;
+		public var userData:Object;
+		
 		public var animation:Animation;
 		
 		dragonBones_internal var _bonesIndexChanged:Boolean;
@@ -34,11 +37,6 @@ package dragonBones
 		protected var _display:Object;
 		public function get display():Object{
 			return _display;
-		}
-		
-		dragonBones_internal var _originName:String;
-		public function get originName():String{
-			return _originName;
 		}
 		
 		public function Armature(display:Object) 
@@ -56,6 +54,17 @@ package dragonBones
 		public function dispose():void
 		{
 			removeEventListeners();
+			for each(var bone:Bone in _rootBoneList)
+			{
+				bone.dispose();
+			}
+			
+			animation.dispose();
+			animation = null;
+			_display = null;
+			
+			_boneDepthList = null;
+			_rootBoneList = null;
 		}
 		
 		public function update():void
@@ -78,7 +87,7 @@ package dragonBones
 			{
 				for each(var bone:Bone in _boneDepthList)
 				{
-					if(bone.originName == name)
+					if(bone.name == name)
 					{
 						return bone;
 					}
@@ -94,11 +103,6 @@ package dragonBones
 				if(eachBone.display == display)
 				{
 					return eachBone;
-				}
-				var bone:Bone = eachBone.getChildByDisplay(display, true);
-				if(bone)
-				{
-					return bone;
 				}
 			}
 			return null;

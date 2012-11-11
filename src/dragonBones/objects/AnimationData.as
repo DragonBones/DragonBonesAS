@@ -1,38 +1,69 @@
-package dragonBones.objects{
+package dragonBones.objects
+{
+	import dragonBones.utils.ConstValues;
 	
 	/**
 	 * ...
 	 * @author Akdcl
 	 */
-	final public class AnimationData extends BaseDicData {
-		private var firstMovement:String;
-		public function AnimationData(_name:String = null) {
-			super(_name);
+	public class AnimationData
+	{
+		private var _movementDatas:Object;
+		private var _movementList:Vector.<String>;
+		
+		internal var _name:String;
+		public function get name():String
+		{
+			return _name;
 		}
 		
-		override public function addData(_data:Object, _id:String=null, _replaceIfExists:Boolean=false):Boolean{
-			if(!firstMovement){
-				firstMovement = _id;
+		public function get totalMovements():uint
+		{
+			return _movementList.length;
+		}
+		
+		public function get movementList():Vector.<String>
+		{
+			return _movementList.concat();
+		}
+		
+		public function AnimationData() 
+		{
+			_movementDatas = { };
+			_movementList = new Vector.<String>;
+		}
+		
+		public function dispose():void
+		{
+			for each(var movementData:MovementData in _movementDatas)
+			{
+				movementData.dispose();
 			}
-			return super.addData(_data, _id, _replaceIfExists);
+			_movementDatas = null;
+			_movementList = null;
 		}
 		
-		override public function getSearchList():Array{
-			if(firstMovement){
-				var _list:Array = [firstMovement];
-				for (var _name:String in datas) {
-					if(_list.indexOf(_name) < 0){
-						_list.push(_name);
-					}
-				}
-				return _list;
+		public function getMovementData(name:String):MovementData 
+		{
+			return _movementDatas[name];
+		}
+		
+		public function getMovementDataAt(index:int):MovementData 
+		{
+			var name:String = _movementList.length > index?_movementList[index]:null;
+			return getMovementData(name);
+		}
+		
+		internal function addMovementData(data:MovementData):void
+		{
+			var name:String = data.name;
+			_movementDatas[name] = data;
+			if(_movementList.indexOf(name) < 0)
+			{
+				_movementList.push(name);
 			}
-			return super.getSearchList();
 		}
 		
-		public function getData(_name:String):MovementData {
-			return datas[_name];
-		}
 	}
 	
 }

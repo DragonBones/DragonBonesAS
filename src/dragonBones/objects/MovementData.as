@@ -1,25 +1,41 @@
-package dragonBones.objects {
+package dragonBones.objects 
+{
+	import dragonBones.utils.dragonBones_internal;
+	
+	use namespace dragonBones_internal;
 	
 	/**
 	 * ...
 	 * @author Akdcl
 	 */
-	final public class MovementData extends BaseDicData {
+	public class MovementData 
+	{
+		private var _movementBoneDatas:Object;
+		dragonBones_internal var _movementFrameList:Vector.<MovementFrameData>;
+		
+		internal var _name:String;
+		public function get name():String
+		{
+			return _name;	
+		}
+		
 		public var duration:int;
 		public var durationTo:int;
 		public var durationTween:int;
 		public var loop:Boolean;
 		public var tweenEasing:Number;
-		public var frameLength:uint;
 		
-		private var frameList:Array;
-		
-		public function MovementData(_name:String = null) {
-			super(_name);
-			frameList = [];
+		public function MovementData()
+		{
+			duration = 1;
+			durationTo = 0;
+			durationTween = 0;
+			_movementBoneDatas = { };
+			_movementFrameList = new Vector.<MovementFrameData>;
 		}
 		
-		public function setValues(_duration:int = 1, _durationTo:int = 0, _durationTween:int = 0, _loop:Boolean = false, _tweenEasing:Number = NaN):void{
+		public function setValues(_duration:int = 1, _durationTo:int = 0, _durationTween:int = 0, _loop:Boolean = false, _tweenEasing:Number = NaN):void
+		{
 			duration = _duration > 0?_duration:1;
 			durationTo = _durationTo >= 0?_durationTo:0;
 			durationTween = _durationTween >= 0?_durationTween:0;
@@ -28,26 +44,25 @@ package dragonBones.objects {
 			tweenEasing = _tweenEasing;
 		}
 		
-		public function getData(_name:String):MovementBoneData {
-			return datas[_name];
-		}
-		
-		public function addFrameData(_frameData:MovementFrameData, _index:int, _replaceIfExists:Boolean = false):Boolean{
-			var _exData:MovementFrameData = frameList[_index];
-			if (_exData) {
-				if(_replaceIfExists){
-					_exData.dispose();
-				}else{
-					return false;
-				}
+		public function dispose():void
+		{
+			for each(var movementBoneData:MovementBoneData in _movementBoneDatas)
+			{
+				movementBoneData.dispose();
 			}
-			frameList[_index] = _frameData;
-			frameLength = frameList.length;
-			return true;
+			movementBoneData = null;
+			_movementFrameList = null;
 		}
 		
-		public function getFrame(_index:int):MovementFrameData {
-			return frameList[_index];
+		public function getMovementBoneData(name:String):MovementBoneData
+		{
+			return _movementBoneDatas[name];
+		}
+		
+		internal function addMovementBoneData(data:MovementBoneData):void
+		{
+			var name:String = data.name;
+			_movementBoneDatas[name] = data;
 		}
 	}
 	

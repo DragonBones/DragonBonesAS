@@ -1,14 +1,21 @@
-package dragonBones.objects
+﻿package dragonBones.objects
 {
-	
-	public final class DisplayData
+	public class DisplayData
 	{
-		public var name:String;
-		public var isArmature:Boolean;
+		internal var _name:String;
+		public function get name():String
+		{
+			return _name;
+		}
 		
-		public function DisplayData(_name:String, _isArmature:Boolean = false){
-			name = _name;
-			isArmature = _isArmature;
+		internal var _isArmature:Boolean;
+		public function get isArmature():Boolean
+		{
+			return _isArmature;
+		}
+		
+		public function DisplayData()
+		{
 		}
 	}
 }

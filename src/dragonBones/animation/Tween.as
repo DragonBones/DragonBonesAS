@@ -6,6 +6,7 @@ package dragonBones.animation
 	import dragonBones.events.SoundEventManager;
 	import dragonBones.objects.FrameData;
 	import dragonBones.objects.MovementBoneData;
+	import dragonBones.objects.TweenNode;
 	import dragonBones.objects.Node;
 	import dragonBones.utils.dragonBones_internal;
 	
@@ -25,7 +26,7 @@ package dragonBones.animation
 		
 		dragonBones_internal var _node:Node;
 		private var _from:Node;
-		private var _between:Node;
+		private var _between:TweenNode;
 		
 		private var _movementBoneData:MovementBoneData;
 		
@@ -53,7 +54,7 @@ package dragonBones.animation
 			_bone = bone;
 			_node = new Node();
 			_from = new Node();
-			_between = new Node();
+			_between = new TweenNode();
 		}
 		
 		override public function dispose():void
@@ -86,14 +87,17 @@ package dragonBones.animation
 			_toIndex = 0;
 			_node.skewY %= 360;
 			var frameData:FrameData;
-			if (_movementBoneData.length == 1) 
+			var length:uint = _movementBoneData._frameList.length;
+			
+			if (length == 1) 
 			{
 				_loop = SINGLE;
-				_nextKeyFrame = _movementBoneData.getData(0);
+				_nextKeyFrame = _movementBoneData._frameList[0];
 				setBetween(_node, _nextKeyFrame);
 				_isTweenKeyFrame = true;
 				_frameTweenEasing = 1;
-			}else if (_movementBoneData.length > 1)
+			}
+			else if (length > 1)
 			{
 				if (loop) {
 					_loop = LIST_LOOP_START;
@@ -109,7 +113,7 @@ package dragonBones.animation
 				}
 				else 
 				{
-					_nextKeyFrame = _movementBoneData.getData(0);
+					_nextKeyFrame = _movementBoneData._frameList[0];
 					setBetween(_node, _nextKeyFrame);
 					_isTweenKeyFrame = true;
 				}
@@ -242,7 +246,6 @@ package dragonBones.animation
 					}
 				}
 				_bone.changeDisplay(displayIndex);
-				
 				if(_currentKeyFrame.movement)
 				{
 					var childAramture:Armature = _bone.childArmature;
@@ -309,12 +312,12 @@ package dragonBones.animation
 			//refind the current frame
 			if (played >= _totalDuration || played < _totalDuration - _betweenDuration) 
 			{
-				var _length:int = _movementBoneData.length;
+				var length:int = _movementBoneData._frameList.length;
 				do {
-					_betweenDuration = _movementBoneData.getData(_toIndex).duration;
+					_betweenDuration = _movementBoneData._frameList[_toIndex].duration;
 					_totalDuration += _betweenDuration;
 					var fromIndex:int = _toIndex;
-					if (++_toIndex >= _length)
+					if (++_toIndex >= length)
 					{
 						_toIndex = 0;
 					}
@@ -322,13 +325,14 @@ package dragonBones.animation
 				var isListEnd:Boolean = _loop == LIST && _toIndex == 0;
 				if(isListEnd)
 				{
-					to = from = _movementBoneData.getData(fromIndex);
+					to = from = _movementBoneData._frameList[fromIndex];
 				}
 				else
 				{
-					from = _movementBoneData.getData(fromIndex);
-					to = _movementBoneData.getData(_toIndex);
+					from = _movementBoneData._frameList[fromIndex];
+					to = _movementBoneData._frameList[_toIndex];
 				}
+				
 				_frameTweenEasing = from.tweenEasing;
 				if (activeFrame)
 				{

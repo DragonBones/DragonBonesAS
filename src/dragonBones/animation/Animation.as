@@ -22,7 +22,7 @@ package dragonBones.animation
 		private static var _soundManager:SoundEventManager = SoundEventManager.getInstance();
 		
 		public var movementID:String;
-		public var movementList:Array;
+		public var movementList:Vector.<String>;
 		
 		private var _animationData:AnimationData;
 		private var _movementData:MovementData;
@@ -47,7 +47,6 @@ package dragonBones.animation
 		override public function dispose():void
 		{
 			super.dispose();
-			movementID = null;
 			movementList = null;
 			_animationData = null;
 			_movementData = null;
@@ -61,7 +60,8 @@ package dragonBones.animation
 			{
 				stop();
 				_animationData = animationData;
-				movementList = _animationData.getSearchList();
+				
+				movementList = _animationData.movementList;
 			}
 		}
 		
@@ -71,7 +71,7 @@ package dragonBones.animation
 			{
 				return;
 			}
-			var movementData:MovementData = _animationData.getData(movementID as String);
+			var movementData:MovementData = _animationData.getMovementData(movementID as String);
 			if (!movementData)
 			{
 				return;
@@ -109,7 +109,7 @@ package dragonBones.animation
 			
 			for each(var bone:Bone in _armature._boneDepthList)
 			{
-				var movementBoneData:MovementBoneData = _movementData.getData(bone.originName);
+				var movementBoneData:MovementBoneData = _movementData.getMovementBoneData(bone.name);
 				if (movementBoneData)
 				{
 					bone._tween.gotoAndPlay(movementBoneData, durationTo, durationTween, loop, tweenEasing);
@@ -212,7 +212,7 @@ package dragonBones.animation
 		
 		private function updateFrameData(currentPrecent:Number):void 
 		{
-			var length:uint = _movementData.frameLength;
+			var length:uint = _movementData._movementFrameList.length;
 			if(length == 0)
 			{
 				return;
@@ -223,7 +223,7 @@ package dragonBones.animation
 			{
 				while (true) 
 				{
-					_currentFrameData =  _movementData.getFrame(_toIndex);
+					_currentFrameData =  _movementData._movementFrameList[_toIndex];
 					if (++_toIndex >= length) 
 					{
 						_toIndex = 0;

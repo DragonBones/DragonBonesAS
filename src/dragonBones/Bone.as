@@ -17,6 +17,7 @@ package dragonBones
 	 */
 	public class Bone extends EventDispatcher 
 	{
+		public var name:String;
 		public var userData:Object;
 		
 		public var global:Node;
@@ -40,10 +41,6 @@ package dragonBones
 		public function get armature():Armature
 		{
 			return _armature;
-		}
-		
-		public function get originName():String{
-			return origin.name;
 		}
 		
 		public function get childArmature():Armature
@@ -158,6 +155,8 @@ package dragonBones
 		public function update():void 
 		{
 			_tween.update();
+			
+			//trace(_tween._node);
 			global.x = origin.x + node.x + _tween._node.x;
 			global.y = origin.y + node.y + _tween._node.y;
 			global.skewX = origin.skewX + node.skewX + _tween._node.skewX;
@@ -215,77 +214,6 @@ package dragonBones
 					child.update();
 				}
 			}
-		}
-		
-		public function getChildByDisplay(boneDisplay:Object, searchInChild:Boolean = false):Bone
-		{
-			if(boneDisplay)
-			{
-				for each(var child:Bone in _children)
-				{
-					if(child.display == boneDisplay)
-					{
-						return child;
-					}
-					
-					if(searchInChild)
-					{
-						var boneInChild:Bone = child.getChildByDisplay(boneDisplay, true);
-						if(boneInChild)
-						{
-							return boneInChild;
-						}
-					}
-				}
-			}
-			return null;
-		}
-		
-		public function getChildByName(name:String, searchInChild:Boolean = false):Bone
-		{
-			if(name)
-			{
-				for each(var child:Bone in _children)
-				{
-					if(child.origin.name == name)
-					{
-						return child;
-					}
-					
-					if(searchInChild)
-					{
-						var _boneInChild:Bone = child.getChildByName(name, true);
-						if(_boneInChild)
-						{
-							return _boneInChild;
-						}
-					}
-				}
-			}
-			return null;
-		}
-		
-		public function eachChild(callback:Function, args:Array = null, searchInChild:Boolean = false):Object
-		{
-			var result:Object;
-			for each(var child:Bone in _children)
-			{
-				result = callback(child, args);
-				if(result)
-				{
-					return result;
-				}
-				
-				if(searchInChild)
-				{
-					result = child.eachChild(callback, args, searchInChild);
-					if(result)
-					{
-						return result;
-					}
-				}
-			}
-			return null;
 		}
 		
 		public function addChild(child:Bone):void 

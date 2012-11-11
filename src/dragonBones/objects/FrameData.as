@@ -1,10 +1,12 @@
-package dragonBones.objects {
+package dragonBones.objects
+{
 	
 	/**
 	 * ...
 	 * @author Akdcl
 	 */
-	final public class FrameData extends Node {
+	final public class FrameData extends TweenNode
+	{
 		public var duration:int;
 		
 		public var tweenEasing:Number;
@@ -17,7 +19,8 @@ package dragonBones.objects {
 		public var sound:String;
 		public var soundEffect:String;
 		
-		public function FrameData() {
+		public function FrameData()
+		{
 			super();
 			
 			duration = 1;

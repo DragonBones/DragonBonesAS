@@ -15,6 +15,7 @@ package dragonBones.factorys
 	import dragonBones.objects.SkeletonAndTextureRawData;
 	import dragonBones.objects.SkeletonData;
 	import dragonBones.objects.TextureData;
+	import dragonBones.objects.XMLDataParser;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.dragonBones_internal;
 	import dragonBones.utils.uncompressionData;
@@ -117,7 +118,7 @@ package dragonBones.factorys
 		public function parseData(bytes:ByteArray, completeCallback:Function = null):void
 		{
 			var sat:SkeletonAndTextureRawData = uncompressionData(bytes);
-			skeletonData = new SkeletonData(sat.skeletonXML);
+			skeletonData = XMLDataParser.parseSkeletonData(sat.skeletonXML);
 			textureData = new TextureData(sat.textureAtlasXML, sat.textureBytes, completeCallback);
 			sat.dispose();
 		}
@@ -138,14 +139,14 @@ package dragonBones.factorys
 			}
 			var animationData:AnimationData = skeletonData.getAnimationData(armatureName);
 			var armature:Armature = generateArmature();
-			armature._originName = armatureName;
+			armature.name = armatureName;
 			if (armature) 
 			{
 				armature.animation.setData(animationData);
-				var boneList:Array = armatureData.getSearchList();
+				var boneList:Array = armatureData.boneList;
 				for each(var boneName:String in boneList) 
 				{
-					var boneData:BoneData = armatureData.getData(boneName);
+					var boneData:BoneData = armatureData.getBoneData(boneName);
 					var bone:Bone = buildBone(boneData);
 					if(bone)
 					{
@@ -167,12 +168,13 @@ package dragonBones.factorys
 		{
 			var bone:Bone = generateBone();
 			bone.origin.copy(boneData);
+			bone.name = boneData.name;
 			
 			var length:uint = boneData.displayLength;
 			var displayData:DisplayData;
 			for(var i:int = length - 1;i >=0;i --)
 			{
-				displayData = boneData.getDisplayData(i);
+				displayData = boneData.getDisplayDataAt(i);
 				bone.changeDisplay(i);
 				if (displayData.isArmature) 
 				{

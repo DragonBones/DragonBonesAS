@@ -1,7 +1,4 @@
 package dragonBones.objects {
-	import dragonBones.utils.ConstValues;
-	import dragonBones.utils.generateAnimationData;
-	import dragonBones.utils.generateArmatureData;
 	
 	import flash.utils.ByteArray;
 	
@@ -9,53 +6,102 @@ package dragonBones.objects {
 	 * 
 	 * @author Akdcl
 	 */
-	final public class SkeletonData extends BaseDicData {
-		private var animationDatas:Object;
+	public class SkeletonData
+	{
+		private var _armatureDatas:Object;
+		private var _animationDatas:Object;
+		private var _armatureList:Vector.<String>;
+		private var _animationList:Vector.<String>;
 		
-		public function SkeletonData(_skeletonXML:XML) {
-			super(null);
-			animationDatas = { };
-			if (_skeletonXML) {
-				setData(_skeletonXML);
+		internal var _name:String;
+		public function get name():String
+		{
+			return _name;
+		}
+		
+		public function get totalArmatures():uint
+		{
+			return _armatureList.length;
+		}
+		
+		public function get totalAnimation():uint
+		{
+			return _animationList.length;
+		}
+		
+		public function get armatureList():Vector.<String>
+		{
+			return _armatureList.concat();
+		}
+		
+		public function get animationList():Vector.<String>
+		{
+			return _animationList.concat();
+		}
+		
+		public function SkeletonData() 
+		{
+			_armatureDatas = { };
+			_animationDatas = { };
+			_armatureList = new Vector.<String>;
+			_animationList = new Vector.<String>;
+		}
+		
+		public function dispose():void
+		{
+			for each(var armatureData:ArmatureData in _armatureDatas)
+			{
+				armatureData.dispose();
+			}
+			for each(var animationData:AnimationData in _animationDatas)
+			{
+				animationData.dispose();
+			}
+			_armatureDatas = null;
+			_animationDatas = null;
+			_armatureList = null;
+			_animationList = null;
+		}
+		
+		public function getArmatureData(name:String):ArmatureData 
+		{
+			return _armatureDatas[name];
+		}
+		
+		public function getAramtureDataAt(index:int):ArmatureData
+		{
+			var name:String = _armatureList.length > index?_armatureList[index]:null;
+			return getArmatureData(name);
+		}
+		
+		public function getAnimationData(name:String):AnimationData 
+		{
+			return _animationDatas[name];
+		}
+		
+		public function getAnimationDataAt(index:int):AnimationData
+		{
+			var name:String = _animationList.length > index?_animationList[index]:null;
+			return getAnimationData(name);
+		}
+		
+		internal function addArmatureData(data:ArmatureData):void
+		{
+			var name:String = data.name;
+			_armatureDatas[name] = data;
+			if(_armatureList.indexOf(name) < 0)
+			{
+				_armatureList.push(name);
 			}
 		}
 		
-		override public function dispose():void{
-			super.dispose();
-			for each(var _data:AnimationData in animationDatas){
-				_data.dispose();
-			}
-			animationDatas = null;
-		}
-		
-		public function getArmatureData(_name:String):ArmatureData {
-			return datas[_name];
-		}
-		
-		public function getAnimationData(_name:String):AnimationData {
-			return animationDatas[_name];
-		}
-		
-		public function addAnimationData(_data:AnimationData, _id:String = null):void{
-			_id = _id || _data.name;
-			if (animationDatas[_id]) {
-				animationDatas[_id].dispose();
-			}
-			animationDatas[_id] = _data;
-		}
-		
-		public function setData(_skeletonXML:XML):void {
-			name = _skeletonXML.attribute(ConstValues.A_NAME);
-			
-			var _dataName:String;
-			for each(var _armatureXML:XML in _skeletonXML.elements(ConstValues.ARMATURES).elements(ConstValues.ARMATURE)) {
-				_dataName = _armatureXML.attribute(ConstValues.A_NAME);
-				addData(generateArmatureData(_dataName, _armatureXML), _dataName);
-			}
-			
-			for each(var _animationXML:XML in _skeletonXML.elements(ConstValues.ANIMATIONS).elements(ConstValues.ANIMATION)) {
-				_dataName = _animationXML.attribute(ConstValues.A_NAME);
-				addAnimationData(generateAnimationData(_dataName, _animationXML, getArmatureData(_dataName)), _dataName);
+		internal function addAnimationData(data:AnimationData):void
+		{
+			var name:String = data.name;
+			_animationDatas[name] = data;
+			if(_animationList.indexOf(name) < 0)
+			{
+				_animationList.push(name);
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 package dragonBones.objects
 {
-	public final class MovementFrameData
+	public class MovementFrameData
 	{
 		public var start:int;
 		public var duration:int;
@@ -9,12 +9,17 @@ package dragonBones.objects
 		public var sound:String;
 		public var soundEffect:String;
 		
-		public function MovementFrameData(){
-			
+		public function MovementFrameData()
+		{
 		}
 		
-		public function dispose():void {
-			
+		public function setValues(start:int, duration:int, movement:String, event:String, sound:String):void
+		{
+			this.start = start;
+			this.duration = duration;
+			this.movement = movement;
+			this.event = event;
+			this.sound = sound;
 		}
 	}
 }
