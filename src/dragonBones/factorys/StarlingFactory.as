@@ -34,6 +34,7 @@
 					subTexture = new SubTexture(textureAtlasData._starlingTexture as Texture, subTextureData);
 					textureAtlasData.addStarlingSubTexture(fullName, subTexture);
 				}
+				
 				var image:Image = new Image(subTexture);
 				image.pivotX = subTextureData.pivotX;
 				image.pivotY = subTextureData.pivotY;
