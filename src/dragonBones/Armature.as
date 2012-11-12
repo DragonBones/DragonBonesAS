@@ -19,10 +19,10 @@ package dragonBones
 	[Event(name="boneFrameEvent", type="dragonBones.events.FrameEvent")]
 	
 	/**
-	 * 
+	 *
 	 * @author Akdcl
 	 */
-	public class Armature extends EventDispatcher 
+	public class Armature extends EventDispatcher
 	{
 		public var name:String;
 		public var userData:Object;
@@ -39,7 +39,7 @@ package dragonBones
 			return _display;
 		}
 		
-		public function Armature(display:Object) 
+		public function Armature(display:Object)
 		{
 			super();
 			_display = display;
@@ -81,7 +81,7 @@ package dragonBones
 			}
 		}
 		
-		public function getBone(name:String):Bone 
+		public function getBone(name:String):Bone
 		{
 			if(name)
 			{
@@ -108,7 +108,7 @@ package dragonBones
 			return null;
 		}
 
-		public function addBone(bone:Bone, parentName:String = null):void 
+		public function addBone(bone:Bone, parentName:String = null):void
 		{
 			var boneParent:Bone = getBone(parentName);
 			if (boneParent)
@@ -122,10 +122,10 @@ package dragonBones
 			}
 		}
 		
-		public function removeBone(boneName:String):void 
+		public function removeBone(boneName:String):void
 		{
 			var bone:Bone = getBone(boneName);
-			if (bone) 
+			if (bone)
 			{
 				if(bone.parent)
 				{
@@ -159,7 +159,7 @@ package dragonBones
 			}
 			
 			bone._armature = this;
-			bone._displayBrideg.addDisplay(_display, bone.global.z);
+			bone._displayBridge.addDisplay(_display, bone.global.z);
 			for each(var child:Bone in bone._children)
 			{
 				addToBones(child);
@@ -181,7 +181,7 @@ package dragonBones
 			}
 			
 			bone._armature = null;
-			bone._displayBrideg.removeDisplay();
+			bone._displayBridge.removeDisplay();
 			for each(var child:Bone in bone._children)
 			{
 				removeFromBones(child);
@@ -189,20 +189,20 @@ package dragonBones
 		}
 		
 		
-		public function updateBonesZ():void 
+		public function updateBonesZ():void
 		{
 			_boneDepthList.sort(sortBoneZIndex);
-			for each(var bone:Bone in _boneDepthList) 
+			for each(var bone:Bone in _boneDepthList)
 			{
 				if(bone._displayVisible)
 				{
-					bone._displayBrideg.addDisplay(_display);
+					bone._displayBridge.addDisplay(_display);
 				}
 			}
 			_bonesIndexChanged = false;
 		}
 		
-		private function sortBoneZIndex(bone1:Bone, bone2:Bone):int 
+		private function sortBoneZIndex(bone1:Bone, bone2:Bone):int
 		{
 			return bone1.global.z >= bone2.global.z?1: -1;
 		}

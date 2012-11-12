@@ -1,4 +1,4 @@
-package dragonBones 
+package dragonBones
 {
 	import dragonBones.animation.Tween;
 	import dragonBones.display.IDisplayBridge;
@@ -15,7 +15,7 @@ package dragonBones
 	 *
 	 * @author akdcl
 	 */
-	public class Bone extends EventDispatcher 
+	public class Bone extends EventDispatcher
 	{
 		public var name:String;
 		public var userData:Object;
@@ -27,7 +27,7 @@ package dragonBones
 		dragonBones_internal var _tween:Tween;
 		
 		dragonBones_internal var _children:Vector.<Bone>;
-		dragonBones_internal var _displayBrideg:IDisplayBridge;
+		dragonBones_internal var _displayBridge:IDisplayBridge;
 		
 		private var _globalTransformMatrix:Matrix = new Matrix;
 		private var _transformMatrixForChildren:Matrix = new Matrix;
@@ -56,12 +56,12 @@ package dragonBones
 		
 		public function get display():Object
 		{
-			return _displayBrideg.display;
+			return _displayBridge.display;
 		}
 		
 		public function set display(value:Object):void
 		{
-			if(_displayBrideg.display == value) 
+			if(_displayBridge.display == value)
 			{
 				return;
 			}
@@ -70,10 +70,10 @@ package dragonBones
 			{
 				value = (value as Armature).display;
 			}
-			_displayBrideg.display = value;
+			_displayBridge.display = value;
 		}
 		
-		dragonBones_internal function changeDisplay(displayIndex:int):void 
+		dragonBones_internal function changeDisplay(displayIndex:int):void
 		{
 			if(displayIndex < 0)
 			{
@@ -81,7 +81,7 @@ package dragonBones
 				{
 					_displayVisible = false;
 					//hide
-					_displayBrideg.removeDisplay();
+					_displayBridge.removeDisplay();
 				}
 			}
 			else
@@ -92,7 +92,7 @@ package dragonBones
 					//show
 					if(_armature)
 					{
-						_displayBrideg.addDisplay(_armature.display, global.z);
+						_displayBridge.addDisplay(_armature.display, global.z);
 						_armature._bonesIndexChanged = true;
 					}
 				}
@@ -108,7 +108,7 @@ package dragonBones
 		
 		public function Bone(displayBrideg:IDisplayBridge)
 		{
-			_displayBrideg = displayBrideg;
+			_displayBridge = displayBrideg;
 			
 			_tween = new Tween(this);
 			
@@ -143,7 +143,7 @@ package dragonBones
 			_globalTransformMatrix = null;
 			_transformMatrixForChildren = null;
 			
-			_displayBrideg = null;
+			_displayBridge = null;
 			_displayList = null;
 			
 			_tween = null;
@@ -152,7 +152,7 @@ package dragonBones
 			_armature = null;
 			_parent = null;
 		}
-		public function update():void 
+		public function update():void
 		{
 			_tween.update();
 			
@@ -172,7 +172,7 @@ package dragonBones
 			var cosY:Number = Math.cos(global.skewY);
 			var sinY:Number = Math.sin(global.skewY);
 			
-			var currentDisplay:Object = _displayBrideg.display;
+			var currentDisplay:Object = _displayBridge.display;
 			if (_children.length > 0 || (_displayVisible && currentDisplay))
 			{
 				_globalTransformMatrix.a = global.scaleX * cosY;
@@ -187,7 +187,7 @@ package dragonBones
 				}
 				if(_displayVisible && currentDisplay)
 				{
-					_displayBrideg.update(_globalTransformMatrix);
+					_displayBridge.update(_globalTransformMatrix);
 					var childArmature:Armature = this.childArmature;
 					if(childArmature)
 					{
@@ -205,34 +205,34 @@ package dragonBones
 				_transformMatrixForChildren.d = cosX;
 				_transformMatrixForChildren.tx = global.x;
 				_transformMatrixForChildren.ty = global.y;
-				if (_parent) 
+				if (_parent)
 				{
 					_transformMatrixForChildren.concat(_parent._transformMatrixForChildren);
 				}
-				for each(var child:Bone in _children) 
+				for each(var child:Bone in _children)
 				{
 					child.update();
 				}
 			}
 		}
 		
-		public function addChild(child:Bone):void 
+		public function addChild(child:Bone):void
 		{
-			if (_children.length > 0?(_children.indexOf(child) < 0):true) 
+			if (_children.length > 0?(_children.indexOf(child) < 0):true)
 			{
 				child.removeFromParent();
 				
 				_children.push(child);
 				child.setParent(this);
 				
-				if (_armature) 
+				if (_armature)
 				{
 					_armature.addToBones(child);
 				}
 			}
 		}
 		
-		public function removeChild(child:Bone):void 
+		public function removeChild(child:Bone):void
 		{
 			var index:int = _children.indexOf(child);
 			if (index >= 0)
