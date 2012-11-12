@@ -10,6 +10,7 @@ package dragonBones.objects
 		
 		public function SubTextureData()
 		{
+			
 		}
 	}
 }

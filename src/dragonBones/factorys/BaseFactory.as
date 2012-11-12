@@ -15,9 +15,9 @@ package dragonBones.factorys
 	import dragonBones.objects.SkeletonData;
 	import dragonBones.objects.SubTextureData;
 	import dragonBones.objects.TextureAtlasData;
+	import dragonBones.objects.XMLDataParser;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.dragonBones_internal;
-	import dragonBones.utils.uncompressionData;
 	
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
@@ -108,7 +108,7 @@ package dragonBones.factorys
 		
 		public function parseData(bytes:ByteArray):void
 		{
-			var sat:SkeletonAndTextureAtlasData = uncompressionData(bytes);
+			var sat:SkeletonAndTextureAtlasData = XMLDataParser.parseXMLData(bytes);
 			skeletonData = sat.skeletonData;
 			textureAtlasData = sat.textureAtlasData;
 			sat.dispose();

@@ -43,6 +43,74 @@ package dragonBones.objects
 			return result;
 		}
 		
+		public static function compressionData(skeletonXML:XML, textureAtlasXML:XML, byteArray:ByteArray):ByteArray {
+			var byteArrayCopy:ByteArray = new ByteArray();
+			byteArrayCopy.writeBytes(byteArray);
+			
+			var xmlBytes:ByteArray = new ByteArray();
+			xmlBytes.writeUTFBytes(textureAtlasXML.toXMLString());
+			xmlBytes.compress();
+			
+			byteArrayCopy.position = byteArrayCopy.length;
+			byteArrayCopy.writeBytes(xmlBytes);
+			byteArrayCopy.writeInt(xmlBytes.length);
+			
+			xmlBytes.length = 0;
+			xmlBytes.writeUTFBytes(skeletonXML.toXMLString());
+			xmlBytes.compress();
+			
+			byteArrayCopy.position = byteArrayCopy.length;
+			byteArrayCopy.writeBytes(xmlBytes);
+			byteArrayCopy.writeInt(xmlBytes.length);
+			
+			return byteArrayCopy;
+		}
+		
+		public static function parseXMLData(compressedByteArray:ByteArray):SkeletonAndTextureAtlasData 
+		{
+			var dataType:String = BytesType.getType(compressedByteArray);
+			switch(dataType)
+			{
+				case BytesType.SWF:
+				case BytesType.PNG:
+				case BytesType.JPG:
+					try {
+						compressedByteArray.position = compressedByteArray.length - 4;
+						var strSize:int = compressedByteArray.readInt();
+						var position:uint = compressedByteArray.length - 4 - strSize;
+						
+						var xmlBytes:ByteArray = new ByteArray();
+						xmlBytes.writeBytes(compressedByteArray, position, strSize);
+						xmlBytes.uncompress();
+						compressedByteArray.length = position;
+						
+						var skeletonXML:XML = XML(xmlBytes.readUTFBytes(xmlBytes.length));
+						
+						compressedByteArray.position = compressedByteArray.length - 4;
+						strSize = compressedByteArray.readInt();
+						position = compressedByteArray.length - 4 - strSize;
+						
+						xmlBytes.length = 0;
+						xmlBytes.writeBytes(compressedByteArray, position, strSize);
+						xmlBytes.uncompress();
+						compressedByteArray.length = position;
+						var textureAtlasXML:XML = XML(xmlBytes.readUTFBytes(xmlBytes.length));
+					}
+					catch (e:Error)
+					{
+						throw new Error("Uncompression error!");
+					}
+					
+					var sat:SkeletonAndTextureAtlasData = new SkeletonAndTextureAtlasData(skeletonXML, textureAtlasXML, compressedByteArray);
+					return sat;
+				case BytesType.ZIP:
+					throw new Error("Can not uncompression zip!");
+				default:
+					throw new UnknownDataError();
+			}
+			return null;
+		}
+		
 		public static function parseSkeletonData(skeletonXML:XML):SkeletonData
 		{
 			checkSkeletonXMLVersion(skeletonXML);
