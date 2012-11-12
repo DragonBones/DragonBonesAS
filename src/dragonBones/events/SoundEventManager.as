@@ -1,11 +1,12 @@
 package dragonBones.events
 {
 	import flash.errors.IllegalOperationError;
+	import flash.events.EventDispatcher;
 	
 	[Event(name="soundFrame", type="dragonBones.events.SoundEvent")]
 	
 	/**
-	 * 
+	 *
 	 * @author Akdcl
 	 */
 	public final class SoundEventManager extends EventDispatcher

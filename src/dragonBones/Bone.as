@@ -2,10 +2,10 @@ package dragonBones
 {
 	import dragonBones.animation.Tween;
 	import dragonBones.display.IDisplayBridge;
-	import dragonBones.events.EventDispatcher;
 	import dragonBones.objects.BoneData;
 	import dragonBones.objects.Node;
 	import dragonBones.utils.dragonBones_internal;
+	import flash.events.EventDispatcher;
 	
 	import flash.geom.Matrix;
 	
@@ -126,7 +126,6 @@ package dragonBones
 		
 		public function dispose():void
 		{
-			removeEventListeners();
 			for each(var _child:Bone in _children)
 			{
 				_child.dispose();

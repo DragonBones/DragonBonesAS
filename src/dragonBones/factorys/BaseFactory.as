@@ -1,10 +1,9 @@
-package dragonBones.factorys 
+package dragonBones.factorys
 {
 	import dragonBones.Armature;
 	import dragonBones.Bone;
 	import dragonBones.display.NativeDisplayBridge;
 	import dragonBones.display.PivotBitmap;
-	import dragonBones.events.EventDispatcher;
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.BoneData;
@@ -18,6 +17,7 @@ package dragonBones.factorys
 	import dragonBones.objects.XMLDataParser;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.dragonBones_internal;
+	import flash.events.EventDispatcher;
 	
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
@@ -33,16 +33,16 @@ package dragonBones.factorys
 	 *
 	 * @author Akdcl
 	 */
-	public class BaseFactory extends EventDispatcher 
+	public class BaseFactory extends EventDispatcher
 	{
-		public static function getTextureDisplay(textureAtlasData:TextureAtlasData, fullName:String):Object 
+		public static function getTextureDisplay(textureAtlasData:TextureAtlasData, fullName:String):Object
 		{
 			var clip:MovieClip = textureAtlasData.clip;
-			if (clip) 
+			if (clip)
 			{
 				clip.gotoAndStop(clip.totalFrames);
 				clip.gotoAndStop(fullName);
-				if (clip.numChildren > 0) 
+				if (clip.numChildren > 0)
 				{
 					try
 					{
@@ -60,7 +60,7 @@ package dragonBones.factorys
 			else if(textureAtlasData.bitmap)
 			{
 				var subTextureData:SubTextureData = textureAtlasData.getSubTextureData(fullName);
-				if (subTextureData) 
+				if (subTextureData)
 				{
 					var displayBitmap:PivotBitmap = new PivotBitmap(textureAtlasData.bitmap.bitmapData);
 					displayBitmap.smoothing = true;
@@ -78,21 +78,21 @@ package dragonBones.factorys
 		{
 			return _skeletonData;
 		}
-		public function set skeletonData(value:SkeletonData):void 
+		public function set skeletonData(value:SkeletonData):void
 		{
 			_skeletonData = value;
 		}
 		
 		protected var _textureAtlasData:TextureAtlasData;
-		public function get textureAtlasData():TextureAtlasData 
+		public function get textureAtlasData():TextureAtlasData
 		{
 			return _textureAtlasData;
 		}
-		public function set textureAtlasData(value:TextureAtlasData):void 
+		public function set textureAtlasData(value:TextureAtlasData):void
 		{
 			if(_textureAtlasData)
 			{
-				_textureAtlasData.removeEventListeners(Event.COMPLETE);
+				_textureAtlasData.removeEventListener(Event.COMPLETE, textureCompleteHandler);
 			}
 			_textureAtlasData = value;
 			if(_textureAtlasData)
@@ -101,7 +101,7 @@ package dragonBones.factorys
 			}
 		}
 		
-		public function BaseFactory() 
+		public function BaseFactory()
 		{
 			super();
 		}
@@ -116,12 +116,11 @@ package dragonBones.factorys
 		
 		public function dispose():void
 		{
-			removeEventListeners();
 			skeletonData = null;
 			textureAtlasData = null;
 		}
 		
-		public function buildArmature(armatureName:String):Armature 
+		public function buildArmature(armatureName:String):Armature
 		{
 			var armatureData:ArmatureData = skeletonData.getArmatureData(armatureName);
 			if(!armatureData)
@@ -131,11 +130,11 @@ package dragonBones.factorys
 			var animationData:AnimationData = skeletonData.getAnimationData(armatureName);
 			var armature:Armature = generateArmature();
 			armature.name = armatureName;
-			if (armature) 
+			if (armature)
 			{
 				armature.animation.setData(animationData);
 				var boneList:Array = armatureData.boneList;
-				for each(var boneName:String in boneList) 
+				for each(var boneName:String in boneList)
 				{
 					var boneData:BoneData = armatureData.getBoneData(boneName);
 					var bone:Bone = buildBone(boneData);
@@ -148,7 +147,7 @@ package dragonBones.factorys
 			return armature;
 		}
 		
-		protected function generateArmature():Armature 
+		protected function generateArmature():Armature
 		{
 			var display:Sprite = new Sprite();
 			var armature:Armature = new Armature(display);
@@ -167,13 +166,13 @@ package dragonBones.factorys
 			{
 				displayData = boneData.getDisplayDataAt(i);
 				bone.changeDisplay(i);
-				if (displayData.isArmature) 
+				if (displayData.isArmature)
 				{
 					var childArmature:Armature = buildArmature(displayData.name);
 					childArmature.animation.play();
 					bone.display = childArmature;
 				}
-				else 
+				else
 				{
 					bone.display = getBoneTextureDisplay(displayData.name);
 				}
@@ -186,7 +185,7 @@ package dragonBones.factorys
 			return getTextureDisplay(_textureAtlasData, textureName);
 		}
 		
-		protected function generateBone():Bone 
+		protected function generateBone():Bone
 		{
 			var bone:Bone = new Bone(new NativeDisplayBridge());
 			return bone;

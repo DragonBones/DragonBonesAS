@@ -1,7 +1,7 @@
 package dragonBones.objects
 {
-	import dragonBones.events.EventDispatcher;
 	import dragonBones.utils.dragonBones_internal;
+	import flash.events.EventDispatcher;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -65,7 +65,7 @@ package dragonBones.objects
 		private var _bitmap:Bitmap;
 		public function get bitmap():Bitmap
 		{
-			if (!_bitmap && clip) 
+			if (!_bitmap && clip)
 			{
 				clip.gotoAndStop(1);
 				_bitmap = new Bitmap();
@@ -83,7 +83,6 @@ package dragonBones.objects
 		
 		public function dispose():void
 		{
-			removeEventListeners();
 			_clip = null;
 			
 			if(_bitmap && _bitmap.bitmapData)
@@ -110,7 +109,7 @@ package dragonBones.objects
 			_subTextureDatas = null;
 		}
 		
-		public function getSubTextureData(name:String):SubTextureData 
+		public function getSubTextureData(name:String):SubTextureData
 		{
 			return _subTextureDatas[name];
 		}
@@ -142,7 +141,7 @@ package dragonBones.objects
 			var content:Object = e.target.content;
 			loader.unloadAndStop();
 			
-			if (content is Bitmap) 
+			if (content is Bitmap)
 			{
 				_bitmap = content as Bitmap;
 			}
@@ -159,7 +158,6 @@ package dragonBones.objects
 			{
 				dispatchEvent(new Event(Event.COMPLETE));
 			}
-			removeEventListeners(Event.COMPLETE);
 		}
 	}
 }

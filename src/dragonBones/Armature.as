@@ -1,8 +1,8 @@
 package dragonBones
 {
 	import dragonBones.animation.Animation;
-	import dragonBones.events.EventDispatcher;
 	import dragonBones.utils.dragonBones_internal;
+	import flash.events.EventDispatcher;
 	
 	use namespace dragonBones_internal;
 	
@@ -53,7 +53,6 @@ package dragonBones
 		
 		public function dispose():void
 		{
-			removeEventListeners();
 			for each(var bone:Bone in _rootBoneList)
 			{
 				bone.dispose();
