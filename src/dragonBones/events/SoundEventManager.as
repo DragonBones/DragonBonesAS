@@ -2,24 +2,27 @@ package dragonBones.events
 {
 	import flash.errors.IllegalOperationError;
 	
+	[Event(name="soundFrame", type="dragonBones.events.SoundEvent")]
+	
 	/**
 	 * 
 	 * @author Akdcl
 	 */
 	public final class SoundEventManager extends EventDispatcher
 	{
-		private static var instance:SoundEventManager;
-		public static function getInstance():SoundEventManager{
-			if(!instance){
-				instance = new SoundEventManager();
+		private static var _instance:SoundEventManager;
+		public static function getInstance():SoundEventManager
+		{
+			if(!_instance){
+				_instance = new SoundEventManager();
 			}
-			return instance;
+			return _instance;
 		}
 		
 		public function SoundEventManager()
 		{
 			super();
-			if (instance) {
+			if (_instance) {
 				throw new IllegalOperationError("Singleton already constructed!");
 			}
 		}

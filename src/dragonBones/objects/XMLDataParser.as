@@ -1,14 +1,32 @@
 package dragonBones.objects
 {
+	import dragonBones.errors.UnknownDataError;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.TransfromUtils;
 	import dragonBones.utils.dragonBones_internal;
+	import dragonBones.utils.BytesType;
+	
+	import flash.utils.ByteArray;
+	import flash.display.Loader;
+	import flash.events.Event;
+	import flash.system.LoaderContext;
 	
 	use namespace dragonBones_internal;
 	
 	public class XMLDataParser
 	{
 		private static var helpNode:Node = new Node();
+		
+		private static function checkSkeletonXMLVersion(skeletonXML:XML):void
+		{
+			var version:String = skeletonXML.attribute(ConstValues.A_VERSION);
+			switch(version){
+				case ConstValues.VERSION:
+					break;
+				default:
+					throw new Error("Nonsupport data version!");
+			}
+		}
 		
 		public static function getElementByAttribute(xmlList:XMLList, attribute:String, value:String):XMLList
 		{
@@ -27,6 +45,8 @@ package dragonBones.objects
 		
 		public static function parseSkeletonData(skeletonXML:XML):SkeletonData
 		{
+			checkSkeletonXMLVersion(skeletonXML);
+			
 			var skeletonData:SkeletonData = new SkeletonData();
 			skeletonData._name = skeletonXML.attribute(ConstValues.A_NAME);
 			
@@ -280,5 +300,57 @@ package dragonBones.objects
 			
 			return frameData;
 		}
+		
+		public static function parseTextureAtlasData(textureAtlasXML:XML, textureBytes:ByteArray):TextureAtlasData
+		{
+			var textureAtlasData:TextureAtlasData = new TextureAtlasData();
+			textureAtlasData._name = textureAtlasXML.attribute(ConstValues.A_NAME);
+			textureAtlasData._width = int(textureAtlasXML.attribute(ConstValues.A_WIDTH));
+			textureAtlasData._height = int(textureAtlasXML.attribute(ConstValues.A_HEIGHT));
+			
+			
+			for each(var subTextureXML:XML in textureAtlasXML.elements(ConstValues.SUB_TEXTURE))
+			{
+				var subTextureData:SubTextureData = parseSubTextureData(subTextureXML);
+				textureAtlasData.addSubTextureData(subTextureData);
+			}
+			
+			var dataType:String = BytesType.getType(textureBytes);
+			textureAtlasData._dataType = dataType;
+			
+			switch(dataType)
+			{
+				case BytesType.SWF:
+				case BytesType.PNG:
+				case BytesType.JPG:
+					var loader:Loader = new Loader();
+					var loaderContext:LoaderContext = new LoaderContext(false);
+					loaderContext.allowCodeImport = true;
+					loader.contentLoaderInfo.addEventListener(Event.COMPLETE, textureAtlasData.loaderCompleteHandler);
+					loader.loadBytes(textureBytes, loaderContext);
+					break;
+				case BytesType.ATF:
+					textureAtlasData.completeHandler();
+					break;
+				default:
+					throw new UnknownDataError();
+					break;
+			}
+			return textureAtlasData;
+		}
+		
+		public static function parseSubTextureData(subTextureXML:XML):SubTextureData
+		{
+			var subTextureData:SubTextureData = new SubTextureData();
+			subTextureData.name = subTextureXML.attribute(ConstValues.A_NAME);
+			subTextureData.x = int(subTextureXML.attribute(ConstValues.A_X));
+			subTextureData.y = int(subTextureXML.attribute(ConstValues.A_Y));
+			subTextureData.width = int(subTextureXML.attribute(ConstValues.A_WIDTH));
+			subTextureData.height = int(subTextureXML.attribute(ConstValues.A_HEIGHT));
+			subTextureData.pivotX = int(subTextureXML.attribute(ConstValues.A_PIVOT_X));
+			subTextureData.pivotY = int(subTextureXML.attribute(ConstValues.A_PIVOT_Y));
+			return subTextureData;
+		}
 	}
+	
 }

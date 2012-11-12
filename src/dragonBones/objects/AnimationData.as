@@ -1,6 +1,5 @@
 package dragonBones.objects
 {
-	import dragonBones.utils.ConstValues;
 	
 	/**
 	 * ...

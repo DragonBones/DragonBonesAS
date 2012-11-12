@@ -2,7 +2,8 @@ package dragonBones.animation
 {
 	import dragonBones.Armature;
 	import dragonBones.Bone;
-	import dragonBones.events.Event;
+	import dragonBones.events.FrameEvent;
+	import dragonBones.events.SoundEvent;
 	import dragonBones.events.SoundEventManager;
 	import dragonBones.objects.FrameData;
 	import dragonBones.objects.MovementBoneData;
@@ -246,6 +247,25 @@ package dragonBones.animation
 					}
 				}
 				_bone.changeDisplay(displayIndex);
+				
+				if(_currentKeyFrame.event && _bone._armature.hasEventListener(FrameEvent.BONE_FRAME_EVENT))
+				{
+					
+					var frameEvent:FrameEvent = new FrameEvent(FrameEvent.BONE_FRAME_EVENT);
+					frameEvent.movementID = _bone._armature.animation.movementID;
+					frameEvent.frameLabel = _currentKeyFrame.event;
+					frameEvent._bone = _bone;
+					_bone._armature.dispatchEvent(frameEvent);
+				}
+				if(_currentKeyFrame.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
+				{
+					var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
+					soundEvent.movementID = _bone._armature.animation.movementID;
+					soundEvent.sound = _currentKeyFrame.sound;
+					soundEvent._armature = _bone._armature;
+					soundEvent._bone = _bone;
+					_soundManager.dispatchEvent(soundEvent);
+				}
 				if(_currentKeyFrame.movement)
 				{
 					var childAramture:Armature = _bone.childArmature;
@@ -253,15 +273,6 @@ package dragonBones.animation
 					{
 						childAramture.animation.gotoAndPlay(_currentKeyFrame.movement);
 					}
-				}
-				
-				if(_currentKeyFrame.event)
-				{
-					_bone.dispatchEventWith(Event.BONE_EVENT_FRAME, _currentKeyFrame.event);
-				}
-				if(_currentKeyFrame.sound)
-				{
-					_soundManager.dispatchEventWith(Event.SOUND_FRAME, _currentKeyFrame.sound);
 				}
 				_currentKeyFrame = null;
 			}

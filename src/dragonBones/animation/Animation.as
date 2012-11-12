@@ -3,7 +3,9 @@ package dragonBones.animation
 	
 	import dragonBones.Armature;
 	import dragonBones.Bone;
-	import dragonBones.events.Event;
+	import dragonBones.events.AnimationEvent;
+	import dragonBones.events.FrameEvent;
+	import dragonBones.events.SoundEvent;
 	import dragonBones.events.SoundEventManager;
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.MovementBoneData;
@@ -79,6 +81,7 @@ package dragonBones.animation
 			_currentFrameData = null;
 			_toIndex = 0;
 			_movementData = movementData;
+			var exMovementID:String = this.movementID;
 			this.movementID = movementID as String;
 			
 			durationTo = durationTo < 0?_movementData.durationTo:durationTo;
@@ -125,7 +128,13 @@ package dragonBones.animation
 				}
 			}
 			
-			_armature.dispatchEventWith(Event.MOVEMENT_CHANGE, movementID);
+			if(_armature.hasEventListener(AnimationEvent.MOVEMENT_CHANGE))
+			{
+				var event:AnimationEvent = new AnimationEvent(AnimationEvent.MOVEMENT_CHANGE);
+				event.exMovementID = exMovementID;
+				event.movementID = this.movementID;
+				_armature.dispatchEvent(event);
+			}
 		}
 		
 		override public function play():void 
@@ -166,6 +175,7 @@ package dragonBones.animation
 		
 		override protected function updateHandler():void 
 		{
+			var event:AnimationEvent;
 			if (_currentPrecent >= 1) 
 			{
 				switch(_loop) 
@@ -180,27 +190,47 @@ package dragonBones.animation
 						else
 						{
 							_totalFrames = _durationTween;
-							_armature.dispatchEventWith(Event.START, movementID);
+							if(_armature.hasEventListener(AnimationEvent.START))
+							{
+								event = new AnimationEvent(AnimationEvent.START);
+								event.movementID = movementID;
+								_armature.dispatchEvent(event);
+							}
 							break;
 						}
 					case LIST:
 					case SINGLE:
 						_currentPrecent = 1;
 						_isComplete = true;
-						_armature.dispatchEventWith(Event.COMPLETE, movementID);
+						if(_armature.hasEventListener(AnimationEvent.COMPLETE))
+						{
+							event = new AnimationEvent(AnimationEvent.COMPLETE);
+							event.movementID = movementID;
+							_armature.dispatchEvent(event);
+						}
 						break;
 					case LIST_LOOP_START:
 						_loop = 0;
 						_totalFrames = _durationTween > 0?_durationTween:1;
 						_currentPrecent %= 1;
-						_armature.dispatchEventWith(Event.START, movementID);
+						if(_armature.hasEventListener(AnimationEvent.START))
+						{
+							event = new AnimationEvent(AnimationEvent.START);
+							event.movementID = movementID;
+							_armature.dispatchEvent(event);
+						}
 						break;
 					default:
 						//change the loop
 						_loop += int(_currentPrecent);
 						_currentPrecent %= 1;
 						_toIndex = 0;
-						_armature.dispatchEventWith(Event.LOOP_COMPLETE, movementID);
+						if(_armature.hasEventListener(AnimationEvent.LOOP_COMPLETE))
+						{
+							event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
+							event.movementID = movementID;
+							_armature.dispatchEvent(event);
+						}
 						break;
 				}
 			}
@@ -233,13 +263,20 @@ package dragonBones.animation
 						break;
 					}
 				}
-				if(_currentFrameData.event)
+				if(_currentFrameData.event && _armature.hasEventListener(FrameEvent.MOVEMENT_FRAME_EVENT))
 				{
-					_armature.dispatchEventWith(Event.MOVEMENT_EVENT_FRAME, _currentFrameData.event);
+					var frameEvent:FrameEvent = new FrameEvent(FrameEvent.MOVEMENT_FRAME_EVENT);
+					frameEvent.movementID = movementID;
+					frameEvent.frameLabel = _currentFrameData.event;
+					_armature.dispatchEvent(frameEvent);
 				}
-				if(_currentFrameData.sound)
+				if(_currentFrameData.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
 				{
-					_soundManager.dispatchEventWith(Event.SOUND_FRAME, _currentFrameData.sound);
+					var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
+					soundEvent.movementID = movementID;
+					soundEvent.sound = _currentFrameData.sound;
+					soundEvent._armature = _armature;
+					_soundManager.dispatchEvent(soundEvent);
 				}
 				if(_currentFrameData.movement)
 				{

@@ -6,17 +6,17 @@ package dragonBones
 	
 	use namespace dragonBones_internal;
 	
-	[Event(name="movementChange", type="dragonBones.events.Event")]
+	[Event(name="movementChange", type="dragonBones.events.AnimationEvent")]
 	
-	[Event(name="start", type="dragonBones.events.Event")]
+	[Event(name="animationStart", type="dragonBones.events.AnimationEvent")]
 	
-	[Event(name="complete", type="dragonBones.events.Event")]
+	[Event(name="movementComplete", type="dragonBones.events.AnimationEvent")]
 	
-	[Event(name="loopComplete", type="dragonBones.events.Event")]
+	[Event(name="movementLoopComplete", type="dragonBones.events.AnimationEvent")]
 	
-	[Event(name="movementEventFrame", type="dragonBones.events.Event")]
+	[Event(name="movementFrameEvent", type="dragonBones.events.FrameEvent")]
 	
-	[Event(name="boneEventFrame", type="dragonBones.events.Event")]
+	[Event(name="boneFrameEvent", type="dragonBones.events.FrameEvent")]
 	
 	/**
 	 * 

@@ -1,14 +1,11 @@
 ﻿package dragonBones.factorys 
 {
-	import flash.geom.Matrix;
-	import flash.geom.Rectangle;
-	
 	import dragonBones.Armature;
 	import dragonBones.Bone;
 	import dragonBones.display.StarlingDisplayBridge;
 	import dragonBones.objects.Node;
-	import dragonBones.objects.SkeletonData;
-	import dragonBones.objects.TextureData;
+	import dragonBones.objects.SubTextureData;
+	import dragonBones.objects.TextureAtlasData;
 	import dragonBones.utils.BytesType;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.dragonBones_internal;
@@ -26,37 +23,31 @@
 	 */
 	public class StarlingFactory extends BaseFactory 
 	{
-		public static function getTextureDisplay(textureData:TextureData, fullName:String):Image 
+		public static function getTextureDisplay(textureAtlasData:TextureAtlasData, fullName:String):Image 
 		{
-			var subTextureXML:XML = textureData.getSubTextureXML(fullName);
-			if (subTextureXML) 
+			var subTextureData:SubTextureData = textureAtlasData.getSubTextureData(fullName);
+			if (subTextureData) 
 			{
-				var subTexture:SubTexture = textureData.subTextures[fullName];
+				var subTexture:SubTexture = textureAtlasData.getStarlingSubTexture(fullName) as SubTexture;
 				if(!subTexture)
 				{
-					var rect:Rectangle = new Rectangle(
-						int(subTextureXML.attribute(ConstValues.A_X)),
-						int(subTextureXML.attribute(ConstValues.A_Y)),
-						int(subTextureXML.attribute(ConstValues.A_WIDTH)),
-						int(subTextureXML.attribute(ConstValues.A_HEIGHT))
-					);
-					subTexture = new SubTexture(textureData.texture as Texture, rect);
-					textureData.subTextures[fullName] = subTexture;
+					subTexture = new SubTexture(textureAtlasData._starlingTexture as Texture, subTextureData);
+					textureAtlasData.addStarlingSubTexture(fullName, subTexture);
 				}
 				var image:Image = new Image(subTexture);
-				image.pivotX = int(subTextureXML.attribute(ConstValues.A_PIVOT_X));
-				image.pivotY = int(subTextureXML.attribute(ConstValues.A_PIVOT_Y));
+				image.pivotX = subTextureData.pivotX;
+				image.pivotY = subTextureData.pivotY;
 				return image;
 			}
 			return null;
 		}
 		
-		override public function set textureData(value:TextureData):void
+		override public function set textureAtlasData(value:TextureAtlasData):void
 		{
-			super.textureData = value;
-			if(_textureData)
+			super.textureAtlasData = value;
+			if(_textureAtlasData)
 			{
-				_textureData.bitmap;
+				_textureAtlasData.bitmap;
 			}
 		}
 		
@@ -69,19 +60,19 @@
 		
 		override protected function generateArmature():Armature 
 		{
-			if (!textureData.texture) 
+			if (!textureAtlasData._starlingTexture) 
 			{
-				if(textureData.dataType == BytesType.ATF)
+				if(textureAtlasData.dataType == BytesType.ATF)
 				{
-					textureData.texture = Texture.fromAtfData(textureData.rawData);
+					textureAtlasData._starlingTexture = Texture.fromAtfData(textureAtlasData.rawData);
 				}
 				else
 				{
-					textureData.texture = Texture.fromBitmap(textureData.bitmap);
+					textureAtlasData._starlingTexture = Texture.fromBitmap(textureAtlasData.bitmap);
 					//no need to keep the bitmapData
 					if (autoDisposeBitmapData) 
 					{
-						textureData.bitmap.bitmapData.dispose();
+						textureAtlasData.bitmap.bitmapData.dispose();
 					}
 				}
 			}
@@ -98,7 +89,7 @@
 		
 		override protected function getBoneTextureDisplay(textureName:String):Object
 		{
-			return getTextureDisplay(_textureData, textureName);
+			return getTextureDisplay(_textureAtlasData, textureName);
 		}
 	}
 }

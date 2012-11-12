@@ -4,7 +4,6 @@ package dragonBones.factorys
 	import dragonBones.Bone;
 	import dragonBones.display.NativeDisplayBridge;
 	import dragonBones.display.PivotBitmap;
-	import dragonBones.events.Event;
 	import dragonBones.events.EventDispatcher;
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.ArmatureData;
@@ -12,25 +11,23 @@ package dragonBones.factorys
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.FrameData;
 	import dragonBones.objects.Node;
-	import dragonBones.objects.SkeletonAndTextureRawData;
+	import dragonBones.objects.SkeletonAndTextureAtlasData;
 	import dragonBones.objects.SkeletonData;
-	import dragonBones.objects.TextureData;
-	import dragonBones.objects.XMLDataParser;
+	import dragonBones.objects.SubTextureData;
+	import dragonBones.objects.TextureAtlasData;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.dragonBones_internal;
 	import dragonBones.utils.uncompressionData;
 	
-	import flash.display.Bitmap;
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
-	import flash.geom.Matrix;
-	import flash.geom.Rectangle;
+	import flash.events.Event;
 	import flash.utils.ByteArray;
 	
 	use namespace dragonBones_internal;
 	
 	/** Dispatched when the textureData init completed. */
-	[Event(name="textureComplete", type="dragonBones.events.Event")]
+	[Event(name="complete", type="flash.events.Event")]
 	
 	/**
 	 *
@@ -38,9 +35,9 @@ package dragonBones.factorys
 	 */
 	public class BaseFactory extends EventDispatcher 
 	{
-		public static function getTextureDisplay(textureData:TextureData, fullName:String):Object 
+		public static function getTextureDisplay(textureAtlasData:TextureAtlasData, fullName:String):Object 
 		{
-			var clip:MovieClip = textureData.clip;
+			var clip:MovieClip = textureAtlasData.clip;
 			if (clip) 
 			{
 				clip.gotoAndStop(clip.totalFrames);
@@ -60,22 +57,16 @@ package dragonBones.factorys
 					}
 				}
 			}
-			else if(textureData.bitmap)
+			else if(textureAtlasData.bitmap)
 			{
-				var subTextureXML:XML = textureData.getSubTextureXML(fullName);
-				if (subTextureXML) 
+				var subTextureData:SubTextureData = textureAtlasData.getSubTextureData(fullName);
+				if (subTextureData) 
 				{
-					var rect:Rectangle = new Rectangle(
-						int(subTextureXML.attribute(ConstValues.A_X)),
-						int(subTextureXML.attribute(ConstValues.A_Y)),
-						int(subTextureXML.attribute(ConstValues.A_WIDTH)),
-						int(subTextureXML.attribute(ConstValues.A_HEIGHT))
-					);
-					var displayBitmap:PivotBitmap = new PivotBitmap(textureData.bitmap.bitmapData);
+					var displayBitmap:PivotBitmap = new PivotBitmap(textureAtlasData.bitmap.bitmapData);
 					displayBitmap.smoothing = true;
-					displayBitmap.scrollRect = rect;
-					displayBitmap.pivotX = int(subTextureXML.attribute(ConstValues.A_PIVOT_X));
-					displayBitmap.pivotY = int(subTextureXML.attribute(ConstValues.A_PIVOT_Y));
+					displayBitmap.scrollRect = subTextureData;
+					displayBitmap.pivotX = subTextureData.pivotX;
+					displayBitmap.pivotY = subTextureData.pivotY;
 					return displayBitmap;
 				}
 			}
@@ -92,21 +83,21 @@ package dragonBones.factorys
 			_skeletonData = value;
 		}
 		
-		protected var _textureData:TextureData;
-		public function get textureData():TextureData 
+		protected var _textureAtlasData:TextureAtlasData;
+		public function get textureAtlasData():TextureAtlasData 
 		{
-			return _textureData;
+			return _textureAtlasData;
 		}
-		public function set textureData(value:TextureData):void 
+		public function set textureAtlasData(value:TextureAtlasData):void 
 		{
-			if(_textureData)
+			if(_textureAtlasData)
 			{
-				_textureData.removeEventListener(Event.TEXTURE_COMPLETE, textureCompleteHandler);
+				_textureAtlasData.removeEventListeners(Event.COMPLETE);
 			}
-			_textureData = value;
-			if(_textureData)
+			_textureAtlasData = value;
+			if(_textureAtlasData)
 			{
-				_textureData.addEventListener(Event.TEXTURE_COMPLETE, textureCompleteHandler);
+				_textureAtlasData.addEventListener(Event.COMPLETE, textureCompleteHandler);
 			}
 		}
 		
@@ -115,11 +106,11 @@ package dragonBones.factorys
 			super();
 		}
 		
-		public function parseData(bytes:ByteArray, completeCallback:Function = null):void
+		public function parseData(bytes:ByteArray):void
 		{
-			var sat:SkeletonAndTextureRawData = uncompressionData(bytes);
-			skeletonData = XMLDataParser.parseSkeletonData(sat.skeletonXML);
-			textureData = new TextureData(sat.textureAtlasXML, sat.textureBytes, completeCallback);
+			var sat:SkeletonAndTextureAtlasData = uncompressionData(bytes);
+			skeletonData = sat.skeletonData;
+			textureAtlasData = sat.textureAtlasData;
 			sat.dispose();
 		}
 		
@@ -127,7 +118,7 @@ package dragonBones.factorys
 		{
 			removeEventListeners();
 			skeletonData = null;
-			textureData = null;
+			textureAtlasData = null;
 		}
 		
 		public function buildArmature(armatureName:String):Armature 
@@ -192,7 +183,7 @@ package dragonBones.factorys
 		
 		protected function getBoneTextureDisplay(textureName:String):Object
 		{
-			return getTextureDisplay(_textureData, textureName);
+			return getTextureDisplay(_textureAtlasData, textureName);
 		}
 		
 		protected function generateBone():Bone 
