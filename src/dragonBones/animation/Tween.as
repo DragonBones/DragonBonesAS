@@ -110,6 +110,7 @@ package dragonBones.animation
 				_durationTween = durationTween * _movementBoneData.scale;
 				if (loop && _movementBoneData.delay != 0) 
 				{
+					_tweenEasing = 2;
 					setBetween(_node, tweenNodeTo(updateFrameData(1 -_movementBoneData.delay), _between));
 				}
 				else 
