@@ -385,7 +385,7 @@ package dragonBones.objects
 			
 			var dataType:String = BytesType.getType(textureBytes);
 			textureAtlasData._dataType = dataType;
-			
+			textureAtlasData._rawData = textureBytes;
 			switch(dataType)
 			{
 				case BytesType.SWF:
