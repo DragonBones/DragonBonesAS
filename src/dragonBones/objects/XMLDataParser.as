@@ -28,7 +28,7 @@ package dragonBones.objects
 			}
 		}
 		
-		public static function getElementByAttribute(xmlList:XMLList, attribute:String, value:String):XMLList
+		private static function getElementByAttribute(xmlList:XMLList, attribute:String, value:String):XMLList
 		{
 			var result:XMLList = new XMLList();
 			var length:uint = xmlList.length();
@@ -132,7 +132,7 @@ package dragonBones.objects
 			return skeletonData;
 		}
 		
-		public static function parseAramtureData(armatureXML:XML):ArmatureData
+		private static function parseAramtureData(armatureXML:XML):ArmatureData
 		{
 			var aramtureData:ArmatureData = new ArmatureData();
 			aramtureData._name = armatureXML.attribute(ConstValues.A_NAME);
@@ -152,7 +152,7 @@ package dragonBones.objects
 			return aramtureData;
 		}
 		
-		public static function parseBoneData(boneXML:XML, parentXML:XML, boneData:BoneData = null):BoneData
+		dragonBones_internal static function parseBoneData(boneXML:XML, parentXML:XML, boneData:BoneData = null):BoneData
 		{
 			if(!boneData){
 				boneData = new BoneData();
@@ -191,7 +191,7 @@ package dragonBones.objects
 			return boneData;
 		}
 		
-		public static function parseDisplayData(displayXML:XML, displayData:DisplayData = null):DisplayData
+		private static function parseDisplayData(displayXML:XML, displayData:DisplayData = null):DisplayData
 		{
 			if(!displayData)
 			{
@@ -202,7 +202,7 @@ package dragonBones.objects
 			return displayData;
 		}
 		
-		public static function parseAnimationData(animationXML:XML, skeletonData:SkeletonData):AnimationData
+		dragonBones_internal static function parseAnimationData(animationXML:XML, skeletonData:SkeletonData):AnimationData
 		{
 			var animationName:String = animationXML.attribute(ConstValues.A_NAME);
 			var animationData:AnimationData = skeletonData.getAnimationData(animationName);
@@ -223,7 +223,7 @@ package dragonBones.objects
 			return animationData;
 		}
 		
-		public static function parseMovementData(movementXML:XML, armatureData:ArmatureData, movementData:MovementData = null):MovementData
+		private static function parseMovementData(movementXML:XML, armatureData:ArmatureData, movementData:MovementData = null):MovementData
 		{
 			if(!movementData){
 				movementData = new MovementData();
@@ -262,7 +262,7 @@ package dragonBones.objects
 			return movementData;
 		}
 		
-		public static function parseMovementBoneData(movementBoneXML:XML, parentXML:XML, boneData:BoneData, movementBoneData:MovementBoneData = null):MovementBoneData
+		private static function parseMovementBoneData(movementBoneXML:XML, parentXML:XML, boneData:BoneData, movementBoneData:MovementBoneData = null):MovementBoneData
 		{
 			if(!movementBoneData){
 				movementBoneData = new MovementBoneData();
@@ -308,7 +308,7 @@ package dragonBones.objects
 			return movementBoneData;
 		}
 		
-		public static function parseMovementFrameData(movementFrameXML:XML, movementFrameData:MovementFrameData = null):MovementFrameData
+		private static function parseMovementFrameData(movementFrameXML:XML, movementFrameData:MovementFrameData = null):MovementFrameData
 		{
 			if(!movementFrameData){
 				movementFrameData = new MovementFrameData();
@@ -324,7 +324,7 @@ package dragonBones.objects
 			return movementFrameData;
 		}
 	
-		public static function parseFrameData(frameXML:XML, parentFrameXML:XML, boneData:BoneData, frameData:FrameData = null):FrameData
+		private static function parseFrameData(frameXML:XML, parentFrameXML:XML, boneData:BoneData, frameData:FrameData = null):FrameData
 		{
 			if(!frameData){
 				frameData = new FrameData();
@@ -407,7 +407,7 @@ package dragonBones.objects
 			return textureAtlasData;
 		}
 		
-		public static function parseSubTextureData(subTextureXML:XML):SubTextureData
+		private static function parseSubTextureData(subTextureXML:XML):SubTextureData
 		{
 			var subTextureData:SubTextureData = new SubTextureData();
 			subTextureData.name = subTextureXML.attribute(ConstValues.A_NAME);
