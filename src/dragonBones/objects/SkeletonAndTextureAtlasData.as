@@ -10,10 +10,15 @@ package dragonBones.objects
 		public var skeletonData:SkeletonData;
 		public var textureAtlasData:TextureAtlasData;
 		
-		public function SkeletonAndTextureAtlasData(skeletonXML:XML, textureAllasXML:XML, textureBytes:ByteArray)
+		public var skeletonXML:XML;
+		public var textureAtlasXML:XML;
+		
+		public function SkeletonAndTextureAtlasData(skeletonXML:XML, textureAtlasXML:XML, textureBytes:ByteArray)
 		{
+			this.skeletonXML = skeletonXML;
+			this.textureAtlasXML = textureAtlasXML;
 			skeletonData = XMLDataParser.parseSkeletonData(skeletonXML);
-			textureAtlasData = XMLDataParser.parseTextureAtlasData(textureAllasXML, textureBytes);
+			textureAtlasData = XMLDataParser.parseTextureAtlasData(textureAtlasXML, textureBytes);
 		}
 		
 		public function dispose():void{

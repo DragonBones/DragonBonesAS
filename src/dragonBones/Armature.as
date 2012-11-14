@@ -60,7 +60,7 @@ package dragonBones
 			
 			animation.dispose();
 			animation = null;
-			_display = null;
+			//_display = null;
 			
 			_boneDepthList = null;
 			_rootBoneList = null;

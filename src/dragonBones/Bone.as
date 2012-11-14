@@ -142,7 +142,7 @@ package dragonBones
 			_globalTransformMatrix = null;
 			_transformMatrixForChildren = null;
 			
-			_displayBridge = null;
+			//_displayBridge = null;
 			_displayList = null;
 			
 			_tween = null;
