@@ -11,7 +11,7 @@ Following steps show you how to use the source code:
 4. Import starling.swc into the project.
 5. Build project and have fun.
 
-There are some demos in [SkeletonAnimationDemos](https://github.com/DragonBones/SkeletonAnimationLibrary) project shows how to use the library
+There are some demos in [SkeletonAnimationDemos](https://github.com/DragonBones/SkeletonAnimationDemos) project shows how to use the library
 
 **All things you need to download can be found [here](http://dragonbones.github.com/download.html)**  
 
