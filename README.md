@@ -1,15 +1,18 @@
-Skeleton Animation Framework
-========
+SkeletonAnimationLibrary
+======================
+http://dragonbones.github.com/ 
 
-This is a 2D skeleton animation framwork. It's defined for common 2D display engines so you can easily extend it. Now it supports the Flash Runtime's Display List System and the Starling framework. It's high performance, flexible and memory-saving. To simplify the work flow, we aslo provide a plug-in for FLash Pro which can help you to build these animations. You can get it from https://github.com/DragonBones/SkeletonDesignPanel.
+In this project you can find the source code of DragonBones' skeleton animation library, which is a framework support rendering characters with skeleton animation by parse assets exported from SkeletonAnimationDesignPanel.
 
-These are some demos for a quick view:
+Following steps show you how to use the source code:
+1. Make sure you have got starling.swc v1.2 or later version. 
+2. Make sure you have installed some Flash IDE such as Flash Builder.
+3. Create a ActionScript Library project and include the source code.
+4. Import starling.swc into the project.
+5. Build project and have fun.
 
-http://akdcl.sinaapp.com/example.html
-http://dragonbones.github.com
+There are some demos in [SkeletonAnimationDemos](https://github.com/DragonBones/SkeletonAnimationDemos) project shows how to use the library
 
+**All things you need to download can be found [here](http://dragonbones.github.com/download.html)**  
 
-For more information, please visit:
-https://github.com/DragonBones/SkeletonAnimationFramework/wiki
-
-Copyright 2012 The DragonBones Team
+Copyright 2012 the DragonBones Team
