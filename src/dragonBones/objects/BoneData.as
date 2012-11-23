@@ -1,10 +1,7 @@
 package dragonBones.objects
 {
 	
-	/**
-	 * ...
-	 * @author Akdcl
-	 */
+	/** @private */
 	final public class BoneData extends Node
 	{
 		internal var _displayList:Vector.<DisplayData>;
@@ -26,7 +23,7 @@ package dragonBones.objects
 			return _displayList.length;
 		}
 		
-		public function BoneData() 
+		public function BoneData()
 		{
 			super();
 			_displayList = new Vector.<DisplayData>;

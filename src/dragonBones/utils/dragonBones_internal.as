@@ -1,9 +1,6 @@
-package dragonBones.utils 
+package dragonBones.utils
 {
 	
-	/**
-	 * ...
-	 * @author Akdcl
-	 */
+	/** @private */
 	public namespace dragonBones_internal;
 }

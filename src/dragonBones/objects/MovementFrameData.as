@@ -1,5 +1,6 @@
 package dragonBones.objects
 {
+	/** @private */
 	public class MovementFrameData
 	{
 		public var start:int;

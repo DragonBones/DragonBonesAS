@@ -1,4 +1,4 @@
-﻿package dragonBones.factorys 
+﻿package dragonBones.factorys
 {
 	import dragonBones.Armature;
 	import dragonBones.Bone;
@@ -18,15 +18,16 @@
 	use namespace dragonBones_internal;
 	
 	/**
-	 *
-	 * @author Akdcl
+	 * A object managing the set of armature resources for Starling engine. It parses the raw data, stores the armature resources and creates armature instrances.
+	 * @see dragonBones.Armature
 	 */
-	public class StarlingFactory extends BaseFactory 
+	public class StarlingFactory extends BaseFactory
 	{
-		public static function getTextureDisplay(textureAtlasData:TextureAtlasData, fullName:String):Image 
+		/** @private */
+		public static function getTextureDisplay(textureAtlasData:TextureAtlasData, fullName:String):Image
 		{
 			var subTextureData:SubTextureData = textureAtlasData.getSubTextureData(fullName);
-			if (subTextureData) 
+			if (subTextureData)
 			{
 				var subTexture:SubTexture = textureAtlasData.getStarlingSubTexture(fullName) as SubTexture;
 				if(!subTexture)
@@ -43,6 +44,9 @@
 			return null;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override public function set textureAtlasData(value:TextureAtlasData):void
 		{
 			super.textureAtlasData = value;
@@ -51,17 +55,22 @@
 				_textureAtlasData.bitmap;
 			}
 		}
-		
+		/**
+		 * Specifies whether this object disposes bitmap data.
+		 */
 		public var autoDisposeBitmapData:Boolean = true;
 		
-		public function StarlingFactory() 
+		/**
+		 * Creates a new <code>StarlingFactory</code>
+		 */
+		public function StarlingFactory()
 		{
 			super();
 		}
 		
-		override protected function generateArmature():Armature 
+		override protected function generateArmature():Armature
 		{
-			if (!textureAtlasData._starlingTexture) 
+			if (!textureAtlasData._starlingTexture)
 			{
 				if(textureAtlasData.dataType == BytesType.ATF)
 				{
@@ -71,7 +80,7 @@
 				{
 					textureAtlasData._starlingTexture = Texture.fromBitmap(textureAtlasData.bitmap);
 					//no need to keep the bitmapData
-					if (autoDisposeBitmapData) 
+					if (autoDisposeBitmapData)
 					{
 						textureAtlasData.bitmap.bitmapData.dispose();
 					}
@@ -82,7 +91,7 @@
 			return armature;
 		}
 		
-		override protected function generateBone():Bone 
+		override protected function generateBone():Bone
 		{
 			var bone:Bone = new Bone(new StarlingDisplayBridge());
 			return bone;

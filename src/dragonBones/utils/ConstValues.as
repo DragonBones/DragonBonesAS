@@ -2,10 +2,7 @@ package dragonBones.utils {
 	
 	import flash.utils.ByteArray;
 	
-	/**
-	 * ...
-	 * @author Akdcl
-	 */
+	/** @private */
 	final public class ConstValues {
 		public static const VERSION:String = "1.4";
 		

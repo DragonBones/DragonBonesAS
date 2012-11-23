@@ -16,8 +16,7 @@ package dragonBones.objects
 	[Event(name="complete", type="flash.events.Event")]
 	
 	/**
-	 * ...
-	 * @author Akdcl
+	 * A set of texture datas
 	 */
 	public class TextureAtlasData extends EventDispatcher
 	{

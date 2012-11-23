@@ -2,9 +2,9 @@ package dragonBones.objects {
 	
 	import flash.utils.ByteArray;
 	
+
 	/**
-	 * 
-	 * @author Akdcl
+	 * A set of armature datas and animation datas
 	 */
 	public class SkeletonData
 	{
@@ -39,7 +39,7 @@ package dragonBones.objects {
 			return _animationList.concat();
 		}
 		
-		public function SkeletonData() 
+		public function SkeletonData()
 		{
 			_armatureDatas = { };
 			_animationDatas = { };
@@ -63,7 +63,7 @@ package dragonBones.objects {
 			_animationList = null;
 		}
 		
-		public function getArmatureData(name:String):ArmatureData 
+		public function getArmatureData(name:String):ArmatureData
 		{
 			return _armatureDatas[name];
 		}
@@ -74,7 +74,7 @@ package dragonBones.objects {
 			return getArmatureData(name);
 		}
 		
-		public function getAnimationData(name:String):AnimationData 
+		public function getAnimationData(name:String):AnimationData
 		{
 			return _animationDatas[name];
 		}

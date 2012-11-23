@@ -1,10 +1,7 @@
 package dragonBones.objects
 {
 	
-	/**
-	 * ...
-	 * @author Akdcl
-	 */
+	/** @private */
 	public class AnimationData
 	{
 		private var _movementDatas:Object;
@@ -26,7 +23,7 @@ package dragonBones.objects
 			return _movementList.concat();
 		}
 		
-		public function AnimationData() 
+		public function AnimationData()
 		{
 			_movementDatas = { };
 			_movementList = new Vector.<String>;
@@ -42,12 +39,12 @@ package dragonBones.objects
 			_movementList = null;
 		}
 		
-		public function getMovementData(name:String):MovementData 
+		public function getMovementData(name:String):MovementData
 		{
 			return _movementDatas[name];
 		}
 		
-		public function getMovementDataAt(index:int):MovementData 
+		public function getMovementDataAt(index:int):MovementData
 		{
 			var name:String = _movementList.length > index?_movementList[index]:null;
 			return getMovementData(name);

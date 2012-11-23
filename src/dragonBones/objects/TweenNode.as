@@ -1,5 +1,8 @@
 package dragonBones.objects
 {
+	/**
+	 * TweenNode provides transformation for a tween object.
+	 */
 	public class TweenNode extends Node
 	{
 		private static const DOUBLE_PI:Number = Math.PI * 2;
@@ -11,7 +14,7 @@ package dragonBones.objects
 			super(x, y, skewX, skewY, scaleX, scaleY);
 		}
 		
-		public function subtract(from:Node, to:Node):void 
+		public function subtract(from:Node, to:Node):void
 		{
 			x = to.x - from.x;
 			y = to.y - from.y;
@@ -21,7 +24,7 @@ package dragonBones.objects
 			skewY = to.skewY - from.skewY;
 			
 			skewX %= DOUBLE_PI;
-			if (skewX > Math.PI) 
+			if (skewX > Math.PI)
 			{
 				skewX -= DOUBLE_PI;
 			}

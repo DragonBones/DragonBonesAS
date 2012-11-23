@@ -1,15 +1,12 @@
-package dragonBones.objects 
+package dragonBones.objects
 {
 	import dragonBones.utils.dragonBones_internal;
 	
 	use namespace dragonBones_internal;
 	
-	/**
-	 * ...
-	 * @author Akdcl
-	 */
+	/** @private */
 	public class MovementBoneData
-	{	
+	{
 		dragonBones_internal var _frameList:Vector.<FrameData>;
 		
 		internal var _duration:int;
@@ -21,7 +18,7 @@ package dragonBones.objects
 		internal var _name:String;
 		public function get name():String
 		{
-			return _name;	
+			return _name;
 		}
 		
 		public var scale:Number;

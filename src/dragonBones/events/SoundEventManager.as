@@ -6,8 +6,7 @@ package dragonBones.events
 	[Event(name="soundFrame", type="dragonBones.events.SoundEvent")]
 	
 	/**
-	 *
-	 * @author Akdcl
+	 * A manager object control the sound event.
 	 */
 	public final class SoundEventManager extends EventDispatcher
 	{
