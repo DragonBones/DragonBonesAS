@@ -12,21 +12,38 @@ package dragonBones
 	use namespace dragonBones_internal;
 	
 	/**
+	 * A object representing a single joint in an armature. It controls the transform of displays in it.
 	 *
-	 * @author akdcl
+	 * @see dragonBones.Armature
 	 */
 	public class Bone extends EventDispatcher
 	{
+		/**
+		 * The name of the Armature.
+		 */
 		public var name:String;
+		/**
+		 * An object that can contain any extra data.
+		 */
 		public var userData:Object;
 		
+		/**
+		 * The transform information relative to the armature's coordinates.
+		 */
 		public var global:Node;
+		
+		/**
+		 * The transform information relative to the local coordinates.
+		 */
 		public var node:Node;
 		
+		/** @private */
 		dragonBones_internal var origin:BoneData;
+		/** @private */
 		dragonBones_internal var _tween:Tween;
-		
+		/** @private */
 		dragonBones_internal var _children:Vector.<Bone>;
+		/** @private */
 		dragonBones_internal var _displayBridge:IDisplayBridge;
 		
 		private var _globalTransformMatrix:Matrix = new Matrix;
@@ -35,25 +52,43 @@ package dragonBones
 		private var _displayList:Array;
 		private var _displayIndex:int;
 		
+		/** @private */
 		dragonBones_internal var _displayVisible:Boolean;
-		
+		/** @private */
 		dragonBones_internal var _armature:Armature;
+		
+		/** @private */
+		protected var _parent:Bone;
+		
+		/**
+		 * The armature holding this bone.
+		 */
 		public function get armature():Armature
 		{
 			return _armature;
 		}
 		
+		/**
+		 * The sub-armature of this bone.
+		 */
 		public function get childArmature():Armature
 		{
 			return _displayList[_displayIndex] as Armature;
 		}
 		
-		protected var _parent:Bone;
+		
+		
+		/**
+		 * Indicates the bone that contains this bone.
+		 */
 		public function get parent():Bone
 		{
 			return _parent;
 		}
 		
+		/**
+		 * Indicates the display object belonging to this bone.
+		 */
 		public function get display():Object
 		{
 			return _displayBridge.display;
@@ -73,6 +108,7 @@ package dragonBones
 			_displayBridge.display = value;
 		}
 		
+		/** @private */
 		dragonBones_internal function changeDisplay(displayIndex:int):void
 		{
 			if(displayIndex < 0)
@@ -106,6 +142,10 @@ package dragonBones
 			}
 		}
 		
+		/**
+		 * Creates a new <code>Bone</code> object
+		 * @param	displayBrideg
+		 */
 		public function Bone(displayBrideg:IDisplayBridge)
 		{
 			_displayBridge = displayBrideg;
@@ -124,6 +164,9 @@ package dragonBones
 			node.scaleY = 0;
 		}
 		
+		/**
+		 * Cleans up any resources used by the current object.
+		 */
 		public function dispose():void
 		{
 			for each(var _child:Bone in _children)
@@ -151,6 +194,10 @@ package dragonBones
 			_armature = null;
 			_parent = null;
 		}
+		
+		/**
+		 * Updates the state of the bone.
+		 */
 		public function update():void
 		{
 			_tween.update();
@@ -215,6 +262,7 @@ package dragonBones
 			}
 		}
 		
+		/** @private */
 		public function addChild(child:Bone):void
 		{
 			if (_children.length > 0?(_children.indexOf(child) < 0):true)
@@ -231,6 +279,7 @@ package dragonBones
 			}
 		}
 		
+		/** @private */
 		public function removeChild(child:Bone):void
 		{
 			var index:int = _children.indexOf(child);
@@ -244,7 +293,7 @@ package dragonBones
 				_children.splice(index, 1);
 			}
 		}
-		
+		/** @private */
 		public function removeFromParent():void
 		{
 			if(_parent)

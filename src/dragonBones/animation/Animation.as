@@ -16,14 +16,21 @@ package dragonBones.animation
 	use namespace dragonBones_internal;
 	
 	/**
-	 *
-	 * @author Akdcl
+	 * A core object that can control the state of an armature
+	 * @see dragonBones.Armature
 	 */
-	final public class Animation extends ProcessBase 
+	final public class Animation extends ProcessBase
 	{
 		private static var _soundManager:SoundEventManager = SoundEventManager.getInstance();
 		
+		/**
+		 * The playing movement ID.
+		 */
 		public var movementID:String;
+		
+		/**
+		 * An vector containing all movements the animation can play.
+		 */
 		public var movementList:Vector.<String>;
 		
 		private var _animationData:AnimationData;
@@ -32,7 +39,10 @@ package dragonBones.animation
 		
 		private var _armature:Armature;
 		
-		override public function set timeScale(value:Number):void 
+		/**
+		 * @inheritDoc
+		 */
+		override public function set timeScale(value:Number):void
 		{
 			super.timeScale = value;
 			for each(var bone:Bone in _armature._boneDepthList)
@@ -41,11 +51,18 @@ package dragonBones.animation
 			}
 		}
 		
-		public function Animation(armature:Armature) 
+		/**
+		 * Creates a new <code>Animation</code>
+		 * @param	armature
+		 */
+		public function Animation(armature:Armature)
 		{
 			_armature = armature;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override public function dispose():void
 		{
 			super.dispose();
@@ -55,8 +72,8 @@ package dragonBones.animation
 			_currentFrameData  = null;
 			_armature = null;
 		}
-		
-		public function setData(animationData:AnimationData):void 
+		/** @private */
+		public function setData(animationData:AnimationData):void
 		{
 			if (animationData)
 			{
@@ -67,6 +84,9 @@ package dragonBones.animation
 			}
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override public function gotoAndPlay(movementID:Object, durationTo:int = -1, durationTween:int = -1, loop:* = null, tweenEasing:Number = NaN):void
 		{
 			if (!_animationData)
@@ -92,13 +112,13 @@ package dragonBones.animation
 			super.gotoAndPlay(null, durationTo, durationTween);
 			
 			_duration = _movementData.duration;
-			if (_duration == 1) 
+			if (_duration == 1)
 			{
 				_loop = SINGLE;
 			}
 			else
 			{
-				if (loop) 
+				if (loop)
 				{
 					_loop = LIST_LOOP_START
 				}
@@ -137,9 +157,12 @@ package dragonBones.animation
 			}
 		}
 		
-		override public function play():void 
+		/**
+		 * @inheritDoc
+		 */
+		override public function play():void
 		{
-			if (!_animationData) 
+			if (!_animationData)
 			{
 				return;
 			}
@@ -164,7 +187,10 @@ package dragonBones.animation
 			}
 		}
 		
-		override public function stop():void 
+		/**
+		 * @inheritDoc
+		 */
+		override public function stop():void
 		{
 			super.stop();
 			for each(var bone:Bone in _armature._boneDepthList)
@@ -173,17 +199,20 @@ package dragonBones.animation
 			}
 		}
 		
-		override protected function updateHandler():void 
+		/**
+		 * @inheritDoc
+		 */
+		override protected function updateHandler():void
 		{
 			var event:AnimationEvent;
-			if (_currentPrecent >= 1) 
+			if (_currentPrecent >= 1)
 			{
-				switch(_loop) 
+				switch(_loop)
 				{
 					case LIST_START:
 						_loop = LIST;
 						_currentPrecent = (_currentPrecent - 1) * _totalFrames / _durationTween;
-						if (_currentPrecent >= 1) 
+						if (_currentPrecent >= 1)
 						{
 							//the speed of playing is too fast or the durationTween is too short
 						}
@@ -240,7 +269,7 @@ package dragonBones.animation
 			}
 		}
 		
-		private function updateFrameData(currentPrecent:Number):void 
+		private function updateFrameData(currentPrecent:Number):void
 		{
 			var length:uint = _movementData._movementFrameList.length;
 			if(length == 0)
@@ -249,12 +278,12 @@ package dragonBones.animation
 			}
 			var played:Number = _duration * currentPrecent;
 			//refind the current frame
-			if (!_currentFrameData || played >= _currentFrameData.duration + _currentFrameData.start || played < _currentFrameData.start) 
+			if (!_currentFrameData || played >= _currentFrameData.duration + _currentFrameData.start || played < _currentFrameData.start)
 			{
-				while (true) 
+				while (true)
 				{
 					_currentFrameData =  _movementData._movementFrameList[_toIndex];
-					if (++_toIndex >= length) 
+					if (++_toIndex >= length)
 					{
 						_toIndex = 0;
 					}

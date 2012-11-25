@@ -5,6 +5,7 @@ package dragonBones.objects
 	
 	import flash.utils.ByteArray;
 
+	/** @private */
 	public final class SkeletonAndTextureAtlasData
 	{
 		public var skeletonData:SkeletonData;

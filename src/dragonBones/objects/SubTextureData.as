@@ -2,6 +2,7 @@ package dragonBones.objects
 {
 	import flash.geom.Rectangle;
 
+	/** @private */
 	public class SubTextureData extends Rectangle
 	{
 		public var pivotX:int;

@@ -2,8 +2,7 @@ package dragonBones.objects
 {
 	
 	/**
-	 * ...
-	 * @author Akdcl
+	 * Node provides a base class for any object that has a transformation.
 	 */
 	public class Node
 	{
@@ -16,11 +15,11 @@ package dragonBones.objects
 		public var skewY:Number;
 		public var z:Number;
 		
-		public function get rotation():Number 
+		public function get rotation():Number
 		{
 			return skewY;
 		}
-		public function set rotation(value:Number):void 
+		public function set rotation(value:Number):void
 		{
 			skewX = skewY = value;
 		}
@@ -37,7 +36,7 @@ package dragonBones.objects
 			z = 0;
 		}
 		
-		public function copy(node:Node):void 
+		public function copy(node:Node):void
 		{
 			x = node.x;
 			y = node.y;
