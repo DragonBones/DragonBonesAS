@@ -169,6 +169,7 @@ package dragonBones.factorys
 					}
 				}
 			}
+			armature.update();
 			return armature;
 		}
 		
