@@ -34,6 +34,17 @@ package dragonBones.objects
 			_displayList = null;
 		}
 		
+		override public function copy(node:Node):void
+		{
+			super.copy(node);
+			var boneData:BoneData = node as BoneData;
+			if(boneData)
+			{
+				_name = boneData.name;
+				_parent = boneData.parent;
+			}
+		}
+		
 		public function getDisplayDataAt(index:int):DisplayData
 		{
 			return _displayList.length > index?_displayList[index]:null;

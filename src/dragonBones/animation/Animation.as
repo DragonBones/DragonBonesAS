@@ -141,7 +141,7 @@ package dragonBones.animation
 						bone.childArmature.animation.gotoAndPlay(movementID);
 					}
 				}
-				else
+				else if(bone.origin.name)
 				{
 					bone.changeDisplay(-1);
 					bone._tween.stop();
