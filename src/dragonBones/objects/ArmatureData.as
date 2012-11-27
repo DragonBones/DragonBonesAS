@@ -1,10 +1,7 @@
 package dragonBones.objects
 {
 	
-	/**
-	 * ...
-	 * @author Akdcl
-	 */
+	/** @private */
 	public class ArmatureData
 	{
 		private var _boneDatas:Object;
@@ -26,7 +23,7 @@ package dragonBones.objects
 			return _boneList.concat();
 		}
 		
-		public function ArmatureData() 
+		public function ArmatureData()
 		{
 			_name = name;
 			_boneDatas = { };
@@ -42,12 +39,12 @@ package dragonBones.objects
 			_boneList = null;
 		}
 		
-		public function getBoneData(name:String):BoneData 
+		public function getBoneData(name:String):BoneData
 		{
 			return _boneDatas[name];
 		}
 		
-		public function getBoneDataAt(index:uint):BoneData 
+		public function getBoneDataAt(index:uint):BoneData
 		{
 			return _boneDatas[_boneList[index]];
 		}

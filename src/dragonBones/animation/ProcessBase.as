@@ -1,11 +1,11 @@
-package dragonBones.animation 
+package dragonBones.animation
 {
 	
 	/**
-	 * 
-	 * @author Akdcl
+	 * Provides an abstract base class for key-frame processing classes.
+	 *
 	 */
-	internal class ProcessBase 
+	internal class ProcessBase
 	{
 		protected static const SINGLE:int = -4;
 		protected static const LIST_START:int = -3;
@@ -23,47 +23,72 @@ package dragonBones.animation
 		protected var _tweenEasing:int;
 		
 		protected var _toIndex:int;
-
+		
+		/**
+		 * Indicates whether the animation is playing
+		 */
 		public function get isPlaying():Boolean
 		{
 			return !_isComplete && !_isPause;
 		}
 		
 		protected var _isComplete:Boolean;
+		/**
+		 * Indicates whether the animation is completed
+		 */
 		public function get isComplete():Boolean
 		{
 			return _isComplete;
 		}
 		
 		protected var _isPause:Boolean;
+		/**
+		 * Indicates whether the animation is paused
+		 */
 		public function get isPause():Boolean
 		{
 			return _isPause;
 		}
 		
 		protected var _timeScale:Number;
-		public function get timeScale():Number 
+		/**
+		 * The amount by which passed time should be scaled. Used to slow down or speed up animations. Defaults to 1.
+		 */
+		public function get timeScale():Number
 		{
 			return _timeScale;
 		}
-		public function set timeScale(value:Number):void 
+		public function set timeScale(value:Number):void
 		{
 			_timeScale = value;
 		}
 		
-		public function ProcessBase() 
+		/**
+		 * Creates a new <code>ProcessBase</code>
+		 */
+		public function ProcessBase()
 		{
 			_timeScale = 1;
 			_isComplete = true;
 			_isPause = false;
 			_currentFrame = 0;
 		}
-		
+		/**
+		 * Cleans up any resources used by the current object.
+		 */
 		public function dispose():void
 		{
 		}
 		
-		public function gotoAndPlay(animation:Object, _durationTo:int = 0, durationTween:int = 0, loop:* = false, tweenEasing:Number = NaN):void 
+		/**
+		 * Starts playing the specified animation.
+		 * @param	animation
+		 * @param	_durationTo
+		 * @param	durationTween
+		 * @param	loop
+		 * @param	tweenEasing
+		 */
+		public function gotoAndPlay(animation:Object, _durationTo:int = 0, durationTween:int = 0, loop:* = false, tweenEasing:Number = NaN):void
 		{
 			_isComplete = false;
 			_isPause = false;
@@ -72,7 +97,10 @@ package dragonBones.animation
 			_tweenEasing = tweenEasing;
 		}
 		
-		public function play():void 
+		/**
+		 * Moves the playhead.
+		 */
+		public function play():void
 		{
 			if(_isComplete)
 			{
@@ -81,19 +109,24 @@ package dragonBones.animation
 			}
 			_isPause = false;
 		}
-		
-		public function stop():void 
+		/**
+		 * Stops the playhead
+		 */
+		public function stop():void
 		{
 			_isPause = true;
 		}
 		
-		final public function update():void 
+		/**
+		 * Updates the state.
+		 */
+		final public function update():void
 		{
-			if (_isComplete || _isPause) 
+			if (_isComplete || _isPause)
 			{
 				return;
 			}
-			if (_totalFrames <= 0) 
+			if (_totalFrames <= 0)
 			{
 				_currentFrame = _totalFrames = 1;
 			}
@@ -103,7 +136,10 @@ package dragonBones.animation
 			updateHandler();
 		}
 		
-		protected function updateHandler():void 
+		/**
+		 * Provides a abstract function for sub-classes processing the update logic.
+		 */
+		protected function updateHandler():void
 		{
 		}
 	}

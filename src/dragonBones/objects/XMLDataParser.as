@@ -13,6 +13,7 @@ package dragonBones.objects
 	
 	use namespace dragonBones_internal;
 	
+	/** @private */
 	public class XMLDataParser
 	{
 		private static var helpNode:Node = new Node();
@@ -32,10 +33,10 @@ package dragonBones.objects
 		{
 			var result:XMLList = new XMLList();
 			var length:uint = xmlList.length();
-			for (var i:int = 0; i < length; i++ ) 
+			for (var i:int = 0; i < length; i++ )
 			{
 				var xml:XML = xmlList[i];
-				if (xml["@" + attribute].toString() == value) 
+				if (xml["@" + attribute].toString() == value)
 				{
 					result[result.length()] = xmlList[i];
 				}
@@ -66,7 +67,7 @@ package dragonBones.objects
 			return byteArrayCopy;
 		}
 		
-		public static function parseXMLData(compressedByteArray:ByteArray):SkeletonAndTextureAtlasData 
+		public static function parseXMLData(compressedByteArray:ByteArray):SkeletonAndTextureAtlasData
 		{
 			var dataType:String = BytesType.getType(compressedByteArray);
 			switch(dataType)
@@ -138,7 +139,7 @@ package dragonBones.objects
 			aramtureData._name = armatureXML.attribute(ConstValues.A_NAME);
 			
 			var boneXMLList:XMLList = armatureXML.elements(ConstValues.BONE);
-			for each(var boneXML:XML in boneXMLList) 
+			for each(var boneXML:XML in boneXMLList)
 			{
 				var boneName:String = boneXML.attribute(ConstValues.A_NAME);
 				var parentName:String = boneXML.attribute(ConstValues.A_PARENT);
@@ -213,7 +214,7 @@ package dragonBones.objects
 			}
 			
 			var armatureData:ArmatureData = skeletonData.getArmatureData(animationData.name);
-			for each(var movementXML:XML in animationXML.elements(ConstValues.MOVEMENT)) 
+			for each(var movementXML:XML in animationXML.elements(ConstValues.MOVEMENT))
 			{
 				var movementName:String = movementXML.attribute(ConstValues.A_NAME);
 				var movementData:MovementData = animationData.getMovementData(movementName);
@@ -287,7 +288,7 @@ package dragonBones.objects
 			var totalDuration:uint = 0;
 			var frameXMLList:XMLList = movementBoneXML.elements(ConstValues.FRAME);
 			var length:uint = frameXMLList.length();
-			for(var j:int = 0;j < length;j ++) 
+			for(var j:int = 0;j < length;j ++)
 			{
 				var frameXML:XML = frameXMLList[j];
 				if(parentXML){

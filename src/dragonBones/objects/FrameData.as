@@ -1,10 +1,7 @@
 package dragonBones.objects
 {
 	
-	/**
-	 * ...
-	 * @author Akdcl
-	 */
+	/** @private */
 	final public class FrameData extends TweenNode
 	{
 		public var duration:int;

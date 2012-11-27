@@ -4,11 +4,7 @@ package dragonBones.utils {
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	
-	/**
-	 * ...
-	 * @author Akdcl
-	 */
-	
+	/** @private */
 	public class TransfromUtils {
 		private static var helpMatrix1:Matrix = new Matrix();
 		private static var helpMatrix2:Matrix = new Matrix();

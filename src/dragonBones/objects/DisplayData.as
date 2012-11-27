@@ -1,5 +1,6 @@
 ﻿package dragonBones.objects
 {
+	/** @private */
 	public class DisplayData
 	{
 		internal var _name:String;

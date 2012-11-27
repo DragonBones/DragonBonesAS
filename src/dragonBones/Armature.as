@@ -5,28 +5,55 @@ package dragonBones
 	import flash.events.EventDispatcher;
 	
 	use namespace dragonBones_internal;
-	
+	/**
+	 * Dispatched when the movement of animation is changed.
+	 */
 	[Event(name="movementChange", type="dragonBones.events.AnimationEvent")]
 	
+	/**
+	 * Dispatched when the playback of a animation starts.
+	 */
 	[Event(name="animationStart", type="dragonBones.events.AnimationEvent")]
 	
+	/**
+	 * Dispatched when the playback of a movement stops.
+	 */
 	[Event(name="movementComplete", type="dragonBones.events.AnimationEvent")]
 	
+	/**
+	 * Dispatched when the playback of a movement completes a loop.
+	 */
 	[Event(name="movementLoopComplete", type="dragonBones.events.AnimationEvent")]
 	
+	/**
+	 * Dispatched when the animation of the armatrue enter a frame.
+	 */
 	[Event(name="movementFrameEvent", type="dragonBones.events.FrameEvent")]
 	
+	/**
+	 * Dispatched when a bone of the armatrue enter a frame.
+	 */
 	[Event(name="boneFrameEvent", type="dragonBones.events.FrameEvent")]
 	
 	/**
+	 * The core object of a skeleton animation system. It contains the root display object, the animation which can the change playback state and all sub-bones.
 	 *
-	 * @author Akdcl
+	 * @see dragonBones.Bone
+	 * @see dragonBones.animation.Animation
 	 */
 	public class Armature extends EventDispatcher
 	{
+		/**
+		 * The name of the Armature.
+		 */
 		public var name:String;
+		/**
+		 * An object that can contain any extra data.
+		 */
 		public var userData:Object;
-		
+		/**
+		 * An object can change the playback state of the armature.
+		 */
 		public var animation:Animation;
 		
 		dragonBones_internal var _bonesIndexChanged:Boolean;
@@ -34,11 +61,21 @@ package dragonBones
 		
 		private var _rootBoneList:Vector.<Bone>;
 		
+		/** @private */
 		protected var _display:Object;
+		
+		/**
+		 * An display object which is dependent on specific display engine.
+		 */
 		public function get display():Object{
 			return _display;
 		}
 		
+		/**
+		 * Creates a new <code>Armature</code>
+		 *
+		 * @param	display	Represents the root display object for all sub-bones.
+		 */
 		public function Armature(display:Object)
 		{
 			super();
@@ -51,6 +88,9 @@ package dragonBones
 			_bonesIndexChanged = false;
 		}
 		
+		/**
+		 * Cleans up any resources used by the current object.
+		 */
 		public function dispose():void
 		{
 			for each(var bone:Bone in _rootBoneList)
@@ -66,6 +106,9 @@ package dragonBones
 			_rootBoneList = null;
 		}
 		
+		/**
+		 * Updates the state of the armature. Should be called every frame manually.
+		 */
 		public function update():void
 		{
 			for each(var bone:Bone in _rootBoneList)
@@ -80,6 +123,11 @@ package dragonBones
 			}
 		}
 		
+		/**
+		 * Gets a bone by name.
+		 * @param	name
+		 * @return
+		 */
 		public function getBone(name:String):Bone
 		{
 			if(name)
@@ -95,6 +143,11 @@ package dragonBones
 			return null;
 		}
 		
+		/**
+		 * Gets a bone by display.
+		 * @param	display
+		 * @return
+		 */
 		public function getBoneByDisplay(display:Object):Bone
 		{
 			for each(var eachBone:Bone in _boneDepthList)
@@ -106,7 +159,8 @@ package dragonBones
 			}
 			return null;
 		}
-
+		
+		/** @private */
 		public function addBone(bone:Bone, parentName:String = null):void
 		{
 			var boneParent:Bone = getBone(parentName);
@@ -121,6 +175,7 @@ package dragonBones
 			}
 		}
 		
+		/** @private */
 		public function removeBone(boneName:String):void
 		{
 			var bone:Bone = getBone(boneName);
@@ -136,7 +191,7 @@ package dragonBones
 				}
 			}
 		}
-		
+		/** @private */
 		dragonBones_internal function addToBones(bone:Bone, _root:Boolean = false):void
 		{
 			var boneIndex:int = _boneDepthList.indexOf(bone);
@@ -165,6 +220,7 @@ package dragonBones
 			}
 		}
 		
+		/** @private */
 		dragonBones_internal function removeFromBones(bone:Bone):void
 		{
 			var boneIndex:int = _boneDepthList.indexOf(bone);
@@ -187,7 +243,9 @@ package dragonBones
 			}
 		}
 		
-		
+		/**
+		 * Sorts the display objects by z value.
+		 */
 		public function updateBonesZ():void
 		{
 			_boneDepthList.sort(sortBoneZIndex);

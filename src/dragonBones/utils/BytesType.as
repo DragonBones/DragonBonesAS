@@ -1,10 +1,7 @@
 package dragonBones.utils {
 	import flash.utils.ByteArray;
 	
-	/**
-	 * ...
-	 * @author Akdcl
-	 */
+	/** @private */
 	public class BytesType{
 		public static const SWF:String = "swf";
 		public static const PNG:String = "png";

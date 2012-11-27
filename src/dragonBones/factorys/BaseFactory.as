@@ -30,11 +30,12 @@ package dragonBones.factorys
 	[Event(name="complete", type="flash.events.Event")]
 	
 	/**
-	 *
-	 * @author Akdcl
+	 * A object managing the set of armature resources for the tranditional DisplayList. It parses the raw data, stores the armature resources and creates armature instrances.
+	 * @see dragonBones.Armature
 	 */
 	public class BaseFactory extends EventDispatcher
 	{
+		/** @private */
 		public static function getTextureDisplay(textureAtlasData:TextureAtlasData, fullName:String):Object
 		{
 			var clip:MovieClip = textureAtlasData.clip;
@@ -74,6 +75,10 @@ package dragonBones.factorys
 		}
 		
 		protected var _skeletonData:SkeletonData;
+		
+		/**
+		 * A set of armature datas and animation datas
+		 */
 		public function get skeletonData():SkeletonData
 		{
 			return _skeletonData;
@@ -84,6 +89,10 @@ package dragonBones.factorys
 		}
 		
 		protected var _textureAtlasData:TextureAtlasData;
+		
+		/**
+		 * A set of texture datas
+		 */
 		public function get textureAtlasData():TextureAtlasData
 		{
 			return _textureAtlasData;
@@ -101,11 +110,19 @@ package dragonBones.factorys
 			}
 		}
 		
+		/**
+		 * Creates a new <code>BaseFactory</code>
+		 *
+		 */
 		public function BaseFactory()
 		{
 			super();
 		}
 		
+		/**
+		 * Pareses the raw data.
+		 * @param	bytes Represents the raw data for the whole skeleton system.
+		 */
 		public function parseData(bytes:ByteArray):void
 		{
 			var sat:SkeletonAndTextureAtlasData = XMLDataParser.parseXMLData(bytes);
@@ -114,12 +131,20 @@ package dragonBones.factorys
 			sat.dispose();
 		}
 		
+		/**
+		 * Cleans up any resources used by the current object.
+		 */
 		public function dispose():void
 		{
 			skeletonData = null;
 			textureAtlasData = null;
 		}
 		
+		/**
+		 * Builds a new armature by name
+		 * @param	armatureName
+		 * @return
+		 */
 		public function buildArmature(armatureName:String):Armature
 		{
 			var armatureData:ArmatureData = skeletonData.getArmatureData(armatureName);
@@ -144,6 +169,7 @@ package dragonBones.factorys
 					}
 				}
 			}
+			armature.update();
 			return armature;
 		}
 		

@@ -1,10 +1,7 @@
 package dragonBones.objects
 {
 	
-	/**
-	 * ...
-	 * @author Akdcl
-	 */
+	/** @private */
 	final public class BoneData extends Node
 	{
 		internal var _displayList:Vector.<DisplayData>;
@@ -26,7 +23,7 @@ package dragonBones.objects
 			return _displayList.length;
 		}
 		
-		public function BoneData() 
+		public function BoneData()
 		{
 			super();
 			_displayList = new Vector.<DisplayData>;
@@ -35,6 +32,17 @@ package dragonBones.objects
 		public function dispose():void
 		{
 			_displayList = null;
+		}
+		
+		override public function copy(node:Node):void
+		{
+			super.copy(node);
+			var boneData:BoneData = node as BoneData;
+			if(boneData)
+			{
+				_name = boneData.name;
+				_parent = boneData.parent;
+			}
 		}
 		
 		public function getDisplayDataAt(index:int):DisplayData

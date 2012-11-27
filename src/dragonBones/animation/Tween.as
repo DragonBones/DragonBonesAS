@@ -1,4 +1,4 @@
-package dragonBones.animation 
+package dragonBones.animation
 {
 	import dragonBones.Armature;
 	import dragonBones.Bone;
@@ -14,10 +14,10 @@ package dragonBones.animation
 	use namespace dragonBones_internal;
 	
 	/**
-	 *
-	 * @author Akdcl
+	 * A core object that can control the state of a bone
+	 * @see dragonBones.Bone
 	 */
-	final public class Tween extends ProcessBase 
+	final public class Tween extends ProcessBase
 	{
 		private static const HALF_PI:Number = Math.PI * 0.5;
 		
@@ -25,7 +25,9 @@ package dragonBones.animation
 		
 		private var _bone:Bone;
 		
+		/** @private */
 		dragonBones_internal var _node:Node;
+		
 		private var _from:Node;
 		private var _between:TweenNode;
 		
@@ -38,6 +40,9 @@ package dragonBones.animation
 		private var _totalDuration:int;
 		private var _frameTweenEasing:Number;
 		
+		/**
+		 * @inheritDoc
+		 */
 		override public function set timeScale(value:Number):void
 		{
 			super.timeScale = value;
@@ -49,7 +54,11 @@ package dragonBones.animation
 			}
 		}
 		
-		public function Tween(bone:Bone) 
+		/**
+		 * Creates a new <code>Tween</code>
+		 * @param	bone
+		 */
+		public function Tween(bone:Bone)
 		{
 			super();
 			_bone = bone;
@@ -58,6 +67,9 @@ package dragonBones.animation
 			_between = new TweenNode();
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override public function dispose():void
 		{
 			super.dispose();
@@ -71,7 +83,10 @@ package dragonBones.animation
 			_nextKeyFrame = null;
 		}
 		
-		override public function gotoAndPlay(movementBoneData:Object, durationTo:int = 0, durationTween:int = 0, loop:* = false, tweenEasing:Number = NaN):void 
+		/**
+		 * @inheritDoc
+		 */
+		override public function gotoAndPlay(movementBoneData:Object, durationTo:int = 0, durationTween:int = 0, loop:* = false, tweenEasing:Number = NaN):void
 		{
 			_movementBoneData = movementBoneData as MovementBoneData;
 			if(!_movementBoneData)
@@ -90,7 +105,7 @@ package dragonBones.animation
 			var frameData:FrameData;
 			var length:uint = _movementBoneData._frameList.length;
 			
-			if (length == 1) 
+			if (length == 1)
 			{
 				_loop = SINGLE;
 				_nextKeyFrame = _movementBoneData._frameList[0];
@@ -108,11 +123,11 @@ package dragonBones.animation
 					_duration = _movementBoneData.duration - 1;
 				}
 				_durationTween = durationTween * _movementBoneData.scale;
-				if (loop && _movementBoneData.delay != 0) 
+				if (loop && _movementBoneData.delay != 0)
 				{
 					setBetween(_node, tweenNodeTo(updateFrameData(1 -_movementBoneData.delay), _between));
 				}
-				else 
+				else
 				{
 					_nextKeyFrame = _movementBoneData._frameList[0];
 					setBetween(_node, _nextKeyFrame);
@@ -120,8 +135,10 @@ package dragonBones.animation
 				}
 			}
 		}
-		
-		override public function play():void 
+		/**
+		 * @inheritDoc
+		 */
+		override public function play():void
 		{
 			if (!_movementBoneData)
 			{
@@ -143,7 +160,10 @@ package dragonBones.animation
 			}
 		}
 		
-		override public function stop():void 
+		/**
+		 * @inheritDoc
+		 */
+		override public function stop():void
 		{
 			super.stop();
 			var childArmature:Armature = _bone.childArmature;
@@ -153,11 +173,14 @@ package dragonBones.animation
 			}
 		}
 		
-		override protected function updateHandler():void 
+		/**
+		 * @inheritDoc
+		 */
+		override protected function updateHandler():void
 		{
-			if (_currentPrecent >= 1) 
+			if (_currentPrecent >= 1)
 			{
-				switch(_loop) 
+				switch(_loop)
 				{
 					case SINGLE:
 						_currentKeyFrame = _nextKeyFrame;
@@ -166,7 +189,7 @@ package dragonBones.animation
 						break;
 					case LIST_START:
 						_loop = LIST;
-						if (_durationTween <= 0) 
+						if (_durationTween <= 0)
 						{
 							_currentPrecent = 1;
 						}
@@ -192,7 +215,7 @@ package dragonBones.animation
 					case LIST_LOOP_START:
 						_loop = 0;
 						_totalFrames = _durationTween > 0?_durationTween:1;
-						if (_movementBoneData.delay != 0) 
+						if (_movementBoneData.delay != 0)
 						{
 							//
 							_currentFrame = (1 - _movementBoneData.delay) * _totalFrames;
@@ -211,12 +234,12 @@ package dragonBones.animation
 						break;
 				}
 			}
-			else if (_loop < -1) 
+			else if (_loop < -1)
 			{
 				_currentPrecent = Math.sin(_currentPrecent * HALF_PI);
 			}
 			
-			if (_loop >= LIST) 
+			if (_loop >= LIST)
 			{
 				//multiple key frame process
 				_currentPrecent = updateFrameData(_currentPrecent, true);
@@ -226,7 +249,7 @@ package dragonBones.animation
 			{
 				tweenNodeTo(_currentPrecent);
 			}
-			else if(_currentKeyFrame) 
+			else if(_currentKeyFrame)
 			{
 				tweenNodeTo(0);
 			}
@@ -303,7 +326,7 @@ package dragonBones.animation
 			_between.subtract(from, to);
 		}
 		
-		private function tweenNodeTo(value:Number, node:Node = null):Node 
+		private function tweenNodeTo(value:Number, node:Node = null):Node
 		{
 			node = node || _node;
 			node.x = _from.x + value * _between.x;
@@ -315,13 +338,13 @@ package dragonBones.animation
 			return node;
 		}
 		
-		private function updateFrameData(currentPrecent:Number, activeFrame:Boolean = false):Number 
+		private function updateFrameData(currentPrecent:Number, activeFrame:Boolean = false):Number
 		{
 			var played:Number = _duration * currentPrecent;
 			var from:FrameData;
 			var to:FrameData;
 			//refind the current frame
-			if (played >= _totalDuration || played < _totalDuration - _betweenDuration) 
+			if (played >= _totalDuration || played < _totalDuration - _betweenDuration)
 			{
 				var length:int = _movementBoneData._frameList.length;
 				do {
@@ -378,12 +401,12 @@ package dragonBones.animation
 		
 		private function getEaseValue(value:Number, easing:Number):Number
 		{
-			if (easing > 1) 
+			if (easing > 1)
 			{
 				value = 0.5 * (1 - Math.cos(value * Math.PI ));
 				easing -= 1;
 			}
-			else if (easing > 0) 
+			else if (easing > 0)
 			{
 				value = Math.sin(value * HALF_PI);
 			}

@@ -4,9 +4,17 @@ package dragonBones.display
 	import flash.display.DisplayObjectContainer;
 	import flash.geom.Matrix;
 	
+	/**
+	 * A display bridge for tranditional DisplayList
+	 *
+	 */
 	public class NativeDisplayBridge implements IDisplayBridge
 	{
 		protected var _display:DisplayObject;
+		
+		/**
+		 * @inheritDoc
+		 */
 		public function get display():Object
 		{
 			return _display;
@@ -29,11 +37,16 @@ package dragonBones.display
 			_display = value as DisplayObject;
 			addDisplay(parent, index);
 		}
-		
+		/**
+		 * Creates a new <code>NativeDisplayBridge</code> object
+		 */
 		public function NativeDisplayBridge()
 		{
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function update(matrix:Matrix):void
 		{
 			var pivotBitmap:PivotBitmap = _display as PivotBitmap;
@@ -47,7 +60,9 @@ package dragonBones.display
 			}
 			_display.transform.matrix = matrix;
 		}
-		
+		/**
+		 * @inheritDoc
+		 */
 		public function addDisplay(container:Object, index:int = -1):void
 		{
 			if(container && _display)
@@ -62,7 +77,9 @@ package dragonBones.display
 				}
 			}
 		}
-		
+		/**
+		 * @inheritDoc
+		 */
 		public function removeDisplay():void
 		{
 			if(_display && _display.parent)

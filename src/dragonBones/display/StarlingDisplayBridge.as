@@ -4,13 +4,22 @@ package dragonBones.display
 	import starling.display.DisplayObject;
 	import starling.display.DisplayObjectContainer;
 	
+	/**
+	 * A display bridge for Starling engine
+	 *
+	 */
 	public class StarlingDisplayBridge implements IDisplayBridge
 	{
 		protected var _display:DisplayObject;
+		
+		/**
+		 * @inheritDoc
+		 */
 		public function get display():Object
 		{
 			return _display;
 		}
+		
 		
 		public function set display(value:Object):void
 		{
@@ -29,11 +38,16 @@ package dragonBones.display
 			_display = value as DisplayObject;
 			addDisplay(parent, index);
 		}
-		
+		/**
+		 * Creates a new <code>StarlingDisplayBridge</code> object
+		 */
 		public function StarlingDisplayBridge()
 		{
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function update(matrix:Matrix):void
 		{
 			if (_display.pivotX != 0 || _display.pivotY != 0)
@@ -44,6 +58,9 @@ package dragonBones.display
 			_display.transformationMatrix.copyFrom(matrix);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function addDisplay(container:Object, index:int = -1):void
 		{
 			if(container && _display)
@@ -58,7 +75,9 @@ package dragonBones.display
 				}
 			}
 		}
-		
+		/**
+		 * @inheritDoc
+		 */
 		public function removeDisplay():void
 		{
 			if(_display && _display.parent)
