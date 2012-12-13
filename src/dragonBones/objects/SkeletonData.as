@@ -1,15 +1,12 @@
 package dragonBones.objects {
 	
-	import flash.utils.ByteArray;
-	
-
 	/**
-	 * A set of armature datas and animation datas
+	 * A set of armature data and animation data
 	 */
 	public class SkeletonData
 	{
-		private var _armatureDatas:Object;
-		private var _animationDatas:Object;
+		private var _armatureDataDic:Object;
+		private var _animationDataDic:Object;
 		private var _armatureList:Vector.<String>;
 		private var _animationList:Vector.<String>;
 		
@@ -24,7 +21,7 @@ package dragonBones.objects {
 			return _armatureList.length;
 		}
 		
-		public function get totalAnimation():uint
+		public function get totalAnimations():uint
 		{
 			return _animationList.length;
 		}
@@ -41,31 +38,31 @@ package dragonBones.objects {
 		
 		public function SkeletonData()
 		{
-			_armatureDatas = { };
-			_animationDatas = { };
+			_armatureDataDic = { };
+			_animationDataDic = { };
 			_armatureList = new Vector.<String>;
 			_animationList = new Vector.<String>;
 		}
 		
 		public function dispose():void
 		{
-			for each(var armatureData:ArmatureData in _armatureDatas)
+			for each(var armatureData:ArmatureData in _armatureDataDic)
 			{
 				armatureData.dispose();
 			}
-			for each(var animationData:AnimationData in _animationDatas)
+			for each(var animationData:AnimationData in _animationDataDic)
 			{
 				animationData.dispose();
 			}
-			_armatureDatas = null;
-			_animationDatas = null;
+			_armatureDataDic = null;
+			_animationDataDic = null;
 			_armatureList = null;
 			_animationList = null;
 		}
 		
 		public function getArmatureData(name:String):ArmatureData
 		{
-			return _armatureDatas[name];
+			return _armatureDataDic[name];
 		}
 		
 		public function getAramtureDataAt(index:int):ArmatureData
@@ -76,7 +73,7 @@ package dragonBones.objects {
 		
 		public function getAnimationData(name:String):AnimationData
 		{
-			return _animationDatas[name];
+			return _animationDataDic[name];
 		}
 		
 		public function getAnimationDataAt(index:int):AnimationData
@@ -88,7 +85,7 @@ package dragonBones.objects {
 		internal function addArmatureData(data:ArmatureData):void
 		{
 			var name:String = data.name;
-			_armatureDatas[name] = data;
+			_armatureDataDic[name] = data;
 			if(_armatureList.indexOf(name) < 0)
 			{
 				_armatureList.push(name);
@@ -98,7 +95,7 @@ package dragonBones.objects {
 		internal function addAnimationData(data:AnimationData):void
 		{
 			var name:String = data.name;
-			_animationDatas[name] = data;
+			_animationDataDic[name] = data;
 			if(_animationList.indexOf(name) < 0)
 			{
 				_animationList.push(name);

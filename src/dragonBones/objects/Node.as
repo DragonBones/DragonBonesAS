@@ -13,11 +13,13 @@ package dragonBones.objects
 		public var scaleY:Number;
 		public var skewX:Number;
 		public var skewY:Number;
+		public var pivotX:Number;
+		public var pivotY:Number;
 		public var z:Number;
 		
 		public function get rotation():Number
 		{
-			return skewY;
+			return skewX;
 		}
 		public function set rotation(value:Number):void
 		{
@@ -33,6 +35,8 @@ package dragonBones.objects
 			scaleX = _scaleX;
 			scaleY = _scaleY;
 			
+			pivotX = 0;
+			pivotY = 0;
 			z = 0;
 		}
 		
@@ -44,12 +48,14 @@ package dragonBones.objects
 			scaleY = node.scaleY;
 			skewX = node.skewX;
 			skewY = node.skewY;
+			
+			pivotX = node.pivotX;
+			pivotY = node.pivotY;
 			z = node.z;
 		}
 		
 		public function toString():String {
-			var _str:String = "";
-			_str += "x:" + x + " y:" + y + " skewX:" + skewX + " skewY:" + skewY + " scaleX:" + scaleX + " scaleY:" + scaleY;
+			var _str:String = "x:" + x + " y:" + y + " skewX:" + skewX + " skewY:" + skewY + " scaleX:" + scaleX + " scaleY:" + scaleY;
 			return _str;
 		}
 	}

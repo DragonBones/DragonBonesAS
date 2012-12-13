@@ -22,6 +22,8 @@ package dragonBones.objects
 			scaleY = to.scaleY - from.scaleY;
 			skewX = to.skewX - from.skewX;
 			skewY = to.skewY - from.skewY;
+			pivotX = to.pivotX - from.pivotX;
+			pivotY = to.pivotY - from.pivotY;
 			
 			skewX %= DOUBLE_PI;
 			if (skewX > Math.PI)

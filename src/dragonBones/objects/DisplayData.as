@@ -3,6 +3,9 @@
 	/** @private */
 	public class DisplayData
 	{
+		public var pivotX:int;
+		public var pivotY:int;
+		
 		internal var _name:String;
 		public function get name():String
 		{

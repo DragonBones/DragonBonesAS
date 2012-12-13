@@ -7,8 +7,8 @@ package dragonBones.objects
 	/** @private */
 	public class MovementData
 	{
-		private var _movementBoneDatas:Object;
-		dragonBones_internal var _movementFrameList:Vector.<MovementFrameData>;
+		private var _movementBoneDataDic:Object;
+		private var _movementFrameList:Vector.<MovementFrameData>;
 		
 		internal var _name:String;
 		public function get name():String
@@ -16,50 +16,71 @@ package dragonBones.objects
 			return _name;
 		}
 		
-		public var duration:int;
-		public var durationTo:int;
-		public var durationTween:int;
+		public function get totalFrames():uint
+		{
+			return _movementFrameList.length;
+		}
+		
+		public var duration:Number;
+		public var durationTo:Number;
+		public var durationTween:Number;
 		public var loop:Boolean;
 		public var tweenEasing:Number;
 		
 		public function MovementData()
 		{
-			duration = 1;
+			duration = 0;
 			durationTo = 0;
 			durationTween = 0;
-			_movementBoneDatas = { };
+			_movementBoneDataDic = { };
 			_movementFrameList = new Vector.<MovementFrameData>;
 		}
 		
-		public function setValues(_duration:int = 1, _durationTo:int = 0, _durationTween:int = 0, _loop:Boolean = false, _tweenEasing:Number = NaN):void
+		public function setValues(duration:Number, durationTo:Number, durationTween:Number, loop:Boolean, tweenEasing:Number):void
 		{
-			duration = _duration > 0?_duration:1;
-			durationTo = _durationTo >= 0?_durationTo:0;
-			durationTween = _durationTween >= 0?_durationTween:0;
-			loop = _loop;
+			this.duration = duration;
+			this.durationTo = durationTo;
+			this.durationTween = durationTween;
+			this.loop = loop;
 			//the default NaN means no tween
-			tweenEasing = _tweenEasing;
+			this.tweenEasing = tweenEasing;
 		}
 		
 		public function dispose():void
 		{
-			for each(var movementBoneData:MovementBoneData in _movementBoneDatas)
+			for each(var movementBoneData:MovementBoneData in _movementBoneDataDic)
 			{
 				movementBoneData.dispose();
 			}
-			movementBoneData = null;
+			_movementBoneDataDic = null;
 			_movementFrameList = null;
 		}
 		
 		public function getMovementBoneData(name:String):MovementBoneData
 		{
-			return _movementBoneDatas[name];
+			return _movementBoneDataDic[name];
+		}
+		
+		public function getMovementFrameDataAt(index:int):MovementFrameData
+		{
+			return _movementFrameList.length > index?_movementFrameList[index]:null;
 		}
 		
 		internal function addMovementBoneData(data:MovementBoneData):void
 		{
 			var name:String = data.name;
-			_movementBoneDatas[name] = data;
+			if(name)
+			{
+				_movementBoneDataDic[name] = data;
+			}
+		}
+		
+		internal function addMovementFrameData(data:MovementFrameData):void
+		{
+			if(_movementFrameList.indexOf(data) < 0)
+			{
+				_movementFrameList.push(data);
+			}
 		}
 	}
 	

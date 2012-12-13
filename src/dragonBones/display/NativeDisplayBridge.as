@@ -1,7 +1,10 @@
 package dragonBones.display
 {
+	import dragonBones.objects.Node;
+	
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
+	import flash.display.Shape;
 	import flash.geom.Matrix;
 	
 	/**
@@ -47,17 +50,12 @@ package dragonBones.display
 		/**
 		 * @inheritDoc
 		 */
-		public function update(matrix:Matrix):void
+		public function update(matrix:Matrix, node:Node):void
 		{
-			var pivotBitmap:PivotBitmap = _display as PivotBitmap;
-			if(pivotBitmap)
-			{
-				if (pivotBitmap.pivotX != 0 || pivotBitmap.pivotY != 0)
-				{
-					matrix.tx -= matrix.a * pivotBitmap.pivotX + matrix.c * pivotBitmap.pivotY;
-					matrix.ty -= matrix.b * pivotBitmap.pivotX + matrix.d * pivotBitmap.pivotY;
-				}
-			}
+			var pivotX:Number = node.pivotX;
+			var pivotY:Number = node.pivotY;
+			matrix.tx -= matrix.a * pivotX + matrix.c * pivotY;
+			matrix.ty -= matrix.b * pivotX + matrix.d * pivotY;
 			_display.transform.matrix = matrix;
 		}
 		/**

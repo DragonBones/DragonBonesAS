@@ -1,12 +1,9 @@
 package dragonBones.utils {
 	
-	import flash.utils.ByteArray;
-	
 	/** @private */
 	final public class ConstValues {
-		public static const VERSION:String = "1.4";
-		
-		public static const ANGLE_TO_RADIAN:Number = Math.PI / 180;
+		public static const VERSION_14:String = "1.4";
+		public static const VERSION:String = "2.0";
 		
 		public static const SKELETON:String = "skeleton";
 

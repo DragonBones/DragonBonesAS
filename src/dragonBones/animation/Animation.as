@@ -35,7 +35,6 @@ package dragonBones.animation
 		
 		private var _animationData:AnimationData;
 		private var _movementData:MovementData;
-		private var _currentFrameData:MovementFrameData;
 		
 		private var _armature:Armature;
 		
@@ -69,7 +68,6 @@ package dragonBones.animation
 			movementList = null;
 			_animationData = null;
 			_movementData = null;
-			_currentFrameData  = null;
 			_armature = null;
 		}
 		/** @private */
@@ -79,15 +77,11 @@ package dragonBones.animation
 			{
 				stop();
 				_animationData = animationData;
-				
 				movementList = _animationData.movementList;
 			}
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
-		override public function gotoAndPlay(movementID:Object, durationTo:int = -1, durationTween:int = -1, loop:* = null, tweenEasing:Number = NaN):void
+		public function gotoAndPlay(movementID:String, tweenTime:Number = -1, duration:Number = -1, loop:* = null, tweenEasing:Number = NaN):void
 		{
 			if (!_animationData)
 			{
@@ -98,21 +92,36 @@ package dragonBones.animation
 			{
 				return;
 			}
-			_currentFrameData = null;
-			_toIndex = 0;
 			_movementData = movementData;
+			
+			_isComplete = false;
+			_isPause = false;
+			_currentTime = 0;
+			
+			_nextFrameDataTimeEdge = 0;
+			_nextFrameDataID = 0;
+			
 			var exMovementID:String = this.movementID;
 			this.movementID = movementID as String;
 			
-			durationTo = durationTo < 0?_movementData.durationTo:durationTo;
-			durationTween = durationTween < 0?_movementData.durationTween:durationTween;
-			loop = loop === null?_movementData.loop:loop;
+			_totalTime = tweenTime > 0?tweenTime:_movementData.durationTo;
+			if(_totalTime < 0)
+			{
+				_totalTime = 0;
+			}
+			
+			_duration = duration > 0?duration:_movementData.durationTween;
+			if(_duration < 0)
+			{
+				_duration = 0;
+			}
+			loop = Boolean(loop === null?_movementData.loop:loop);
 			tweenEasing = isNaN(tweenEasing)?_movementData.tweenEasing:tweenEasing;
 			
-			super.gotoAndPlay(null, durationTo, durationTween);
 			
-			_duration = _movementData.duration;
-			if (_duration == 1)
+			_rawDuration = _movementData.duration;
+			
+			if (_rawDuration == 0)
 			{
 				_loop = SINGLE;
 			}
@@ -120,14 +129,12 @@ package dragonBones.animation
 			{
 				if (loop)
 				{
-					_loop = LIST_LOOP_START
+					_loop = LIST_LOOP_START;
 				}
 				else
 				{
-					_loop = LIST_START
-					_duration --;
+					_loop = LIST_START;
 				}
-				_durationTween = durationTween;
 			}
 			
 			for each(var bone:Bone in _armature._boneDepthList)
@@ -135,7 +142,7 @@ package dragonBones.animation
 				var movementBoneData:MovementBoneData = _movementData.getMovementBoneData(bone.name);
 				if (movementBoneData)
 				{
-					bone._tween.gotoAndPlay(movementBoneData, durationTo, durationTween, loop, tweenEasing);
+					bone._tween.gotoAndPlay(movementBoneData, _totalTime, _duration, loop, tweenEasing);
 					if(bone.childArmature)
 					{
 						bone.childArmature.animation.gotoAndPlay(movementID);
@@ -205,31 +212,26 @@ package dragonBones.animation
 		override protected function updateHandler():void
 		{
 			var event:AnimationEvent;
-			if (_currentPrecent >= 1)
+			if (_progress >= 1)
 			{
 				switch(_loop)
 				{
 					case LIST_START:
 						_loop = LIST;
-						_currentPrecent = (_currentPrecent - 1) * _totalFrames / _durationTween;
-						if (_currentPrecent >= 1)
+						_progress = 0;
+						_totalTime = _duration;
+						_nextFrameDataTimeEdge = 0;
+						
+						if(_armature.hasEventListener(AnimationEvent.START))
 						{
-							//the speed of playing is too fast or the durationTween is too short
+							event = new AnimationEvent(AnimationEvent.START);
+							event.movementID = movementID;
+							_armature.dispatchEvent(event);
 						}
-						else
-						{
-							_totalFrames = _durationTween;
-							if(_armature.hasEventListener(AnimationEvent.START))
-							{
-								event = new AnimationEvent(AnimationEvent.START);
-								event.movementID = movementID;
-								_armature.dispatchEvent(event);
-							}
-							break;
-						}
+						break;
 					case LIST:
 					case SINGLE:
-						_currentPrecent = 1;
+						_progress = 1;
 						_isComplete = true;
 						if(_armature.hasEventListener(AnimationEvent.COMPLETE))
 						{
@@ -240,8 +242,8 @@ package dragonBones.animation
 						break;
 					case LIST_LOOP_START:
 						_loop = 0;
-						_totalFrames = _durationTween > 0?_durationTween:1;
-						_currentPrecent %= 1;
+						_totalTime = _duration;
+						_progress %= 1;
 						if(_armature.hasEventListener(AnimationEvent.START))
 						{
 							event = new AnimationEvent(AnimationEvent.START);
@@ -251,9 +253,10 @@ package dragonBones.animation
 						break;
 					default:
 						//change the loop
-						_loop += int(_currentPrecent);
-						_currentPrecent %= 1;
-						_toIndex = 0;
+						_loop += int(_progress);
+						_progress %= 1;
+						_nextFrameDataTimeEdge = 0;
+						_nextFrameDataID = 0;
 						if(_armature.hasEventListener(AnimationEvent.LOOP_COMPLETE))
 						{
 							event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
@@ -263,53 +266,47 @@ package dragonBones.animation
 						break;
 				}
 			}
-			if (_loop >= LIST)
+			if (_loop >= LIST && _movementData.totalFrames > 0)
 			{
-				updateFrameData(_currentPrecent);
+				updateFrameData(_progress);
 			}
 		}
 		
-		private function updateFrameData(currentPrecent:Number):void
+		private function updateFrameData(progress:Number):void
 		{
-			var length:uint = _movementData._movementFrameList.length;
-			if(length == 0)
-			{
-				return;
-			}
-			var played:Number = _duration * currentPrecent;
+			var playedTime:Number = _rawDuration * progress;
 			//refind the current frame
-			if (!_currentFrameData || played >= _currentFrameData.duration + _currentFrameData.start || played < _currentFrameData.start)
+			if (playedTime >= _nextFrameDataTimeEdge)
 			{
-				while (true)
-				{
-					_currentFrameData =  _movementData._movementFrameList[_toIndex];
-					if (++_toIndex >= length)
+				var length:uint = _movementData.totalFrames;
+				do {
+					var currentFrameDataID:int = _nextFrameDataID;
+					var currentFrameData:MovementFrameData = _movementData.getMovementFrameDataAt(currentFrameDataID);
+					var frameDuration:Number = currentFrameData.duration;
+					_nextFrameDataTimeEdge += frameDuration;
+					if (++ _nextFrameDataID >= length)
 					{
-						_toIndex = 0;
+						_nextFrameDataID = 0;
 					}
-					if(_currentFrameData && played >= _currentFrameData.start && played < _currentFrameData.duration + _currentFrameData.start)
-					{
-						break;
-					}
-				}
-				if(_currentFrameData.event && _armature.hasEventListener(FrameEvent.MOVEMENT_FRAME_EVENT))
+				}while (playedTime >= _nextFrameDataTimeEdge);
+				if(currentFrameData.event && _armature.hasEventListener(FrameEvent.MOVEMENT_FRAME_EVENT))
 				{
 					var frameEvent:FrameEvent = new FrameEvent(FrameEvent.MOVEMENT_FRAME_EVENT);
 					frameEvent.movementID = movementID;
-					frameEvent.frameLabel = _currentFrameData.event;
+					frameEvent.frameLabel = currentFrameData.event;
 					_armature.dispatchEvent(frameEvent);
 				}
-				if(_currentFrameData.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
+				if(currentFrameData.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
 				{
 					var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
 					soundEvent.movementID = movementID;
-					soundEvent.sound = _currentFrameData.sound;
+					soundEvent.sound = currentFrameData.sound;
 					soundEvent._armature = _armature;
 					_soundManager.dispatchEvent(soundEvent);
 				}
-				if(_currentFrameData.movement)
+				if(currentFrameData.movement)
 				{
-					gotoAndPlay(_currentFrameData.movement);
+					gotoAndPlay(currentFrameData.movement);
 				}
 			}
 		}

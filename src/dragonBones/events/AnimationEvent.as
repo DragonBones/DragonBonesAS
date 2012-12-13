@@ -9,7 +9,7 @@
 	 *
 	 * @see dragonBones.Armature
 	 */
-	public class AnimationEvent extends flash.events.Event
+	public class AnimationEvent extends Event
 	{
 		/**
 		 * Dispatched when the movement of animation is changed.

@@ -4,7 +4,7 @@ package dragonBones.objects
 	/** @private */
 	public class AnimationData
 	{
-		private var _movementDatas:Object;
+		private var _movementDataDic:Object;
 		private var _movementList:Vector.<String>;
 		
 		internal var _name:String;
@@ -25,23 +25,23 @@ package dragonBones.objects
 		
 		public function AnimationData()
 		{
-			_movementDatas = { };
+			_movementDataDic = { };
 			_movementList = new Vector.<String>;
 		}
 		
 		public function dispose():void
 		{
-			for each(var movementData:MovementData in _movementDatas)
+			for each(var movementData:MovementData in _movementDataDic)
 			{
 				movementData.dispose();
 			}
-			_movementDatas = null;
+			_movementDataDic = null;
 			_movementList = null;
 		}
 		
 		public function getMovementData(name:String):MovementData
 		{
-			return _movementDatas[name];
+			return _movementDataDic[name];
 		}
 		
 		public function getMovementDataAt(index:int):MovementData
@@ -53,10 +53,13 @@ package dragonBones.objects
 		internal function addMovementData(data:MovementData):void
 		{
 			var name:String = data.name;
-			_movementDatas[name] = data;
-			if(_movementList.indexOf(name) < 0)
+			if(name)
 			{
-				_movementList.push(name);
+				_movementDataDic[name] = data;
+				if(_movementList.indexOf(name) < 0)
+				{
+					_movementList.push(name);
+				}
 			}
 		}
 		

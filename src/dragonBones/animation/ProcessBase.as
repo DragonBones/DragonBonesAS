@@ -12,17 +12,17 @@ package dragonBones.animation
 		protected static const LIST_LOOP_START:int = -2;
 		protected static const LIST:int = -1;
 		
-		protected var _currentFrame:Number;
-		protected var _totalFrames:int;
-		protected var _currentPrecent:Number;
-		
-		protected var _durationTween:int;
-		protected var _duration:int;
+		protected var _currentTime:Number;
+		protected var _totalTime:Number;
+		protected var _progress:Number;
 		
 		protected var _loop:int;
-		protected var _tweenEasing:int;
+		protected var _duration:Number;
+		protected var _rawDuration:Number;
 		
-		protected var _toIndex:int;
+		protected var _nextFrameDataTimeEdge:Number;
+		protected var _frameDuration:Number;
+		protected var _nextFrameDataID:int;
 		
 		/**
 		 * Indicates whether the animation is playing
@@ -60,6 +60,10 @@ package dragonBones.animation
 		}
 		public function set timeScale(value:Number):void
 		{
+			if(value < 0)
+			{
+				value = 0;
+			}
 			_timeScale = value;
 		}
 		
@@ -68,33 +72,16 @@ package dragonBones.animation
 		 */
 		public function ProcessBase()
 		{
-			_timeScale = 1;
 			_isComplete = true;
 			_isPause = false;
-			_currentFrame = 0;
+			_timeScale = 1;
+			_currentTime = 0;
 		}
 		/**
 		 * Cleans up any resources used by the current object.
 		 */
 		public function dispose():void
 		{
-		}
-		
-		/**
-		 * Starts playing the specified animation.
-		 * @param	animation
-		 * @param	_durationTo
-		 * @param	durationTween
-		 * @param	loop
-		 * @param	tweenEasing
-		 */
-		public function gotoAndPlay(animation:Object, _durationTo:int = 0, durationTween:int = 0, loop:* = false, tweenEasing:Number = NaN):void
-		{
-			_isComplete = false;
-			_isPause = false;
-			_currentFrame = 0;
-			_totalFrames = _durationTo;
-			_tweenEasing = tweenEasing;
 		}
 		
 		/**
@@ -105,7 +92,7 @@ package dragonBones.animation
 			if(_isComplete)
 			{
 				_isComplete = false;
-				_currentFrame = 0;
+				_currentTime = 0;
 			}
 			_isPause = false;
 		}
@@ -126,13 +113,16 @@ package dragonBones.animation
 			{
 				return;
 			}
-			if (_totalFrames <= 0)
+			if(_totalTime > 0)
 			{
-				_currentFrame = _totalFrames = 1;
+				_currentTime += WorldClock.timeLag;
+				_progress = _currentTime / _totalTime;
+				_currentTime %= _totalTime;
 			}
-			_currentFrame += _timeScale;
-			_currentPrecent = _currentFrame / _totalFrames;
-			_currentFrame %= _totalFrames;
+			else
+			{
+				_progress = 1;
+			}
 			updateHandler();
 		}
 		

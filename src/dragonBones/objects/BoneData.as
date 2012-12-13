@@ -4,7 +4,7 @@ package dragonBones.objects
 	/** @private */
 	final public class BoneData extends Node
 	{
-		internal var _displayList:Vector.<DisplayData>;
+		private var _displayList:Vector.<DisplayData>;
 		
 		internal var _name:String;
 		public function get name():String
@@ -18,7 +18,7 @@ package dragonBones.objects
 			return _parent;
 		}
 		
-		public function get displayLength():uint
+		public function get totalDisplays():uint
 		{
 			return _displayList.length;
 		}
@@ -48,6 +48,14 @@ package dragonBones.objects
 		public function getDisplayDataAt(index:int):DisplayData
 		{
 			return _displayList.length > index?_displayList[index]:null;
+		}
+		
+		internal function addBoneData(data:DisplayData):void
+		{
+			if(_displayList.indexOf(data) < 0)
+			{
+				_displayList.push(data);
+			}
 		}
 	}
 }

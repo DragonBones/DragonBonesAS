@@ -24,7 +24,7 @@
 	public class StarlingFactory extends BaseFactory
 	{
 		/** @private */
-		public static function getTextureDisplay(textureAtlasData:TextureAtlasData, fullName:String):Image
+		public static function getTextureDisplay(textureAtlasData:TextureAtlasData, fullName:String, pivotX:int, pivotY:int):Image
 		{
 			var subTextureData:SubTextureData = textureAtlasData.getSubTextureData(fullName);
 			if (subTextureData)
@@ -37,8 +37,9 @@
 				}
 				
 				var image:Image = new Image(subTexture);
-				image.pivotX = subTextureData.pivotX;
-				image.pivotY = subTextureData.pivotY;
+				//1.4
+				image.pivotX = pivotX || subTextureData.pivotX;
+				image.pivotY = pivotY || subTextureData.pivotY;
 				return image;
 			}
 			return null;
@@ -70,6 +71,24 @@
 		
 		override protected function generateArmature():Armature
 		{
+			generateTexture();
+			var armature:Armature = new Armature(new Sprite());
+			return armature;
+		}
+		
+		override protected function generateBone():Bone
+		{
+			var bone:Bone = new Bone(new StarlingDisplayBridge());
+			return bone;
+		}
+		
+		override protected function getBoneTextureDisplay(textureName:String, pivotX:int, pivotY:int):Object
+		{
+			return getTextureDisplay(_textureAtlasData, textureName, pivotX, pivotY);
+		}
+		
+		protected function generateTexture():void
+		{
 			if (!textureAtlasData._starlingTexture)
 			{
 				if(textureAtlasData.dataType == BytesType.ATF)
@@ -86,20 +105,6 @@
 					}
 				}
 			}
-			
-			var armature:Armature = new Armature(new Sprite());
-			return armature;
-		}
-		
-		override protected function generateBone():Bone
-		{
-			var bone:Bone = new Bone(new StarlingDisplayBridge());
-			return bone;
-		}
-		
-		override protected function getBoneTextureDisplay(textureName:String):Object
-		{
-			return getTextureDisplay(_textureAtlasData, textureName);
 		}
 	}
 }

@@ -4,7 +4,7 @@ package dragonBones.objects
 	/** @private */
 	final public class FrameData extends TweenNode
 	{
-		public var duration:int;
+		public var duration:Number;
 		
 		public var tweenEasing:Number;
 		
@@ -20,7 +20,7 @@ package dragonBones.objects
 		{
 			super();
 			
-			duration = 1;
+			duration = 0;
 			//NaN: no tweens;  -1: ease out; 0: linear; 1: ease in; 2: ease in&out
 			tweenEasing = 0;
 		}

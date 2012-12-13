@@ -207,7 +207,8 @@ package dragonBones
 				{
 					_rootBoneList.push(bone);
 				}
-			}else if(boneIndex >= 0)
+			}
+			else if(boneIndex >= 0)
 			{
 				_rootBoneList.splice(boneIndex, 1);
 			}

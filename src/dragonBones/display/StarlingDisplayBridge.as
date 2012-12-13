@@ -1,6 +1,9 @@
 package dragonBones.display
 {
 	import flash.geom.Matrix;
+	
+	import dragonBones.objects.Node;
+	
 	import starling.display.DisplayObject;
 	import starling.display.DisplayObjectContainer;
 	
@@ -48,13 +51,12 @@ package dragonBones.display
 		/**
 		 * @inheritDoc
 		 */
-		public function update(matrix:Matrix):void
+		public function update(matrix:Matrix, node:Node):void
 		{
-			if (_display.pivotX != 0 || _display.pivotY != 0)
-			{
-				matrix.tx -= matrix.a * _display.pivotX + matrix.c * _display.pivotY;
-				matrix.ty -= matrix.b * _display.pivotX + matrix.d * _display.pivotY;
-			}
+			var pivotX:Number = node.pivotX + _display.pivotX;
+			var pivotY:Number = node.pivotY + _display.pivotY;
+			matrix.tx -= matrix.a * pivotX + matrix.c * pivotY;
+			matrix.ty -= matrix.b * pivotX + matrix.d * pivotY;
 			_display.transformationMatrix.copyFrom(matrix);
 		}
 		

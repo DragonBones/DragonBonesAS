@@ -1,5 +1,7 @@
 package dragonBones.display
 {
+	import dragonBones.objects.Node;
+	
 	import flash.geom.Matrix;
 
 	/**
@@ -17,7 +19,7 @@ package dragonBones.display
 		 * Updates the transform of the display object
 		 * @param	matrix
 		 */
-		function update(matrix:Matrix):void;
+		function update(matrix:Matrix, node:Node):void;
 		/**
 		 * Adds the original display object to another display object.
 		 * @param	container

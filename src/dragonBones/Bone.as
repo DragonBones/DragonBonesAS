@@ -5,8 +5,8 @@ package dragonBones
 	import dragonBones.objects.BoneData;
 	import dragonBones.objects.Node;
 	import dragonBones.utils.dragonBones_internal;
-	import flash.events.EventDispatcher;
 	
+	import flash.events.EventDispatcher;
 	import flash.geom.Matrix;
 	
 	use namespace dragonBones_internal;
@@ -45,20 +45,16 @@ package dragonBones
 		dragonBones_internal var _children:Vector.<Bone>;
 		/** @private */
 		dragonBones_internal var _displayBridge:IDisplayBridge;
-		
-		private var _globalTransformMatrix:Matrix = new Matrix;
-		private var _transformMatrixForChildren:Matrix = new Matrix;
-		
-		private var _displayList:Array;
-		private var _displayIndex:int;
-		
 		/** @private */
 		dragonBones_internal var _displayVisible:Boolean;
 		/** @private */
 		dragonBones_internal var _armature:Armature;
 		
-		/** @private */
-		protected var _parent:Bone;
+		private var _globalTransformMatrix:Matrix = new Matrix;
+		private var _transformMatrixForChildren:Matrix = new Matrix;
+		private var _displayList:Array;
+		private var _displayIndex:int;
+		private var _parent:Bone;
 		
 		/**
 		 * The armature holding this bone.
@@ -75,8 +71,6 @@ package dragonBones
 		{
 			return _displayList[_displayIndex] as Armature;
 		}
-		
-		
 		
 		/**
 		 * Indicates the bone that contains this bone.
@@ -201,16 +195,18 @@ package dragonBones
 		public function update():void
 		{
 			_tween.update();
+			var tweenNode:Node = _tween._node;
+			var x:Number = origin.x + node.x + tweenNode.x;
+			var y:Number = origin.y + node.y + tweenNode.y;
 			
-			//trace(_tween._node);
-			global.x = origin.x + node.x + _tween._node.x;
-			global.y = origin.y + node.y + _tween._node.y;
-			global.skewX = origin.skewX + node.skewX + _tween._node.skewX;
-			global.skewY = origin.skewY + node.skewY + _tween._node.skewY;
-			global.scaleX = node.scaleX + _tween._node.scaleX;
-			global.scaleY = node.scaleX + _tween._node.scaleY;
+			global.skewX = origin.skewX + node.skewX + tweenNode.skewX;
+			global.skewY = origin.skewY + node.skewY + tweenNode.skewY;
+			global.scaleX = node.scaleX + tweenNode.scaleX;
+			global.scaleY = node.scaleX + tweenNode.scaleY;
 			//origin.scaleX + node.scaleX + tweenNode.scaleX;
 			//origin.scaleY + node.scaleY + tweenNode.scaleY;
+			global.pivotX = origin.pivotX + node.pivotX + tweenNode.pivotX;
+			global.pivotY = origin.pivotY + node.pivotY + tweenNode.pivotY;
 			
 			//Note: this formula of transform is defined by Flash pro
 			var cosX:Number = Math.cos(global.skewX);
@@ -225,15 +221,20 @@ package dragonBones
 				_globalTransformMatrix.b = global.scaleX * sinY;
 				_globalTransformMatrix.c = -global.scaleY * sinX;
 				_globalTransformMatrix.d = global.scaleY * cosX;
-				_globalTransformMatrix.tx = global.x;
-				_globalTransformMatrix.ty = global.y;
+				_globalTransformMatrix.tx = x;
+				_globalTransformMatrix.ty = y;
 				if(_parent)
 				{
 					_globalTransformMatrix.concat(_parent._transformMatrixForChildren);
 				}
+				
+				//update global
+				global.x = _globalTransformMatrix.tx;
+				global.y = _globalTransformMatrix.ty;
+				
 				if(_displayVisible && currentDisplay)
 				{
-					_displayBridge.update(_globalTransformMatrix);
+					_displayBridge.update(_globalTransformMatrix, global);
 					var childArmature:Armature = this.childArmature;
 					if(childArmature)
 					{
@@ -249,8 +250,8 @@ package dragonBones
 				_transformMatrixForChildren.b = sinY;
 				_transformMatrixForChildren.c = -sinX;
 				_transformMatrixForChildren.d = cosX;
-				_transformMatrixForChildren.tx = global.x;
-				_transformMatrixForChildren.ty = global.y;
+				_transformMatrixForChildren.tx = x;
+				_transformMatrixForChildren.ty = y;
 				if (_parent)
 				{
 					_transformMatrixForChildren.concat(_parent._transformMatrixForChildren);
