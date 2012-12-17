@@ -1,4 +1,7 @@
 package dragonBones.objects {
+	import dragonBones.utils.dragonBones_internal;
+	
+	use namespace dragonBones_internal;
 	
 	/**
 	 * A set of armature data and animation data
@@ -7,6 +10,7 @@ package dragonBones.objects {
 	{
 		private var _armatureDataDic:Object;
 		private var _animationDataDic:Object;
+		private var _displayDataDic:Object;
 		private var _armatureList:Vector.<String>;
 		private var _animationList:Vector.<String>;
 		
@@ -40,6 +44,7 @@ package dragonBones.objects {
 		{
 			_armatureDataDic = { };
 			_animationDataDic = { };
+			_displayDataDic = { };
 			_armatureList = new Vector.<String>;
 			_animationList = new Vector.<String>;
 		}
@@ -56,6 +61,7 @@ package dragonBones.objects {
 			}
 			_armatureDataDic = null;
 			_animationDataDic = null;
+			_displayDataDic = null;
 			_armatureList = null;
 			_animationList = null;
 		}
@@ -76,15 +82,13 @@ package dragonBones.objects {
 			return _animationDataDic[name];
 		}
 		
-		public function getAnimationDataAt(index:int):AnimationData
+		dragonBones_internal function getDisplayData(name:String):DisplayData
 		{
-			var name:String = _animationList.length > index?_animationList[index]:null;
-			return getAnimationData(name);
+			return _displayDataDic[name];
 		}
 		
-		internal function addArmatureData(data:ArmatureData):void
+		internal function addArmatureData(data:ArmatureData, name:String):void
 		{
-			var name:String = data.name;
 			_armatureDataDic[name] = data;
 			if(_armatureList.indexOf(name) < 0)
 			{
@@ -92,14 +96,18 @@ package dragonBones.objects {
 			}
 		}
 		
-		internal function addAnimationData(data:AnimationData):void
+		internal function addAnimationData(data:AnimationData, name:String):void
 		{
-			var name:String = data.name;
 			_animationDataDic[name] = data;
 			if(_animationList.indexOf(name) < 0)
 			{
 				_animationList.push(name);
 			}
+		}
+		
+		internal function addDisplayData(data:DisplayData, name:String):void
+		{
+			_displayDataDic[name] = data;
 		}
 	}
 }

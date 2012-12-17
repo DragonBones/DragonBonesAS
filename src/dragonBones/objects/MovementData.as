@@ -10,12 +10,6 @@ package dragonBones.objects
 		private var _movementBoneDataDic:Object;
 		private var _movementFrameList:Vector.<MovementFrameData>;
 		
-		internal var _name:String;
-		public function get name():String
-		{
-			return _name;
-		}
-		
 		public function get totalFrames():uint
 		{
 			return _movementFrameList.length;
@@ -66,13 +60,9 @@ package dragonBones.objects
 			return _movementFrameList.length > index?_movementFrameList[index]:null;
 		}
 		
-		internal function addMovementBoneData(data:MovementBoneData):void
+		internal function addMovementBoneData(data:MovementBoneData, name:String):void
 		{
-			var name:String = data.name;
-			if(name)
-			{
-				_movementBoneDataDic[name] = data;
-			}
+			_movementBoneDataDic[name] = data;
 		}
 		
 		internal function addMovementFrameData(data:MovementFrameData):void

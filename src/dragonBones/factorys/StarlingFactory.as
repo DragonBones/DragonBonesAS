@@ -3,17 +3,22 @@
 	import dragonBones.Armature;
 	import dragonBones.Bone;
 	import dragonBones.display.StarlingDisplayBridge;
-	import dragonBones.objects.Node;
-	import dragonBones.objects.SubTextureData;
-	import dragonBones.objects.TextureAtlasData;
-	import dragonBones.utils.BytesType;
+	import dragonBones.textures.ITextureAtlas;
+	import dragonBones.textures.StarlingTextureAtlas;
+	import dragonBones.textures.SubTextureData;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.dragonBones_internal;
 	
-	import starling.display.Sprite;
+	import flash.display.BitmapData;
+	import flash.display.MovieClip;
+	import flash.geom.Rectangle;
+	import flash.utils.ByteArray;
+	
+	import starling.core.Starling;
 	import starling.display.Image;
-	import starling.textures.SubTexture;
+	import starling.display.Sprite;
 	import starling.textures.Texture;
+	import starling.textures.SubTexture;
 	
 	use namespace dragonBones_internal;
 	
@@ -23,44 +28,6 @@
 	 */
 	public class StarlingFactory extends BaseFactory
 	{
-		/** @private */
-		public static function getTextureDisplay(textureAtlasData:TextureAtlasData, fullName:String, pivotX:int, pivotY:int):Image
-		{
-			var subTextureData:SubTextureData = textureAtlasData.getSubTextureData(fullName);
-			if (subTextureData)
-			{
-				var subTexture:SubTexture = textureAtlasData.getStarlingSubTexture(fullName) as SubTexture;
-				if(!subTexture)
-				{
-					subTexture = new SubTexture(textureAtlasData._starlingTexture as Texture, subTextureData);
-					textureAtlasData.addStarlingSubTexture(fullName, subTexture);
-				}
-				
-				var image:Image = new Image(subTexture);
-				//1.4
-				image.pivotX = pivotX || subTextureData.pivotX;
-				image.pivotY = pivotY || subTextureData.pivotY;
-				return image;
-			}
-			return null;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function set textureAtlasData(value:TextureAtlasData):void
-		{
-			super.textureAtlasData = value;
-			if(_textureAtlasData)
-			{
-				_textureAtlasData.bitmap;
-			}
-		}
-		/**
-		 * Specifies whether this object disposes bitmap data.
-		 */
-		public var autoDisposeBitmapData:Boolean = true;
-		
 		/**
 		 * Creates a new <code>StarlingFactory</code>
 		 */
@@ -71,7 +38,6 @@
 		
 		override protected function generateArmature():Armature
 		{
-			generateTexture();
 			var armature:Armature = new Armature(new Sprite());
 			return armature;
 		}
@@ -82,29 +48,58 @@
 			return bone;
 		}
 		
-		override protected function getBoneTextureDisplay(textureName:String, pivotX:int, pivotY:int):Object
+		override protected function generateTextureDisplay(textureAtlas:ITextureAtlas, fullName:String, pivotX:int, pivotY:int):Object
 		{
-			return getTextureDisplay(_textureAtlasData, textureName, pivotX, pivotY);
-		}
-		
-		protected function generateTexture():void
-		{
-			if (!textureAtlasData._starlingTexture)
+			var starlingTextureAtlas:StarlingTextureAtlas = textureAtlas as StarlingTextureAtlas;
+			if(starlingTextureAtlas)
 			{
-				if(textureAtlasData.dataType == BytesType.ATF)
+				//1.4
+				var subTextureData:SubTextureData = starlingTextureAtlas.getRegion(fullName) as SubTextureData;
+				if(subTextureData)
 				{
-					textureAtlasData._starlingTexture = Texture.fromAtfData(textureAtlasData.rawData);
+					pivotX = pivotX || subTextureData.pivotX;
+					pivotY = pivotY || subTextureData.pivotY;
 				}
-				else
+				var subTexture:SubTexture = starlingTextureAtlas.getTexture(fullName) as SubTexture;
+				if(subTexture)
 				{
-					textureAtlasData._starlingTexture = Texture.fromBitmap(textureAtlasData.bitmap);
-					//no need to keep the bitmapData
-					if (autoDisposeBitmapData)
-					{
-						textureAtlasData.bitmap.bitmapData.dispose();
-					}
+					var image:Image = new Image(subTexture);
+					image.pivotX = pivotX;
+					image.pivotY = pivotY;
+					return image;
 				}
 			}
+			return null;
+		}
+		
+		override protected function generateTextureAtlas(content:Object, textureAtlasXML:XML):ITextureAtlas
+		{
+			var texture:Texture;
+			var bitmapData:BitmapData;
+			if(content is BitmapData)
+			{
+				bitmapData = content as BitmapData;
+				texture = Texture.fromBitmapData(bitmapData, true, false, Starling.contentScaleFactor);
+				bitmapData.dispose();
+			}
+			else if(content is MovieClip)
+			{
+				var width:int = int(textureAtlasXML.attribute(ConstValues.A_WIDTH));
+				var height:int = int(textureAtlasXML.attribute(ConstValues.A_HEIGHT));
+				var movieClip:MovieClip = content as MovieClip;
+				bitmapData= new BitmapData(width, height, true, 0xFF00FF);
+				bitmapData.draw(movieClip);
+				texture = Texture.fromBitmapData(bitmapData, true, false, Starling.contentScaleFactor);
+				bitmapData.dispose();
+			}
+			else if(content is ByteArray)
+			{
+				texture =  Texture.fromAtfData(content as ByteArray, Starling.contentScaleFactor);
+				(content as ByteArray).clear();
+			}
+			
+			var textureAtlas:StarlingTextureAtlas = new StarlingTextureAtlas(texture, textureAtlasXML);
+			return textureAtlas;
 		}
 	}
 }

@@ -7,12 +7,6 @@ package dragonBones.objects
 		private var _boneDataDic:Object;
 		private var _boneList:Vector.<String>;
 		
-		internal var _name:String;
-		public function get name():String
-		{
-			return _name;
-		}
-		
 		public function get totalBones():uint
 		{
 			return _boneList.length;
@@ -49,13 +43,9 @@ package dragonBones.objects
 			return getBoneData(name);
 		}
 		
-		internal function addBoneData(data:BoneData):void
+		internal function addBoneData(data:BoneData, name:String):void
 		{
-			var name:String = data.name;
-			if(name)
-			{
-				_boneDataDic[name] = data;
-			}
+			_boneDataDic[name] = data;
 		}
 		
 		internal function updateBoneList():void

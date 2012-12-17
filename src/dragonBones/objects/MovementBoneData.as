@@ -11,12 +11,6 @@ package dragonBones.objects
 			return _duration;
 		}
 		
-		internal var _name:String;
-		public function get name():String
-		{
-			return _name;
-		}
-		
 		public function get totalFrames():int
 		{
 			return _frameList.length;
