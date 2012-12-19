@@ -63,6 +63,8 @@ package dragonBones.animation
 			_node = new Node();
 			_from = new Node();
 			_tweenNode = new TweenNode();
+			_node.scaleX = 0;
+			_node.scaleY = 0;
 		}
 		
 		/**
@@ -342,33 +344,21 @@ package dragonBones.animation
 						_nextFrameDataID = 0;
 					}
 				}while (playedTime >= _nextFrameDataTimeEdge);
-				
-				var isListEnd:Boolean = _loop == LIST && _nextFrameDataID == 0;
-				var currentFrameData:FrameData;
-				var nextFrameData:FrameData;
-				if(isListEnd)
+				if(_loop == LIST && _nextFrameDataID == 0)
 				{
-					nextFrameData = currentFrameData = _movementBoneData.getFrameDataAt(currentFrameDataID);
+					return 1;
 				}
-				else
-				{
-					currentFrameData = _movementBoneData.getFrameDataAt(currentFrameDataID);
-					nextFrameData = _movementBoneData.getFrameDataAt(_nextFrameDataID);
-				}
-				
+				var currentFrameData:FrameData = _movementBoneData.getFrameDataAt(currentFrameDataID);
+				var nextFrameData:FrameData = _movementBoneData.getFrameDataAt(_nextFrameDataID);
 				_frameTweenEasing = currentFrameData.tweenEasing;
 				if (activeFrame)
 				{
 					_currentFrameData = _nextFrameData;
-					if(!isListEnd)
-					{
-						_nextFrameData = nextFrameData;
-					}
+					_nextFrameData = nextFrameData;
 				}
 				setBetween(currentFrameData, nextFrameData);
 			}
 			progress = 1 - (_nextFrameDataTimeEdge - playedTime) / _frameDuration;
-			
 			if (!isNaN(_frameTweenEasing))
 			{
 				//NaN: no tweens;  -1: ease out; 0: linear; 1: ease in; 2: ease in&out

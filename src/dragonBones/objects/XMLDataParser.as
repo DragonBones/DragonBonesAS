@@ -36,7 +36,7 @@ package dragonBones.objects
 			}
 		}
 		
-		public static function getElementByAttribute(xmlList:XMLList, attribute:String, value:String):XMLList
+		public static function getElementsByAttribute(xmlList:XMLList, attribute:String, value:String):XMLList
 		{
 			var result:XMLList = new XMLList();
 			var length:uint = xmlList.length();
@@ -167,7 +167,7 @@ package dragonBones.objects
 			{
 				var boneName:String = boneXML.attribute(ConstValues.A_NAME);
 				var parentName:String = boneXML.attribute(ConstValues.A_PARENT);
-				var parentXML:XML = getElementByAttribute(boneXMLList, ConstValues.A_NAME, parentName)[0];
+				var parentXML:XML = getElementsByAttribute(boneXMLList, ConstValues.A_NAME, parentName)[0];
 				var boneData:BoneData = aramtureData.getBoneData(boneName);
 				boneData = parseBoneData(boneXML, parentXML, boneData);
 				boneData._name = boneName;
@@ -189,6 +189,8 @@ package dragonBones.objects
 			boneData.y = Number(boneXML.attribute(ConstValues.A_Y));
 			boneData.skewX = Number(boneXML.attribute(ConstValues.A_SKEW_X)) * ANGLE_TO_RADIAN;
 			boneData.skewY = Number(boneXML.attribute(ConstValues.A_SKEW_Y)) * ANGLE_TO_RADIAN;
+			boneData.scaleX = Number(boneXML.attribute(ConstValues.A_SCALE_X));
+			boneData.scaleY = Number(boneXML.attribute(ConstValues.A_SCALE_Y));
 			boneData.pivotX =  int(boneXML.attribute(ConstValues.A_PIVOT_X));
 			boneData.pivotY =  int(boneXML.attribute(ConstValues.A_PIVOT_Y));
 			boneData.z = int(boneXML.attribute(ConstValues.A_Z));
@@ -213,8 +215,8 @@ package dragonBones.objects
 				helpNode.y = Number(parentXML.attribute(ConstValues.A_Y));
 				helpNode.skewX = Number(parentXML.attribute(ConstValues.A_SKEW_X)) * ANGLE_TO_RADIAN;
 				helpNode.skewY = Number(parentXML.attribute(ConstValues.A_SKEW_Y)) * ANGLE_TO_RADIAN;
-				//helpNode.scaleX = Number(parentXML.attribute(ConstValues.A_SCALE_X));
-				//helpNode.scaleY = Number(parentXML.attribute(ConstValues.A_SCALE_Y));
+				helpNode.scaleX = Number(parentXML.attribute(ConstValues.A_SCALE_X));
+				helpNode.scaleY = Number(parentXML.attribute(ConstValues.A_SCALE_Y));
 				
 				TransfromUtils.transfromPointWithParent(boneData, helpNode);
 			}
@@ -222,8 +224,6 @@ package dragonBones.objects
 			{
 				boneData._parent = null;
 			}
-			//boneData.scaleX = Number(boneXML.attribute(ConstValues.A_SCALE_X));
-			//boneData.scaleY = Number(boneXML.attribute(ConstValues.A_SCALE_Y));
 			return boneData;
 		}
 		
@@ -280,7 +280,7 @@ package dragonBones.objects
 			{
 				var boneName:String = movementBoneXML.attribute(ConstValues.A_NAME);
 				var boneData:BoneData = armatureData.getBoneData(boneName);
-				var parentXML:XML = getElementByAttribute(movementBoneXMLList, ConstValues.A_NAME, boneData.parent)[0];
+				var parentXML:XML = getElementsByAttribute(movementBoneXMLList, ConstValues.A_NAME, boneData.parent)[0];
 				var movementBoneData:MovementBoneData = movementData.getMovementBoneData(boneName);
 				if(movementBoneData)
 				{
@@ -400,6 +400,8 @@ package dragonBones.objects
 			frameData.y = Number(frameXML.attribute(ConstValues.A_Y));
 			frameData.skewX = Number(frameXML.attribute(ConstValues.A_SKEW_X)) * ANGLE_TO_RADIAN;
 			frameData.skewY = Number(frameXML.attribute(ConstValues.A_SKEW_Y)) * ANGLE_TO_RADIAN;
+			frameData.scaleX = Number(frameXML.attribute(ConstValues.A_SCALE_X));
+			frameData.scaleY = Number(frameXML.attribute(ConstValues.A_SCALE_Y));
 			frameData.pivotX =  int(frameXML.attribute(ConstValues.A_PIVOT_X));
 			frameData.pivotY =  int(frameXML.attribute(ConstValues.A_PIVOT_Y));
 			frameData.z = int(frameXML.attribute(ConstValues.A_Z));
@@ -420,8 +422,8 @@ package dragonBones.objects
 				helpNode.y = Number(parentFrameXML.attribute(ConstValues.A_Y));
 				helpNode.skewX = Number(parentFrameXML.attribute(ConstValues.A_SKEW_X)) * ANGLE_TO_RADIAN;
 				helpNode.skewY = Number(parentFrameXML.attribute(ConstValues.A_SKEW_Y)) * ANGLE_TO_RADIAN;
-				//helpNode.scaleX = Number(parentFrameXML.attribute(ConstValues.A_SCALE_X));
-				//helpNode.scaleY = Number(parentFrameXML.attribute(ConstValues.A_SCALE_Y));
+				helpNode.scaleX = Number(parentFrameXML.attribute(ConstValues.A_SCALE_X));
+				helpNode.scaleY = Number(parentFrameXML.attribute(ConstValues.A_SCALE_Y));
 				
 				TransfromUtils.transfromPointWithParent(frameData, helpNode);
 			}
@@ -430,10 +432,8 @@ package dragonBones.objects
 			frameData.y -= boneData.y;
 			frameData.skewX -= boneData.skewX;
 			frameData.skewY -= boneData.skewY;
-			frameData.scaleX = Number(frameXML.attribute(ConstValues.A_SCALE_X))
-				//- boneData.scaleX;
-			frameData.scaleY = Number(frameXML.attribute(ConstValues.A_SCALE_Y))
-				//- boneData.scaleY;
+			frameData.scaleX -= boneData.scaleX;
+			frameData.scaleY -= boneData.scaleY;
 			frameData.pivotX -= boneData.pivotX;
 			frameData.pivotY -= boneData.pivotY;
 			

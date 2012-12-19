@@ -14,7 +14,6 @@
 	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
 	
-	import starling.core.Starling;
 	import starling.display.Image;
 	import starling.display.Sprite;
 	import starling.textures.Texture;
@@ -79,7 +78,7 @@
 			if(content is BitmapData)
 			{
 				bitmapData = content as BitmapData;
-				texture = Texture.fromBitmapData(bitmapData, true, false, Starling.contentScaleFactor);
+				texture = Texture.fromBitmapData(bitmapData);
 				bitmapData.dispose();
 			}
 			else if(content is MovieClip)
@@ -89,12 +88,12 @@
 				var movieClip:MovieClip = content as MovieClip;
 				bitmapData= new BitmapData(width, height, true, 0xFF00FF);
 				bitmapData.draw(movieClip);
-				texture = Texture.fromBitmapData(bitmapData, true, false, Starling.contentScaleFactor);
+				texture = Texture.fromBitmapData(bitmapData);
 				bitmapData.dispose();
 			}
 			else if(content is ByteArray)
 			{
-				texture =  Texture.fromAtfData(content as ByteArray, Starling.contentScaleFactor);
+				texture =  Texture.fromAtfData(content as ByteArray);
 				(content as ByteArray).clear();
 			}
 			

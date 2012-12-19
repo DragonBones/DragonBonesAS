@@ -39,16 +39,25 @@ package dragonBones.textures
 			return _bitmapData;
 		}
 		
-		protected var _textureScale:Number;
-		public function get textureScale():Number
+		protected var _scale:Number;
+		public function get scale():Number
 		{
-			return _textureScale;
+			return _scale;
 		}
 		
-		public function NativeTextureAtlas(texture:Object, textureAtlasXML:XML, atlasScale:Number = 1, textureScale:Number = 1)
+		public function NativeTextureAtlas(texture:Object, textureAtlasXML:XML, textureScale:Number = 1, atlasScale:Number = NaN)
 		{
-			_atlasScale = atlasScale;
-			_textureScale = textureScale;
+			_scale = textureScale;
+			if(isNaN(atlasScale))
+			{
+				_atlasScale = _scale;
+			}
+			else
+			{
+				_atlasScale = atlasScale;
+			}
+			
+			
 			_subTextureDataDic = {};
 			
 			if(texture is BitmapData)
@@ -61,7 +70,7 @@ package dragonBones.textures
 				_movieClip.stop();
 			}
 			
-			parseData(textureAtlasXML, atlasScale);
+			parseData(textureAtlasXML);
 		}
 		
 		public function dispose():void
@@ -82,7 +91,7 @@ package dragonBones.textures
 			return _subTextureDataDic[name];
 		}
 		
-		protected function parseData(textureAtlasXML:XML, atlasScale:Number = 1):void
+		protected function parseData(textureAtlasXML:XML):void
 		{
 			_name = textureAtlasXML.attribute(ConstValues.A_NAME);
 			_width = int(textureAtlasXML.attribute(ConstValues.A_WIDTH));
@@ -92,10 +101,10 @@ package dragonBones.textures
 			{
 				var subTextureName:String = subTextureXML.attribute(ConstValues.A_NAME);
 				var subTextureData:SubTextureData = new SubTextureData();
-				subTextureData.x = int(subTextureXML.attribute(ConstValues.A_X)) / atlasScale;
-				subTextureData.y = int(subTextureXML.attribute(ConstValues.A_Y)) / atlasScale;
-				subTextureData.width = int(subTextureXML.attribute(ConstValues.A_WIDTH)) / atlasScale;
-				subTextureData.height = int(subTextureXML.attribute(ConstValues.A_HEIGHT)) / atlasScale;
+				subTextureData.x = int(subTextureXML.attribute(ConstValues.A_X)) / _atlasScale;
+				subTextureData.y = int(subTextureXML.attribute(ConstValues.A_Y)) / _atlasScale;
+				subTextureData.width = int(subTextureXML.attribute(ConstValues.A_WIDTH)) / _atlasScale;
+				subTextureData.height = int(subTextureXML.attribute(ConstValues.A_HEIGHT)) / _atlasScale;
 				//1.4
 				subTextureData.pivotX = int(subTextureXML.attribute(ConstValues.A_PIVOT_X));
 				subTextureData.pivotY = int(subTextureXML.attribute(ConstValues.A_PIVOT_Y));

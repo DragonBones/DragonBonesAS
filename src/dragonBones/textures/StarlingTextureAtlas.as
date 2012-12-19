@@ -12,7 +12,7 @@
 	{
 		protected var _subTextureDic:Object;
 		
-		private var _atlasScale:Number;
+		private var _scale:Number;
 		
 		protected var _name:String;
 		public function get name():String
@@ -20,15 +20,15 @@
 			return _name;
 		}
 		
-		public function StarlingTextureAtlas(texture:Texture, textureAtlasXML:XML, atlasScale:Number = NaN)
+		public function StarlingTextureAtlas(texture:Texture, textureAtlasXML:XML, scale:Number = NaN)
 		{
-			if(isNaN(atlasScale))
+			if(isNaN(scale))
 			{
-				_atlasScale = texture.scale;
+				_scale = texture.scale;
 			}
 			else
 			{
-				_atlasScale = atlasScale;
+				_scale = scale;
 			}
 			
 			super(texture, textureAtlasXML);
@@ -67,7 +67,7 @@
 		//1.4
 		override protected function parseAtlasXml(atlasXml:XML):void
 		{
-			var scale:Number = _atlasScale;
+			var scale:Number = _scale;
 			
 			for each (var subTexture:XML in atlasXml.SubTexture)
 			{

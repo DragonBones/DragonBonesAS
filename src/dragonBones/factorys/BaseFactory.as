@@ -365,7 +365,7 @@ package dragonBones.factorys
 						_helpMatirx.b = 0;
 						_helpMatirx.c = 0;
 						_helpMatirx.d = 1;
-						_helpMatirx.scale(nativeTextureAtlas.textureScale, nativeTextureAtlas.textureScale);
+						_helpMatirx.scale(nativeTextureAtlas.scale, nativeTextureAtlas.scale);
 						_helpMatirx.tx = -subTextureData.x - pivotX;
 						_helpMatirx.ty = -subTextureData.y - pivotY;
 						
