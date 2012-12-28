@@ -13,15 +13,19 @@ package dragonBones.animation
 	
 	use namespace dragonBones_internal;
 	
-	/**
-	 * A core object that can control the state of a bone
-	 * @see dragonBones.Bone
-	 */
-	final public class Tween extends ProcessBase
+	/** @private */
+	final public class Tween
 	{
 		private static const HALF_PI:Number = Math.PI * 0.5;
 		
 		private static var _soundManager:SoundEventManager = SoundEventManager.getInstance();
+		
+		private var _isPause:Boolean;
+		private var _rawDuration:Number;
+		private var _nextFrameDataTimeEdge:Number;
+		private var _frameDuration:Number;
+		private var _nextFrameDataID:int;
+		private var _loop:int;
 		
 		private var _bone:Bone;
 		
@@ -39,20 +43,6 @@ package dragonBones.animation
 		private var _tweenEasing:Number;
 		
 		/**
-		 * @inheritDoc
-		 */
-		override public function set timeScale(value:Number):void
-		{
-			super.timeScale = value;
-			
-			var childArmature:Armature = _bone.childArmature;
-			if(childArmature)
-			{
-				childArmature.animation.timeScale = value;
-			}
-		}
-		
-		/**
 		 * Creates a new <code>Tween</code>
 		 * @param	bone
 		 */
@@ -67,75 +57,47 @@ package dragonBones.animation
 			_node.scaleY = 0;
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
-		override public function dispose():void
-		{
-			super.dispose();
-			_bone = null;
-			_node = null;
-			_from = null;
-			_tweenNode = null;
-			
-			_movementBoneData = null;
-			_currentFrameData = null;
-			_nextFrameData = null;
-		}
-		
-		public function gotoAndPlay(movementBoneData:MovementBoneData, tweenTime:Number, duration:Number = 0, loop:Boolean = false, tweenEasing:Number = NaN):void
+		/** @private */
+		internal function gotoAndPlay(movementBoneData:MovementBoneData, rawDuration:Number, loop:Boolean, tweenEasing:Number):void
 		{
 			_movementBoneData = movementBoneData;
 			if(!_movementBoneData)
 			{
 				return;
 			}
-			
-			if(_movementBoneData.totalFrames == 0)
+			var totalFrames:uint = _movementBoneData.totalFrames;
+			if(totalFrames == 0)
 			{
 				return;
 			}
 			
-			_isComplete = false;
+			_node.skewY %= 360;
 			_isPause = false;
-			_currentTime = 0;
-			
 			_currentFrameData = null;
 			_nextFrameData = null;
-			_frameDuration = 0;
-			_nextFrameDataTimeEdge = 0;
-			_nextFrameDataID = 0;
+			_loop = loop?0:-1;
 			
-			_node.skewY %= 360;
-			
-			_totalTime = tweenTime >= 0?tweenTime:0;
-			_rawDuration = _movementBoneData.duration;
-			_tweenEasing = tweenEasing;
-			
-			if (_rawDuration == 0)
+			if (totalFrames == 1)
 			{
-				_loop = SINGLE;
+				_rawDuration = 0;
 				_nextFrameData = _movementBoneData.getFrameDataAt(0);
 				setBetween(_node, _nextFrameData);
 				_frameTweenEasing = 1;
 			}
 			else
 			{
-				_duration = duration > 0?duration * _movementBoneData.scale:duration;
-				if (loop)
-				{
-					_loop = LIST_LOOP_START;
-				}
-				else
-				{
-					_loop = LIST_START;
-					_rawDuration -= _movementBoneData.getFrameDataAt(_movementBoneData.totalFrames - 1).duration;
-				}
+				_rawDuration = rawDuration;
+				_tweenEasing = tweenEasing;
+				_nextFrameDataTimeEdge = 0;
+				_nextFrameDataID = 0;
 				
 				if (loop && _movementBoneData.delay != 0)
 				{
-					setNodeTo(updateFrameData(- _movementBoneData.delay), _tweenNode);
+					setNodeTo(updateFrameData(_movementBoneData.delay), _tweenNode);
 					setBetween(_node, _tweenNode);
+					//
+					_nextFrameDataTimeEdge = 0;
+					_nextFrameDataID = 0;
 				}
 				else
 				{
@@ -144,106 +106,59 @@ package dragonBones.animation
 				}
 			}
 		}
-		/**
-		 * @inheritDoc
-		 */
-		override public function play():void
+		
+		/** @private */
+		internal function stop():void
 		{
-			if (!_movementBoneData)
+			_isPause = true;
+		}
+		
+		/** @private */
+		internal function advanceTime(progress:Number, playType:int):void
+		{
+			if(_isPause)
 			{
 				return;
 			}
-			
-			super.play();
-			var childArmature:Armature = _bone.childArmature;
-			if(childArmature)
+			if(_rawDuration == 0)
 			{
-				childArmature.animation.play();
-			}
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function stop():void
-		{
-			super.stop();
-			var childArmature:Armature = _bone.childArmature;
-			if(childArmature)
-			{
-				childArmature.animation.stop();
-			}
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override protected function updateHandler():void
-		{
-			if (_progress >= 1)
-			{
-				switch(_loop)
+				playType = Animation.SINGLE;
+				if(progress == 0)
 				{
-					case SINGLE:
-						_currentFrameData = _nextFrameData;
-						_progress = 1;
-						_isComplete = true;
-						break;
-					case LIST_START:
-						_loop = LIST;
-						_progress = 0;
-						_totalTime = _duration;
-						_nextFrameDataTimeEdge = 0;
-						break;
-					case LIST:
-						_progress = 1;
-						_isComplete = true;
-						break;
-					case LIST_LOOP_START:
-						_loop = 0;
-						_totalTime = _duration;
-						_frameDuration = 0;
-						_nextFrameDataID = 0;
-						_nextFrameDataTimeEdge = 0;
-						if (_movementBoneData.delay != 0)
-						{
-							if(_totalTime > 0)
-							{
-								_currentTime = - _movementBoneData.delay * _totalTime;
-							}
-							_progress = - _movementBoneData.delay;
-						}
-						else
-						{
-							_progress = 0;
-						}
-						break;
-					default:
-						//change the loop
-						_loop ++;
-						_progress = 0;
-						_frameDuration = 0;
-						_nextFrameDataTimeEdge = 0;
-						_nextFrameDataID = 0;
-						break;
+					progress = 1;
 				}
 			}
-			else if (_loop < LIST)
-			{
-				//SINGLE,LIST_START,LIST_LOOP_START
-				_progress = Math.sin(_progress * HALF_PI);
-			}
 			
-			if (_loop >= LIST)
+			if(playType == Animation.LOOP)
 			{
-				//multiple key frame process
-				_progress = updateFrameData(_progress, true);
-				
+				progress /= _movementBoneData.scale;
+				progress += _movementBoneData.delay;
+				var loop:int = progress;
+				if(loop != _loop)
+				{
+					_loop = loop;
+					_nextFrameDataTimeEdge = 0;
+				}
+				progress -= _loop;
+				progress = updateFrameData(progress, true);
+			}
+			else if (playType == Animation.LIST)
+			{
+				progress = updateFrameData(progress, true, true);
+			}
+			else if (playType == Animation.SINGLE && progress == 1)
+			{
+				_currentFrameData = _nextFrameData;
+				_isPause = true;
+			}
+			else
+			{
+				progress = Math.sin(progress * HALF_PI);
 			}
 			
 			if (!isNaN(_frameTweenEasing))
 			{
-				setNodeTo(_progress);
+				setNodeTo(progress);
 			}
 			else if(_currentFrameData)
 			{
@@ -264,7 +179,7 @@ package dragonBones.animation
 			{
 				if((to as FrameData).displayIndex < 0)
 				{
-					_tweenNode.subtract(from, from);
+					_tweenNode.zero();
 					return;
 				}
 			}
@@ -302,7 +217,6 @@ package dragonBones.animation
 			
 			if(frameData.event && _bone._armature.hasEventListener(FrameEvent.BONE_FRAME_EVENT))
 			{
-				
 				var frameEvent:FrameEvent = new FrameEvent(FrameEvent.BONE_FRAME_EVENT);
 				frameEvent.movementID = _bone._armature.animation.movementID;
 				frameEvent.frameLabel = frameData.event;
@@ -328,14 +242,14 @@ package dragonBones.animation
 			}
 		}
 		
-		private function updateFrameData(progress:Number, activeFrame:Boolean = false):Number
+		private function updateFrameData(progress:Number, activeFrame:Boolean = false, isList:Boolean= false):Number
 		{
 			var playedTime:Number = _rawDuration * progress;
-			//refind the current frame
 			if (playedTime >= _nextFrameDataTimeEdge)
 			{
 				var length:int = _movementBoneData.totalFrames;
-				do {
+				do 
+				{
 					var currentFrameDataID:int = _nextFrameDataID;
 					_frameDuration = _movementBoneData.getFrameDataAt(currentFrameDataID).duration;
 					_nextFrameDataTimeEdge += _frameDuration;
@@ -343,11 +257,9 @@ package dragonBones.animation
 					{
 						_nextFrameDataID = 0;
 					}
-				}while (playedTime >= _nextFrameDataTimeEdge);
-				if(_loop == LIST && _nextFrameDataID == 0)
-				{
-					return 1;
 				}
+				while (playedTime >= _nextFrameDataTimeEdge);
+				
 				var currentFrameData:FrameData = _movementBoneData.getFrameDataAt(currentFrameDataID);
 				var nextFrameData:FrameData = _movementBoneData.getFrameDataAt(_nextFrameDataID);
 				_frameTweenEasing = currentFrameData.tweenEasing;
@@ -356,8 +268,14 @@ package dragonBones.animation
 					_currentFrameData = _nextFrameData;
 					_nextFrameData = nextFrameData;
 				}
+				if(isList && _nextFrameDataID == 0)
+				{
+					_isPause = true;
+					return 1;
+				}
 				setBetween(currentFrameData, nextFrameData);
 			}
+			
 			progress = 1 - (_nextFrameDataTimeEdge - playedTime) / _frameDuration;
 			if (!isNaN(_frameTweenEasing))
 			{

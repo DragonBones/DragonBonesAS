@@ -14,6 +14,18 @@ package dragonBones.objects
 			super(x, y, skewX, skewY, scaleX, scaleY);
 		}
 		
+		public function zero():void
+		{
+			x = 0;
+			y = 0;
+			skewX = 0;
+			skewY = 0;
+			scaleX = 0;
+			scaleY = 0;
+			pivotX = 0;
+			pivotY = 0;
+		}
+		
 		public function subtract(from:Node, to:Node):void
 		{
 			x = to.x - from.x;

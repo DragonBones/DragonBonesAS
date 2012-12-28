@@ -1,15 +1,21 @@
 ﻿package dragonBones.textures
 {
 	import dragonBones.utils.ConstValues;
+	import dragonBones.utils.dragonBones_internal;
 	
+	import flash.display.BitmapData;
 	import flash.geom.Rectangle;
 	
 	import starling.textures.SubTexture;
 	import starling.textures.Texture;
 	import starling.textures.TextureAtlas;
 	
+	use namespace dragonBones_internal;
+	
 	public class StarlingTextureAtlas extends TextureAtlas implements ITextureAtlas
 	{
+		dragonBones_internal var _bitmapData:BitmapData;
+		
 		protected var _subTextureDic:Object;
 		
 		private var _scale:Number;
@@ -47,7 +53,13 @@
 				subTexture.dispose();
 			}
 			
-			_subTextureDic = null;
+			_subTextureDic = {};
+			
+			if(_bitmapData)
+			{
+				_bitmapData.dispose();
+			}
+			_bitmapData = null;
 		}
 		
 		override public function getTexture(name:String):Texture

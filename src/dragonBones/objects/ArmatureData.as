@@ -28,8 +28,8 @@ package dragonBones.objects
 			{
 				boneData.dispose();
 			}
-			_boneDataDic = null;
-			_boneList = null;
+			_boneDataDic = {};
+			_boneList.length = 0;
 		}
 		
 		public function getBoneData(name:String):BoneData
@@ -53,19 +53,21 @@ package dragonBones.objects
 			var boneList:Array = [];
 			for(var boneName:String in _boneDataDic)
 			{
-				var depth:int = 0;
 				var parentData:BoneData = _boneDataDic[boneName];
+				var z:int = parentData.z;
+				var depth:int = 0;
 				while(parentData)
 				{
 					depth ++;
+					z += 1000 * depth;
 					parentData = _boneDataDic[parentData.parent];
 				}
-				boneList.push({depth:depth, boneName:boneName});
+				boneList.push({z:z, boneName:boneName});
 			}
 			var length:int = boneList.length;
 			if(length > 0)
 			{
-				boneList.sortOn("depth", Array.NUMERIC);
+				boneList.sortOn("z", Array.NUMERIC);
 				_boneList = new Vector.<String>;
 				var i:int = 0;
 				while(i < length)

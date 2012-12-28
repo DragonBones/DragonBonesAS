@@ -127,23 +127,29 @@ package dragonBones.factorys
 		/**
 		 * Cleans up any resources used by the current object.
 		 */
-		public function dispose():void
+		public function dispose(disposeData:Boolean = true):void
 		{
-			for each(var skeletonData:SkeletonData in _skeletonDataDic)
+			if(disposeData)
 			{
-				skeletonData.dispose();
+				for each(var skeletonData:SkeletonData in _skeletonDataDic)
+				{
+					skeletonData.dispose();
+				}
+				for each(var textureAtlas:ITextureAtlas in _textureAtlasDic)
+				{
+					textureAtlas.dispose();
+				}
 			}
-			_skeletonDataDic = null;
+			_skeletonDataDic = {};
 			
-			for each(var textureAtlas:ITextureAtlas in _textureAtlasDic)
-			{
-				textureAtlas.dispose();
-			}
-			_textureAtlasDic = null;
+			_textureAtlasDic = {};
 			
-			_textureAtlasLoadingDic = null;
+			_textureAtlasLoadingDic = {};
 			
 			_currentSkeletonData = null;
+			_currentTextureAtlas = null;
+			_currentSkeletonName = null;
+			_currentTextureAtlasName = null;
 		}
 		
 		/**
@@ -199,6 +205,7 @@ package dragonBones.factorys
 					armature.addBone(bone, boneData.parent);
 				}
 			}
+			armature._bonesIndexChanged = true;
 			armature.update();
 			return armature;
 		}
@@ -246,7 +253,8 @@ package dragonBones.factorys
 		protected function buildBone(boneData:BoneData):Bone
 		{
 			var bone:Bone = generateBone();
-			bone.origin.copy(boneData);
+			bone._origin.copy(boneData);
+			bone.global.z = bone._origin.z;
 			bone.name = boneData.name;
 			
 			var displayData:DisplayData;
@@ -291,6 +299,10 @@ package dragonBones.factorys
 				else if (content is Sprite)
 				{
 					content = (content as Sprite).getChildAt(0) as MovieClip;
+				}
+				else
+				{
+					//
 				}
 				
 				var textureAtlas:ITextureAtlas = generateTextureAtlas(content, textureAtlasXML);
@@ -369,7 +381,7 @@ package dragonBones.factorys
 						_helpMatirx.tx = -subTextureData.x - pivotX;
 						_helpMatirx.ty = -subTextureData.y - pivotY;
 						
-						displayShape.graphics.beginBitmapFill(nativeTextureAtlas.bitmapData, _helpMatirx, false);
+						displayShape.graphics.beginBitmapFill(nativeTextureAtlas.bitmapData, _helpMatirx, false, true);
 						displayShape.graphics.drawRect(-pivotX, -pivotY, subTextureData.width, subTextureData.height);
 						return displayShape;
 					}

@@ -59,11 +59,11 @@ package dragonBones.objects {
 			{
 				animationData.dispose();
 			}
-			_armatureDataDic = null;
-			_animationDataDic = null;
-			_displayDataDic = null;
-			_armatureList = null;
-			_animationList = null;
+			_armatureDataDic = {};
+			_animationDataDic = {};
+			_displayDataDic = {};
+			_armatureList.length = 0;
+			_animationList.length = 0;
 		}
 		
 		public function getArmatureData(name:String):ArmatureData

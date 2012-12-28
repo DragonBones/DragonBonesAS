@@ -18,10 +18,6 @@ package dragonBones.objects
 		{
 			skeletonXML = null;
 			textureAtlasXML = null;
-			if(textureBytes)
-			{
-				textureBytes.clear();
-			}
 			textureBytes = null;
 		}
 	}

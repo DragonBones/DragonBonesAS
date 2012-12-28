@@ -46,8 +46,8 @@ package dragonBones.objects
 			{
 				movementBoneData.dispose();
 			}
-			_movementBoneDataDic = null;
-			_movementFrameList = null;
+			_movementBoneDataDic = {};
+			_movementFrameList.length = 0;
 		}
 		
 		public function getMovementBoneData(name:String):MovementBoneData

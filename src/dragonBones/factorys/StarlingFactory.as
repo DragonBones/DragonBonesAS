@@ -14,10 +14,11 @@
 	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
 	
+	import starling.core.Starling;
 	import starling.display.Image;
 	import starling.display.Sprite;
-	import starling.textures.Texture;
 	import starling.textures.SubTexture;
+	import starling.textures.Texture;
 	
 	use namespace dragonBones_internal;
 	
@@ -79,7 +80,6 @@
 			{
 				bitmapData = content as BitmapData;
 				texture = Texture.fromBitmapData(bitmapData);
-				bitmapData.dispose();
 			}
 			else if(content is MovieClip)
 			{
@@ -89,15 +89,22 @@
 				bitmapData= new BitmapData(width, height, true, 0xFF00FF);
 				bitmapData.draw(movieClip);
 				texture = Texture.fromBitmapData(bitmapData);
-				bitmapData.dispose();
 			}
-			else if(content is ByteArray)
+			else
 			{
-				texture =  Texture.fromAtfData(content as ByteArray);
-				(content as ByteArray).clear();
+				//
 			}
 			
 			var textureAtlas:StarlingTextureAtlas = new StarlingTextureAtlas(texture, textureAtlasXML);
+			
+			if(Starling.handleLostContext)
+			{
+				textureAtlas._bitmapData = bitmapData;
+			}
+			else
+			{
+				bitmapData.dispose();
+			}
 			return textureAtlas;
 		}
 	}

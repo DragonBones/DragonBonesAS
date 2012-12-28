@@ -29,8 +29,8 @@ package dragonBones.objects
 			{
 				movementData.dispose();
 			}
-			_movementDataDic = null;
-			_movementList = null;
+			_movementDataDic = {};
+			_movementList.length = 0;
 		}
 		
 		public function getMovementData(name:String):MovementData

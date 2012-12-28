@@ -32,7 +32,6 @@ package dragonBones.objects
 		public function dispose():void
 		{
 			_displayList.length = 0;
-			_displayList = null;
 		}
 		
 		override public function copy(node:Node):void

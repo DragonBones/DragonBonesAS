@@ -5,12 +5,6 @@ package dragonBones.objects
 	{
 		private var _frameList:Vector.<FrameData>;
 		
-		internal var _duration:Number;
-		public function get duration():Number
-		{
-			return _duration;
-		}
-		
 		public function get totalFrames():int
 		{
 			return _frameList.length;
@@ -29,7 +23,7 @@ package dragonBones.objects
 		
 		public function dispose():void
 		{
-			_frameList = null;
+			_frameList.length = 0;
 		}
 		
 		public function setValues(scale:Number = 1, delay:Number = 0):void
@@ -40,6 +34,7 @@ package dragonBones.objects
 			{
 				this.delay -= 1;
 			}
+			this.delay *= -1;
 		}
 		
 		public function getFrameDataAt(index:int):FrameData

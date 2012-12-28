@@ -130,7 +130,7 @@ package dragonBones.objects
 			checkSkeletonXMLVersion(skeletonXML);
 			
 			_frameRate = int(skeletonXML.attribute(ConstValues.A_FRAME_RATE));
-			WorldClock.timeLag = 1/_frameRate;
+			WorldClock.defaultTimeLag = 1/_frameRate;
 			
 			var skeletonData:SkeletonData = new SkeletonData();
 			skeletonData._name = skeletonXML.attribute(ConstValues.A_NAME);
@@ -360,14 +360,6 @@ package dragonBones.objects
 				}
 				totalDuration += frameData.duration;
 				frameData.duration /= _frameRate;
-			}
-			if(frameCount > 1)
-			{
-				movementBoneData._duration = totalDuration / _frameRate;
-			}
-			else
-			{
-				movementBoneData._duration = 0;
 			}
 			
 			return movementBoneData;

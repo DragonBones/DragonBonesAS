@@ -83,7 +83,7 @@ package dragonBones.textures
 			}
 			_bitmapData = null;
 			
-			_subTextureDataDic = null;
+			_subTextureDataDic = {};
 		}
 		
 		public function getRegion(name:String):Rectangle

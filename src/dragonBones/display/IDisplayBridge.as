@@ -18,6 +18,7 @@ package dragonBones.display
 		/**
 		 * Updates the transform of the display object
 		 * @param	matrix
+		 * @param	node
 		 */
 		function update(matrix:Matrix, node:Node):void;
 		/**

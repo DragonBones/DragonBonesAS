@@ -23,7 +23,6 @@ package dragonBones.display
 			return _display;
 		}
 		
-		
 		public function set display(value:Object):void
 		{
 			if(_display == value){
@@ -57,7 +56,15 @@ package dragonBones.display
 			var pivotY:Number = node.pivotY + _display.pivotY;
 			matrix.tx -= matrix.a * pivotX + matrix.c * pivotY;
 			matrix.ty -= matrix.b * pivotX + matrix.d * pivotY;
-			_display.transformationMatrix.copyFrom(matrix);
+			
+			//if(updateStarlingDisplay)
+			//{
+				//_display.transformationMatrix = matrix;
+			//}
+			//else
+			//{
+				_display.transformationMatrix.copyFrom(matrix);
+			//}
 		}
 		
 		/**
