@@ -132,7 +132,6 @@ package dragonBones.animation
 			_armature = null;
 		}
 		
-		
 		/** @private */
 		public function setData(animationData:AnimationData):void
 		{
@@ -155,7 +154,6 @@ package dragonBones.animation
 				return;
 			}
 			_movementData = movementData;
-			
 			_isPlaying = true;
 			_currentTime = 0;
 			
@@ -209,9 +207,12 @@ package dragonBones.animation
 						bone.childArmature.animation.gotoAndPlay(movementID);
 					}
 				}
-				else if(bone._origin.name)
+				else
 				{
-					bone.changeDisplay(-1);
+					if(_animationData.containsBone(bone.name))
+					{
+						bone.changeDisplay(-1);
+					}
 					bone._tween.stop();
 				}
 			}
@@ -267,7 +268,7 @@ package dragonBones.animation
 		{
 			if(_isPlaying)
 			{
-				if (_loop > 0 || _currentTime < _totalTime)
+				if (_loop > 0 || _currentTime < _totalTime || _totalTime == 0)
 				{
 					var progress:Number;
 					if(_totalTime > 0)
@@ -277,6 +278,8 @@ package dragonBones.animation
 					}
 					else
 					{
+						_currentTime = 1;
+						_totalTime = 1;
 						progress = 1;
 					}
 					

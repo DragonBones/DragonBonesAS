@@ -15,7 +15,7 @@ package dragonBones.objects
 		public var skewY:Number;
 		public var pivotX:Number;
 		public var pivotY:Number;
-		public var z:Number;
+		public var z:int;
 		
 		public function get rotation():Number
 		{

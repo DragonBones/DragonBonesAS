@@ -7,8 +7,6 @@ package dragonBones.objects
 	{
 		private static const DOUBLE_PI:Number = Math.PI * 2;
 		
-		public var tweenRotate:int;
-		
 		public function TweenNode(x:Number = 0, y:Number = 0, skewX:Number = 0, skewY:Number = 0, scaleX:Number = 1, scaleY:Number = 1)
 		{
 			super(x, y, skewX, skewY, scaleX, scaleY);
@@ -55,11 +53,11 @@ package dragonBones.objects
 			{
 				skewY += DOUBLE_PI;
 			}
-			var tweenNode:TweenNode = to as TweenNode;
-			if (tweenNode && tweenNode.tweenRotate)
+			var frameData:FrameData = to as FrameData;
+			if (frameData && frameData.tweenRotate)
 			{
-				skewX += tweenNode.tweenRotate * DOUBLE_PI;
-				skewY += tweenNode.tweenRotate * DOUBLE_PI;
+				skewX += frameData.tweenRotate * DOUBLE_PI;
+				skewY += frameData.tweenRotate * DOUBLE_PI;
 			}
 		}
 	}

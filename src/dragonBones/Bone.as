@@ -29,28 +29,12 @@ package dragonBones
 		 */
 		public var userData:Object;
 		
-		private var _global:Node;
-		/**
-		 * The transform information relative to the armature's coordinates.
-		 */
-		public function get global():Node
-		{
-			return _global;
-		}
-		
-		private var _node:Node;
-		/**
-		 * The transform information relative to the local coordinates.
-		 */
-		public function get node():Node
-		{
-			return _node;
-		}
-		
-		/** @private */
-		dragonBones_internal var _origin:BoneData;
 		/** @private */
 		dragonBones_internal var _tween:Tween;
+		/** @private */
+		dragonBones_internal var _tweenNode:Node;
+		/** @private */
+		dragonBones_internal var _origin:BoneData;
 		/** @private */
 		dragonBones_internal var _children:Vector.<Bone>;
 		/** @private */
@@ -111,6 +95,24 @@ package dragonBones
 			_displayBridge.display = value;
 		}
 		
+		private var _global:Node;
+		/**
+		 * The transform information relative to the armature's coordinates.
+		 */
+		public function get global():Node
+		{
+			return _global;
+		}
+		
+		private var _node:Node;
+		/**
+		 * The transform information relative to the local coordinates.
+		 */
+		public function get node():Node
+		{
+			return _node;
+		}
+		
 		/** @private */
 		dragonBones_internal function changeDisplay(displayIndex:int):void
 		{
@@ -135,10 +137,15 @@ package dragonBones
 						_armature._bonesIndexChanged = true;
 					}
 				}
-				
 				if(_displayIndex != displayIndex)
 				{
+					var length:uint = _displayList.length;
+					if(displayIndex >= length && length > 0)
+					{
+						displayIndex = length - 1;
+					}
 					_displayIndex = displayIndex;
+					
 					//change
 					display = _displayList[_displayIndex];
 				}
@@ -153,8 +160,6 @@ package dragonBones
 		{
 			_displayBridge = displayBrideg;
 			
-			_tween = new Tween(this);
-			
 			_children = new Vector.<Bone>;
 			
 			_globalTransformMatrix = new Matrix()
@@ -165,6 +170,11 @@ package dragonBones
 			_node = new Node();
 			_node.scaleX = 0;
 			_node.scaleY = 0;
+			_tweenNode = new Node();
+			_tweenNode.scaleX = 0;
+			_tweenNode.scaleY = 0;
+			
+			_tween = new Tween(this);
 		}
 		
 		/**
@@ -237,12 +247,10 @@ package dragonBones
 			var currentDisplay:Object = _displayBridge.display;
 			if (_children.length > 0 || (_displayVisible && currentDisplay))
 			{
-				var tweenNode:Node = _tween._node;
-				
-				_helpPoint.x = _origin.x + _node.x + tweenNode.x;
-				_helpPoint.y = _origin.y + _node.y + tweenNode.y;
-				_global.skewX = _origin.skewX + _node.skewX + tweenNode.skewX;
-				_global.skewY = _origin.skewY + _node.skewY + tweenNode.skewY;
+				_helpPoint.x = _origin.x + _node.x + _tweenNode.x;
+				_helpPoint.y = _origin.y + _node.y + _tweenNode.y;
+				_global.skewX = _origin.skewX + _node.skewX + _tweenNode.skewX;
+				_global.skewY = _origin.skewY + _node.skewY + _tweenNode.skewY;
 				
 				//transform
 				if(_parent)
@@ -257,10 +265,11 @@ package dragonBones
 				//update global
 				_global.x = _helpPoint.x;
 				_global.y = _helpPoint.y;
-				_global.scaleX = _origin.scaleX + _node.scaleX + tweenNode.scaleX;
-				_global.scaleY = _origin.scaleY + _node.scaleY + tweenNode.scaleY;
-				_global.pivotX = _origin.pivotX + _node.pivotX + tweenNode.pivotX;
-				_global.pivotY = _origin.pivotY + _node.pivotY + tweenNode.pivotY;
+				_global.scaleX = _origin.scaleX + _node.scaleX + _tweenNode.scaleX;
+				_global.scaleY = _origin.scaleY + _node.scaleY + _tweenNode.scaleY;
+				_global.pivotX = _origin.pivotX + _node.pivotX + _tweenNode.pivotX;
+				_global.pivotY = _origin.pivotY + _node.pivotY + _tweenNode.pivotY;
+				_global.z = _origin.z + _node.z + _tweenNode.z;
 				
 				//Note: this formula of transform is defined by Flash pro
 				_globalTransformMatrix.a = _global.scaleX * Math.cos(_global.skewY);

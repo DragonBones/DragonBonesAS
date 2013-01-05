@@ -51,10 +51,6 @@ package dragonBones.animation
 		
 		public function WorldClock()
 		{
-			if(clock)
-			{
-				clock.add(this);
-			}
 			animatableList = new Vector.<IAnimatable>;
 		}
 		
@@ -80,9 +76,8 @@ package dragonBones.animation
 			}
 		}
 		
-		public function dispose():void
+		public function clear():void
 		{
-			clock.remove(this);
 			animatableList.length = 0;
 		}
 		

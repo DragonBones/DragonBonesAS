@@ -6,6 +6,7 @@ package dragonBones.objects
 	{
 		private var _movementDataDic:Object;
 		private var _movementList:Vector.<String>;
+		private var _boneList:Vector.<String>;
 		
 		public function get totalMovements():uint
 		{
@@ -21,6 +22,7 @@ package dragonBones.objects
 		{
 			_movementDataDic = { };
 			_movementList = new Vector.<String>;
+			_boneList = new Vector.<String>;
 		}
 		
 		public function dispose():void
@@ -44,12 +46,28 @@ package dragonBones.objects
 			return getMovementData(name);
 		}
 		
+		public function containsBone(boneName:String):Boolean
+		{
+			return _boneList.indexOf(boneName) != -1;
+		}
+		
 		internal function addMovementData(data:MovementData, name:String):void
 		{
 			_movementDataDic[name] = data;
 			if(_movementList.indexOf(name) < 0)
 			{
 				_movementList.push(name);
+			}
+		}
+		
+		internal function addBoneList(boneList:Vector.<String>):void
+		{
+			for each(var boneName:String in boneList)
+			{
+				if(_boneList.indexOf(boneName) == -1)
+				{
+					_boneList.push(boneName);
+				}
 			}
 		}
 		

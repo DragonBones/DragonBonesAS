@@ -28,9 +28,7 @@ package dragonBones.animation
 		private var _loop:int;
 		
 		private var _bone:Bone;
-		
-		/** @private */
-		dragonBones_internal var _node:Node;
+		private var _node:Node;
 		
 		private var _from:Node;
 		private var _tweenNode:TweenNode;
@@ -49,12 +47,11 @@ package dragonBones.animation
 		public function Tween(bone:Bone)
 		{
 			super();
-			_bone = bone;
-			_node = new Node();
 			_from = new Node();
 			_tweenNode = new TweenNode();
-			_node.scaleX = 0;
-			_node.scaleY = 0;
+			
+			_bone = bone;
+			_node = _bone._tweenNode;
 		}
 		
 		/** @private */
@@ -204,9 +201,9 @@ package dragonBones.animation
 			var displayIndex:int = frameData.displayIndex;
 			if(displayIndex >= 0)
 			{
-				if(_bone.global.z != frameData.z)
+				if(_node.z != frameData.z)
 				{
-					_bone.global.z = frameData.z;
+					_node.z = frameData.z;
 					if(_bone.armature)
 					{
 						_bone.armature._bonesIndexChanged = true;
@@ -291,21 +288,22 @@ package dragonBones.animation
 		
 		private function getEaseValue(value:Number, easing:Number):Number
 		{
+			var valueEase:Number;
 			if (easing > 1)
 			{
-				value = 0.5 * (1 - Math.cos(value * Math.PI ));
+				valueEase = 0.5 * (1 - Math.cos(value * Math.PI )) - value;
 				easing -= 1;
 			}
 			else if (easing > 0)
 			{
-				value = Math.sin(value * HALF_PI);
+				valueEase = Math.sin(value * HALF_PI) - value;
 			}
 			else
 			{
-				value = 1 - Math.cos(value * HALF_PI);
-				easing = -easing;
+				valueEase = 1 - Math.cos(value * HALF_PI) - value;
+				easing *= -1;
 			}
-			return value * easing + (1 - easing);
+			return valueEase * easing + value;
 		}
 	}
 }

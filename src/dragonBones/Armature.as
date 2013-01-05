@@ -55,19 +55,11 @@ package dragonBones
 		public var userData:Object;
 		
 		/** @private */
-		protected var _animation:Animation;
-		/**
-		 * An object can change the playback state of the armature.
-		 */
-		public function get animation():Animation
-		{
-			return _animation;
-		}
-		
 		dragonBones_internal var _bonesIndexChanged:Boolean;
+		/** @private */
 		dragonBones_internal var _boneDepthList:Vector.<Bone>;
-		
-		private var _rootBoneList:Vector.<Bone>;
+		/** @private */
+		dragonBones_internal var _rootBoneList:Vector.<Bone>;
 		
 		/** @private */
 		protected var _display:Object;
@@ -77,6 +69,16 @@ package dragonBones
 		public function get display():Object
 		{
 			return _display;
+		}
+		
+		/** @private */
+		protected var _animation:Animation;
+		/**
+		 * An object can change the playback state of the armature.
+		 */
+		public function get animation():Animation
+		{
+			return _animation;
 		}
 		
 		/**
@@ -190,19 +192,6 @@ package dragonBones
 			update();
 		}
 		
-		dragonBones_internal function update():void
-		{
-			for each(var bone:Bone in _rootBoneList)
-			{
-				bone.update();
-			}
-			
-			if(_bonesIndexChanged)
-			{
-				updateBonesZ();
-			}
-		}
-		
 		/**
 		 * Sorts the display objects by z value.
 		 */
@@ -217,6 +206,20 @@ package dragonBones
 				}
 			}
 			_bonesIndexChanged = false;
+		}
+		
+		/** @private */
+		dragonBones_internal function update():void
+		{
+			for each(var bone:Bone in _rootBoneList)
+			{
+				bone.update();
+			}
+			
+			if(_bonesIndexChanged)
+			{
+				updateBonesZ();
+			}
 		}
 		
 		/** @private */

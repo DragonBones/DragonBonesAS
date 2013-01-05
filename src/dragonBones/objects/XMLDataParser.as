@@ -4,7 +4,7 @@ package dragonBones.objects
 	import dragonBones.errors.UnknownDataError;
 	import dragonBones.utils.BytesType;
 	import dragonBones.utils.ConstValues;
-	import dragonBones.utils.TransfromUtils;
+	import dragonBones.utils.TransformUtils;
 	import dragonBones.utils.dragonBones_internal;
 	
 	import flash.utils.ByteArray;
@@ -15,6 +15,7 @@ package dragonBones.objects
 	public class XMLDataParser
 	{
 		private static const ANGLE_TO_RADIAN:Number = Math.PI / 180;
+		private static const HALF_PI:Number = Math.PI * 0.5;
 		
 		private static var helpNode:Node = new Node();
 		
@@ -139,29 +140,50 @@ package dragonBones.objects
 			for each(var armatureXML:XML in skeletonXML.elements(ConstValues.ARMATURES).elements(ConstValues.ARMATURE))
 			{
 				var armatureName:String = armatureXML.attribute(ConstValues.A_NAME);
-				var armatureData:ArmatureData = parseAramtureData(armatureXML);
-				skeletonData.addArmatureData(armatureData, armatureName);
+				var armatureData:ArmatureData = skeletonData.getArmatureData(animationName);
+				if(armatureData)
+				{
+					parseAramtureData(armatureXML, armatureData);
+				}
+				else
+				{
+					armatureData = new ArmatureData();
+					parseAramtureData(armatureXML, armatureData);
+					skeletonData.addArmatureData(armatureData, armatureName);
+				}
 			}
 			
 			for each(var animationXML:XML in skeletonXML.elements(ConstValues.ANIMATIONS).elements(ConstValues.ANIMATION))
 			{
 				var animationName:String = animationXML.attribute(ConstValues.A_NAME);
+				armatureData = skeletonData.getArmatureData(animationName);
 				
-				var animationData:AnimationData = parseAnimationData(
-					animationXML, 
-					skeletonData.getAnimationData(animationName), 
-					skeletonData.getArmatureData(animationName)
-				);
-				skeletonData.addAnimationData(animationData, animationName);
+				var animationData:AnimationData = skeletonData.getAnimationData(animationName);
+				if(animationData)
+				{
+					parseAnimationData(
+						animationXML, 
+						animationData, 
+						armatureData
+					);
+				}
+				else
+				{
+					animationData = new AnimationData();
+					parseAnimationData(
+						animationXML, 
+						animationData, 
+						armatureData
+					);
+					skeletonData.addAnimationData(animationData, animationName);
+				}
 			}
 			_currentSkeletonData = null;
 			return skeletonData;
 		}
 		
-		private static function parseAramtureData(armatureXML:XML):ArmatureData
+		private static function parseAramtureData(armatureXML:XML, aramtureData:ArmatureData):void
 		{
-			var aramtureData:ArmatureData = new ArmatureData();
-			
 			var boneXMLList:XMLList = armatureXML.elements(ConstValues.BONE);
 			for each(var boneXML:XML in boneXMLList)
 			{
@@ -169,32 +191,25 @@ package dragonBones.objects
 				var parentName:String = boneXML.attribute(ConstValues.A_PARENT);
 				var parentXML:XML = getElementsByAttribute(boneXMLList, ConstValues.A_NAME, parentName)[0];
 				var boneData:BoneData = aramtureData.getBoneData(boneName);
-				boneData = parseBoneData(boneXML, parentXML, boneData);
+				if(boneData)
+				{
+					parseBoneData(boneXML, parentXML, boneData);
+				}
+				else
+				{
+					boneData = new BoneData();
+					parseBoneData(boneXML, parentXML, boneData);
+					aramtureData.addBoneData(boneData, boneName);
+				}
 				boneData._name = boneName;
-				aramtureData.addBoneData(boneData, boneName);
 			}
 				
 			aramtureData.updateBoneList();
-			return aramtureData;
 		}
 		
-		dragonBones_internal static function parseBoneData(boneXML:XML, parentXML:XML, boneData:BoneData = null):BoneData
+		dragonBones_internal static function parseBoneData(boneXML:XML, parentXML:XML, boneData:BoneData):void
 		{
-			if(!boneData)
-			{
-				boneData = new BoneData();
-			}
-			
-			boneData.x = Number(boneXML.attribute(ConstValues.A_X));
-			boneData.y = Number(boneXML.attribute(ConstValues.A_Y));
-			boneData.skewX = Number(boneXML.attribute(ConstValues.A_SKEW_X)) * ANGLE_TO_RADIAN;
-			boneData.skewY = Number(boneXML.attribute(ConstValues.A_SKEW_Y)) * ANGLE_TO_RADIAN;
-			boneData.scaleX = Number(boneXML.attribute(ConstValues.A_SCALE_X));
-			boneData.scaleY = Number(boneXML.attribute(ConstValues.A_SCALE_Y));
-			boneData.pivotX =  int(boneXML.attribute(ConstValues.A_PIVOT_X));
-			boneData.pivotY =  int(boneXML.attribute(ConstValues.A_PIVOT_Y));
-			boneData.z = int(boneXML.attribute(ConstValues.A_Z));
-			
+			parseNode(boneXML, boneData);
 			var displayXMLList:XMLList = boneXML.elements(ConstValues.DISPLAY);
 			var length:uint = displayXMLList.length();
 			for(var i:int = 0;i < length;i ++)
@@ -211,20 +226,13 @@ package dragonBones.objects
 			if(parentXML)
 			{
 				boneData._parent = parentXML.attribute(ConstValues.A_NAME);
-				helpNode.x = Number(parentXML.attribute(ConstValues.A_X));
-				helpNode.y = Number(parentXML.attribute(ConstValues.A_Y));
-				helpNode.skewX = Number(parentXML.attribute(ConstValues.A_SKEW_X)) * ANGLE_TO_RADIAN;
-				helpNode.skewY = Number(parentXML.attribute(ConstValues.A_SKEW_Y)) * ANGLE_TO_RADIAN;
-				helpNode.scaleX = Number(parentXML.attribute(ConstValues.A_SCALE_X));
-				helpNode.scaleY = Number(parentXML.attribute(ConstValues.A_SCALE_Y));
-				
-				TransfromUtils.transfromPointWithParent(boneData, helpNode);
+				parseNode(parentXML, helpNode);
+				TransformUtils.transformPointWithParent(boneData, helpNode);
 			}
 			else
 			{
 				boneData._parent = null;
 			}
-			return boneData;
 		}
 		
 		private static function parseDisplayData(displayXML:XML):DisplayData
@@ -236,13 +244,8 @@ package dragonBones.objects
 			return displayData;
 		}
 		
-		dragonBones_internal static function parseAnimationData(animationXML:XML, animationData:AnimationData, armatureData:ArmatureData):AnimationData
+		dragonBones_internal static function parseAnimationData(animationXML:XML, animationData:AnimationData, armatureData:ArmatureData):void
 		{
-			if(!animationData)
-			{
-				animationData = new AnimationData();
-			}
-			
 			for each(var movementXML:XML in animationXML.elements(ConstValues.MOVEMENT))
 			{
 				var movementName:String = movementXML.attribute(ConstValues.A_NAME);
@@ -253,18 +256,16 @@ package dragonBones.objects
 				}
 				else
 				{
-					animationData.addMovementData(parseMovementData(movementXML, armatureData), movementName);
+					movementData = new MovementData();
+					var boneList:Vector.<String> = parseMovementData(movementXML, armatureData, movementData);
+					animationData.addMovementData(movementData, movementName);
+					animationData.addBoneList(boneList);
 				}
 			}
-			return animationData;
 		}
 		
-		private static function parseMovementData(movementXML:XML, armatureData:ArmatureData, movementData:MovementData = null):MovementData
+		private static function parseMovementData(movementXML:XML, armatureData:ArmatureData, movementData:MovementData):Vector.<String>
 		{
-			if(!movementData)
-			{
-				movementData = new MovementData();
-			}
 			var duration:int = int(movementXML.attribute(ConstValues.A_DURATION));
 			
 			movementData.setValues(
@@ -275,6 +276,7 @@ package dragonBones.objects
 				Number(movementXML.attribute(ConstValues.A_TWEEN_EASING)[0])
 			);
 			
+			var boneList:Vector.<String> = new Vector.<String>;
 			var movementBoneXMLList:XMLList = movementXML.elements(ConstValues.BONE);
 			for each(var movementBoneXML:XML in movementBoneXMLList)
 			{
@@ -288,8 +290,10 @@ package dragonBones.objects
 				}
 				else
 				{
-					movementBoneData = parseMovementBoneData(movementBoneXML, parentXML, boneData);
+					movementBoneData = new MovementBoneData();
+					parseMovementBoneData(movementBoneXML, parentXML, boneData, movementBoneData);
 					movementData.addMovementBoneData(movementBoneData, boneName);
+					boneList.push(boneName);
 				}
 			}
 			
@@ -305,18 +309,17 @@ package dragonBones.objects
 				}
 				else
 				{
-					movementData.addMovementFrameData(parseMovementFrameData(movementFrameXML));
+					movementFrameData = new MovementFrameData();
+					parseMovementFrameData(movementFrameXML, movementFrameData)
+					movementData.addMovementFrameData(movementFrameData);
 				}
 			}
-			return movementData;
+			
+			return boneList;
 		}
 		
-		private static function parseMovementBoneData(movementBoneXML:XML, parentXML:XML, boneData:BoneData, movementBoneData:MovementBoneData = null):MovementBoneData
+		private static function parseMovementBoneData(movementBoneXML:XML, parentXML:XML, boneData:BoneData, movementBoneData:MovementBoneData):void
 		{
-			if(!movementBoneData)
-			{
-				movementBoneData = new MovementBoneData();
-			}
 			movementBoneData.setValues(
 				Number(movementBoneXML.attribute(ConstValues.A_MOVEMENT_SCALE)),
 				Number(movementBoneXML.attribute(ConstValues.A_MOVEMENT_DELAY))
@@ -347,6 +350,15 @@ package dragonBones.objects
 						currentDuration = int(parentFrameXML.attribute(ConstValues.A_DURATION));
 						i++;
 					}
+					if(parentFrameXML)
+					{
+						var tweenFrameXML:XML = xmlList[i];
+						var passedFrame:int = totalDuration - parentTotalDuration;
+						if(tweenFrameXML && passedFrame > 0)
+						{
+							parentFrameXML = getTweenFrameXML(parentFrameXML, tweenFrameXML, passedFrame, currentDuration);
+						}
+					}
 				}
 				var frameData:FrameData = movementBoneData.getFrameDataAt(j);
 				if(frameData)
@@ -355,48 +367,28 @@ package dragonBones.objects
 				}
 				else
 				{
-					frameData = parseFrameData(frameXML, parentFrameXML, boneData);
+					frameData = new FrameData();
+					parseFrameData(frameXML, parentFrameXML, boneData, frameData);
 					movementBoneData.addFrameData(frameData);
 				}
 				totalDuration += frameData.duration;
 				frameData.duration /= _frameRate;
 			}
-			
-			return movementBoneData;
 		}
 		
-		private static function parseMovementFrameData(movementFrameXML:XML, movementFrameData:MovementFrameData = null):MovementFrameData
+		private static function parseMovementFrameData(movementFrameXML:XML, movementFrameData:MovementFrameData):void
 		{
-			if(!movementFrameData)
-			{
-				movementFrameData = new MovementFrameData();
-			}
-			
 			movementFrameData.setValues(
 				Number(movementFrameXML.attribute(ConstValues.A_DURATION))/_frameRate,
 				movementFrameXML.attribute(ConstValues.A_MOVEMENT),
 				movementFrameXML.attribute(ConstValues.A_EVENT),
 				movementFrameXML.attribute(ConstValues.A_SOUND)
 			);
-			return movementFrameData;
 		}
 	
-		private static function parseFrameData(frameXML:XML, parentFrameXML:XML, boneData:BoneData, frameData:FrameData = null):FrameData
+		private static function parseFrameData(frameXML:XML, parentFrameXML:XML, boneData:BoneData, frameData:FrameData):void
 		{
-			if(!frameData)
-			{
-				frameData = new FrameData();
-			}
-				
-			frameData.x = Number(frameXML.attribute(ConstValues.A_X));
-			frameData.y = Number(frameXML.attribute(ConstValues.A_Y));
-			frameData.skewX = Number(frameXML.attribute(ConstValues.A_SKEW_X)) * ANGLE_TO_RADIAN;
-			frameData.skewY = Number(frameXML.attribute(ConstValues.A_SKEW_Y)) * ANGLE_TO_RADIAN;
-			frameData.scaleX = Number(frameXML.attribute(ConstValues.A_SCALE_X));
-			frameData.scaleY = Number(frameXML.attribute(ConstValues.A_SCALE_Y));
-			frameData.pivotX =  int(frameXML.attribute(ConstValues.A_PIVOT_X));
-			frameData.pivotY =  int(frameXML.attribute(ConstValues.A_PIVOT_Y));
-			frameData.z = int(frameXML.attribute(ConstValues.A_Z));
+			parseNode(frameXML, frameData);
 			frameData.duration = int(frameXML.attribute(ConstValues.A_DURATION));
 			frameData.tweenEasing = Number(frameXML.attribute(ConstValues.A_TWEEN_EASING));
 			frameData.tweenRotate = int(frameXML.attribute(ConstValues.A_TWEEN_ROTATE));
@@ -407,17 +399,10 @@ package dragonBones.objects
 			frameData.sound = String(frameXML.attribute(ConstValues.A_SOUND));
 			frameData.soundEffect = String(frameXML.attribute(ConstValues.A_SOUND_EFFECT));
 				
-				
 			if(parentFrameXML)
 			{
-				helpNode.x = Number(parentFrameXML.attribute(ConstValues.A_X));
-				helpNode.y = Number(parentFrameXML.attribute(ConstValues.A_Y));
-				helpNode.skewX = Number(parentFrameXML.attribute(ConstValues.A_SKEW_X)) * ANGLE_TO_RADIAN;
-				helpNode.skewY = Number(parentFrameXML.attribute(ConstValues.A_SKEW_Y)) * ANGLE_TO_RADIAN;
-				helpNode.scaleX = Number(parentFrameXML.attribute(ConstValues.A_SCALE_X));
-				helpNode.scaleY = Number(parentFrameXML.attribute(ConstValues.A_SCALE_Y));
-				
-				TransfromUtils.transfromPointWithParent(frameData, helpNode);
+				parseNode(parentFrameXML, helpNode);
+				TransformUtils.transformPointWithParent(frameData, helpNode);
 			}
 			
 			frameData.x -= boneData.x;
@@ -428,8 +413,64 @@ package dragonBones.objects
 			frameData.scaleY -= boneData.scaleY;
 			frameData.pivotX -= boneData.pivotX;
 			frameData.pivotY -= boneData.pivotY;
+			frameData.z -= boneData.z;
+		}
+		
+		private static function parseNode(xml:XML, node:Node):void
+		{
+			node.x = Number(xml.attribute(ConstValues.A_X));
+			node.y = Number(xml.attribute(ConstValues.A_Y));
+			node.skewX = Number(xml.attribute(ConstValues.A_SKEW_X)) * ANGLE_TO_RADIAN;
+			node.skewY = Number(xml.attribute(ConstValues.A_SKEW_Y)) * ANGLE_TO_RADIAN;
+			node.scaleX = Number(xml.attribute(ConstValues.A_SCALE_X));
+			node.scaleY = Number(xml.attribute(ConstValues.A_SCALE_Y));
+			node.pivotX =  int(xml.attribute(ConstValues.A_PIVOT_X));
+			node.pivotY =  int(xml.attribute(ConstValues.A_PIVOT_Y));
+			node.z = int(xml.attribute(ConstValues.A_Z));
+		}
+		
+		
+		private static var _parentFrameXML:XML;
+		private static var _from:FrameData = new FrameData();
+		private static var _to:FrameData = new FrameData();
+		private static var _tweenNode:TweenNode = new TweenNode();
+		
+		private static function getTweenFrameXML(parentFrameXML:XML, tweenFrameXML:XML, passedFrame:int, duration:uint):XML
+		{
+			if(!_parentFrameXML)
+			{
+				_parentFrameXML = parentFrameXML.copy();
+			}
 			
-			return frameData;
+			var progress:Number = passedFrame / (duration + 1);
+			
+			parseNode(parentFrameXML, _from);
+			parseNode(tweenFrameXML, _to);
+			_tweenNode.subtract(_from, _to);
+			
+			_from.tweenEasing = Number(parentFrameXML.attribute(ConstValues.A_TWEEN_EASING));
+			_to.tweenRotate = int(tweenFrameXML.attribute(ConstValues.A_TWEEN_ROTATE));
+			
+			if(!isNaN(_from.tweenEasing))
+			{
+				if (_from.tweenEasing > 0)
+				{
+					progress += (Math.sin(progress * HALF_PI) - progress) * _from.tweenEasing;
+				}
+				else
+				{
+					progress -= (1 - Math.cos(progress * HALF_PI) - progress) * _from.tweenEasing;
+				}
+			}
+			_parentFrameXML[ConstValues.AT + ConstValues.A_X] = _from.x + progress * _tweenNode.x;
+			_parentFrameXML[ConstValues.AT + ConstValues.A_Y] = _from.y + progress * _tweenNode.y;
+			_parentFrameXML[ConstValues.AT + ConstValues.A_SCALE_X] = _from.scaleX + progress * _tweenNode.scaleX;
+			_parentFrameXML[ConstValues.AT + ConstValues.A_SCALE_Y] = _from.scaleY + progress * _tweenNode.scaleY;
+			_parentFrameXML[ConstValues.AT + ConstValues.A_SKEW_X] = (_from.skewX + progress * _tweenNode.skewX) / ANGLE_TO_RADIAN;
+			_parentFrameXML[ConstValues.AT + ConstValues.A_SKEW_Y] = (_from.skewY + progress * _tweenNode.skewY) / ANGLE_TO_RADIAN;
+			_parentFrameXML[ConstValues.AT + ConstValues.A_PIVOT_X] = _from.pivotX + progress * _tweenNode.pivotX;
+			_parentFrameXML[ConstValues.AT + ConstValues.A_PIVOT_Y] = _from.pivotY + progress * _tweenNode.pivotY;
+			return _parentFrameXML;
 		}
 	}
 }

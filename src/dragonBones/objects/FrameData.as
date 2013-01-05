@@ -2,11 +2,12 @@ package dragonBones.objects
 {
 	
 	/** @private */
-	final public class FrameData extends TweenNode
+	final public class FrameData extends Node
 	{
 		public var duration:Number;
 		
 		public var tweenEasing:Number;
+		public var tweenRotate:int;
 		
 		public var displayIndex:int;
 		public var movement:String;

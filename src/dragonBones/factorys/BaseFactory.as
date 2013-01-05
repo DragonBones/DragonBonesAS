@@ -254,7 +254,6 @@ package dragonBones.factorys
 		{
 			var bone:Bone = generateBone();
 			bone._origin.copy(boneData);
-			bone.global.z = bone._origin.z;
 			bone.name = boneData.name;
 			
 			var displayData:DisplayData;

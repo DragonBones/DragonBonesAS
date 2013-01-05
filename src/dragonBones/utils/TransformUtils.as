@@ -6,12 +6,12 @@ package dragonBones.utils
 	import flash.geom.Point;
 	
 	/** @private */
-	public class TransfromUtils 
+	public class TransformUtils 
 	{
 		private static var _helpMatrix:Matrix = new Matrix();
 		private static var _helpPoint:Point = new Point();
 		
-		public static function transfromPointWithParent(boneData:Node, parentData:Node):void 
+		public static function transformPointWithParent(boneData:Node, parentData:Node):void 
 		{
 			nodeToMatrix(parentData, _helpMatrix);
 			
