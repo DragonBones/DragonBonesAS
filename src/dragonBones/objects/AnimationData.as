@@ -40,12 +40,6 @@ package dragonBones.objects
 			return _movementDataDic[name];
 		}
 		
-		public function getMovementDataAt(index:int):MovementData
-		{
-			var name:String = _movementList.length > index?_movementList[index]:null;
-			return getMovementData(name);
-		}
-		
 		public function containsBone(boneName:String):Boolean
 		{
 			return _boneList.indexOf(boneName) != -1;

@@ -1,5 +1,8 @@
 package dragonBones.objects
 {
+	import dragonBones.utils.dragonBones_internal;
+	
+	use namespace dragonBones_internal;
 	
 	/** @private */
 	public class ArmatureData
@@ -37,18 +40,12 @@ package dragonBones.objects
 			return _boneDataDic[name];
 		}
 		
-		public function getBoneDataAt(index:int):BoneData
-		{
-			var name:String = _boneList.length > index?_boneList[index]:null;
-			return getBoneData(name);
-		}
-		
 		internal function addBoneData(data:BoneData, name:String):void
 		{
 			_boneDataDic[name] = data;
 		}
 		
-		internal function updateBoneList():void
+		dragonBones_internal function updateBoneList():void
 		{
 			var boneList:Array = [];
 			for(var boneName:String in _boneDataDic)

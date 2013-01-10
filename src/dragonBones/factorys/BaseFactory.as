@@ -38,8 +38,8 @@ package dragonBones.factorys
 	 */
 	public class BaseFactory extends EventDispatcher
 	{
-		private static var _helpMatirx:Matrix = new Matrix();
 		private static var _loaderContext:LoaderContext = new LoaderContext(false);
+		protected static var _helpMatirx:Matrix = new Matrix();
 		
 		protected var _skeletonDataDic:Object;
 		protected var _textureAtlasDic:Object;

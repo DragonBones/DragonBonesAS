@@ -231,10 +231,10 @@ package dragonBones.animation
 			}
 			if(frameData.movement)
 			{
-				var childAramture:Armature = _bone.childArmature;
-				if(childAramture)
+				var childArmature:Armature = _bone.childArmature;
+				if(childArmature)
 				{
-					childAramture.animation.gotoAndPlay(frameData.movement);
+					childArmature.animation.gotoAndPlay(frameData.movement);
 				}
 			}
 		}
@@ -286,7 +286,7 @@ package dragonBones.animation
 			return progress;
 		}
 		
-		private function getEaseValue(value:Number, easing:Number):Number
+		dragonBones_internal static function getEaseValue(value:Number, easing:Number):Number
 		{
 			var valueEase:Number;
 			if (easing > 1)

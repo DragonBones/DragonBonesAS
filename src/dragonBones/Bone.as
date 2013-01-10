@@ -247,29 +247,28 @@ package dragonBones
 			var currentDisplay:Object = _displayBridge.display;
 			if (_children.length > 0 || (_displayVisible && currentDisplay))
 			{
-				_helpPoint.x = _origin.x + _node.x + _tweenNode.x;
-				_helpPoint.y = _origin.y + _node.y + _tweenNode.y;
+				//update global
+				_global.x = _origin.x + _node.x + _tweenNode.x;
+				_global.y = _origin.y + _node.y + _tweenNode.y;
 				_global.skewX = _origin.skewX + _node.skewX + _tweenNode.skewX;
 				_global.skewY = _origin.skewY + _node.skewY + _tweenNode.skewY;
-				
-				//transform
-				if(_parent)
-				{
-					_helpPoint = _parent._globalTransformMatrix.deltaTransformPoint(_helpPoint);
-					_helpPoint.x += _parent._global.x;
-					_helpPoint.y += _parent._global.y;
-					_global.skewX += _parent._global.skewX;
-					_global.skewY += _parent._global.skewY;
-				}
-				
-				//update global
-				_global.x = _helpPoint.x;
-				_global.y = _helpPoint.y;
 				_global.scaleX = _origin.scaleX + _node.scaleX + _tweenNode.scaleX;
 				_global.scaleY = _origin.scaleY + _node.scaleY + _tweenNode.scaleY;
 				_global.pivotX = _origin.pivotX + _node.pivotX + _tweenNode.pivotX;
 				_global.pivotY = _origin.pivotY + _node.pivotY + _tweenNode.pivotY;
 				_global.z = _origin.z + _node.z + _tweenNode.z;
+				
+				//transform
+				if(_parent)
+				{
+					_helpPoint.x = _global.x;
+					_helpPoint.y = _global.y;
+					_helpPoint = _parent._globalTransformMatrix.transformPoint(_helpPoint);
+					_global.x = _helpPoint.x
+					_global.y = _helpPoint.y;
+					_global.skewX += _parent._global.skewX;
+					_global.skewY += _parent._global.skewY;
+				}
 				
 				//Note: this formula of transform is defined by Flash pro
 				_globalTransformMatrix.a = _global.scaleX * Math.cos(_global.skewY);
@@ -279,12 +278,6 @@ package dragonBones
 				_globalTransformMatrix.tx = _global.x;
 				_globalTransformMatrix.ty = _global.y;
 				
-				//update display
-				if(_displayVisible && currentDisplay)
-				{
-					_displayBridge.update(_globalTransformMatrix, _global);
-				}
-				
 				//update children
 				if (_children.length > 0)
 				{
@@ -293,10 +286,28 @@ package dragonBones
 						child.update();
 					}
 				}
+				
+				//
+				//var scaleX:Number = _armature.scaleX;
+				//var scaleY:Number = _armature.scaleY;
 				var childArmature:Armature = this.childArmature;
 				if(childArmature)
 				{
 					childArmature.update();
+					//_globalTransformMatrix.tx *= scaleX;
+					//_globalTransformMatrix.ty *= scaleY;
+				}
+				else
+				{
+					//_globalTransformMatrix.scale(scaleX, scaleY);
+				}
+				//_global.x *= scaleX;
+				//_global.y *= scaleY;
+				
+				//update display
+				if(_displayVisible && currentDisplay)
+				{
+					_displayBridge.update(_globalTransformMatrix, _global);
 				}
 			}
 		}

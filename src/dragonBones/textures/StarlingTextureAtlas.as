@@ -17,8 +17,9 @@
 		dragonBones_internal var _bitmapData:BitmapData;
 		
 		protected var _subTextureDic:Object;
-		
-		private var _scale:Number;
+		protected var _isDifferentXML:Boolean;
+		//mAtlasTexture.scale
+		protected var _scale:Number;
 		
 		protected var _name:String;
 		public function get name():String
@@ -26,16 +27,10 @@
 			return _name;
 		}
 		
-		public function StarlingTextureAtlas(texture:Texture, textureAtlasXML:XML, scale:Number = NaN)
+		public function StarlingTextureAtlas(texture:Texture, textureAtlasXML:XML, isDifferentXML:Boolean = false)
 		{
-			if(isNaN(scale))
-			{
-				_scale = texture.scale;
-			}
-			else
-			{
-				_scale = scale;
-			}
+			_scale = texture.scale;
+			_isDifferentXML = isDifferentXML;
 			
 			super(texture, textureAtlasXML);
 			if(textureAtlasXML)
@@ -76,10 +71,9 @@
 			return texture;
 		}
 		
-		//1.4
 		override protected function parseAtlasXml(atlasXml:XML):void
 		{
-			var scale:Number = _scale;
+			var scale:Number = _isDifferentXML?_scale:1;
 			
 			for each (var subTexture:XML in atlasXml.SubTexture)
 			{

@@ -27,7 +27,7 @@ package dragonBones.utils
 			boneData.skewY -= parentData.skewY;
 		}
 		
-		private static function nodeToMatrix(node:Node, matrix:Matrix):void
+		public static function nodeToMatrix(node:Node, matrix:Matrix):void
 		{
 			matrix.a = node.scaleX * Math.cos(node.skewY)
 			matrix.b = node.scaleX * Math.sin(node.skewY)

@@ -10,7 +10,9 @@ package dragonBones.objects {
 	{
 		private var _armatureDataDic:Object;
 		private var _animationDataDic:Object;
+		
 		private var _displayDataDic:Object;
+		
 		private var _armatureList:Vector.<String>;
 		private var _animationList:Vector.<String>;
 		
@@ -69,12 +71,6 @@ package dragonBones.objects {
 		public function getArmatureData(name:String):ArmatureData
 		{
 			return _armatureDataDic[name];
-		}
-		
-		public function getAramtureDataAt(index:int):ArmatureData
-		{
-			var name:String = _armatureList.length > index?_armatureList[index]:null;
-			return getArmatureData(name);
 		}
 		
 		public function getAnimationData(name:String):AnimationData

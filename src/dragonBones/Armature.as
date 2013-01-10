@@ -49,6 +49,17 @@ package dragonBones
 		 * The name of the Armature.
 		 */
 		public var name:String;
+		
+		/**
+		 * Armature scaleX.
+		 */
+		//public var scaleX:Number;
+		
+		/**
+		 * Armature scaleY.
+		 */
+		//public var scaleY:Number;
+		
 		/**
 		 * An object that can contain any extra data.
 		 */
@@ -89,6 +100,8 @@ package dragonBones
 		public function Armature(display:Object)
 		{
 			super();
+			//scaleX = 1;
+			//scaleY = 1;
 			_display = display;
 			
 			_boneDepthList = new Vector.<Bone>;
