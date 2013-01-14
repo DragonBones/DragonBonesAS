@@ -4,9 +4,10 @@ package dragonBones.objects
 	/** @private */
 	public class AnimationData
 	{
+		internal var _boneList:Vector.<String>;
+		
 		private var _movementDataDic:Object;
 		private var _movementList:Vector.<String>;
-		private var _boneList:Vector.<String>;
 		
 		public function get totalMovements():uint
 		{
@@ -53,18 +54,6 @@ package dragonBones.objects
 				_movementList.push(name);
 			}
 		}
-		
-		internal function addBoneList(boneList:Vector.<String>):void
-		{
-			for each(var boneName:String in boneList)
-			{
-				if(_boneList.indexOf(boneName) == -1)
-				{
-					_boneList.push(boneName);
-				}
-			}
-		}
-		
 	}
 	
 }

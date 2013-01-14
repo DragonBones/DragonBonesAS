@@ -23,6 +23,7 @@ package dragonBones.objects
 		public function ArmatureData()
 		{
 			_boneDataDic = { };
+			_boneList = new Vector.<String>;
 		}
 		
 		public function dispose():void
@@ -65,7 +66,7 @@ package dragonBones.objects
 			if(length > 0)
 			{
 				boneList.sortOn("z", Array.NUMERIC);
-				_boneList = new Vector.<String>;
+				_boneList.length = 0;
 				var i:int = 0;
 				while(i < length)
 				{

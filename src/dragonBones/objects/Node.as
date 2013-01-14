@@ -26,14 +26,14 @@ package dragonBones.objects
 			skewX = skewY = value;
 		}
 		
-		public function Node(_x:Number = 0, _y:Number = 0, _skewX:Number = 0, _skewY:Number = 0, _scaleX:Number = 1, _scaleY:Number = 1)
+		public function Node(x:Number = 0, y:Number = 0, skewX:Number = 0, skewY:Number = 0, scaleX:Number = 1, scaleY:Number = 1)
 		{
-			x = _x || 0;
-			y = _y || 0;
-			skewX = _skewX || 0;
-			skewY = _skewY || 0;
-			scaleX = _scaleX;
-			scaleY = _scaleY;
+			this.x = x || 0;
+			this.y = y || 0;
+			this.skewX = skewX || 0;
+			this.skewY = skewY || 0;
+			this.scaleX = scaleX;
+			this.scaleY = scaleY;
 			
 			pivotX = 0;
 			pivotY = 0;

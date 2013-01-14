@@ -29,8 +29,11 @@
 		
 		public function StarlingTextureAtlas(texture:Texture, textureAtlasXML:XML, isDifferentXML:Boolean = false)
 		{
-			_scale = texture.scale;
-			_isDifferentXML = isDifferentXML;
+			if(texture)
+			{
+				_scale = texture.scale;
+				_isDifferentXML = isDifferentXML;
+			}
 			
 			super(texture, textureAtlasXML);
 			if(textureAtlasXML)

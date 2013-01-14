@@ -18,11 +18,10 @@ package dragonBones.objects
 		private static const ANGLE_TO_RADIAN:Number = Math.PI / 180;
 		private static const HALF_PI:Number = Math.PI * 0.5;
 		
-		private static var helpNode:Node = new Node();
-		
 		private static var _frameRate:uint;
-		
 		private static var _currentSkeletonData:SkeletonData;
+		private static var _helpNode:Node = new Node();
+		private static var _helpFrameData:FrameData = new FrameData();
 		
 		private static function checkSkeletonXMLVersion(skeletonXML:XML):void
 		{
@@ -178,6 +177,8 @@ package dragonBones.objects
 					);
 					skeletonData.addAnimationData(animationData, animationName);
 				}
+				//
+				animationData._boneList = armatureData.boneList;
 			}
 			_currentSkeletonData = null;
 			return skeletonData;
@@ -227,8 +228,8 @@ package dragonBones.objects
 			if(parentXML)
 			{
 				boneData._parent = parentXML.attribute(ConstValues.A_NAME);
-				parseNode(parentXML, helpNode);
-				TransformUtils.transformPointWithParent(boneData, helpNode);
+				parseNode(parentXML, _helpNode);
+				TransformUtils.transformPointWithParent(boneData, _helpNode);
 			}
 			else
 			{
@@ -258,14 +259,13 @@ package dragonBones.objects
 				else
 				{
 					movementData = new MovementData();
-					var boneList:Vector.<String> = parseMovementData(movementXML, armatureData, movementData);
+					parseMovementData(movementXML, armatureData, movementData);
 					animationData.addMovementData(movementData, movementName);
-					animationData.addBoneList(boneList);
 				}
 			}
 		}
 		
-		private static function parseMovementData(movementXML:XML, armatureData:ArmatureData, movementData:MovementData):Vector.<String>
+		private static function parseMovementData(movementXML:XML, armatureData:ArmatureData, movementData:MovementData):void
 		{
 			var duration:int = int(movementXML.attribute(ConstValues.A_DURATION));
 			
@@ -277,7 +277,6 @@ package dragonBones.objects
 				Number(movementXML.attribute(ConstValues.A_TWEEN_EASING)[0])
 			);
 			
-			var boneList:Vector.<String> = new Vector.<String>;
 			var movementBoneXMLList:XMLList = movementXML.elements(ConstValues.BONE);
 			for each(var movementBoneXML:XML in movementBoneXMLList)
 			{
@@ -285,16 +284,18 @@ package dragonBones.objects
 				var boneData:BoneData = armatureData.getBoneData(boneName);
 				var parentMovementBoneXML:XML = getElementsByAttribute(movementBoneXMLList, ConstValues.A_NAME, boneData.parent)[0];
 				var movementBoneData:MovementBoneData = movementData.getMovementBoneData(boneName);
-				if(movementBoneData)
+				if(movementBoneXML)
 				{
-					parseMovementBoneData(movementBoneXML, parentMovementBoneXML, boneData, movementBoneData);
-				}
-				else
-				{
-					movementBoneData = new MovementBoneData();
-					parseMovementBoneData(movementBoneXML, parentMovementBoneXML, boneData, movementBoneData);
-					movementData.addMovementBoneData(movementBoneData, boneName);
-					boneList.push(boneName);
+					if(movementBoneData)
+					{
+						parseMovementBoneData(movementBoneXML, parentMovementBoneXML, boneData, movementBoneData);
+					}
+					else
+					{
+						movementBoneData = new MovementBoneData();
+						parseMovementBoneData(movementBoneXML, parentMovementBoneXML, boneData, movementBoneData);
+						movementData.addMovementBoneData(movementBoneData, boneName);
+					}
 				}
 			}
 			
@@ -315,8 +316,6 @@ package dragonBones.objects
 					movementData.addMovementFrameData(movementFrameData);
 				}
 			}
-			
-			return boneList;
 		}
 		
 		private static function parseMovementBoneData(movementBoneXML:XML, parentMovementBoneXML:XML, boneData:BoneData, movementBoneData:MovementBoneData):void
@@ -326,22 +325,35 @@ package dragonBones.objects
 				Number(movementBoneXML.attribute(ConstValues.A_MOVEMENT_DELAY))
 			);
 			
+			var i:uint = 0;
+			var parentTotalDuration:uint = 0;
+			var totalDuration:uint = 0;
+			var currentDuration:uint = 0;
 			if(parentMovementBoneXML)
 			{
 				var parentFrameXMLList:XMLList = parentMovementBoneXML.elements(ConstValues.FRAME);
-				var parentFrameXML:XML;
 				var parentFrameCount:uint = parentFrameXMLList.length();
-				var i:uint = 0;
-				var parentTotalDuration:uint = 0;
-				var currentDuration:uint = 0;
+				var parentFrameXML:XML;
 			}
 			
-			var totalDuration:uint = 0;
+			
 			var frameXMLList:XMLList = movementBoneXML.elements(ConstValues.FRAME);
 			var frameCount:uint = frameXMLList.length();
 			for(var j:int = 0;j < frameCount;j ++)
 			{
 				var frameXML:XML = frameXMLList[j];
+				var frameData:FrameData = movementBoneData.getFrameDataAt(j);
+				if(frameData)
+				{
+					parseFrameData(frameXML, frameData);
+				}
+				else
+				{
+					frameData = new FrameData();
+					parseFrameData(frameXML, frameData);
+					movementBoneData.addFrameData(frameData);
+				}
+				
 				if(parentMovementBoneXML)
 				{
 					while(i < parentFrameCount && (parentFrameXML?(totalDuration < parentTotalDuration || totalDuration >= parentTotalDuration + currentDuration):true))
@@ -351,27 +363,25 @@ package dragonBones.objects
 						currentDuration = int(parentFrameXML.attribute(ConstValues.A_DURATION));
 						i++;
 					}
-					if(parentFrameXML)
+					
+					parseFrameData(parentFrameXML, _helpFrameData);
+					
+					var tweenFrameXML:XML = parentFrameXMLList[i];
+					var progress:Number;
+					if(tweenFrameXML)
 					{
-						var tweenFrameXML:XML = parentFrameXMLList[i];
-						var passedFrame:int = totalDuration - parentTotalDuration;
-						if(tweenFrameXML && passedFrame > 0)
-						{
-							parentFrameXML = getTweenFrameXML(parentFrameXML, tweenFrameXML, passedFrame, currentDuration);
-						}
+						progress = (totalDuration - parentTotalDuration) / currentDuration;
 					}
+					else
+					{
+						tweenFrameXML = parentFrameXML;
+						progress = 0;
+					}
+					parseNode(tweenFrameXML, _helpNode);
+					var parentNode:Node = TransformUtils.getTweenNode(_helpFrameData, _helpNode, progress, _helpFrameData.tweenEasing);
+					TransformUtils.transformPointWithParent(frameData, parentNode);
 				}
-				var frameData:FrameData = movementBoneData.getFrameDataAt(j);
-				if(frameData)
-				{
-					parseFrameData(frameXML, parentFrameXML, frameData);
-				}
-				else
-				{
-					frameData = new FrameData();
-					parseFrameData(frameXML, parentFrameXML, frameData);
-					movementBoneData.addFrameData(frameData);
-				}
+				totalDuration += int(frameXML.attribute(ConstValues.A_DURATION));
 				
 				frameData.x -= boneData.x;
 				frameData.y -= boneData.y;
@@ -382,26 +392,23 @@ package dragonBones.objects
 				frameData.pivotX -= boneData.pivotX;
 				frameData.pivotY -= boneData.pivotY;
 				frameData.z -= boneData.z;
-				
-				totalDuration += frameData.duration;
-				frameData.duration /= _frameRate;
 			}
 		}
 		
 		private static function parseMovementFrameData(movementFrameXML:XML, movementFrameData:MovementFrameData):void
 		{
 			movementFrameData.setValues(
-				Number(movementFrameXML.attribute(ConstValues.A_DURATION))/_frameRate,
+				Number(movementFrameXML.attribute(ConstValues.A_DURATION)) / _frameRate,
 				movementFrameXML.attribute(ConstValues.A_MOVEMENT),
 				movementFrameXML.attribute(ConstValues.A_EVENT),
 				movementFrameXML.attribute(ConstValues.A_SOUND)
 			);
 		}
 	
-		private static function parseFrameData(frameXML:XML, parentFrameXML:XML, frameData:FrameData):void
+		dragonBones_internal static function parseFrameData(frameXML:XML, frameData:FrameData):void
 		{
 			parseNode(frameXML, frameData);
-			frameData.duration = int(frameXML.attribute(ConstValues.A_DURATION));
+			frameData.duration = int(frameXML.attribute(ConstValues.A_DURATION)) / _frameRate;
 			frameData.tweenEasing = Number(frameXML.attribute(ConstValues.A_TWEEN_EASING));
 			frameData.tweenRotate = int(frameXML.attribute(ConstValues.A_TWEEN_ROTATE));
 			frameData.displayIndex = int(frameXML.attribute(ConstValues.A_DISPLAY_INDEX));
@@ -410,15 +417,9 @@ package dragonBones.objects
 			frameData.event = String(frameXML.attribute(ConstValues.A_EVENT));
 			frameData.sound = String(frameXML.attribute(ConstValues.A_SOUND));
 			frameData.soundEffect = String(frameXML.attribute(ConstValues.A_SOUND_EFFECT));
-				
-			if(parentFrameXML)
-			{
-				parseNode(parentFrameXML, helpNode);
-				TransformUtils.transformPointWithParent(frameData, helpNode);
-			}
 		}
 		
-		dragonBones_internal static function parseNode(xml:XML, node:Node):void
+		private static function parseNode(xml:XML, node:Node):void
 		{
 			node.x = Number(xml.attribute(ConstValues.A_X));
 			node.y = Number(xml.attribute(ConstValues.A_Y));
@@ -429,37 +430,6 @@ package dragonBones.objects
 			node.pivotX =  int(xml.attribute(ConstValues.A_PIVOT_X));
 			node.pivotY =  int(xml.attribute(ConstValues.A_PIVOT_Y));
 			node.z = int(xml.attribute(ConstValues.A_Z));
-		}
-		
-		private static var _from:FrameData = new FrameData();
-		private static var _to:FrameData = new FrameData();
-		private static var _tweenNode:TweenNode = new TweenNode();
-		
-		dragonBones_internal static function getTweenFrameXML(parentFrameXML:XML, tweenFrameXML:XML, passedFrame:int, duration:uint):XML
-		{
-			_from.tweenEasing = Number(parentFrameXML.attribute(ConstValues.A_TWEEN_EASING));
-			if(isNaN(_from.tweenEasing))
-			{
-			}
-			else
-			{
-				parseNode(parentFrameXML, _from);
-				parseNode(tweenFrameXML, _to);
-				_to.tweenRotate = int(tweenFrameXML.attribute(ConstValues.A_TWEEN_ROTATE));
-				_tweenNode.subtract(_from, _to);
-				
-				var progress:Number = Tween.getEaseValue(passedFrame / duration, _from.tweenEasing);
-				parentFrameXML = parentFrameXML.copy();
-				parentFrameXML[ConstValues.AT + ConstValues.A_X] = _from.x + progress * _tweenNode.x;
-				parentFrameXML[ConstValues.AT + ConstValues.A_Y] = _from.y + progress * _tweenNode.y;
-				parentFrameXML[ConstValues.AT + ConstValues.A_SCALE_X] = _from.scaleX + progress * _tweenNode.scaleX;
-				parentFrameXML[ConstValues.AT + ConstValues.A_SCALE_Y] = _from.scaleY + progress * _tweenNode.scaleY;
-				parentFrameXML[ConstValues.AT + ConstValues.A_SKEW_X] = (_from.skewX + progress * _tweenNode.skewX) / ANGLE_TO_RADIAN;
-				parentFrameXML[ConstValues.AT + ConstValues.A_SKEW_Y] = (_from.skewY + progress * _tweenNode.skewY) / ANGLE_TO_RADIAN;
-				parentFrameXML[ConstValues.AT + ConstValues.A_PIVOT_X] = _from.pivotX + progress * _tweenNode.pivotX;
-				parentFrameXML[ConstValues.AT + ConstValues.A_PIVOT_Y] = _from.pivotY + progress * _tweenNode.pivotY;
-			}
-			return parentFrameXML;
 		}
 	}
 }

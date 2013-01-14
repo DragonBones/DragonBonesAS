@@ -94,7 +94,11 @@ package dragonBones.factorys
 		public function addSkeletonData(skeletonData:SkeletonData, name:String = null):void
 		{
 			name = name || skeletonData.name;
-			if(name)
+			if(!name)
+			{
+				throw new ArgumentError("Unnamed data!");
+			}
+			if(skeletonData)
 			{
 				_skeletonDataDic[name] = skeletonData;
 			}
@@ -113,7 +117,11 @@ package dragonBones.factorys
 		public function addTextureAtlas(textureAtlas:ITextureAtlas, name:String = null):void
 		{
 			name = name || textureAtlas.name;
-			if(name)
+			if(!name)
+			{
+				throw new ArgumentError("Unnamed data!");
+			}
+			if(textureAtlas)
 			{
 				_textureAtlasDic[name] = textureAtlas;
 			}

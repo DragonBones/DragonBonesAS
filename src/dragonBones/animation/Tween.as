@@ -20,6 +20,26 @@ package dragonBones.animation
 		
 		private static var _soundManager:SoundEventManager = SoundEventManager.getInstance();
 		
+		public static function getEaseValue(value:Number, easing:Number):Number
+		{
+			var valueEase:Number;
+			if (easing > 1)
+			{
+				valueEase = 0.5 * (1 - Math.cos(value * Math.PI )) - value;
+				easing -= 1;
+			}
+			else if (easing > 0)
+			{
+				valueEase = Math.sin(value * HALF_PI) - value;
+			}
+			else
+			{
+				valueEase = 1 - Math.cos(value * HALF_PI) - value;
+				easing *= -1;
+			}
+			return valueEase * easing + value;
+		}
+		
 		private var _isPause:Boolean;
 		private var _rawDuration:Number;
 		private var _nextFrameDataTimeEdge:Number;
@@ -284,26 +304,6 @@ package dragonBones.animation
 				}
 			}
 			return progress;
-		}
-		
-		dragonBones_internal static function getEaseValue(value:Number, easing:Number):Number
-		{
-			var valueEase:Number;
-			if (easing > 1)
-			{
-				valueEase = 0.5 * (1 - Math.cos(value * Math.PI )) - value;
-				easing -= 1;
-			}
-			else if (easing > 0)
-			{
-				valueEase = Math.sin(value * HALF_PI) - value;
-			}
-			else
-			{
-				valueEase = 1 - Math.cos(value * HALF_PI) - value;
-				easing *= -1;
-			}
-			return valueEase * easing + value;
 		}
 	}
 }
