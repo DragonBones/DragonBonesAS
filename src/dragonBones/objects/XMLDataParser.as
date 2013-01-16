@@ -44,7 +44,7 @@ package dragonBones.objects
 			for (var i:int = 0; i < length; i++ )
 			{
 				var xml:XML = xmlList[i];
-				if (xml["@" + attribute].toString() == value)
+				if (xml.@[attribute].toString() == value)
 				{
 					result[result.length()] = xmlList[i];
 				}
