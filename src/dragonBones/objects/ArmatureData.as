@@ -43,7 +43,25 @@ package dragonBones.objects
 		
 		internal function addBoneData(data:BoneData, name:String):void
 		{
-			_boneDataDic[name] = data;
+			if(data || name)
+			{
+				_boneDataDic[name] = data;
+			}
+		}
+		
+		internal function removeBoneData(data:BoneData):void
+		{
+			if(data)
+			{
+				for(var name:String in _boneDataDic)
+				{
+					if(_boneDataDic[name] == data)
+					{
+						delete _boneDataDic[name];
+						return;
+					}
+				}
+			}
 		}
 		
 		dragonBones_internal function updateBoneList():void
@@ -52,20 +70,20 @@ package dragonBones.objects
 			for(var boneName:String in _boneDataDic)
 			{
 				var parentData:BoneData = _boneDataDic[boneName];
-				var z:int = parentData.z;
-				var depth:int = 0;
+				var levelValue:int = parentData.node.z;
+				var level:int = 0;
 				while(parentData)
 				{
-					depth ++;
-					z += 1000 * depth;
+					level ++;
+					levelValue += 1000 * level;
 					parentData = _boneDataDic[parentData.parent];
 				}
-				boneList.push({z:z, boneName:boneName});
+				boneList.push({level:levelValue, boneName:boneName});
 			}
 			var length:int = boneList.length;
 			if(length > 0)
 			{
-				boneList.sortOn("z", Array.NUMERIC);
+				boneList.sortOn("level", Array.NUMERIC);
 				_boneList.length = 0;
 				var i:int = 0;
 				while(i < length)

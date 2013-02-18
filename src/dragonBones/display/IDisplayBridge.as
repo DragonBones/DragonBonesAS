@@ -2,6 +2,7 @@ package dragonBones.display
 {
 	import dragonBones.objects.Node;
 	
+	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 
 	/**
@@ -20,7 +21,7 @@ package dragonBones.display
 		 * @param	matrix
 		 * @param	node
 		 */
-		function update(matrix:Matrix, node:Node):void;
+		function update(matrix:Matrix, node:Node, colorTransform:ColorTransform):void;
 		/**
 		 * Adds the original display object to another display object.
 		 * @param	container

@@ -8,8 +8,10 @@ package dragonBones.animation
 	import dragonBones.objects.FrameData;
 	import dragonBones.objects.MovementBoneData;
 	import dragonBones.objects.Node;
-	import dragonBones.objects.TweenNode;
+	import dragonBones.utils.TransformUtils;
 	import dragonBones.utils.dragonBones_internal;
+	
+	import flash.geom.ColorTransform;
 	
 	use namespace dragonBones_internal;
 	
@@ -20,10 +22,15 @@ package dragonBones.animation
 		
 		private static var _soundManager:SoundEventManager = SoundEventManager.getInstance();
 		
+		//NaN: no tweens;  -1: ease out; 0: linear; 1: ease in; 2: ease in&out
 		public static function getEaseValue(value:Number, easing:Number):Number
 		{
-			var valueEase:Number;
-			if (easing > 1)
+			var valueEase:Number = 0;
+			if(isNaN(easing))
+			{
+				return valueEase;
+			}
+			else if (easing > 1)
 			{
 				valueEase = 0.5 * (1 - Math.cos(value * Math.PI )) - value;
 				easing -= 1;
@@ -32,13 +39,31 @@ package dragonBones.animation
 			{
 				valueEase = Math.sin(value * HALF_PI) - value;
 			}
-			else
+			else if (easing < 0)
 			{
 				valueEase = 1 - Math.cos(value * HALF_PI) - value;
 				easing *= -1;
 			}
 			return valueEase * easing + value;
 		}
+		
+		private var _bone:Bone;
+		
+		private var _movementBoneData:MovementBoneData;
+		
+		private var _node:Node;
+		private var _colorTransform:ColorTransform;
+		
+		private var _currentNode:Node;
+		private var _currentColorTransform:ColorTransform;
+		
+		private var _offSetNode:Node;
+		private var _offSetColorTransform:ColorTransform;
+		
+		private var _currentFrameData:FrameData;
+		private var _nextFrameData:FrameData;
+		private var _tweenEasing:Number;
+		private var _frameTweenEasing:Number;
 		
 		private var _isPause:Boolean;
 		private var _rawDuration:Number;
@@ -47,19 +72,6 @@ package dragonBones.animation
 		private var _nextFrameDataID:int;
 		private var _loop:int;
 		
-		private var _bone:Bone;
-		private var _node:Node;
-		
-		private var _from:Node;
-		private var _tweenNode:TweenNode;
-		
-		private var _movementBoneData:MovementBoneData;
-		
-		private var _currentFrameData:FrameData;
-		private var _nextFrameData:FrameData;
-		private var _frameTweenEasing:Number;
-		private var _tweenEasing:Number;
-		
 		/**
 		 * Creates a new <code>Tween</code>
 		 * @param	bone
@@ -67,11 +79,16 @@ package dragonBones.animation
 		public function Tween(bone:Bone)
 		{
 			super();
-			_from = new Node();
-			_tweenNode = new TweenNode();
 			
 			_bone = bone;
 			_node = _bone._tweenNode;
+			_colorTransform = _bone._tweenColorTransform;
+			
+			_currentNode = new Node();
+			_currentColorTransform = new ColorTransform(0,0,0,0,0,0,0,0);
+			
+			_offSetNode = new Node();
+			_offSetColorTransform = new ColorTransform(0,0,0,0,0,0,0,0);
 		}
 		
 		/** @private */
@@ -94,34 +111,62 @@ package dragonBones.animation
 			_nextFrameData = null;
 			_loop = loop?0:-1;
 			
+			_nextFrameDataTimeEdge = 0;
+			_nextFrameDataID = 0;
+			_rawDuration = rawDuration;
+			_tweenEasing = tweenEasing;
+			
 			if (totalFrames == 1)
 			{
 				_rawDuration = 0;
 				_nextFrameData = _movementBoneData.getFrameDataAt(0);
-				setBetween(_node, _nextFrameData);
-				_frameTweenEasing = 1;
+				setOffset(_node, _colorTransform, _nextFrameData.node, _nextFrameData.colorTransform);
+			}
+			else if (loop && _movementBoneData.delay != 0)
+			{
+				getLoopListNode();
+				setOffset(_node, _colorTransform, _offSetNode, _offSetColorTransform);
 			}
 			else
 			{
-				_rawDuration = rawDuration;
-				_tweenEasing = tweenEasing;
-				_nextFrameDataTimeEdge = 0;
-				_nextFrameDataID = 0;
-				
-				if (loop && _movementBoneData.delay != 0)
+				_nextFrameData = _movementBoneData.getFrameDataAt(0);
+				setOffset(_node, _colorTransform, _nextFrameData.node, _nextFrameData.colorTransform);
+			}
+		}
+		
+		private function getLoopListNode():void
+		{
+			var playedTime:Number = _rawDuration * _movementBoneData.delay;
+			var length:int = _movementBoneData.totalFrames;
+			var nextFrameDataID:int = 0;
+			var nextFrameDataTimeEdge:Number = 0;
+			do 
+			{
+				var currentFrameDataID:int = nextFrameDataID;
+				var frameDuration:Number = _movementBoneData.getFrameDataAt(currentFrameDataID).duration;
+				nextFrameDataTimeEdge += frameDuration;
+				if (++ nextFrameDataID >= length)
 				{
-					setNodeTo(updateFrameData(_movementBoneData.delay), _tweenNode);
-					setBetween(_node, _tweenNode);
-					//
-					_nextFrameDataTimeEdge = 0;
-					_nextFrameDataID = 0;
-				}
-				else
-				{
-					_nextFrameData = _movementBoneData.getFrameDataAt(0);
-					setBetween(_node, _nextFrameData);
+					nextFrameDataID = 0;
 				}
 			}
+			while (playedTime >= nextFrameDataTimeEdge);
+			
+			var currentFrameData:FrameData = _movementBoneData.getFrameDataAt(currentFrameDataID);
+			var nextFrameData:FrameData = _movementBoneData.getFrameDataAt(nextFrameDataID);
+			
+			setOffset(currentFrameData.node, currentFrameData.colorTransform, nextFrameData.node, nextFrameData.colorTransform);
+		
+			var progress:Number = 1 - (nextFrameDataTimeEdge - playedTime) / frameDuration;
+			
+			var tweenEasing:Number = isNaN(_tweenEasing)?currentFrameData.tweenEasing:_tweenEasing;
+			if (tweenEasing)
+			{
+				progress = getEaseValue(progress, tweenEasing);
+			}
+			
+			TransformUtils.setOffSetNode(currentFrameData.node, nextFrameData.node, _offSetNode);
+			TransformUtils.setTweenNode(_currentNode, _offSetNode, _offSetNode, progress);
 		}
 		
 		/** @private */
@@ -175,11 +220,13 @@ package dragonBones.animation
 			
 			if (!isNaN(_frameTweenEasing))
 			{
-				setNodeTo(progress);
+				TransformUtils.setTweenNode(_currentNode, _offSetNode, _node, progress);
+				TransformUtils.setTweenColorTransform(_currentColorTransform, _offSetColorTransform, _colorTransform, progress);
 			}
 			else if(_currentFrameData)
 			{
-				setNodeTo(0);
+				TransformUtils.setTweenNode(_currentNode, _offSetNode, _node, 0);
+				TransformUtils.setTweenColorTransform(_currentColorTransform, _offSetColorTransform, _colorTransform, 0);
 			}
 			
 			if(_currentFrameData)
@@ -189,31 +236,24 @@ package dragonBones.animation
 			}
 		}
 		
-		private function setBetween(from:Node, to:Node):void
+		private function setOffset(currentNode:Node, currentColorTransform:ColorTransform, nextNode:Node, nextColorTransform:ColorTransform, tweenRotate:int = 0):void
 		{
-			_from.copy(from);
-			if(to is FrameData)
+			_currentNode.copy(currentNode);
+			
+			if(currentColorTransform)
 			{
-				if((to as FrameData).displayIndex < 0)
-				{
-					_tweenNode.zero();
-					return;
-				}
+				_currentColorTransform.alphaOffset = currentColorTransform.alphaOffset;
+				_currentColorTransform.redOffset = currentColorTransform.redOffset;
+				_currentColorTransform.greenOffset = currentColorTransform.greenOffset;
+				_currentColorTransform.blueOffset = currentColorTransform.blueOffset;
+				_currentColorTransform.alphaMultiplier = currentColorTransform.alphaMultiplier;
+				_currentColorTransform.redMultiplier = currentColorTransform.redMultiplier;
+				_currentColorTransform.greenMultiplier = currentColorTransform.greenMultiplier;
+				_currentColorTransform.blueMultiplier = currentColorTransform.blueMultiplier;
 			}
-			_tweenNode.subtract(from, to);
-		}
-		
-		private function setNodeTo(value:Number, node:Node = null):void
-		{
-			node = node || _node;
-			node.x = _from.x + value * _tweenNode.x;
-			node.y = _from.y + value * _tweenNode.y;
-			node.scaleX = _from.scaleX + value * _tweenNode.scaleX;
-			node.scaleY = _from.scaleY + value * _tweenNode.scaleY;
-			node.skewX = _from.skewX + value * _tweenNode.skewX;
-			node.skewY = _from.skewY + value * _tweenNode.skewY;
-			node.pivotX = _from.pivotX + value * _tweenNode.pivotX;
-			node.pivotY = _from.pivotY + value * _tweenNode.pivotY;
+			
+			TransformUtils.setOffSetNode(_currentNode, nextNode, _offSetNode, tweenRotate);
+			TransformUtils.setOffSetColorTransform(_currentColorTransform, nextColorTransform, _offSetColorTransform);
 		}
 		
 		private function arriveFrameData(frameData:FrameData):void
@@ -221,9 +261,9 @@ package dragonBones.animation
 			var displayIndex:int = frameData.displayIndex;
 			if(displayIndex >= 0)
 			{
-				if(_node.z != frameData.z)
+				if(_node.z != frameData.node.z)
 				{
-					_node.z = frameData.z;
+					_node.z = frameData.node.z;
 					if(_bone.armature)
 					{
 						_bone.armature._bonesIndexChanged = true;
@@ -285,24 +325,27 @@ package dragonBones.animation
 					_currentFrameData = _nextFrameData;
 					_nextFrameData = nextFrameData;
 				}
+				
+				//
 				if(isList && _nextFrameDataID == 0)
 				{
 					_isPause = true;
 					return 1;
 				}
-				setBetween(currentFrameData, nextFrameData);
+				
+				setOffset(currentFrameData.node, currentFrameData.colorTransform, nextFrameData.node, nextFrameData.colorTransform);
 			}
 			
 			progress = 1 - (_nextFrameDataTimeEdge - playedTime) / _frameDuration;
 			if (!isNaN(_frameTweenEasing))
 			{
-				//NaN: no tweens;  -1: ease out; 0: linear; 1: ease in; 2: ease in&out
 				var tweenEasing:Number = isNaN(_tweenEasing)?_frameTweenEasing:_tweenEasing;
 				if (tweenEasing)
 				{
 					progress = getEaseValue(progress, tweenEasing);
 				}
 			}
+			progress = getEaseValue(progress, _frameTweenEasing);
 			return progress;
 		}
 	}

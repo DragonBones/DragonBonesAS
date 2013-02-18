@@ -16,6 +16,7 @@ package dragonBones.utils {
 		public static const ANIMATION:String = "animation";
 		public static const MOVEMENT:String = "mov";
 		public static const FRAME:String = "f";
+		public static const COLOR_TRANSFORM:String = "colorTransform";
 
 		public static const TEXTURE_ATLAS:String = "TextureAtlas";
 		public static const SUB_TEXTURE:String = "SubTexture";
@@ -53,6 +54,16 @@ package dragonBones.utils {
 		public static const A_HEIGHT:String = "height";
 		public static const A_PIVOT_X:String = "pX";
 		public static const A_PIVOT_Y:String = "pY";
+		
+		public static const A_ALPHA:String = "a";
+		public static const A_RED:String = "r";
+		public static const A_GREEN:String = "g";
+		public static const A_BLUE:String = "b";
+
+		public static const A_ALPHA_MULTIPLIER:String = "aM";
+		public static const A_RED_MULTIPLIER:String = "rM";
+		public static const A_GREEN_MULTIPLIER:String = "gM";
+		public static const A_BLUE_MULTIPLIER:String = "bM";
 
 		public static const V_SOUND_LEFT:String = "l";
 		public static const V_SOUND_RIGHT:String = "r";

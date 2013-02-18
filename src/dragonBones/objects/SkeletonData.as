@@ -85,25 +85,66 @@ package dragonBones.objects {
 		
 		internal function addArmatureData(data:ArmatureData, name:String):void
 		{
-			_armatureDataDic[name] = data;
-			if(_armatureList.indexOf(name) < 0)
+			if(data && name)
 			{
-				_armatureList.push(name);
+				_armatureDataDic[name] = data;
+				if(_armatureList.indexOf(name) < 0)
+				{
+					_armatureList.push(name);
+				}
+			}
+		}
+		
+		internal function removeArmatureData(data:ArmatureData):void
+		{
+			if(data)
+			{
+				for(var name:String in _armatureDataDic)
+				{
+					if(_armatureDataDic[name] == data)
+					{
+						delete _armatureDataDic[name];
+						_armatureList.splice(_armatureList.indexOf(name), 1);
+						return;
+					}
+				}
 			}
 		}
 		
 		internal function addAnimationData(data:AnimationData, name:String):void
 		{
-			_animationDataDic[name] = data;
-			if(_animationList.indexOf(name) < 0)
+			if(data && name)
 			{
-				_animationList.push(name);
+				_animationDataDic[name] = data;
+				if(_animationList.indexOf(name) < 0)
+				{
+					_animationList.push(name);
+				}
+			}
+		}
+		
+		internal function removeAnimationData(data:AnimationData):void
+		{
+			if(data)
+			{
+				for(var name:String in _animationDataDic)
+				{
+					if(_animationDataDic[name] == data)
+					{
+						delete _animationDataDic[name];
+						_animationList.splice(_animationList.indexOf(name), 1);
+						return;
+					}
+				}
 			}
 		}
 		
 		internal function addDisplayData(data:DisplayData, name:String):void
 		{
-			_displayDataDic[name] = data;
+			if(data && name)
+			{
+				_displayDataDic[name] = data;
+			}
 		}
 	}
 }

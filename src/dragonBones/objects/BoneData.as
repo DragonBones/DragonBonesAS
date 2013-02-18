@@ -2,15 +2,9 @@ package dragonBones.objects
 {
 	
 	/** @private */
-	final public class BoneData extends Node
+	final public class BoneData
 	{
-		private var _displayList:Vector.<String>;
-		
-		internal var _name:String;
-		public function get name():String
-		{
-			return _name;
-		}
+		public var displayList:Vector.<String>;
 		
 		internal var _parent:String;
 		public function get parent():String
@@ -18,44 +12,17 @@ package dragonBones.objects
 			return _parent;
 		}
 		
-		public function get totalDisplays():uint
-		{
-			return _displayList.length;
-		}
+		public var node:Node;
 		
 		public function BoneData()
 		{
-			super();
-			_displayList = new Vector.<String>;
+			displayList = new Vector.<String>;
+			node = new Node();
 		}
 		
 		public function dispose():void
 		{
-			_displayList.length = 0;
-		}
-		
-		override public function copy(node:Node):void
-		{
-			super.copy(node);
-			var boneData:BoneData = node as BoneData;
-			if(boneData)
-			{
-				_name = boneData.name;
-				_parent = boneData.parent;
-			}
-		}
-		
-		public function getDisplayDataAt(index:int):String
-		{
-			return _displayList.length > index?_displayList[index]:null;
-		}
-		
-		internal function addDisplayData(data:String):void
-		{
-			if(_displayList.indexOf(data) < 0)
-			{
-				_displayList.push(data);
-			}
+			displayList.length = 0;
 		}
 	}
 }

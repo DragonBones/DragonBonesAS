@@ -2,11 +2,11 @@ package dragonBones
 {
 	import dragonBones.animation.Tween;
 	import dragonBones.display.IDisplayBridge;
-	import dragonBones.objects.BoneData;
 	import dragonBones.objects.Node;
 	import dragonBones.utils.dragonBones_internal;
 	
 	import flash.events.EventDispatcher;
+	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	
@@ -29,12 +29,19 @@ package dragonBones
 		 */
 		public var userData:Object;
 		
+		public var global:Node;
+		public var origin:Node;
+		public var node:Node;
+		
+		public var colorTransform:ColorTransform;
+		private var _globalColorTransform:ColorTransform;
+		
 		/** @private */
 		dragonBones_internal var _tween:Tween;
 		/** @private */
 		dragonBones_internal var _tweenNode:Node;
 		/** @private */
-		dragonBones_internal var _origin:BoneData;
+		dragonBones_internal var _tweenColorTransform:ColorTransform;
 		/** @private */
 		dragonBones_internal var _children:Vector.<Bone>;
 		/** @private */
@@ -95,24 +102,6 @@ package dragonBones
 			_displayBridge.display = value;
 		}
 		
-		private var _global:Node;
-		/**
-		 * The transform information relative to the armature's coordinates.
-		 */
-		public function get global():Node
-		{
-			return _global;
-		}
-		
-		private var _node:Node;
-		/**
-		 * The transform information relative to the local coordinates.
-		 */
-		public function get node():Node
-		{
-			return _node;
-		}
-		
 		/** @private */
 		dragonBones_internal function changeDisplay(displayIndex:int):void
 		{
@@ -133,7 +122,7 @@ package dragonBones
 					//show
 					if(_armature)
 					{
-						_displayBridge.addDisplay(_armature.display, _global.z);
+						_displayBridge.addDisplay(_armature.display, global.z);
 						_armature._bonesIndexChanged = true;
 					}
 				}
@@ -158,23 +147,38 @@ package dragonBones
 		 */
 		public function Bone(displayBrideg:IDisplayBridge)
 		{
+			origin = new Node();
+			global = new Node();
+			node = new Node();
+			
 			_displayBridge = displayBrideg;
 			
 			_children = new Vector.<Bone>;
 			
-			_globalTransformMatrix = new Matrix()
+			_globalTransformMatrix = new Matrix();
 			_displayList = [];
 			_displayIndex = -1;
-			_origin = new BoneData();
-			_global = new Node();
-			_node = new Node();
-			_node.scaleX = 0;
-			_node.scaleY = 0;
+			
+			_globalColorTransform = new ColorTransform();
+			
 			_tweenNode = new Node();
-			_tweenNode.scaleX = 0;
-			_tweenNode.scaleY = 0;
+			_tweenColorTransform = new ColorTransform();
 			
 			_tween = new Tween(this);
+		}
+		
+		public function changeDisplayList(displayList:Array):void
+		{
+			var indexBackup:int = _displayIndex;
+			
+			var length:uint = Math.min(_displayList.length, displayList.length);
+			for(var i:int = 0;i < length;i ++)
+			{
+				changeDisplay(i);
+				display = displayList[i];
+			}
+			
+			changeDisplay(indexBackup);
 		}
 		
 		/**
@@ -248,35 +252,35 @@ package dragonBones
 			if (_children.length > 0 || (_displayVisible && currentDisplay))
 			{
 				//update global
-				_global.x = _origin.x + _node.x + _tweenNode.x;
-				_global.y = _origin.y + _node.y + _tweenNode.y;
-				_global.skewX = _origin.skewX + _node.skewX + _tweenNode.skewX;
-				_global.skewY = _origin.skewY + _node.skewY + _tweenNode.skewY;
-				_global.scaleX = _origin.scaleX + _node.scaleX + _tweenNode.scaleX;
-				_global.scaleY = _origin.scaleY + _node.scaleY + _tweenNode.scaleY;
-				_global.pivotX = _origin.pivotX + _node.pivotX + _tweenNode.pivotX;
-				_global.pivotY = _origin.pivotY + _node.pivotY + _tweenNode.pivotY;
-				_global.z = _origin.z + _node.z + _tweenNode.z;
+				global.x = origin.x + node.x + _tweenNode.x;
+				global.y = origin.y + node.y + _tweenNode.y;
+				global.skewX = origin.skewX + node.skewX + _tweenNode.skewX;
+				global.skewY = origin.skewY + node.skewY + _tweenNode.skewY;
+				global.scaleX = origin.scaleX + node.scaleX + _tweenNode.scaleX;
+				global.scaleY = origin.scaleY + node.scaleY + _tweenNode.scaleY;
+				global.pivotX = origin.pivotX + node.pivotX + _tweenNode.pivotX;
+				global.pivotY = origin.pivotY + node.pivotY + _tweenNode.pivotY;
+				global.z = origin.z + node.z + _tweenNode.z;
 				
 				//transform
 				if(_parent)
 				{
-					_helpPoint.x = _global.x;
-					_helpPoint.y = _global.y;
+					_helpPoint.x = global.x;
+					_helpPoint.y = global.y;
 					_helpPoint = _parent._globalTransformMatrix.transformPoint(_helpPoint);
-					_global.x = _helpPoint.x
-					_global.y = _helpPoint.y;
-					_global.skewX += _parent._global.skewX;
-					_global.skewY += _parent._global.skewY;
+					global.x = _helpPoint.x
+					global.y = _helpPoint.y;
+					global.skewX += _parent.global.skewX;
+					global.skewY += _parent.global.skewY;
 				}
 				
 				//Note: this formula of transform is defined by Flash pro
-				_globalTransformMatrix.a = _global.scaleX * Math.cos(_global.skewY);
-				_globalTransformMatrix.b = _global.scaleX * Math.sin(_global.skewY);
-				_globalTransformMatrix.c = -_global.scaleY * Math.sin(_global.skewX);
-				_globalTransformMatrix.d = _global.scaleY * Math.cos(_global.skewX);
-				_globalTransformMatrix.tx = _global.x;
-				_globalTransformMatrix.ty = _global.y;
+				_globalTransformMatrix.a = global.scaleX * Math.cos(global.skewY);
+				_globalTransformMatrix.b = global.scaleX * Math.sin(global.skewY);
+				_globalTransformMatrix.c = -global.scaleY * Math.sin(global.skewX);
+				_globalTransformMatrix.d = global.scaleY * Math.cos(global.skewX);
+				_globalTransformMatrix.tx = global.x;
+				_globalTransformMatrix.ty = global.y;
 				
 				//update children
 				if (_children.length > 0)
@@ -287,27 +291,32 @@ package dragonBones
 					}
 				}
 				
-				//
-				//var scaleX:Number = _armature.scaleX;
-				//var scaleY:Number = _armature.scaleY;
 				var childArmature:Armature = this.childArmature;
 				if(childArmature)
 				{
 					childArmature.update();
-					//_globalTransformMatrix.tx *= scaleX;
-					//_globalTransformMatrix.ty *= scaleY;
 				}
-				else
-				{
-					//_globalTransformMatrix.scale(scaleX, scaleY);
-				}
-				//_global.x *= scaleX;
-				//_global.y *= scaleY;
 				
 				//update display
 				if(_displayVisible && currentDisplay)
 				{
-					_displayBridge.update(_globalTransformMatrix, _global);
+					//colorTransform
+					_globalColorTransform.alphaOffset = 0;
+					_globalColorTransform.alphaMultiplier = 1;
+					_globalColorTransform.redOffset = 0;
+					_globalColorTransform.redMultiplier = 1;
+					_globalColorTransform.greenOffset = 0;
+					_globalColorTransform.greenMultiplier = 1;
+					_globalColorTransform.blueOffset = 0;
+					_globalColorTransform.blueMultiplier = 1;
+					
+					_globalColorTransform.concat(_tweenColorTransform);
+					if(colorTransform)
+					{
+						_globalColorTransform.concat(colorTransform);
+					}
+						
+					_displayBridge.update(_globalTransformMatrix, global, _globalColorTransform);
 				}
 			}
 		}

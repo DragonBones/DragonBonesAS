@@ -149,9 +149,7 @@ package dragonBones.factorys
 				}
 			}
 			_skeletonDataDic = {};
-			
 			_textureAtlasDic = {};
-			
 			_textureAtlasLoadingDic = {};
 			
 			_currentSkeletonData = null;
@@ -191,6 +189,25 @@ package dragonBones.factorys
 			}
 			if(!armatureData)
 			{
+				var armatureNames:Array = [];
+				for (skeletonName in _skeletonDataDic)
+				{
+					skeletonData = _skeletonDataDic[skeletonName];
+					var armatureList:Vector.<String> = skeletonData.armatureList;
+					
+					for each(var eachArmatureName:String in armatureList)
+					{
+						if(eachArmatureName.indexOf(armatureName) >= 0)
+						{
+							armatureNames.push(armatureName);
+						}
+					}
+				}
+				trace("未找到名为 " + armatureName + "的 ArmatureData！");
+				if(armatureNames.length > 0)
+				{
+					trace("是否要创建的是以下 ArmatureData 中的某个？\n" + armatureNames);
+				}
 				return null;
 			}
 			_currentSkeletonName = skeletonName;
@@ -210,6 +227,7 @@ package dragonBones.factorys
 				if(boneData)
 				{
 					var bone:Bone = buildBone(boneData);
+					bone.name = boneName;
 					armature.addBone(bone, boneData.parent);
 				}
 			}
@@ -261,13 +279,12 @@ package dragonBones.factorys
 		protected function buildBone(boneData:BoneData):Bone
 		{
 			var bone:Bone = generateBone();
-			bone._origin.copy(boneData);
-			bone.name = boneData.name;
+			bone.origin.copy(boneData.node);
 			
 			var displayData:DisplayData;
-			for(var i:int = boneData.totalDisplays - 1;i >= 0;i --)
+			for(var i:int = boneData.displayList.length - 1;i >= 0;i --)
 			{
-				var displayName:String = boneData.getDisplayDataAt(i);
+				var displayName:String = boneData.displayList[i];
 				displayData = _currentSkeletonData.getDisplayData(displayName);
 				bone.changeDisplay(i);
 				if (displayData.isArmature)
@@ -351,9 +368,9 @@ package dragonBones.factorys
 		{
 			var nativeTextureAtlas:NativeTextureAtlas = textureAtlas as NativeTextureAtlas;
 			if(nativeTextureAtlas){
-				if (nativeTextureAtlas.movieClip)
+				var movieClip:MovieClip = nativeTextureAtlas.movieClip;
+				if (movieClip && movieClip.totalFrames > 3)
 				{
-					var movieClip:MovieClip = nativeTextureAtlas.movieClip;
 					movieClip.gotoAndStop(movieClip.totalFrames);
 					movieClip.gotoAndStop(fullName);
 					if (movieClip.numChildren > 0)

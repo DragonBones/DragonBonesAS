@@ -1,8 +1,9 @@
 package dragonBones.display
 {
-	import flash.geom.Matrix;
-	
 	import dragonBones.objects.Node;
+	
+	import flash.geom.ColorTransform;
+	import flash.geom.Matrix;
 	
 	import starling.display.DisplayObject;
 	import starling.display.DisplayObjectContainer;
@@ -50,7 +51,7 @@ package dragonBones.display
 		/**
 		 * @inheritDoc
 		 */
-		public function update(matrix:Matrix, node:Node):void
+		public function update(matrix:Matrix, node:Node, colorTransform:ColorTransform):void
 		{
 			var pivotX:Number = node.pivotX + _display.pivotX;
 			var pivotY:Number = node.pivotY + _display.pivotY;

@@ -1,19 +1,19 @@
 package dragonBones.utils 
 {
-	import dragonBones.objects.Node;
-	import dragonBones.objects.TweenNode;
 	import dragonBones.animation.Tween;
+	import dragonBones.objects.Node;
 	
+	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	
 	/** @private */
 	public class TransformUtils 
 	{
+		private static const DOUBLE_PI:Number = Math.PI * 2;
+		
 		private static var _helpMatrix:Matrix = new Matrix();
 		private static var _helpPoint:Point = new Point();
-		private static var _helpNode:Node = new Node();
-		private static var _helpTweenNode:TweenNode = new TweenNode();
 		
 		public static function transformPointWithParent(bone:Node, parent:Node):void 
 		{
@@ -42,29 +42,80 @@ package dragonBones.utils
 			matrix.ty = node.y;
 		}
 		
-		public static function getTweenNode(currentNode:Node, nextNode:Node, progress:Number, ease:Number):Node
+		public static function setOffSetColorTransform(from:ColorTransform, to:ColorTransform, offSet:ColorTransform):void
 		{
-			if(isNaN(ease))
+			offSet.alphaOffset = to.alphaOffset - from.alphaOffset;
+			offSet.redOffset = to.redOffset - from.redOffset;
+			offSet.greenOffset = to.greenOffset - from.greenOffset;
+			offSet.blueOffset = to.blueOffset - from.blueOffset;
+			offSet.alphaMultiplier = to.alphaMultiplier - from.alphaMultiplier;
+			offSet.redMultiplier = to.redMultiplier - from.redMultiplier;
+			offSet.greenMultiplier = to.greenMultiplier - from.greenMultiplier;
+			offSet.blueMultiplier = to.blueMultiplier - from.blueMultiplier;
+		}
+		
+		public static function setTweenColorTransform(current:ColorTransform, offSet:ColorTransform, tween:ColorTransform, progress:Number):void
+		{
+			tween.alphaOffset = current.alphaOffset + progress * offSet.alphaOffset;
+			tween.redOffset = current.redOffset + progress * offSet.redOffset;
+			tween.greenOffset = current.greenOffset + progress * offSet.greenOffset;
+			tween.blueOffset = current.blueOffset + progress * offSet.blueOffset;
+			tween.alphaMultiplier = current.alphaMultiplier + progress * offSet.alphaMultiplier;
+			tween.redMultiplier = current.redMultiplier + progress * offSet.redMultiplier;
+			tween.greenMultiplier = current.greenMultiplier + progress * offSet.greenMultiplier;
+			tween.blueMultiplier = current.blueMultiplier + progress * offSet.blueMultiplier;
+		}
+		
+		public static function setOffSetNode(from:Node, to:Node, offSet:Node, tweenRotate:int = 0):void
+		{
+			offSet.x =	to.x - from.x;
+			offSet.y = to.y - from.y;
+			offSet.skewX =	to.skewX - from.skewX;
+			offSet.skewY =	to.skewY - from.skewY;
+			offSet.scaleX = to.scaleX - from.scaleX;
+			offSet.scaleY = to.scaleY - from.scaleY;
+			offSet.pivotX = to.pivotX - from.pivotX;
+			offSet.pivotY = to.pivotY - from.pivotY;
+			
+			offSet.skewX %= DOUBLE_PI;
+			if (offSet.skewX > Math.PI)
 			{
-				progress = 0;
+				offSet.skewX -= DOUBLE_PI;
 			}
-			else
+			if (offSet.skewX < -Math.PI)
 			{
-				progress = Tween.getEaseValue(progress, ease);
+				offSet.skewX += DOUBLE_PI;
 			}
 			
-			_helpTweenNode.subtract(currentNode, nextNode);
+			offSet.skewY %= DOUBLE_PI;
+			if (offSet.skewY > Math.PI)
+			{
+				offSet.skewY -= DOUBLE_PI;
+			}
+			if (offSet.skewY < -Math.PI)
+			{
+				offSet.skewY += DOUBLE_PI;
+			}
 			
-			_helpNode.x = currentNode.x + progress * _helpTweenNode.x;
-			_helpNode.y = currentNode.y + progress * _helpTweenNode.y;
-			
-			_helpNode.scaleX = currentNode.scaleX + progress * _helpTweenNode.scaleX;
-			_helpNode.scaleY = currentNode.scaleY + progress * _helpTweenNode.scaleY;
-			_helpNode.skewX = currentNode.skewX + progress * _helpTweenNode.skewX;
-			_helpNode.skewY = currentNode.skewY + progress * _helpTweenNode.skewY;
-			_helpNode.pivotX = currentNode.pivotX + progress * _helpTweenNode.pivotX;
-			_helpNode.pivotY = currentNode.pivotX + progress * _helpTweenNode.pivotY;
-			return _helpNode;
+			if (tweenRotate)
+			{
+				offSet.skewX += tweenRotate * DOUBLE_PI;
+				offSet.skewY += tweenRotate * DOUBLE_PI;
+			}
+		}
+		
+		public static function setTweenNode(current:Node, offSet:Node, tween:Node, progress:Number):void
+		{
+			tween.setValues(
+				current.x + progress * offSet.x,
+				current.y + progress * offSet.y,
+				current.skewX + progress * offSet.skewX,
+				current.skewY + progress * offSet.skewY,
+				current.scaleX + progress * offSet.scaleX,
+				current.scaleY + progress * offSet.scaleY,
+				current.pivotX + progress * offSet.pivotX,
+				current.pivotY + progress * offSet.pivotY
+			);
 		}
 	}
 	

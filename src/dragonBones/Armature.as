@@ -51,16 +51,6 @@ package dragonBones
 		public var name:String;
 		
 		/**
-		 * Armature scaleX.
-		 */
-		//public var scaleX:Number;
-		
-		/**
-		 * Armature scaleY.
-		 */
-		//public var scaleY:Number;
-		
-		/**
 		 * An object that can contain any extra data.
 		 */
 		public var userData:Object;
@@ -69,8 +59,8 @@ package dragonBones
 		dragonBones_internal var _bonesIndexChanged:Boolean;
 		/** @private */
 		dragonBones_internal var _boneDepthList:Vector.<Bone>;
-		/** @private */
-		dragonBones_internal var _rootBoneList:Vector.<Bone>;
+		
+		private var _rootBoneList:Vector.<Bone>;
 		
 		/** @private */
 		protected var _display:Object;
@@ -100,8 +90,6 @@ package dragonBones
 		public function Armature(display:Object)
 		{
 			super();
-			//scaleX = 1;
-			//scaleY = 1;
 			_display = display;
 			
 			_boneDepthList = new Vector.<Bone>;
@@ -157,17 +145,24 @@ package dragonBones
 		 */
 		public function getBoneByDisplay(display:Object):Bone
 		{
-			for each(var eachBone:Bone in _boneDepthList)
+			if(display)
 			{
-				if(eachBone.display == display)
+				for each(var bone:Bone in _boneDepthList)
 				{
-					return eachBone;
+					if(bone.display == display)
+					{
+						return bone;
+					}
 				}
 			}
 			return null;
 		}
 		
-		/** @private */
+		public function getBones():Vector.<Bone>
+		{
+			return _boneDepthList.concat();
+		}
+		
 		public function addBone(bone:Bone, parentName:String = null):void
 		{
 			var boneParent:Bone = getBone(parentName);
@@ -182,10 +177,8 @@ package dragonBones
 			}
 		}
 		
-		/** @private */
-		public function removeBone(boneName:String):void
+		public function removeBone(bone:Bone):void
 		{
-			var bone:Bone = getBone(boneName);
 			if (bone)
 			{
 				if(bone.parent)
@@ -197,6 +190,12 @@ package dragonBones
 					removeFromBones(bone);
 				}
 			}
+		}
+		
+		public function removeBoneByName(boneName:String):void
+		{
+			var bone:Bone = getBone(boneName);
+			removeBone(bone);
 		}
 		
 		public function advanceTime(passedTime:Number):void

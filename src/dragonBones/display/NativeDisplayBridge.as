@@ -5,6 +5,7 @@ package dragonBones.display
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Shape;
+	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	
 	/**
@@ -50,13 +51,15 @@ package dragonBones.display
 		/**
 		 * @inheritDoc
 		 */
-		public function update(matrix:Matrix, node:Node):void
+		public function update(matrix:Matrix, node:Node, colorTransform:ColorTransform):void
 		{
 			var pivotX:Number = node.pivotX;
 			var pivotY:Number = node.pivotY;
 			matrix.tx -= matrix.a * pivotX + matrix.c * pivotY;
 			matrix.ty -= matrix.b * pivotX + matrix.d * pivotY;
+			
 			_display.transform.matrix = matrix;
+			_display.transform.colorTransform = colorTransform;
 		}
 		/**
 		 * @inheritDoc
