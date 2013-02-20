@@ -1,4 +1,4 @@
-package dragonBones.display
+﻿package dragonBones.display
 {
 	import dragonBones.objects.Node;
 	
@@ -7,6 +7,7 @@ package dragonBones.display
 	
 	import starling.display.DisplayObject;
 	import starling.display.DisplayObjectContainer;
+	import starling.display.Quad;
 	
 	/**
 	 * A display bridge for Starling engine
@@ -65,6 +66,11 @@ package dragonBones.display
 			//else
 			//{
 				_display.transformationMatrix.copyFrom(matrix);
+				if(_display is Quad)
+				{
+					(_display as Quad).alpha = colorTransform.alphaMultiplier;
+					(_display as Quad).color = (uint(colorTransform.redMultiplier * 0xff)<<16) + (uint(colorTransform.greenMultiplier * 0xff)<<8) + uint(colorTransform.blueMultiplier * 0xff);
+				}
 			//}
 		}
 		
