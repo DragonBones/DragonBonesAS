@@ -1,12 +1,15 @@
 package dragonBones.objects
 {
+	import dragonBones.utils.dragonBones_internal;
+	
+	use namespace dragonBones_internal;
 	
 	/** @private */
 	final public class BoneData
 	{
-		public var displayList:Vector.<String>;
+		dragonBones_internal var _displayNames:Vector.<String>;
 		
-		internal var _parent:String;
+		dragonBones_internal var _parent:String;
 		public function get parent():String
 		{
 			return _parent;
@@ -16,13 +19,13 @@ package dragonBones.objects
 		
 		public function BoneData()
 		{
-			displayList = new Vector.<String>;
+			_displayNames = new Vector.<String>;
 			node = new Node();
 		}
 		
 		public function dispose():void
 		{
-			displayList.length = 0;
+			_displayNames.length = 0;
 		}
 	}
 }

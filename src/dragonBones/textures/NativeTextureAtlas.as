@@ -4,8 +4,9 @@ package dragonBones.textures
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.dragonBones_internal;
 	
-	import flash.display.BitmapData;
+	
 	import flash.display.MovieClip;
+	import flash.display.BitmapData;
 	import flash.geom.Rectangle;
 	
 	use namespace dragonBones_internal;
@@ -18,6 +19,7 @@ package dragonBones.textures
 		protected var _width:int;
 		protected var _height:int;
 		protected var _subTextureDataDic:Object;
+		
 		
 		protected var _isDifferentXML:Boolean;
 		

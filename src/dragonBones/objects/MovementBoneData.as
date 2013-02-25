@@ -1,14 +1,15 @@
 package dragonBones.objects
 {
+	import dragonBones.utils.dragonBones_internal;
+	
+	use namespace dragonBones_internal;
+	
 	/** @private */
 	public class MovementBoneData
 	{
-		private var _frameList:Vector.<FrameData>;
+		dragonBones_internal static const HIDE_DATA:MovementBoneData = new MovementBoneData();
 		
-		public function get totalFrames():int
-		{
-			return _frameList.length;
-		}
+		dragonBones_internal var _frameList:Vector.<FrameData>;
 		
 		public var scale:Number;
 		public var delay:Number;
@@ -36,20 +37,6 @@ package dragonBones.objects
 			}
 			this.delay *= -1;
 		}
-		
-		public function getFrameDataAt(index:int):FrameData
-		{
-			return _frameList.length > index?_frameList[index]:null;
-		}
-		
-		internal function addFrameData(data:FrameData):void
-		{
-			if(_frameList.indexOf(data) < 0)
-			{
-				_frameList.push(data);
-			}
-		}
-		
 	}
 	
 }

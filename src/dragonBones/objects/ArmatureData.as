@@ -7,88 +7,62 @@ package dragonBones.objects
 	/** @private */
 	public class ArmatureData
 	{
-		private var _boneDataDic:Object;
-		private var _boneList:Vector.<String>;
+		dragonBones_internal var _boneDataList:DataList;
 		
-		public function get totalBones():uint
+		public function get boneNames():Vector.<String>
 		{
-			return _boneList.length;
-		}
-		
-		public function get boneList():Vector.<String>
-		{
-			return _boneList.concat();
+			return _boneDataList.dataNames.concat();
 		}
 		
 		public function ArmatureData()
 		{
-			_boneDataDic = { };
-			_boneList = new Vector.<String>;
+			_boneDataList = new DataList();
 		}
 		
 		public function dispose():void
 		{
-			for each(var boneData:BoneData in _boneDataDic)
+			for each(var boneName:String in _boneDataList.dataNames)
 			{
+				var boneData:BoneData = _boneDataList.getData(boneName) as BoneData;
 				boneData.dispose();
 			}
-			_boneDataDic = {};
-			_boneList.length = 0;
+			
+			_boneDataList.dispose();
 		}
 		
 		public function getBoneData(name:String):BoneData
 		{
-			return _boneDataDic[name];
+			return _boneDataList.getData(name) as BoneData;
 		}
 		
-		internal function addBoneData(data:BoneData, name:String):void
+		public function updateBoneList():void
 		{
-			if(data || name)
+			var boneNames:Vector.<String> = _boneDataList.dataNames;
+			
+			var sortList:Array = [];
+			for each(var boneName:String in boneNames)
 			{
-				_boneDataDic[name] = data;
-			}
-		}
-		
-		internal function removeBoneData(data:BoneData):void
-		{
-			if(data)
-			{
-				for(var name:String in _boneDataDic)
-				{
-					if(_boneDataDic[name] == data)
-					{
-						delete _boneDataDic[name];
-						return;
-					}
-				}
-			}
-		}
-		
-		dragonBones_internal function updateBoneList():void
-		{
-			var boneList:Array = [];
-			for(var boneName:String in _boneDataDic)
-			{
-				var parentData:BoneData = _boneDataDic[boneName];
-				var levelValue:int = parentData.node.z;
+				var boneData:BoneData = _boneDataList.getData(boneName) as BoneData;
+				var levelValue:int = boneData.node.z;
 				var level:int = 0;
-				while(parentData)
+				while(boneData)
 				{
 					level ++;
 					levelValue += 1000 * level;
-					parentData = _boneDataDic[parentData.parent];
+					boneData = getBoneData(boneData.parent);
 				}
-				boneList.push({level:levelValue, boneName:boneName});
+				sortList.push({level:levelValue, boneName:boneName});
 			}
-			var length:int = boneList.length;
+			
+			var length:int = sortList.length;
 			if(length > 0)
 			{
-				boneList.sortOn("level", Array.NUMERIC);
-				_boneList.length = 0;
+				sortList.sortOn("level", Array.NUMERIC);
+				boneNames.length = 0;
 				var i:int = 0;
 				while(i < length)
 				{
-					_boneList[i] = boneList[i].boneName;
+					boneNames[i] = sortList[i].boneName;
 					i ++;
 				}
 			}

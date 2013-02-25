@@ -1,58 +1,38 @@
 package dragonBones.objects
 {
+	import dragonBones.utils.dragonBones_internal;
+	
+	use namespace dragonBones_internal;
 	
 	/** @private */
 	public class AnimationData
 	{
-		internal var _boneList:Vector.<String>;
-		
-		private var _movementDataDic:Object;
-		private var _movementList:Vector.<String>;
-		
-		public function get totalMovements():uint
-		{
-			return _movementList.length;
-		}
+		dragonBones_internal var _movementDataList:DataList;
 		
 		public function get movementList():Vector.<String>
 		{
-			return _movementList.concat();
+			return _movementDataList.dataNames.concat();
 		}
 		
 		public function AnimationData()
 		{
-			_movementDataDic = { };
-			_movementList = new Vector.<String>;
-			_boneList = new Vector.<String>;
+			_movementDataList = new DataList();
 		}
 		
 		public function dispose():void
 		{
-			for each(var movementData:MovementData in _movementDataDic)
+			for each(var movementName:String in _movementDataList.dataNames)
 			{
+				var movementData:MovementData = _movementDataList.getData(movementName) as MovementData;
 				movementData.dispose();
 			}
-			_movementDataDic = {};
-			_movementList.length = 0;
+			
+			_movementDataList.dispose();
 		}
 		
 		public function getMovementData(name:String):MovementData
 		{
-			return _movementDataDic[name];
-		}
-		
-		public function containsBone(boneName:String):Boolean
-		{
-			return _boneList.indexOf(boneName) != -1;
-		}
-		
-		internal function addMovementData(data:MovementData, name:String):void
-		{
-			_movementDataDic[name] = data;
-			if(_movementList.indexOf(name) < 0)
-			{
-				_movementList.push(name);
-			}
+			return _movementDataList.getData(name) as MovementData;
 		}
 	}
 	

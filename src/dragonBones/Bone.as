@@ -204,6 +204,25 @@ package dragonBones
 			userData = null;
 		}
 		
+		public function contains(bone:Bone, deepLevel:Boolean = false):Boolean
+		{
+			if(deepLevel)
+			{
+				var ancestor:Bone = this;
+				while (ancestor != bone && ancestor != null)
+				{
+					ancestor = ancestor.parent;
+				}
+				if (ancestor == bone)
+				{
+					return true;
+				}
+				return false;
+			}
+			
+			return bone.parent == this;
+		}
+		
 		/** @private */
 		public function addChild(child:Bone):void
 		{
@@ -323,19 +342,11 @@ package dragonBones
 		
 		private function setParent(parent:Bone):void
 		{
-			var ancestor:Bone = parent;
-			while (ancestor != this && ancestor != null)
-			{
-				ancestor = ancestor.parent;
-			}
-			if (ancestor == this)
+			if (parent && parent.contains(this, true))
 			{
 				throw new ArgumentError("An Bone cannot be added as a child to itself or one of its children (or children's children, etc.)");
 			}
-			else
-			{
-				_parent = parent;
-			}
+			_parent = parent;
 		}
 	}
 }

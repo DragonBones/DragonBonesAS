@@ -165,15 +165,18 @@ package dragonBones
 		
 		public function addBone(bone:Bone, parentName:String = null):void
 		{
-			var boneParent:Bone = getBone(parentName);
-			if (boneParent)
+			if (bone)
 			{
-				boneParent.addChild(bone);
-			}
-			else
-			{
-				bone.removeFromParent();
-				addToBones(bone, true);
+				var boneParent:Bone = getBone(parentName);
+				if (boneParent)
+				{
+					boneParent.addChild(bone);
+				}
+				else
+				{
+					bone.removeFromParent();
+					addToBones(bone, true);
+				}
 			}
 		}
 		
@@ -262,6 +265,7 @@ package dragonBones
 			{
 				addToBones(child);
 			}
+			_bonesIndexChanged = true;
 		}
 		
 		/** @private */
@@ -285,6 +289,7 @@ package dragonBones
 			{
 				removeFromBones(child);
 			}
+			_bonesIndexChanged = true;
 		}
 		
 		private function sortBoneZIndex(bone1:Bone, bone2:Bone):int

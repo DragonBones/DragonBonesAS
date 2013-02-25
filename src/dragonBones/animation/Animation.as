@@ -40,8 +40,24 @@ package dragonBones.animation
 		private var _loop:int;
 		
 		private var _armature:Armature;
-		private var _animationData:AnimationData;
 		private var _movementData:MovementData;
+		
+		private var _animationData:AnimationData;
+		/**
+		 * 
+		 */
+		public function get animationData():AnimationData
+		{
+			return _animationData;
+		}
+		public function set animationData(value:AnimationData):void
+		{
+			if (value)
+			{
+				stop();
+				_animationData = value;
+			}
+		}
 		
 		private var _isPlaying:Boolean;
 		/**
@@ -132,16 +148,6 @@ package dragonBones.animation
 			_armature = null;
 		}
 		
-		/** @private */
-		public function setData(animationData:AnimationData):void
-		{
-			if (animationData)
-			{
-				stop();
-				_animationData = animationData;
-			}
-		}
-		
 		public function gotoAndPlay(movementID:String, tweenTime:Number = -1, duration:Number = -1, loop:* = null):void
 		{
 			if (!_animationData)
@@ -209,10 +215,6 @@ package dragonBones.animation
 				}
 				else
 				{
-					if(_animationData.containsBone(bone.name))
-					{
-						bone.changeDisplay(-1);
-					}
 					bone._tween.stop();
 				}
 			}
@@ -351,7 +353,7 @@ package dragonBones.animation
 						}
 					}
 					
-					if ((_playType == LIST || _playType == LOOP) && _movementData.totalFrames > 0)
+					if ((_playType == LIST || _playType == LOOP) && _movementData._movementFrameList.length > 0)
 					{
 						if(_loop > 0)
 						{
@@ -379,11 +381,11 @@ package dragonBones.animation
 			var playedTime:Number = _rawDuration * progress;
 			if (playedTime >= _nextFrameDataTimeEdge)
 			{
-				var length:uint = _movementData.totalFrames;
+				var length:uint = _movementData._movementFrameList.length;
 				do 
 				{
 					var currentFrameDataID:int = _nextFrameDataID;
-					var currentFrameData:MovementFrameData = _movementData.getMovementFrameDataAt(currentFrameDataID);
+					var currentFrameData:MovementFrameData = _movementData._movementFrameList[currentFrameDataID];
 					var frameDuration:Number = currentFrameData.duration;
 					_nextFrameDataTimeEdge += frameDuration;
 					if (++ _nextFrameDataID >= length)

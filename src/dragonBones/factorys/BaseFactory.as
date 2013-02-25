@@ -189,25 +189,6 @@ package dragonBones.factorys
 			}
 			if(!armatureData)
 			{
-				var armatureNames:Array = [];
-				for (skeletonName in _skeletonDataDic)
-				{
-					skeletonData = _skeletonDataDic[skeletonName];
-					var armatureList:Vector.<String> = skeletonData.armatureList;
-					
-					for each(var eachArmatureName:String in armatureList)
-					{
-						if(eachArmatureName.indexOf(armatureName) >= 0)
-						{
-							armatureNames.push(armatureName);
-						}
-					}
-				}
-				trace("未找到名为 " + armatureName + "的 ArmatureData！");
-				if(armatureNames.length > 0)
-				{
-					trace("是否要创建的是以下 ArmatureData 中的某个？\n" + armatureNames);
-				}
 				return null;
 			}
 			_currentSkeletonName = skeletonName;
@@ -219,9 +200,9 @@ package dragonBones.factorys
 			var animationData:AnimationData = _currentSkeletonData.getAnimationData(animationName || armatureName);
 			var armature:Armature = generateArmature();
 			armature.name = armatureName;
-			armature.animation.setData(animationData);
-			var boneList:Vector.<String> = armatureData.boneList;
-			for each(var boneName:String in boneList)
+			armature.animation.animationData = animationData;
+			var boneNames:Vector.<String> = armatureData.boneNames;
+			for each(var boneName:String in boneNames)
 			{
 				var boneData:BoneData = armatureData.getBoneData(boneName);
 				if(boneData)
@@ -282,9 +263,9 @@ package dragonBones.factorys
 			bone.origin.copy(boneData.node);
 			
 			var displayData:DisplayData;
-			for(var i:int = boneData.displayList.length - 1;i >= 0;i --)
+			for(var i:int = boneData._displayNames.length - 1;i >= 0;i --)
 			{
-				var displayName:String = boneData.displayList[i];
+				var displayName:String = boneData._displayNames[i];
 				displayData = _currentSkeletonData.getDisplayData(displayName);
 				bone.changeDisplay(i);
 				if (displayData.isArmature)

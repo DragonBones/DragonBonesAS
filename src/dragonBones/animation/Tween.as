@@ -85,23 +85,25 @@ package dragonBones.animation
 			_colorTransform = _bone._tweenColorTransform;
 			
 			_currentNode = new Node();
-			_currentColorTransform = new ColorTransform(0,0,0,0,0,0,0,0);
+			_currentColorTransform = new ColorTransform();
 			
 			_offSetNode = new Node();
-			_offSetColorTransform = new ColorTransform(0,0,0,0,0,0,0,0);
+			_offSetColorTransform = new ColorTransform();
 		}
 		
 		/** @private */
 		internal function gotoAndPlay(movementBoneData:MovementBoneData, rawDuration:Number, loop:Boolean, tweenEasing:Number):void
 		{
-			_movementBoneData = movementBoneData;
-			if(!_movementBoneData)
+			if(!movementBoneData)
 			{
 				return;
 			}
-			var totalFrames:uint = _movementBoneData.totalFrames;
+			_movementBoneData = movementBoneData;
+			var totalFrames:uint = _movementBoneData._frameList.length;
 			if(totalFrames == 0)
 			{
+				_bone.changeDisplay(-1);
+				stop();
 				return;
 			}
 			
@@ -119,7 +121,7 @@ package dragonBones.animation
 			if (totalFrames == 1)
 			{
 				_rawDuration = 0;
-				_nextFrameData = _movementBoneData.getFrameDataAt(0);
+				_nextFrameData = _movementBoneData._frameList[0];
 				setOffset(_node, _colorTransform, _nextFrameData.node, _nextFrameData.colorTransform);
 			}
 			else if (loop && _movementBoneData.delay != 0)
@@ -129,7 +131,7 @@ package dragonBones.animation
 			}
 			else
 			{
-				_nextFrameData = _movementBoneData.getFrameDataAt(0);
+				_nextFrameData = _movementBoneData._frameList[0];
 				setOffset(_node, _colorTransform, _nextFrameData.node, _nextFrameData.colorTransform);
 			}
 		}
@@ -137,13 +139,13 @@ package dragonBones.animation
 		private function getLoopListNode():void
 		{
 			var playedTime:Number = _rawDuration * _movementBoneData.delay;
-			var length:int = _movementBoneData.totalFrames;
+			var length:int = _movementBoneData._frameList.length;
 			var nextFrameDataID:int = 0;
 			var nextFrameDataTimeEdge:Number = 0;
 			do 
 			{
 				var currentFrameDataID:int = nextFrameDataID;
-				var frameDuration:Number = _movementBoneData.getFrameDataAt(currentFrameDataID).duration;
+				var frameDuration:Number = _movementBoneData._frameList[currentFrameDataID].duration;
 				nextFrameDataTimeEdge += frameDuration;
 				if (++ nextFrameDataID >= length)
 				{
@@ -152,8 +154,8 @@ package dragonBones.animation
 			}
 			while (playedTime >= nextFrameDataTimeEdge);
 			
-			var currentFrameData:FrameData = _movementBoneData.getFrameDataAt(currentFrameDataID);
-			var nextFrameData:FrameData = _movementBoneData.getFrameDataAt(nextFrameDataID);
+			var currentFrameData:FrameData = _movementBoneData._frameList[currentFrameDataID];
+			var nextFrameData:FrameData = _movementBoneData._frameList[_nextFrameDataID];
 			
 			setOffset(currentFrameData.node, currentFrameData.colorTransform, nextFrameData.node, nextFrameData.colorTransform);
 		
@@ -167,6 +169,9 @@ package dragonBones.animation
 			
 			TransformUtils.setOffSetNode(currentFrameData.node, nextFrameData.node, _offSetNode);
 			TransformUtils.setTweenNode(_currentNode, _offSetNode, _offSetNode, progress);
+			
+			TransformUtils.setOffSetColorTransform(currentFrameData.colorTransform, nextFrameData.colorTransform, _offSetColorTransform);
+			TransformUtils.setTweenColorTransform(_currentColorTransform, _offSetColorTransform, _offSetColorTransform, progress);
 		}
 		
 		/** @private */
@@ -304,11 +309,11 @@ package dragonBones.animation
 			var playedTime:Number = _rawDuration * progress;
 			if (playedTime >= _nextFrameDataTimeEdge)
 			{
-				var length:int = _movementBoneData.totalFrames;
+				var length:int = _movementBoneData._frameList.length;
 				do 
 				{
 					var currentFrameDataID:int = _nextFrameDataID;
-					_frameDuration = _movementBoneData.getFrameDataAt(currentFrameDataID).duration;
+					_frameDuration = _movementBoneData._frameList[currentFrameDataID].duration;
 					_nextFrameDataTimeEdge += _frameDuration;
 					if (++ _nextFrameDataID >= length)
 					{
@@ -317,8 +322,8 @@ package dragonBones.animation
 				}
 				while (playedTime >= _nextFrameDataTimeEdge);
 				
-				var currentFrameData:FrameData = _movementBoneData.getFrameDataAt(currentFrameDataID);
-				var nextFrameData:FrameData = _movementBoneData.getFrameDataAt(_nextFrameDataID);
+				var currentFrameData:FrameData = _movementBoneData._frameList[currentFrameDataID];
+				var nextFrameData:FrameData = _movementBoneData._frameList[_nextFrameDataID];
 				_frameTweenEasing = currentFrameData.tweenEasing;
 				if (activeFrame)
 				{
