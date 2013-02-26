@@ -1,4 +1,4 @@
-package dragonBones
+﻿package dragonBones
 {
 	import dragonBones.animation.Tween;
 	import dragonBones.display.IDisplayBridge;
@@ -47,7 +47,9 @@ package dragonBones
 		/** @private */
 		dragonBones_internal var _displayBridge:IDisplayBridge;
 		/** @private */
-		dragonBones_internal var _displayVisible:Boolean;
+		dragonBones_internal var _isOnStage:Boolean;
+		/** @private */
+		dragonBones_internal var _visible:Boolean;
 		/** @private */
 		dragonBones_internal var _armature:Armature;
 		
@@ -107,19 +109,19 @@ package dragonBones
 		{
 			if(displayIndex < 0)
 			{
-				if(_displayVisible)
+				if(_isOnStage)
 				{
-					_displayVisible = false;
-					//hide
+					_isOnStage = false;
+					//removeFromStage
 					_displayBridge.removeDisplay();
 				}
 			}
 			else
 			{
-				if(!_displayVisible)
+				if(!_isOnStage)
 				{
-					_displayVisible = true;
-					//show
+					_isOnStage = true;
+					//addToStage
 					if(_armature)
 					{
 						_displayBridge.addDisplay(_armature.display, global.z);
@@ -158,6 +160,7 @@ package dragonBones
 			_globalTransformMatrix = new Matrix();
 			_displayList = [];
 			_displayIndex = -1;
+			_visible = true;
 			
 			_globalColorTransform = new ColorTransform();
 			
@@ -267,8 +270,7 @@ package dragonBones
 		dragonBones_internal function update():void
 		{
 			//update node and matirx
-			var currentDisplay:Object = _displayBridge.display;
-			if (_children.length > 0 || (_displayVisible && currentDisplay))
+			if (_children.length > 0 || _isOnStage)
 			{
 				//update global
 				global.x = origin.x + node.x + _tweenNode.x;
@@ -280,7 +282,6 @@ package dragonBones
 				global.pivotX = origin.pivotX + node.pivotX + _tweenNode.pivotX;
 				global.pivotY = origin.pivotY + node.pivotY + _tweenNode.pivotY;
 				global.z = origin.z + node.z + _tweenNode.z;
-				
 				//transform
 				if(_parent)
 				{
@@ -316,8 +317,9 @@ package dragonBones
 					childArmature.update();
 				}
 				
+				var currentDisplay:Object = _displayBridge.display;
 				//update display
-				if(_displayVisible && currentDisplay)
+				if(_isOnStage && currentDisplay)
 				{
 					//colorTransform
 					_globalColorTransform.alphaOffset = 0;
@@ -335,7 +337,7 @@ package dragonBones
 						_globalColorTransform.concat(colorTransform);
 					}
 						
-					_displayBridge.update(_globalTransformMatrix, global, _globalColorTransform);
+					_displayBridge.update(_globalTransformMatrix, global, _globalColorTransform, _visible);
 				}
 			}
 		}

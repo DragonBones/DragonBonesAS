@@ -51,7 +51,7 @@ package dragonBones.display
 		/**
 		 * @inheritDoc
 		 */
-		public function update(matrix:Matrix, node:Node, colorTransform:ColorTransform):void
+		public function update(matrix:Matrix, node:Node, colorTransform:ColorTransform, visible:Boolean):void
 		{
 			var pivotX:Number = node.pivotX;
 			var pivotY:Number = node.pivotY;
@@ -60,6 +60,7 @@ package dragonBones.display
 			
 			_display.transform.matrix = matrix;
 			_display.transform.colorTransform = colorTransform;
+			_display.visible = visible;
 		}
 		/**
 		 * @inheritDoc

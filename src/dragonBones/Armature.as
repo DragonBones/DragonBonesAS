@@ -215,7 +215,7 @@ package dragonBones
 			_boneDepthList.sort(sortBoneZIndex);
 			for each(var bone:Bone in _boneDepthList)
 			{
-				if(bone._displayVisible)
+				if(bone._isOnStage)
 				{
 					bone._displayBridge.addDisplay(_display);
 				}

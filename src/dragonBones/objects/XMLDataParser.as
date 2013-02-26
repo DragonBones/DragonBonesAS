@@ -477,6 +477,9 @@ package dragonBones.objects
 				frameData.event = String(frameXML.attribute(ConstValues.A_EVENT));
 				frameData.sound = String(frameXML.attribute(ConstValues.A_SOUND));
 				frameData.soundEffect = String(frameXML.attribute(ConstValues.A_SOUND_EFFECT));
+				
+				var visibleStr:String = String(frameXML.attribute(ConstValues.A_VISIBLE));
+				frameData.visible = (visibleStr == "1" || visibleStr =="");
 			}
 		}
 		

@@ -20,8 +20,10 @@ package dragonBones.display
 		 * Updates the transform of the display object
 		 * @param	matrix
 		 * @param	node
+		 * @param	colorTransform
+		 * @param	visible
 		 */
-		function update(matrix:Matrix, node:Node, colorTransform:ColorTransform):void;
+		function update(matrix:Matrix, node:Node, colorTransform:ColorTransform, visible:Boolean):void;
 		/**
 		 * Adds the original display object to another display object.
 		 * @param	container

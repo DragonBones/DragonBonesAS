@@ -47,6 +47,7 @@ package dragonBones.utils {
 		public static const A_TWEEN_ROTATE:String ="twR";
 		public static const A_IS_ARMATURE:String = "isArmature";
 		public static const A_MOVEMENT:String = "mov";
+		public static const A_VISIBLE:String = "visible";
 
 		public static const A_X:String = "x";
 		public static const A_Y:String = "y";

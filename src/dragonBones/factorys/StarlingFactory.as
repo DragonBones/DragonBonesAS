@@ -30,7 +30,7 @@
 	{
 		public var generateMipMaps:Boolean;
 		public var optimizeForRenderToTexture:Boolean;
-		public var scale:Number;
+		public var scaleForSWF:Number;
 		
 		/**
 		 * Creates a new <code>StarlingFactory</code>
@@ -40,7 +40,7 @@
 			super();
 			generateMipMaps = true;
 			optimizeForRenderToTexture = true;
-			scale = 1;
+			scaleForSWF = 1;
 		}
 		
 		override protected function generateArmature():Armature
@@ -86,18 +86,18 @@
 			if(content is BitmapData)
 			{
 				bitmapData = content as BitmapData;
-				texture = Texture.fromBitmapData(bitmapData, generateMipMaps, optimizeForRenderToTexture, scale);
+				texture = Texture.fromBitmapData(bitmapData, generateMipMaps, optimizeForRenderToTexture, scaleForSWF);
 			}
 			else if(content is MovieClip)
 			{
-				var width:int = int(textureAtlasXML.attribute(ConstValues.A_WIDTH)) * scale;
-				var height:int = int(textureAtlasXML.attribute(ConstValues.A_HEIGHT)) * scale;
+				var width:int = int(textureAtlasXML.attribute(ConstValues.A_WIDTH)) * scaleForSWF;
+				var height:int = int(textureAtlasXML.attribute(ConstValues.A_HEIGHT)) * scaleForSWF;
 				
 				_helpMatirx.a = 1;
 				_helpMatirx.b = 0;
 				_helpMatirx.c = 0;
 				_helpMatirx.d = 1;
-				_helpMatirx.scale(scale, scale);
+				_helpMatirx.scale(scaleForSWF, scaleForSWF);
 				_helpMatirx.tx = 0;
 				_helpMatirx.ty = 0;
 				
@@ -106,7 +106,7 @@
 				bitmapData= new BitmapData(width, height, true, 0xFF00FF);
 				bitmapData.draw(movieClip, _helpMatirx);
 				movieClip.gotoAndStop(movieClip.totalFrames);
-				texture = Texture.fromBitmapData(bitmapData, generateMipMaps, optimizeForRenderToTexture, scale);
+				texture = Texture.fromBitmapData(bitmapData, generateMipMaps, optimizeForRenderToTexture, scaleForSWF);
 			}
 			else
 			{

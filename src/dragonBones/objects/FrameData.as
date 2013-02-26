@@ -12,6 +12,7 @@ package dragonBones.objects
 		
 		public var displayIndex:int;
 		public var movement:String;
+		public var visible:Boolean;
 		
 		public var event:String;
 		

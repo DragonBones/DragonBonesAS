@@ -1,4 +1,4 @@
-package dragonBones.animation
+﻿package dragonBones.animation
 {
 	import dragonBones.Armature;
 	import dragonBones.Bone;
@@ -223,15 +223,10 @@ package dragonBones.animation
 				progress = Math.sin(progress * HALF_PI);
 			}
 			
-			if (!isNaN(_frameTweenEasing))
+			if (!isNaN(_frameTweenEasing) || _currentFrameData)
 			{
 				TransformUtils.setTweenNode(_currentNode, _offSetNode, _node, progress);
 				TransformUtils.setTweenColorTransform(_currentColorTransform, _offSetColorTransform, _colorTransform, progress);
-			}
-			else if(_currentFrameData)
-			{
-				TransformUtils.setTweenNode(_currentNode, _offSetNode, _node, 0);
-				TransformUtils.setTweenColorTransform(_currentColorTransform, _offSetColorTransform, _colorTransform, 0);
 			}
 			
 			if(_currentFrameData)
@@ -276,6 +271,7 @@ package dragonBones.animation
 				}
 			}
 			_bone.changeDisplay(displayIndex);
+			_bone._visible = frameData.visible;
 			
 			if(frameData.event && _bone._armature.hasEventListener(FrameEvent.BONE_FRAME_EVENT))
 			{
@@ -324,21 +320,21 @@ package dragonBones.animation
 				
 				var currentFrameData:FrameData = _movementBoneData._frameList[currentFrameDataID];
 				var nextFrameData:FrameData = _movementBoneData._frameList[_nextFrameDataID];
-				_frameTweenEasing = currentFrameData.tweenEasing;
+				_frameTweenEasing = _bone.armature.animation.enabledTween?currentFrameData.tweenEasing:NaN;
 				if (activeFrame)
 				{
 					_currentFrameData = _nextFrameData;
 					_nextFrameData = nextFrameData;
 				}
 				
+				setOffset(currentFrameData.node, currentFrameData.colorTransform, nextFrameData.node, nextFrameData.colorTransform);
+			
 				//
 				if(isList && _nextFrameDataID == 0)
 				{
 					_isPause = true;
-					return 1;
+					return 0;
 				}
-				
-				setOffset(currentFrameData.node, currentFrameData.colorTransform, nextFrameData.node, nextFrameData.colorTransform);
 			}
 			
 			progress = 1 - (_nextFrameDataTimeEdge - playedTime) / _frameDuration;

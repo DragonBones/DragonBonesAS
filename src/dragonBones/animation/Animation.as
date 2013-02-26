@@ -28,6 +28,8 @@ package dragonBones.animation
 		
 		private static var _soundManager:SoundEventManager = SoundEventManager.getInstance();
 		
+		public var enabledTween:Boolean = true;
+		
 		private var _currentTime:Number;
 		private var _totalTime:Number;
 		

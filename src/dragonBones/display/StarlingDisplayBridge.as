@@ -52,7 +52,7 @@
 		/**
 		 * @inheritDoc
 		 */
-		public function update(matrix:Matrix, node:Node, colorTransform:ColorTransform):void
+		public function update(matrix:Matrix, node:Node, colorTransform:ColorTransform, visible:Boolean):void
 		{
 			var pivotX:Number = node.pivotX + _display.pivotX;
 			var pivotY:Number = node.pivotY + _display.pivotY;
@@ -72,6 +72,9 @@
 					(_display as Quad).color = (uint(colorTransform.redMultiplier * 0xff)<<16) + (uint(colorTransform.greenMultiplier * 0xff)<<8) + uint(colorTransform.blueMultiplier * 0xff);
 				}
 			//}
+			
+			//
+			_display.visible = visible;
 		}
 		
 		/**
