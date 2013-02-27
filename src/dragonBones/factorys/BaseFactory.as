@@ -46,7 +46,7 @@ package dragonBones.factorys
 		protected var _textureAtlasLoadingDic:Object;
 		
 		protected var _currentSkeletonData:SkeletonData;
-		protected var _currentTextureAtlas:ITextureAtlas;
+		protected var _currentTextureAtlas:Object;
 		protected var _currentSkeletonName:String;
 		protected var _currentTextureAtlasName:String;
 		
@@ -109,14 +109,18 @@ package dragonBones.factorys
 			delete _skeletonDataDic[name];
 		}
 		
-		public function getTextureAtlas(name:String):ITextureAtlas
+		public function getTextureAtlas(name:String):Object
 		{
 			return _textureAtlasDic[name];
 		}
 		
-		public function addTextureAtlas(textureAtlas:ITextureAtlas, name:String = null):void
+		public function addTextureAtlas(textureAtlas:Object, name:String = null):void
 		{
-			name = name || textureAtlas.name;
+			if(!name && textureAtlas is ITextureAtlas)
+			{
+				name = textureAtlas.name;
+			}
+			
 			if(!name)
 			{
 				throw new ArgumentError("Unnamed data!");
@@ -143,7 +147,7 @@ package dragonBones.factorys
 				{
 					skeletonData.dispose();
 				}
-				for each(var textureAtlas:ITextureAtlas in _textureAtlasDic)
+				for each(var textureAtlas:Object in _textureAtlasDic)
 				{
 					textureAtlas.dispose();
 				}
@@ -219,7 +223,7 @@ package dragonBones.factorys
 		
 		public function getTextureDisplay(textureName:String, textureAtlasName:String = null, pivotX:Number = NaN, pivotY:Number = NaN):Object
 		{
-			var textureAtlas:ITextureAtlas;
+			var textureAtlas:Object;
 			if(textureAtlasName)
 			{
 				textureAtlas = _textureAtlasDic[textureAtlasName];
@@ -310,7 +314,7 @@ package dragonBones.factorys
 					//
 				}
 				
-				var textureAtlas:ITextureAtlas = generateTextureAtlas(content, textureAtlasXML);
+				var textureAtlas:Object = generateTextureAtlas(content, textureAtlasXML);
 				addTextureAtlas(textureAtlas, skeletonName);
 				
 				skeletonName = null;
@@ -326,7 +330,7 @@ package dragonBones.factorys
 			}
 		}
 		
-		protected function generateTextureAtlas(content:Object, textureAtlasXML:XML):ITextureAtlas
+		protected function generateTextureAtlas(content:Object, textureAtlasXML:XML):Object
 		{
 			var textureAtlas:NativeTextureAtlas = new NativeTextureAtlas(content, textureAtlasXML);
 			return textureAtlas;
@@ -345,7 +349,7 @@ package dragonBones.factorys
 			return bone;
 		}
 		
-		protected function generateTextureDisplay(textureAtlas:ITextureAtlas, fullName:String, pivotX:int, pivotY:int):Object
+		protected function generateTextureDisplay(textureAtlas:Object, fullName:String, pivotX:int, pivotY:int):Object
 		{
 			var nativeTextureAtlas:NativeTextureAtlas = textureAtlas as NativeTextureAtlas;
 			if(nativeTextureAtlas){

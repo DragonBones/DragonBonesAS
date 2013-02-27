@@ -19,6 +19,7 @@
 	import starling.display.Sprite;
 	import starling.textures.SubTexture;
 	import starling.textures.Texture;
+	import starling.textures.TextureAtlas;
 	
 	use namespace dragonBones_internal;
 	
@@ -55,7 +56,7 @@
 			return bone;
 		}
 		
-		override protected function generateTextureDisplay(textureAtlas:ITextureAtlas, fullName:String, pivotX:int, pivotY:int):Object
+		override protected function generateTextureDisplay(textureAtlas:Object, fullName:String, pivotX:int, pivotY:int):Object
 		{
 			var starlingTextureAtlas:StarlingTextureAtlas = textureAtlas as StarlingTextureAtlas;
 			if(starlingTextureAtlas)
@@ -67,19 +68,20 @@
 					pivotX = pivotX || subTextureData.pivotX;
 					pivotY = pivotY || subTextureData.pivotY;
 				}
-				var subTexture:SubTexture = starlingTextureAtlas.getTexture(fullName) as SubTexture;
-				if(subTexture)
-				{
-					var image:Image = new Image(subTexture);
-					image.pivotX = pivotX;
-					image.pivotY = pivotY;
-					return image;
-				}
+			}
+			
+			var subTexture:SubTexture = (textureAtlas as TextureAtlas).getTexture(fullName) as SubTexture;
+			if(subTexture)
+			{
+				var image:Image = new Image(subTexture);
+				image.pivotX = pivotX;
+				image.pivotY = pivotY;
+				return image;
 			}
 			return null;
 		}
 		
-		override protected function generateTextureAtlas(content:Object, textureAtlasXML:XML):ITextureAtlas
+		override protected function generateTextureAtlas(content:Object, textureAtlasXML:XML):Object
 		{
 			var texture:Texture;
 			var bitmapData:BitmapData;

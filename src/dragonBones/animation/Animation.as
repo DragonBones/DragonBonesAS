@@ -28,7 +28,7 @@ package dragonBones.animation
 		
 		private static var _soundManager:SoundEventManager = SoundEventManager.getInstance();
 		
-		public var enabledTween:Boolean = true;
+		public var tweenEnabled:Boolean = true;
 		
 		private var _currentTime:Number;
 		private var _totalTime:Number;
@@ -168,7 +168,19 @@ package dragonBones.animation
 			var exMovementID:String = _movementID;
 			_movementID = movementID as String;
 			
-			_totalTime = tweenTime >= 0?tweenTime:_movementData.durationTo;
+			if(tweenTime >= 0 )
+			{
+				_totalTime = tweenTime;
+			}
+			else if(tweenEnabled)
+			{
+				_totalTime = _movementData.durationTo;
+			}
+			else
+			{
+				_totalTime = 0;
+			}
+			
 			if(_totalTime < 0)
 			{
 				_totalTime = 0;
