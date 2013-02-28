@@ -114,7 +114,8 @@ package dragonBones.utils
 				current.scaleX + progress * offSet.scaleX,
 				current.scaleY + progress * offSet.scaleY,
 				current.pivotX + progress * offSet.pivotX,
-				current.pivotY + progress * offSet.pivotY
+				current.pivotY + progress * offSet.pivotY,
+				tween.z
 			);
 		}
 	}

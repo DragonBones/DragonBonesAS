@@ -419,6 +419,7 @@ package dragonBones.objects
 					}
 					
 					parseNode(tweenFrameXML, _helpNode);
+					TransformUtils.setOffSetNode(_helpFrameData.node, _helpNode, _helpNode, _helpFrameData.tweenRotate);
 					
 					_helpNode.setValues(
 						_helpFrameData.node.x + progress * _helpNode.x,

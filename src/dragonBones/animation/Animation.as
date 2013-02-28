@@ -168,11 +168,11 @@ package dragonBones.animation
 			var exMovementID:String = _movementID;
 			_movementID = movementID as String;
 			
-			if(tweenTime >= 0 )
+			if(tweenTime >= 0)
 			{
 				_totalTime = tweenTime;
 			}
-			else if(tweenEnabled)
+			else if(tweenEnabled && exMovementID)
 			{
 				_totalTime = _movementData.durationTo;
 			}

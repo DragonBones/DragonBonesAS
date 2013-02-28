@@ -106,7 +106,7 @@
 				stop();
 				return;
 			}
-			
+			_node.skewX %= 360;
 			_node.skewY %= 360;
 			_isPause = false;
 			_currentFrameData = null;
@@ -334,16 +334,23 @@
 				var currentFrameData:FrameData = _movementBoneData._frameList[currentFrameDataID];
 				var nextFrameData:FrameData = _movementBoneData._frameList[_nextFrameDataID];
 				
-				_frameTweenEasing = _bone.armature.animation.tweenEnabled?currentFrameData.tweenEasing:NaN;
+				if(nextFrameData.displayIndex >= 0 && _bone.armature.animation.tweenEnabled)
+				{
+					_frameTweenEasing = currentFrameData.tweenEasing;
+				}
+				else
+				{
+					_frameTweenEasing = NaN;
+				}
+				
 				if (activeFrame)
 				{
 					_currentFrameData = _nextFrameData;
 					_nextFrameData = nextFrameData;
 				}
 				
-				setOffset(currentFrameData.node, currentFrameData.colorTransform, nextFrameData.node, nextFrameData.colorTransform);
+				setOffset(currentFrameData.node, currentFrameData.colorTransform, nextFrameData.node, nextFrameData.colorTransform, nextFrameData.tweenRotate);
 			
-				
 				if(isList && _nextFrameDataID == 0)
 				{
 					_isPause = true;
