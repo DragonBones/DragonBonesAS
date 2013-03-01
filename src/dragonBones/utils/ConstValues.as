@@ -25,7 +25,6 @@ package dragonBones.utils {
 		public static const A_VERSION:String = "version";
 		public static const A_FRAME_RATE:String = "frameRate";
 		public static const A_NAME:String = "name";
-		public static const A_START:String = "st";
 		public static const A_DURATION:String = "dr";
 		public static const A_DURATION_TO:String = "to";
 		public static const A_DURATION_TWEEN:String = "drTW";

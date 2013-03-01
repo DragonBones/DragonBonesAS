@@ -61,7 +61,6 @@
 		private var _offSetColorTransform:ColorTransform;
 		
 		private var _currentFrameData:FrameData;
-		private var _nextFrameData:FrameData;
 		private var _tweenEasing:Number;
 		private var _frameTweenEasing:Number;
 		
@@ -110,7 +109,6 @@
 			_node.skewY %= 360;
 			_isPause = false;
 			_currentFrameData = null;
-			_nextFrameData = null;
 			_loop = loop?0:-1;
 			
 			_nextFrameDataTimeEdge = 0;
@@ -118,12 +116,14 @@
 			_rawDuration = rawDuration;
 			_tweenEasing = tweenEasing;
 			
+			var nextFrameData:FrameData;
+			
 			if (totalFrames == 1)
 			{
 				_frameTweenEasing = 1;
 				_rawDuration = 0;
-				_nextFrameData = _movementBoneData._frameList[0];
-				setOffset(_node, _colorTransform, _nextFrameData.node, _nextFrameData.colorTransform);
+				nextFrameData = _movementBoneData._frameList[0];
+				setOffset(_node, _colorTransform, nextFrameData.node, nextFrameData.colorTransform);
 			}
 			else if (loop && _movementBoneData.delay != 0)
 			{
@@ -132,13 +132,13 @@
 			}
 			else
 			{
-				_nextFrameData = _movementBoneData._frameList[0];
-				setOffset(_node, _colorTransform, _nextFrameData.node, _nextFrameData.colorTransform);
+				nextFrameData = _movementBoneData._frameList[0];
+				setOffset(_node, _colorTransform, nextFrameData.node, nextFrameData.colorTransform);
 			}
 			
-			if(_nextFrameData)
+			if(nextFrameData)
 			{
-				updateBoneDisplayIndex(_nextFrameData);
+				updateBoneDisplayIndex(nextFrameData);
 			}
 		}
 		
@@ -207,12 +207,7 @@
 			{
 				progress /= _movementBoneData.scale;
 				progress += _movementBoneData.delay;
-				var loop:int = progress;
-				if(loop != _loop)
-				{
-					_loop = loop;
-					_nextFrameDataTimeEdge = 0;
-				}
+				_loop = progress;
 				progress -= _loop;
 				progress = updateFrameData(progress, true);
 			}
@@ -222,7 +217,7 @@
 			}
 			else if (playType == Animation.SINGLE && progress == 1)
 			{
-				_currentFrameData = _nextFrameData;
+				_currentFrameData = _movementBoneData._frameList[0];
 				_isPause = true;
 			}
 			else
@@ -327,6 +322,7 @@
 					if (++ _nextFrameDataID >= length)
 					{
 						_nextFrameDataID = 0;
+						var isEnd:Boolean = true;
 					}
 				}
 				while (playedTime >= _nextFrameDataTimeEdge);
@@ -343,22 +339,25 @@
 					_frameTweenEasing = NaN;
 				}
 				
-				if (activeFrame)
-				{
-					_currentFrameData = _nextFrameData;
-					_nextFrameData = nextFrameData;
-				}
-				
 				setOffset(currentFrameData.node, currentFrameData.colorTransform, nextFrameData.node, nextFrameData.colorTransform, nextFrameData.tweenRotate);
 			
-				if(isList && _nextFrameDataID == 0)
+				if(isList && isEnd)
 				{
 					_isPause = true;
 					return 0;
 				}
+				
+				if (activeFrame)
+				{
+					_currentFrameData = currentFrameData;
+				}
 			}
 			
 			progress = 1 - (_nextFrameDataTimeEdge - playedTime) / _frameDuration;
+			if(isEnd)
+			{
+				_nextFrameDataTimeEdge = 0;
+			}
 			if (!isNaN(_frameTweenEasing))
 			{
 				var tweenEasing:Number = isNaN(_tweenEasing)?_frameTweenEasing:_tweenEasing;

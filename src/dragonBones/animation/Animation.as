@@ -41,6 +41,8 @@ package dragonBones.animation
 		private var _nextFrameDataID:int;
 		private var _loop:int;
 		
+		private var _breakFrameWhile:Boolean;
+		
 		private var _armature:Armature;
 		private var _movementData:MovementData;
 		
@@ -164,6 +166,7 @@ package dragonBones.animation
 			_movementData = movementData;
 			_isPlaying = true;
 			_currentTime = 0;
+			_breakFrameWhile = true;
 			
 			var exMovementID:String = _movementID;
 			_movementID = movementID as String;
@@ -395,6 +398,7 @@ package dragonBones.animation
 			var playedTime:Number = _rawDuration * progress;
 			if (playedTime >= _nextFrameDataTimeEdge)
 			{
+				_breakFrameWhile = false;
 				var length:uint = _movementData._movementFrameList.length;
 				do 
 				{
@@ -406,28 +410,36 @@ package dragonBones.animation
 					{
 						_nextFrameDataID = 0;
 					}
+					arriveFrameData(currentFrameData);
+					if(_breakFrameWhile)
+					{
+						break;
+					}
 				}
 				while (playedTime >= _nextFrameDataTimeEdge);
-				
-				if(currentFrameData.event && _armature.hasEventListener(FrameEvent.MOVEMENT_FRAME_EVENT))
-				{
-					var frameEvent:FrameEvent = new FrameEvent(FrameEvent.MOVEMENT_FRAME_EVENT);
-					frameEvent.movementID = _movementID;
-					frameEvent.frameLabel = currentFrameData.event;
-					_armature.dispatchEvent(frameEvent);
-				}
-				if(currentFrameData.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
-				{
-					var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
-					soundEvent.movementID = _movementID;
-					soundEvent.sound = currentFrameData.sound;
-					soundEvent._armature = _armature;
-					_soundManager.dispatchEvent(soundEvent);
-				}
-				if(currentFrameData.movement)
-				{
-					gotoAndPlay(currentFrameData.movement);
-				}
+			}
+		}
+		
+		private function arriveFrameData(movementFrameData:MovementFrameData):void
+		{
+			if(movementFrameData.event && _armature.hasEventListener(FrameEvent.MOVEMENT_FRAME_EVENT))
+			{
+				var frameEvent:FrameEvent = new FrameEvent(FrameEvent.MOVEMENT_FRAME_EVENT);
+				frameEvent.movementID = _movementID;
+				frameEvent.frameLabel = movementFrameData.event;
+				_armature.dispatchEvent(frameEvent);
+			}
+			if(movementFrameData.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
+			{
+				var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
+				soundEvent.movementID = _movementID;
+				soundEvent.sound = movementFrameData.sound;
+				soundEvent._armature = _armature;
+				_soundManager.dispatchEvent(soundEvent);
+			}
+			if(movementFrameData.movement)
+			{
+				gotoAndPlay(movementFrameData.movement);
 			}
 		}
 	}
