@@ -207,8 +207,14 @@
 			{
 				progress /= _movementBoneData.scale;
 				progress += _movementBoneData.delay;
-				_loop = progress;
-				progress -= _loop;
+				var loop:int = progress;
+				if(_loop != loop)
+				{
+					_nextFrameDataTimeEdge = 0;
+					_nextFrameDataID = 0;
+					_loop = loop;
+				}
+				progress -= loop;
 				progress = updateFrameData(progress, true);
 			}
 			else if (playType == Animation.LIST)
@@ -322,7 +328,6 @@
 					if (++ _nextFrameDataID >= length)
 					{
 						_nextFrameDataID = 0;
-						var isEnd:Boolean = true;
 					}
 				}
 				while (playedTime >= _nextFrameDataTimeEdge);
@@ -341,7 +346,7 @@
 				
 				setOffset(currentFrameData.node, currentFrameData.colorTransform, nextFrameData.node, nextFrameData.colorTransform, nextFrameData.tweenRotate);
 			
-				if(isList && isEnd)
+				if(isList && _nextFrameDataID)
 				{
 					_isPause = true;
 					return 0;
@@ -354,10 +359,7 @@
 			}
 			
 			progress = 1 - (_nextFrameDataTimeEdge - playedTime) / _frameDuration;
-			if(isEnd)
-			{
-				_nextFrameDataTimeEdge = 0;
-			}
+			
 			if (!isNaN(_frameTweenEasing))
 			{
 				var tweenEasing:Number = isNaN(_tweenEasing)?_frameTweenEasing:_tweenEasing;
