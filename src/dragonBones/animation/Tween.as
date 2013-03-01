@@ -345,16 +345,16 @@
 				}
 				
 				setOffset(currentFrameData.node, currentFrameData.colorTransform, nextFrameData.node, nextFrameData.colorTransform, nextFrameData.tweenRotate);
-			
-				if(isList && _nextFrameDataID)
-				{
-					_isPause = true;
-					return 0;
-				}
 				
 				if (activeFrame)
 				{
 					_currentFrameData = currentFrameData;
+				}
+				
+				if(isList && _nextFrameDataID == 0)
+				{
+					_isPause = true;
+					return 0;
 				}
 			}
 			

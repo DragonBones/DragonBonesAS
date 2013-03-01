@@ -354,7 +354,7 @@ package dragonBones.factorys
 			var nativeTextureAtlas:NativeTextureAtlas = textureAtlas as NativeTextureAtlas;
 			if(nativeTextureAtlas){
 				var movieClip:MovieClip = nativeTextureAtlas.movieClip;
-				if (movieClip && movieClip.totalFrames > 3)
+				if (movieClip && movieClip.totalFrames >= 3)
 				{
 					movieClip.gotoAndStop(movieClip.totalFrames);
 					movieClip.gotoAndStop(fullName);
