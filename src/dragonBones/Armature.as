@@ -2,6 +2,7 @@ package dragonBones
 {
 	import dragonBones.animation.Animation;
 	import dragonBones.animation.IAnimatable;
+	import dragonBones.events.ArmatureEvent;
 	import dragonBones.utils.dragonBones_internal;
 	
 	import flash.events.EventDispatcher;
@@ -221,6 +222,7 @@ package dragonBones
 				}
 			}
 			_bonesIndexChanged = false;
+			dispatchEvent(new ArmatureEvent(ArmatureEvent.Z_ORDER_UPDATED));
 		}
 		
 		/** @private */
