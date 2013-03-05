@@ -30,9 +30,6 @@ package dragonBones.animation
 		
 		public var tweenEnabled:Boolean = true;
 		
-		private var _currentTime:Number;
-		private var _totalTime:Number;
-		
 		private var _playType:int;
 		private var _duration:Number;
 		private var _rawDuration:Number;
@@ -61,6 +58,18 @@ package dragonBones.animation
 				stop();
 				_animationData = value;
 			}
+		}
+		
+		private var _currentTime:Number;
+		public function get currentTime():Number
+		{
+			return _currentTime;
+		}
+		
+		private var _totalTime:Number;
+		public function get totalTime():Number
+		{
+			return _totalTime;
 		}
 		
 		private var _isPlaying:Boolean;

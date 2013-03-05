@@ -6,34 +6,15 @@ package dragonBones.animation
 	
 	public final class WorldClock implements IAnimatable
 	{
-		public static var defaultTimeLag:Number = 1/30;
+		public static var clock:WorldClock = new WorldClock();
 		
-		public static const clock:WorldClock = new WorldClock();
+		private var animatableList:Vector.<IAnimatable>;
 		
-		private static var _time:Number = getTimer() * 0.001;
-		public static function get time():Number
+		private var _time:Number;
+		public function get time():Number
 		{
 			return _time;
 		}
-		
-		public static function update(useFrames:Boolean = false):void
-		{
-			var passedTime:Number;
-			if(useFrames)
-			{
-				passedTime = defaultTimeLag;
-			}
-			else
-			{
-				var time:Number = getTimer() * 0.001;
-				passedTime = time - _time;
-				_time = time;
-			}
-			
-			clock.advanceTime(passedTime);
-		}
-		
-		private var animatableList:Vector.<IAnimatable>;
 		
 		private var _timeScale:Number = 1;
 		public function get timeScale():Number
@@ -51,6 +32,7 @@ package dragonBones.animation
 		
 		public function WorldClock()
 		{
+			_time = getTimer();
 			animatableList = new Vector.<IAnimatable>;
 		}
 		
@@ -83,6 +65,13 @@ package dragonBones.animation
 		
 		public function advanceTime(passedTime:Number):void 
 		{
+			if(passedTime < 0)
+			{
+				var time:Number = getTimer() * 0.001;
+				passedTime = time - _time;
+				_time = time;
+			}
+			
 			passedTime *= _timeScale;
 			
 			var length:int = animatableList.length;

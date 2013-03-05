@@ -135,8 +135,6 @@ package dragonBones.objects
 			skeletonData._frameRate = int(skeletonXML.attribute(ConstValues.A_FRAME_RATE));
 			_currentSkeletonData = skeletonData;
 			
-			WorldClock.defaultTimeLag = 1/_currentSkeletonData._frameRate;
-			
 			for each(var armatureXML:XML in skeletonXML.elements(ConstValues.ARMATURES).elements(ConstValues.ARMATURE))
 			{
 				var armatureName:String = armatureXML.attribute(ConstValues.A_NAME);
