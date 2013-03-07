@@ -71,6 +71,8 @@
 		private var _nextFrameDataID:int;
 		private var _loop:int;
 		
+		dragonBones_internal var _differentColorTransform:Boolean;
+		
 		/**
 		 * Creates a new <code>Tween</code>
 		 * @param	bone
@@ -176,9 +178,11 @@
 			TransformUtils.setOffSetNode(currentFrameData.node, nextFrameData.node, _offSetNode);
 			TransformUtils.setTweenNode(_currentNode, _offSetNode, _offSetNode, progress);
 			
-			TransformUtils.setOffSetColorTransform(currentFrameData.colorTransform, nextFrameData.colorTransform, _offSetColorTransform);
-			TransformUtils.setTweenColorTransform(_currentColorTransform, _offSetColorTransform, _offSetColorTransform, progress);
-			
+			if(_differentColorTransform)
+			{
+				TransformUtils.setOffSetColorTransform(currentFrameData.colorTransform, nextFrameData.colorTransform, _offSetColorTransform);
+				TransformUtils.setTweenColorTransform(_currentColorTransform, _offSetColorTransform, _offSetColorTransform, progress);
+			}
 		}
 		
 		/** @private */
@@ -235,7 +239,11 @@
 			if (!isNaN(_frameTweenEasing) || _currentFrameData)
 			{
 				TransformUtils.setTweenNode(_currentNode, _offSetNode, _node, progress);
-				TransformUtils.setTweenColorTransform(_currentColorTransform, _offSetColorTransform, _colorTransform, progress);
+				
+				if(_differentColorTransform)
+				{
+					TransformUtils.setTweenColorTransform(_currentColorTransform, _offSetColorTransform, _colorTransform, progress);
+				}
 			}
 			
 			if(_currentFrameData)
@@ -248,8 +256,9 @@
 		private function setOffset(currentNode:Node, currentColorTransform:ColorTransform, nextNode:Node, nextColorTransform:ColorTransform, tweenRotate:int = 0):void
 		{
 			_currentNode.copy(currentNode);
+			TransformUtils.setOffSetNode(_currentNode, nextNode, _offSetNode, tweenRotate);
 			
-			if(currentColorTransform)
+			if(_differentColorTransform)
 			{
 				_currentColorTransform.alphaOffset = currentColorTransform.alphaOffset;
 				_currentColorTransform.redOffset = currentColorTransform.redOffset;
@@ -259,10 +268,27 @@
 				_currentColorTransform.redMultiplier = currentColorTransform.redMultiplier;
 				_currentColorTransform.greenMultiplier = currentColorTransform.greenMultiplier;
 				_currentColorTransform.blueMultiplier = currentColorTransform.blueMultiplier;
-			}
 			
-			TransformUtils.setOffSetNode(_currentNode, nextNode, _offSetNode, tweenRotate);
-			TransformUtils.setOffSetColorTransform(_currentColorTransform, nextColorTransform, _offSetColorTransform);
+				TransformUtils.setOffSetColorTransform(_currentColorTransform, nextColorTransform, _offSetColorTransform);
+				
+				if(
+					_offSetColorTransform.alphaOffset != 0 ||
+					_offSetColorTransform.redOffset != 0 ||
+					_offSetColorTransform.greenOffset != 0 ||
+					_offSetColorTransform.blueOffset != 0 ||
+					_offSetColorTransform.alphaMultiplier != 0 ||
+					_offSetColorTransform.redMultiplier != 0 ||
+					_offSetColorTransform.greenMultiplier != 0 ||
+					_offSetColorTransform.blueMultiplier != 0
+				)
+				{
+					_differentColorTransform = true;
+				}
+				else
+				{
+					_differentColorTransform = false;
+				}
+			}
 		}
 		
 		private function updateBoneDisplayIndex(frameData:FrameData):void
@@ -289,10 +315,9 @@
 			
 			if(frameData.event && _bone._armature.hasEventListener(FrameEvent.BONE_FRAME_EVENT))
 			{
-				var frameEvent:FrameEvent = new FrameEvent(FrameEvent.BONE_FRAME_EVENT);
+				var frameEvent:FrameEvent = new FrameEvent(FrameEvent.BONE_FRAME_EVENT, false, _bone);
 				frameEvent.movementID = _bone._armature.animation.movementID;
 				frameEvent.frameLabel = frameData.event;
-				frameEvent._bone = _bone;
 				_bone._armature.dispatchEvent(frameEvent);
 			}
 			if(frameData.sound && _soundManager.hasEventListener(SoundEvent.SOUND))

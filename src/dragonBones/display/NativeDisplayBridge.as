@@ -59,6 +59,7 @@ package dragonBones.display
 			matrix.ty -= matrix.b * pivotX + matrix.d * pivotY;
 			
 			_display.transform.matrix = matrix;
+			
 			_display.transform.colorTransform = colorTransform;
 			_display.visible = visible;
 		}

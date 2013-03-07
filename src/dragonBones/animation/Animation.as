@@ -323,7 +323,6 @@ package dragonBones.animation
 							{
 								event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
 								event.movementID = _movementID;
-								_armature.dispatchEvent(event);
 							}
 						}
 					}
@@ -338,7 +337,6 @@ package dragonBones.animation
 								{
 									event = new AnimationEvent(AnimationEvent.COMPLETE);
 									event.movementID = _movementID;
-									_armature.dispatchEvent(event);
 								}
 								break;
 							case LIST_START:
@@ -350,7 +348,6 @@ package dragonBones.animation
 								{
 									event = new AnimationEvent(AnimationEvent.START);
 									event.movementID = _movementID;
-									_armature.dispatchEvent(event);
 								}
 								break;
 							case LOOP_START:
@@ -362,7 +359,6 @@ package dragonBones.animation
 								{
 									event = new AnimationEvent(AnimationEvent.START);
 									event.movementID = _movementID;
-									_armature.dispatchEvent(event);
 								}
 								break;
 						}
@@ -386,6 +382,11 @@ package dragonBones.animation
 							progress -= _loop;
 						}
 						updateFrameData(progress);
+					}
+					
+					if(event)
+					{
+						_armature.dispatchEvent(event);
 					}
 				}
 				else

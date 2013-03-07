@@ -5,6 +5,7 @@ package dragonBones
 	import dragonBones.utils.dragonBones_internal;
 	
 	import flash.events.EventDispatcher;
+	import flash.geom.ColorTransform;
 	
 	use namespace dragonBones_internal;
 	/**
@@ -57,10 +58,27 @@ package dragonBones
 		
 		/** @private */
 		dragonBones_internal var _bonesIndexChanged:Boolean;
+		
 		/** @private */
 		dragonBones_internal var _boneDepthList:Vector.<Bone>;
+		/** @private */
+		protected var _rootBoneList:Vector.<Bone>;
 		
-		private var _rootBoneList:Vector.<Bone>;
+		
+		/** @private */
+		dragonBones_internal var _colorTransformChange:Boolean;
+		/** @private */
+		protected var _colorTransform:ColorTransform;
+		
+		public function get colorTransform():ColorTransform
+		{
+			return _colorTransform;
+		}
+		public function set colorTransfrom(value:ColorTransform):void
+		{
+			_colorTransform = value;
+			_colorTransformChange = true;
+		}
 		
 		/** @private */
 		protected var _display:Object;
@@ -158,6 +176,10 @@ package dragonBones
 			return null;
 		}
 		
+		/**
+		 * Gets bones.
+		 * @return
+		 */
 		public function getBones():Vector.<Bone>
 		{
 			return _boneDepthList.concat();

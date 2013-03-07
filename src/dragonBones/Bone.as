@@ -33,7 +33,6 @@
 		public var origin:Node;
 		public var node:Node;
 		
-		public var colorTransform:ColorTransform;
 		private var _globalColorTransform:ColorTransform;
 		
 		/** @private */
@@ -257,6 +256,7 @@
 				_children.splice(index, 1);
 			}
 		}
+		
 		/** @private */
 		public function removeFromParent():void
 		{
@@ -322,22 +322,22 @@
 				if(_isOnStage && currentDisplay)
 				{
 					//colorTransform
-					_globalColorTransform.alphaOffset = 0;
-					_globalColorTransform.alphaMultiplier = 1;
-					_globalColorTransform.redOffset = 0;
-					_globalColorTransform.redMultiplier = 1;
-					_globalColorTransform.greenOffset = 0;
-					_globalColorTransform.greenMultiplier = 1;
-					_globalColorTransform.blueOffset = 0;
-					_globalColorTransform.blueMultiplier = 1;
+					var colorTransform:ColorTransform;
 					
-					_globalColorTransform.concat(_tweenColorTransform);
-					if(colorTransform)
+					if(_tween._differentColorTransform)
 					{
-						_globalColorTransform.concat(colorTransform);
+						if(_armature.colorTransform)
+						{
+							_tweenColorTransform.concat(_armature.colorTransform);
+						}
+						colorTransform = _tweenColorTransform;
 					}
-						
-					_displayBridge.update(_globalTransformMatrix, global, _globalColorTransform, _visible);
+					else if(_armature._colorTransformChange)
+					{
+						colorTransform = _armature.colorTransform;
+					}
+					
+					_displayBridge.update(_globalTransformMatrix, global, colorTransform, _visible);
 				}
 			}
 		}
