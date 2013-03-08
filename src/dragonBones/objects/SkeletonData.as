@@ -25,6 +25,16 @@ package dragonBones.objects
 			return _frameRate;
 		}
 		
+		public function get armatureNames():Vector.<String>
+		{
+			return _armatureDataList.dataNames.concat();
+		}
+		
+		public function get animationNames():Vector.<String>
+		{
+			return _animationDataList.dataNames.concat();
+		}
+		
 		public function SkeletonData()
 		{
 			_armatureDataList = new DataList();
