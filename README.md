@@ -15,4 +15,4 @@ There are some demos in [SkeletonAnimationDemos](https://github.com/DragonBones/
 
 **All things you need to download can be found [here](http://dragonbones.github.com/download.html)**  
 
-Copyright 2012 the DragonBones Team
+Copyright 2012-2013 the DragonBones Team
