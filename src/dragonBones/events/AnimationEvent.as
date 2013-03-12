@@ -19,17 +19,17 @@
 		/**
 		 * Dispatched when the playback of a animation starts.
 		 */
-		public static const START:String = "animationStart";
+		public static const START:String = "start";
 		
 		/**
 		 * Dispatched when the playback of a movement stops.
 		 */
-		public static const COMPLETE:String = "movementComplete";
+		public static const COMPLETE:String = "complete";
 		
 		/**
 		 * Dispatched when the playback of a movement completes a loop.
 		 */
-		public static const LOOP_COMPLETE:String = "movementLoopComplete";
+		public static const LOOP_COMPLETE:String = "loopComplete";
 		
 		public var exMovementID:String;
 		public var movementID:String;

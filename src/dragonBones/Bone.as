@@ -33,8 +33,6 @@
 		public var origin:Node;
 		public var node:Node;
 		
-		private var _globalColorTransform:ColorTransform;
-		
 		/** @private */
 		dragonBones_internal var _tween:Tween;
 		/** @private */
@@ -160,8 +158,6 @@
 			_displayList = [];
 			_displayIndex = -1;
 			_visible = true;
-			
-			_globalColorTransform = new ColorTransform();
 			
 			_tweenNode = new Node();
 			_tweenColorTransform = new ColorTransform();
@@ -335,6 +331,7 @@
 					else if(_armature._colorTransformChange)
 					{
 						colorTransform = _armature.colorTransform;
+						_armature._colorTransformChange = false;
 					}
 					
 					_displayBridge.update(_globalTransformMatrix, global, colorTransform, _visible);

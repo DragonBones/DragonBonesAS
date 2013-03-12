@@ -107,6 +107,7 @@
 				stop();
 				return;
 			}
+			
 			_node.skewX %= 360;
 			_node.skewY %= 360;
 			_isPause = false;
@@ -119,7 +120,6 @@
 			_tweenEasing = tweenEasing;
 			
 			var nextFrameData:FrameData;
-			
 			if (totalFrames == 1)
 			{
 				_frameTweenEasing = 1;
@@ -178,11 +178,9 @@
 			TransformUtils.setOffSetNode(currentFrameData.node, nextFrameData.node, _offSetNode);
 			TransformUtils.setTweenNode(_currentNode, _offSetNode, _offSetNode, progress);
 			
-			if(_differentColorTransform)
-			{
-				TransformUtils.setOffSetColorTransform(currentFrameData.colorTransform, nextFrameData.colorTransform, _offSetColorTransform);
-				TransformUtils.setTweenColorTransform(_currentColorTransform, _offSetColorTransform, _offSetColorTransform, progress);
-			}
+			TransformUtils.setOffSetColorTransform(currentFrameData.colorTransform, nextFrameData.colorTransform, _offSetColorTransform);
+			TransformUtils.setTweenColorTransform(_currentColorTransform, _offSetColorTransform, _offSetColorTransform, progress);
+
 		}
 		
 		/** @private */
@@ -198,6 +196,7 @@
 			{
 				return;
 			}
+			
 			if(_rawDuration == 0)
 			{
 				playType = Animation.SINGLE;
@@ -258,36 +257,33 @@
 			_currentNode.copy(currentNode);
 			TransformUtils.setOffSetNode(_currentNode, nextNode, _offSetNode, tweenRotate);
 			
-			if(_differentColorTransform)
-			{
-				_currentColorTransform.alphaOffset = currentColorTransform.alphaOffset;
-				_currentColorTransform.redOffset = currentColorTransform.redOffset;
-				_currentColorTransform.greenOffset = currentColorTransform.greenOffset;
-				_currentColorTransform.blueOffset = currentColorTransform.blueOffset;
-				_currentColorTransform.alphaMultiplier = currentColorTransform.alphaMultiplier;
-				_currentColorTransform.redMultiplier = currentColorTransform.redMultiplier;
-				_currentColorTransform.greenMultiplier = currentColorTransform.greenMultiplier;
-				_currentColorTransform.blueMultiplier = currentColorTransform.blueMultiplier;
+			_currentColorTransform.alphaOffset = currentColorTransform.alphaOffset;
+			_currentColorTransform.redOffset = currentColorTransform.redOffset;
+			_currentColorTransform.greenOffset = currentColorTransform.greenOffset;
+			_currentColorTransform.blueOffset = currentColorTransform.blueOffset;
+			_currentColorTransform.alphaMultiplier = currentColorTransform.alphaMultiplier;
+			_currentColorTransform.redMultiplier = currentColorTransform.redMultiplier;
+			_currentColorTransform.greenMultiplier = currentColorTransform.greenMultiplier;
+			_currentColorTransform.blueMultiplier = currentColorTransform.blueMultiplier;
 			
-				TransformUtils.setOffSetColorTransform(_currentColorTransform, nextColorTransform, _offSetColorTransform);
-				
-				if(
-					_offSetColorTransform.alphaOffset != 0 ||
-					_offSetColorTransform.redOffset != 0 ||
-					_offSetColorTransform.greenOffset != 0 ||
-					_offSetColorTransform.blueOffset != 0 ||
-					_offSetColorTransform.alphaMultiplier != 0 ||
-					_offSetColorTransform.redMultiplier != 0 ||
-					_offSetColorTransform.greenMultiplier != 0 ||
-					_offSetColorTransform.blueMultiplier != 0
-				)
-				{
-					_differentColorTransform = true;
-				}
-				else
-				{
-					_differentColorTransform = false;
-				}
+			TransformUtils.setOffSetColorTransform(_currentColorTransform, nextColorTransform, _offSetColorTransform);
+			
+			if(
+				_offSetColorTransform.alphaOffset != 0 ||
+				_offSetColorTransform.redOffset != 0 ||
+				_offSetColorTransform.greenOffset != 0 ||
+				_offSetColorTransform.blueOffset != 0 ||
+				_offSetColorTransform.alphaMultiplier != 0 ||
+				_offSetColorTransform.redMultiplier != 0 ||
+				_offSetColorTransform.greenMultiplier != 0 ||
+				_offSetColorTransform.blueMultiplier != 0
+			)
+			{
+				_differentColorTransform = true;
+			}
+			else
+			{
+				_differentColorTransform = false;
 			}
 		}
 		

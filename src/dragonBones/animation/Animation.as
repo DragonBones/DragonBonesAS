@@ -1,4 +1,4 @@
-package dragonBones.animation
+﻿package dragonBones.animation
 {
 	import dragonBones.Armature;
 	import dragonBones.Bone;
@@ -80,7 +80,7 @@ package dragonBones.animation
 		{
 			if(_isPlaying)
 			{
-				return _loop >=0 || _currentTime < _totalTime;
+				return _loop >= 0 || _currentTime < _totalTime && !_isPlaying;
 			}
 			return false;
 		}

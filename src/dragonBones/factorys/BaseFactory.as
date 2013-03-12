@@ -169,6 +169,8 @@ package dragonBones.factorys
 		 */
 		public function buildArmature(armatureName:String, animationName:String = null, skeletonName:String = null, textureAtlasName:String = null):Armature
 		{
+			animationName = animationName || armatureName;
+			
 			var skeletonData:SkeletonData;
 			var armatureData:ArmatureData;
 			if(skeletonName)
@@ -201,7 +203,21 @@ package dragonBones.factorys
 			_currentTextureAtlasName = textureAtlasName || skeletonName;
 			_currentTextureAtlas = _textureAtlasDic[_currentTextureAtlasName];
 			
-			var animationData:AnimationData = _currentSkeletonData.getAnimationData(animationName || armatureName);
+			var animationData:AnimationData = _currentSkeletonData.getAnimationData(animationName);
+			
+			if(!animationData)
+			{
+				for (skeletonName in _skeletonDataDic)
+				{
+					skeletonData = _skeletonDataDic[skeletonName];
+					animationData = skeletonData.getAnimationData(animationName);
+					if(animationData)
+					{
+						break;
+					}
+				}
+			}
+			
 			var armature:Armature = generateArmature();
 			armature.name = armatureName;
 			armature.animation.animationData = animationData;

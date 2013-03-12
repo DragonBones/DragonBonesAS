@@ -1,4 +1,4 @@
-package dragonBones.animation
+﻿package dragonBones.animation
 {
 	import dragonBones.Armature;
 	
@@ -32,7 +32,7 @@ package dragonBones.animation
 		
 		public function WorldClock()
 		{
-			_time = getTimer();
+			_time = getTimer() * 0.001;
 			animatableList = new Vector.<IAnimatable>;
 		}
 		
@@ -67,9 +67,9 @@ package dragonBones.animation
 		{
 			if(passedTime < 0)
 			{
-				var time:Number = getTimer() * 0.001;
-				passedTime = time - _time;
-				_time = time;
+				var currentTime:Number = getTimer() * 0.001;
+				passedTime = currentTime - _time;
+				_time = currentTime;
 			}
 			
 			passedTime *= _timeScale;

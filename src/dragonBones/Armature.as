@@ -17,17 +17,17 @@ package dragonBones
 	/**
 	 * Dispatched when the playback of a animation starts.
 	 */
-	[Event(name="animationStart", type="dragonBones.events.AnimationEvent")]
+	[Event(name="start", type="dragonBones.events.AnimationEvent")]
 	
 	/**
 	 * Dispatched when the playback of a movement stops.
 	 */
-	[Event(name="movementComplete", type="dragonBones.events.AnimationEvent")]
+	[Event(name="complete", type="dragonBones.events.AnimationEvent")]
 	
 	/**
 	 * Dispatched when the playback of a movement completes a loop.
 	 */
-	[Event(name="movementLoopComplete", type="dragonBones.events.AnimationEvent")]
+	[Event(name="loopComplete", type="dragonBones.events.AnimationEvent")]
 	
 	/**
 	 * Dispatched when the animation of the armatrue enter a frame.
@@ -244,7 +244,11 @@ package dragonBones
 				}
 			}
 			_bonesIndexChanged = false;
-			dispatchEvent(new ArmatureEvent(ArmatureEvent.Z_ORDER_UPDATED));
+			
+			if(hasEventListener(ArmatureEvent.Z_ORDER_UPDATED))
+			{
+				dispatchEvent(new ArmatureEvent(ArmatureEvent.Z_ORDER_UPDATED));
+			}
 		}
 		
 		/** @private */
