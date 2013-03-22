@@ -59,15 +59,14 @@ package dragonBones
 		
 		/** @private */
 		dragonBones_internal var _bonesIndexChanged:Boolean;
-		
 		/** @private */
 		dragonBones_internal var _boneDepthList:Vector.<Bone>;
 		/** @private */
 		protected var _rootBoneList:Vector.<Bone>;
 		
-		
 		/** @private */
 		dragonBones_internal var _colorTransformChange:Boolean;
+		
 		/** @private */
 		protected var _colorTransform:ColorTransform;
 		
@@ -135,6 +134,13 @@ package dragonBones
 			_animation = null;
 			
 			//_display = null;
+			
+			userData = null;
+			
+			if(_colorTransform)
+			{
+				_colorTransform = null;
+			}
 		}
 		
 		/**
@@ -258,6 +264,8 @@ package dragonBones
 			{
 				bone.update();
 			}
+			
+			_colorTransformChange = false;
 			
 			if(_bonesIndexChanged)
 			{

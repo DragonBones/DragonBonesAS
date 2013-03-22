@@ -33,6 +33,8 @@
 		public var origin:Node;
 		public var node:Node;
 		
+		public var visible:Object;
+		
 		/** @private */
 		dragonBones_internal var _tween:Tween;
 		/** @private */
@@ -40,13 +42,13 @@
 		/** @private */
 		dragonBones_internal var _tweenColorTransform:ColorTransform;
 		/** @private */
+		dragonBones_internal var _visible:Boolean;
+		/** @private */
 		dragonBones_internal var _children:Vector.<Bone>;
 		/** @private */
 		dragonBones_internal var _displayBridge:IDisplayBridge;
 		/** @private */
 		dragonBones_internal var _isOnStage:Boolean;
-		/** @private */
-		dragonBones_internal var _visible:Boolean;
 		/** @private */
 		dragonBones_internal var _armature:Armature;
 		
@@ -147,6 +149,8 @@
 		public function Bone(displayBrideg:IDisplayBridge)
 		{
 			origin = new Node();
+			origin.scaleX = 1;
+			origin.scaleY = 1;
 			global = new Node();
 			node = new Node();
 			
@@ -168,8 +172,8 @@
 		public function changeDisplayList(displayList:Array):void
 		{
 			var indexBackup:int = _displayIndex;
-			
-			var length:uint = Math.min(_displayList.length, displayList.length);
+			var length:uint = displayList.length;
+			_displayList.length = length;
 			for(var i:int = 0;i < length;i ++)
 			{
 				changeDisplay(i);
@@ -331,10 +335,9 @@
 					else if(_armature._colorTransformChange)
 					{
 						colorTransform = _armature.colorTransform;
-						_armature._colorTransformChange = false;
 					}
 					
-					_displayBridge.update(_globalTransformMatrix, global, colorTransform, _visible);
+					_displayBridge.update(_globalTransformMatrix, global, colorTransform, (visible != null)?visible:_visible);
 				}
 			}
 		}
@@ -346,6 +349,12 @@
 				throw new ArgumentError("An Bone cannot be added as a child to itself or one of its children (or children's children, etc.)");
 			}
 			_parent = parent;
+			
+			if(_parent)
+			{
+				_isOnStage = _parent._isOnStage;
+			}
+			
 		}
 	}
 }

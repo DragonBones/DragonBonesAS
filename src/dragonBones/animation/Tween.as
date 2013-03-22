@@ -125,17 +125,18 @@
 				_frameTweenEasing = 1;
 				_rawDuration = 0;
 				nextFrameData = _movementBoneData._frameList[0];
-				setOffset(_node, _colorTransform, nextFrameData.node, nextFrameData.colorTransform);
+				setOffset(_bone._isOnStage?_node:nextFrameData.node, _colorTransform, nextFrameData.node, nextFrameData.colorTransform);
 			}
 			else if (loop && _movementBoneData.delay != 0)
 			{
 				getLoopListNode();
-				setOffset(_node, _colorTransform, _offSetNode, _offSetColorTransform);
+				setOffset(_bone._isOnStage?_node:_offSetNode, _colorTransform, _offSetNode, _offSetColorTransform);
 			}
 			else
 			{
+				_frameTweenEasing = 1;
 				nextFrameData = _movementBoneData._frameList[0];
-				setOffset(_node, _colorTransform, nextFrameData.node, nextFrameData.colorTransform);
+				setOffset(_bone._isOnStage?_node:nextFrameData.node, _colorTransform, nextFrameData.node, nextFrameData.colorTransform);
 			}
 			
 			if(nextFrameData)
@@ -164,6 +165,16 @@
 			
 			var currentFrameData:FrameData = _movementBoneData._frameList[currentFrameDataID];
 			var nextFrameData:FrameData = _movementBoneData._frameList[nextFrameDataID];
+			
+			
+			if(nextFrameData.displayIndex >= 0 && _bone.armature.animation.tweenEnabled)
+			{
+				_frameTweenEasing = currentFrameData.tweenEasing;
+			}
+			else
+			{
+				_frameTweenEasing = NaN;
+			}
 			
 			setOffset(currentFrameData.node, currentFrameData.colorTransform, nextFrameData.node, nextFrameData.colorTransform);
 		
