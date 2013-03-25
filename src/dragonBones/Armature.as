@@ -74,7 +74,7 @@ package dragonBones
 		{
 			return _colorTransform;
 		}
-		public function set colorTransfrom(value:ColorTransform):void
+		public function set colorTransform(value:ColorTransform):void
 		{
 			_colorTransform = value;
 			_colorTransformChange = true;
