@@ -245,8 +245,8 @@ package dragonBones.objects
 		private static function parseDisplayData(displayXML:XML, displayData:DisplayData):void
 		{
 			displayData._isArmature = Boolean(int(displayXML.attribute(ConstValues.A_IS_ARMATURE)));
-			displayData.pivotX = int(displayXML.attribute(ConstValues.A_PIVOT_X));
-			displayData.pivotY = int(displayXML.attribute(ConstValues.A_PIVOT_Y));
+			displayData.pivotX = Number(displayXML.attribute(ConstValues.A_PIVOT_X));
+			displayData.pivotY = Number(displayXML.attribute(ConstValues.A_PIVOT_Y));
 		}
 		
 		/** @private */
@@ -490,8 +490,8 @@ package dragonBones.objects
 			node.skewY = Number(xml.attribute(ConstValues.A_SKEW_Y)) * ANGLE_TO_RADIAN;
 			node.scaleX = Number(xml.attribute(ConstValues.A_SCALE_X));
 			node.scaleY = Number(xml.attribute(ConstValues.A_SCALE_Y));
-			node.pivotX =  int(xml.attribute(ConstValues.A_PIVOT_X));
-			node.pivotY =  int(xml.attribute(ConstValues.A_PIVOT_Y));
+			node.pivotX =  Number(xml.attribute(ConstValues.A_PIVOT_X));
+			node.pivotY =  Number(xml.attribute(ConstValues.A_PIVOT_Y));
 			node.z = int(xml.attribute(ConstValues.A_Z));
 		}
 		

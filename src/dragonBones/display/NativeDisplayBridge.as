@@ -57,7 +57,6 @@ package dragonBones.display
 			var pivotY:Number = node.pivotY;
 			matrix.tx -= matrix.a * pivotX + matrix.c * pivotY;
 			matrix.ty -= matrix.b * pivotX + matrix.d * pivotY;
-			
 			_display.transform.matrix = matrix;
 			if(colorTransform)
 			{

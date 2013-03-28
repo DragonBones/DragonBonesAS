@@ -365,7 +365,7 @@ package dragonBones.factorys
 			return bone;
 		}
 		
-		protected function generateTextureDisplay(textureAtlas:Object, fullName:String, pivotX:int, pivotY:int):Object
+		protected function generateTextureDisplay(textureAtlas:Object, fullName:String, pivotX:Number, pivotY:Number):Object
 		{
 			var nativeTextureAtlas:NativeTextureAtlas = textureAtlas as NativeTextureAtlas;
 			if(nativeTextureAtlas){

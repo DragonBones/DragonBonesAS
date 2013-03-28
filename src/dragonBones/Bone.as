@@ -336,7 +336,6 @@
 					{
 						colorTransform = _armature.colorTransform;
 					}
-					
 					_displayBridge.update(_globalTransformMatrix, global, colorTransform, (visible != null)?visible:_visible);
 				}
 			}
