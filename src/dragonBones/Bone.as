@@ -269,75 +269,71 @@
 		/** @private */
 		dragonBones_internal function update():void
 		{
-			//update node and matirx
-			if (_children.length > 0 || _isOnStage)
+			//update global
+			global.x = origin.x + node.x + _tweenNode.x;
+			global.y = origin.y + node.y + _tweenNode.y;
+			global.skewX = origin.skewX + node.skewX + _tweenNode.skewX;
+			global.skewY = origin.skewY + node.skewY + _tweenNode.skewY;
+			global.scaleX = origin.scaleX + node.scaleX + _tweenNode.scaleX;
+			global.scaleY = origin.scaleY + node.scaleY + _tweenNode.scaleY;
+			global.pivotX = origin.pivotX + node.pivotX + _tweenNode.pivotX;
+			global.pivotY = origin.pivotY + node.pivotY + _tweenNode.pivotY;
+			global.z = origin.z + node.z + _tweenNode.z;
+			//transform
+			if(_parent)
 			{
-				//update global
-				global.x = origin.x + node.x + _tweenNode.x;
-				global.y = origin.y + node.y + _tweenNode.y;
-				global.skewX = origin.skewX + node.skewX + _tweenNode.skewX;
-				global.skewY = origin.skewY + node.skewY + _tweenNode.skewY;
-				global.scaleX = origin.scaleX + node.scaleX + _tweenNode.scaleX;
-				global.scaleY = origin.scaleY + node.scaleY + _tweenNode.scaleY;
-				global.pivotX = origin.pivotX + node.pivotX + _tweenNode.pivotX;
-				global.pivotY = origin.pivotY + node.pivotY + _tweenNode.pivotY;
-				global.z = origin.z + node.z + _tweenNode.z;
-				//transform
-				if(_parent)
+				_helpPoint.x = global.x;
+				_helpPoint.y = global.y;
+				_helpPoint = _parent._globalTransformMatrix.transformPoint(_helpPoint);
+				global.x = _helpPoint.x
+				global.y = _helpPoint.y;
+				global.skewX += _parent.global.skewX;
+				global.skewY += _parent.global.skewY;
+			}
+			
+			//Note: this formula of transform is defined by Flash pro
+			_globalTransformMatrix.a = global.scaleX * Math.cos(global.skewY);
+			_globalTransformMatrix.b = global.scaleX * Math.sin(global.skewY);
+			_globalTransformMatrix.c = -global.scaleY * Math.sin(global.skewX);
+			_globalTransformMatrix.d = global.scaleY * Math.cos(global.skewX);
+			_globalTransformMatrix.tx = global.x;
+			_globalTransformMatrix.ty = global.y;
+			
+			//update children
+			if (_children.length > 0)
+			{
+				for each(var child:Bone in _children)
 				{
-					_helpPoint.x = global.x;
-					_helpPoint.y = global.y;
-					_helpPoint = _parent._globalTransformMatrix.transformPoint(_helpPoint);
-					global.x = _helpPoint.x
-					global.y = _helpPoint.y;
-					global.skewX += _parent.global.skewX;
-					global.skewY += _parent.global.skewY;
+					child.update();
 				}
+			}
+			
+			var childArmature:Armature = this.childArmature;
+			if(childArmature)
+			{
+				childArmature.update();
+			}
+			
+			var currentDisplay:Object = _displayBridge.display;
+			//update display
+			if(currentDisplay)
+			{
+				//colorTransform
+				var colorTransform:ColorTransform;
 				
-				//Note: this formula of transform is defined by Flash pro
-				_globalTransformMatrix.a = global.scaleX * Math.cos(global.skewY);
-				_globalTransformMatrix.b = global.scaleX * Math.sin(global.skewY);
-				_globalTransformMatrix.c = -global.scaleY * Math.sin(global.skewX);
-				_globalTransformMatrix.d = global.scaleY * Math.cos(global.skewX);
-				_globalTransformMatrix.tx = global.x;
-				_globalTransformMatrix.ty = global.y;
-				
-				//update children
-				if (_children.length > 0)
+				if(_tween._differentColorTransform)
 				{
-					for each(var child:Bone in _children)
+					if(_armature.colorTransform)
 					{
-						child.update();
+						_tweenColorTransform.concat(_armature.colorTransform);
 					}
+					colorTransform = _tweenColorTransform;
 				}
-				
-				var childArmature:Armature = this.childArmature;
-				if(childArmature)
+				else if(_armature._colorTransformChange)
 				{
-					childArmature.update();
+					colorTransform = _armature.colorTransform;
 				}
-				
-				var currentDisplay:Object = _displayBridge.display;
-				//update display
-				if(_isOnStage && currentDisplay)
-				{
-					//colorTransform
-					var colorTransform:ColorTransform;
-					
-					if(_tween._differentColorTransform)
-					{
-						if(_armature.colorTransform)
-						{
-							_tweenColorTransform.concat(_armature.colorTransform);
-						}
-						colorTransform = _tweenColorTransform;
-					}
-					else if(_armature._colorTransformChange)
-					{
-						colorTransform = _armature.colorTransform;
-					}
-					_displayBridge.update(_globalTransformMatrix, global, colorTransform, (visible != null)?visible:_visible);
-				}
+				_displayBridge.update(_globalTransformMatrix, global, colorTransform, (visible != null)?visible:_visible);
 			}
 		}
 		

@@ -229,11 +229,11 @@
 					_loop = loop;
 				}
 				progress -= loop;
-				progress = updateFrameData(progress, true);
+				progress = updateFrameData(progress);
 			}
 			else if (playType == Animation.LIST)
 			{
-				progress = updateFrameData(progress, true, true);
+				progress = updateFrameData(progress, true);
 			}
 			else if (playType == Animation.SINGLE && progress == 1)
 			{
@@ -249,7 +249,6 @@
 			if (!isNaN(_frameTweenEasing) || _currentFrameData)
 			{
 				TransformUtils.setTweenNode(_currentNode, _offSetNode, _node, progress);
-				
 				if(_differentColorTransform)
 				{
 					TransformUtils.setTweenColorTransform(_currentColorTransform, _offSetColorTransform, _colorTransform, progress);
@@ -346,7 +345,7 @@
 			}
 		}
 		
-		private function updateFrameData(progress:Number, activeFrame:Boolean = false, isList:Boolean= false):Number
+		private function updateFrameData(progress:Number, isList:Boolean= false):Number
 		{
 			var playedTime:Number = _rawDuration * progress;
 			if (playedTime >= _nextFrameDataTimeEdge)
@@ -378,10 +377,7 @@
 				
 				setOffset(currentFrameData.node, currentFrameData.colorTransform, nextFrameData.node, nextFrameData.colorTransform, nextFrameData.tweenRotate);
 				
-				if (activeFrame)
-				{
-					_currentFrameData = currentFrameData;
-				}
+				_currentFrameData = currentFrameData;
 				
 				if(isList && _nextFrameDataID == 0)
 				{
@@ -392,15 +388,11 @@
 			
 			progress = 1 - (_nextFrameDataTimeEdge - playedTime) / _frameDuration;
 			
-			if (!isNaN(_frameTweenEasing))
+			var tweenEasing:Number = isNaN(_tweenEasing)?_frameTweenEasing:_tweenEasing;
+			if (tweenEasing)
 			{
-				var tweenEasing:Number = isNaN(_tweenEasing)?_frameTweenEasing:_tweenEasing;
-				if (tweenEasing)
-				{
-					progress = getEaseValue(progress, tweenEasing);
-				}
+				progress = getEaseValue(progress, tweenEasing);
 			}
-			progress = getEaseValue(progress, _frameTweenEasing);
 			return progress;
 		}
 	}

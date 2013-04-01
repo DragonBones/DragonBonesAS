@@ -233,6 +233,17 @@ package dragonBones
 		public function advanceTime(passedTime:Number):void
 		{
 			animation.advanceTime(passedTime);
+			for each(var bone:Bone in _boneDepthList)
+			{
+				if(bone._isOnStage)
+				{
+					var childArmature:Armature = bone.childArmature;
+					if(childArmature)
+					{
+						childArmature.advanceTime(passedTime);
+					}
+				}
+			}
 			update();
 		}
 		

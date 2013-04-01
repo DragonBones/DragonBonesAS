@@ -80,7 +80,7 @@
 		{
 			if(_isPlaying)
 			{
-				return _loop >= 0 || _currentTime < _totalTime && !_isPlaying;
+				return _loop >= 0 || _currentTime < _totalTime;
 			}
 			return false;
 		}
@@ -367,12 +367,6 @@
 					for each(var bone:Bone in _armature._boneDepthList)
 					{
 						bone._tween.advanceTime(progress, _playType);
-						
-						var childArmature:Armature = bone.childArmature;
-						if(childArmature)
-						{
-							childArmature.animation.advanceTime(passedTime);
-						}
 					}
 					
 					if ((_playType == LIST || _playType == LOOP) && _movementData._movementFrameList.length > 0)
@@ -387,17 +381,6 @@
 					if(event)
 					{
 						_armature.dispatchEvent(event);
-					}
-				}
-				else
-				{
-					for each(bone in _armature._boneDepthList)
-					{
-						childArmature = bone.childArmature;
-						if(childArmature)
-						{
-							childArmature.animation.advanceTime(passedTime);
-						}
 					}
 				}
 			}

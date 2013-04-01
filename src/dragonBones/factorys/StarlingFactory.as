@@ -39,8 +39,6 @@
 		public function StarlingFactory()
 		{
 			super();
-			generateMipMaps = true;
-			optimizeForRenderToTexture = true;
 			scaleForTexture = 1;
 		}
 		
@@ -56,7 +54,7 @@
 			return bone;
 		}
 		
-		override protected function generateTextureDisplay(textureAtlas:Object, fullName:String, pivotX:int, pivotY:int):Object
+		override protected function generateTextureDisplay(textureAtlas:Object, fullName:String, pivotX:Number, pivotY:Number):Object
 		{
 			var starlingTextureAtlas:StarlingTextureAtlas = textureAtlas as StarlingTextureAtlas;
 			if(starlingTextureAtlas)
