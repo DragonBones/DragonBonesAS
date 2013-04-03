@@ -5,9 +5,9 @@
 	import dragonBones.events.FrameEvent;
 	import dragonBones.events.SoundEvent;
 	import dragonBones.events.SoundEventManager;
+	import dragonBones.objects.BoneTransform;
 	import dragonBones.objects.FrameData;
 	import dragonBones.objects.MovementBoneData;
-	import dragonBones.objects.Node;
 	import dragonBones.utils.TransformUtils;
 	import dragonBones.utils.dragonBones_internal;
 	
@@ -51,13 +51,13 @@
 		
 		private var _movementBoneData:MovementBoneData;
 		
-		private var _node:Node;
+		private var _node:BoneTransform;
 		private var _colorTransform:ColorTransform;
 		
-		private var _currentNode:Node;
+		private var _currentNode:BoneTransform;
 		private var _currentColorTransform:ColorTransform;
 		
-		private var _offSetNode:Node;
+		private var _offSetNode:BoneTransform;
 		private var _offSetColorTransform:ColorTransform;
 		
 		private var _currentFrameData:FrameData;
@@ -85,10 +85,10 @@
 			_node = _bone._tweenNode;
 			_colorTransform = _bone._tweenColorTransform;
 			
-			_currentNode = new Node();
+			_currentNode = new BoneTransform();
 			_currentColorTransform = new ColorTransform();
 			
-			_offSetNode = new Node();
+			_offSetNode = new BoneTransform();
 			_offSetColorTransform = new ColorTransform();
 		}
 		
@@ -249,6 +249,7 @@
 			if (!isNaN(_frameTweenEasing) || _currentFrameData)
 			{
 				TransformUtils.setTweenNode(_currentNode, _offSetNode, _node, progress);
+				
 				if(_differentColorTransform)
 				{
 					TransformUtils.setTweenColorTransform(_currentColorTransform, _offSetColorTransform, _colorTransform, progress);
@@ -262,7 +263,7 @@
 			}
 		}
 		
-		private function setOffset(currentNode:Node, currentColorTransform:ColorTransform, nextNode:Node, nextColorTransform:ColorTransform, tweenRotate:int = 0):void
+		private function setOffset(currentNode:BoneTransform, currentColorTransform:ColorTransform, nextNode:BoneTransform, nextColorTransform:ColorTransform, tweenRotate:int = 0):void
 		{
 			_currentNode.copy(currentNode);
 			TransformUtils.setOffSetNode(_currentNode, nextNode, _offSetNode, tweenRotate);

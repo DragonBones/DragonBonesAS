@@ -1,7 +1,7 @@
 package dragonBones.textures
 {
 	import flash.geom.Rectangle;
-
+	
 	//1.4
 	/** @private */
 	public class SubTextureData extends Rectangle

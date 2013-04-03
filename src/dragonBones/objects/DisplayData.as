@@ -11,6 +11,7 @@
 		public var pivotY:Number;
 		
 		dragonBones_internal var _isArmature:Boolean;
+		
 		public function get isArmature():Boolean
 		{
 			return _isArmature;
