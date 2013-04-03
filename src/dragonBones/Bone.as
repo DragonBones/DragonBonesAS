@@ -425,7 +425,7 @@
 					currentColorTransform = _colorTransform || _armature.colorTransform;
 					_colorTransformChange = false;
 				}
-				_displayBridge.update(_globalTransformMatrix, global, currentColorTransform, (visible != null)?visible:_visible);
+				_displayBridge.update(_globalTransformMatrix, global, currentColorTransform, (_boneVisible != null)?_boneVisible:_visible);
 			}
 		}
 		
