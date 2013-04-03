@@ -139,14 +139,23 @@
 		
 		private var _colorTransformChange:Boolean;
 		private var _colorTransform:ColorTransform;
-		public function get colorTransform():ColorTransform
-		{
-			return _colorTransform;
-		}
+		
+		/**
+		 * @private
+		 */
 		public function set colorTransform(value:ColorTransform):void
 		{
 			_colorTransform = value;
 			_colorTransformChange = true;
+		}
+		
+		/**
+		 * The ColorTransform instance assiociated with this instance.
+		 * @param	The ColorTransform instance assiociated with this Bone instance.
+		 */
+		public function get colorTransform():ColorTransform
+		{
+			return _colorTransform;
 		}
 		
 		/**
