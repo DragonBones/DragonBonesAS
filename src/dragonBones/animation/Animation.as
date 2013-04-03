@@ -280,6 +280,13 @@
 			else if(!_isPlaying)
 			{
 				_isPlaying = true;
+				for each(var bone:Bone in _armature._boneDepthList)
+				{
+					if (bone.childArmature)
+					{
+						bone.childArmature.animation.play();
+					}
+				}
 			}
 		}
 		
@@ -289,6 +296,14 @@
 		public function stop():void
 		{
 			_isPlaying = false;
+			
+			for each(var bone:Bone in _armature._boneDepthList)
+			{
+				if (bone.childArmature)
+				{
+					bone.childArmature.animation.stop();
+				}
+			}
 		}
 		
 		/** @private */

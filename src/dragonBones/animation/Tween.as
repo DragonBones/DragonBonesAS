@@ -389,10 +389,15 @@
 			progress = 1 - (_nextFrameDataTimeEdge - playedTime) / _frameDuration;
 			
 			var tweenEasing:Number = isNaN(_tweenEasing)?_frameTweenEasing:_tweenEasing;
-			if (tweenEasing)
+			if (isNaN(tweenEasing))
 			{
-				progress = getEaseValue(progress, tweenEasing);
+				return 0;
 			}
+			else if(tweenEasing)
+			{
+				return getEaseValue(progress, tweenEasing);
+			}
+			
 			return progress;
 		}
 	}

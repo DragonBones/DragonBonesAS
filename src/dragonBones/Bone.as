@@ -57,6 +57,18 @@
 		private var _displayIndex:int;
 		private var _parent:Bone;
 		
+		private var _colorTransformChange:Boolean;
+		private var _colorTransform:ColorTransform;
+		public function get colorTransform():ColorTransform
+		{
+			return _colorTransform;
+		}
+		public function set colorTransform(value:ColorTransform):void
+		{
+			_colorTransform = value;
+			_colorTransformChange = true;
+		}
+		
 		/**
 		 * The armature holding this bone.
 		 */
@@ -318,22 +330,27 @@
 			//update display
 			if(currentDisplay)
 			{
-				//colorTransform
-				var colorTransform:ColorTransform;
+				//currentColorTransform
+				var currentColorTransform:ColorTransform;
 				
 				if(_tween._differentColorTransform)
 				{
+					if(_colorTransform)
+					{
+						_tweenColorTransform.concat(_colorTransform);
+					}
 					if(_armature.colorTransform)
 					{
 						_tweenColorTransform.concat(_armature.colorTransform);
 					}
-					colorTransform = _tweenColorTransform;
+					currentColorTransform = _tweenColorTransform;
 				}
-				else if(_armature._colorTransformChange)
+				else if(_armature._colorTransformChange || _colorTransformChange)
 				{
-					colorTransform = _armature.colorTransform;
+					currentColorTransform = _colorTransform || _armature.colorTransform;
+					_colorTransformChange = false;
 				}
-				_displayBridge.update(_globalTransformMatrix, global, colorTransform, (visible != null)?visible:_visible);
+				_displayBridge.update(_globalTransformMatrix, global, currentColorTransform, (visible != null)?visible:_visible);
 			}
 		}
 		
