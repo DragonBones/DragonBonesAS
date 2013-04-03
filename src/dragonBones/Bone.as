@@ -10,7 +10,8 @@
 	import dragonBones.animation.Tween;
 	import dragonBones.display.IDisplayBridge;
 	import dragonBones.objects.BoneTransform;
-	import dragonBones.utils.dragonBones_internal;	
+	import dragonBones.utils.dragonBones_internal;
+	
 	import flash.events.EventDispatcher;
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
@@ -92,11 +93,27 @@
 		 * @see dragonBones.objects.Node
 		 */
 		public var node:BoneTransform;
+		
+		private var _boneVisible:Object;
 		/**
 		 * Whether this Bone instance and its associated DisplayObject are visible or not (true/false).
 		 * 
 		 */
-		public var visible:Object;
+		public function get visible():Object
+		{
+			return _boneVisible;
+		}
+		public function set visible(value:Object):void
+		{
+			if(value == null)
+			{
+				_boneVisible = value;
+			}
+			else
+			{
+				_boneVisible = Boolean(value);
+			}
+		}
 		
 		/** @private */
 		dragonBones_internal var _tween:Tween;
