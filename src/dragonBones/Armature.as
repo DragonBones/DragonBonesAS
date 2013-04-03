@@ -307,7 +307,6 @@ package dragonBones
 		 */
 		public function advanceTime(passedTime:Number):void
 		{
-			animation.advanceTime(passedTime);
 			for each(var bone:Bone in _boneDepthList)
 			{
 				if(bone._isOnStage)
@@ -319,6 +318,7 @@ package dragonBones
 					}
 				}
 			}
+			animation.advanceTime(passedTime);
 			update();
 		}
 		

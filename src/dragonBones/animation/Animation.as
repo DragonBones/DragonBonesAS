@@ -150,7 +150,7 @@
 		{
 			if (_isPlaying)
 			{
-				return _loop >= 0 || _currentTime < _totalTime && !_isPlaying;
+				return _loop >= 0 || _currentTime < _totalTime;
 			}
 			return false;
 		}
@@ -394,111 +394,91 @@
 		/** @private */
 		dragonBones_internal function advanceTime(passedTime:Number):void
 		{
-			if (_isPlaying)
+			if (_isPlaying && (_loop > 0 || _currentTime < _totalTime || _totalTime == 0))
 			{
-				if (_loop > 0 || _currentTime < _totalTime || _totalTime == 0)
+				var progress:Number;
+				if (_totalTime > 0)
 				{
-					var progress:Number;
-					if (_totalTime > 0)
-					{
-						_currentTime += passedTime * _timeScale;
-						progress = _currentTime / _totalTime;
-					}
-					else
-					{
-						_currentTime = 1;
-						_totalTime = 1;
-						progress = 1;
-					}
-					
-					var event:AnimationEvent;
-					if (_playType == LOOP)
-					{
-						var loop:int = progress;
-						if (loop != _loop)
-						{
-							_loop = loop;
-							_nextFrameDataTimeEdge = 0;
-							if (_armature.hasEventListener(AnimationEvent.LOOP_COMPLETE))
-							{
-								event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
-								event.movementID = _movementID;
-							}
-						}
-					}
-					else if (progress >= 1)
-					{
-						switch (_playType)
-						{
-							case SINGLE: 
-							case LIST: 
-								progress = 1;
-								if (_armature.hasEventListener(AnimationEvent.COMPLETE))
-								{
-									event = new AnimationEvent(AnimationEvent.COMPLETE);
-									event.movementID = _movementID;
-								}
-								break;
-							case LIST_START: 
-								progress = 0;
-								_playType = LIST;
-								_currentTime = 0;
-								_totalTime = _duration;
-								if (_armature.hasEventListener(AnimationEvent.START))
-								{
-									event = new AnimationEvent(AnimationEvent.START);
-									event.movementID = _movementID;
-								}
-								break;
-							case LOOP_START: 
-								progress = 0;
-								_playType = LOOP;
-								_currentTime = 0;
-								_totalTime = _duration;
-								if (_armature.hasEventListener(AnimationEvent.START))
-								{
-									event = new AnimationEvent(AnimationEvent.START);
-									event.movementID = _movementID;
-								}
-								break;
-						}
-					}
-					
-					for each (var bone:Bone in _armature._boneDepthList)
-					{
-						bone._tween.advanceTime(progress, _playType);
-						
-						var childArmature:Armature = bone.childArmature;
-						if (childArmature)
-						{
-							childArmature.animation.advanceTime(passedTime);
-						}
-					}
-					
-					if ((_playType == LIST || _playType == LOOP) && _movementData._movementFrameList.length > 0)
-					{
-						if (_loop > 0)
-						{
-							progress -= _loop;
-						}
-						updateFrameData(progress);
-					}
-					
-					if (event)
-					{
-						_armature.dispatchEvent(event);
-					}
+					_currentTime += passedTime * _timeScale;
+					progress = _currentTime / _totalTime;
 				}
 				else
 				{
-					for each (bone in _armature._boneDepthList)
+					_currentTime = 1;
+					_totalTime = 1;
+					progress = 1;
+				}
+				
+				var event:AnimationEvent;
+				if (_playType == LOOP)
+				{
+					var loop:int = progress;
+					if (loop != _loop)
 					{
-						childArmature = bone.childArmature;
-						if (childArmature)
+						_loop = loop;
+						_nextFrameDataTimeEdge = 0;
+						if (_armature.hasEventListener(AnimationEvent.LOOP_COMPLETE))
 						{
-							childArmature.animation.advanceTime(passedTime);
+							event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
+							event.movementID = _movementID;
 						}
 					}
+				}
+				else if (progress >= 1)
+				{
+					switch (_playType)
+					{
+						case SINGLE: 
+						case LIST: 
+							progress = 1;
+							if (_armature.hasEventListener(AnimationEvent.COMPLETE))
+							{
+								event = new AnimationEvent(AnimationEvent.COMPLETE);
+								event.movementID = _movementID;
+							}
+							break;
+						case LIST_START: 
+							progress = 0;
+							_playType = LIST;
+							_currentTime = 0;
+							_totalTime = _duration;
+							if (_armature.hasEventListener(AnimationEvent.START))
+							{
+								event = new AnimationEvent(AnimationEvent.START);
+								event.movementID = _movementID;
+							}
+							break;
+						case LOOP_START: 
+							progress = 0;
+							_playType = LOOP;
+							_currentTime = 0;
+							_totalTime = _duration;
+							if (_armature.hasEventListener(AnimationEvent.START))
+							{
+								event = new AnimationEvent(AnimationEvent.START);
+								event.movementID = _movementID;
+							}
+							break;
+					}
+				}
+				
+				for each (var bone:Bone in _armature._boneDepthList)
+				{
+					bone._tween.advanceTime(progress, _playType);
+				}
+				
+				if ((_playType == LIST || _playType == LOOP) && _movementData._movementFrameList.length > 0)
+				{
+					if (_loop > 0)
+					{
+						progress -= _loop;
+					}
+					updateFrameData(progress);
+				}
+				
+				if (event)
+				{
+					_armature.dispatchEvent(event);
 				}
 			}
 		}

@@ -1,4 +1,4 @@
-package dragonBones.objects
+﻿package dragonBones.objects
 {
 	/**
 	* Copyright 2012-2013. DragonBones. All Rights Reserved.
@@ -31,9 +31,9 @@ package dragonBones.objects
 			var version:String = skeletonXML.attribute(ConstValues.A_VERSION);
 			switch (version)
 			{
-				case ConstValues.VERSION_14: 
-					break;
-				case ConstValues.VERSION: 
+				case ConstValues.VERSION_14:
+				case ConstValues.VERSION_20:
+				case ConstValues.VERSION:
 					break;
 				default: 
 					throw new Error("Nonsupport data version!");
