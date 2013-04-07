@@ -94,27 +94,6 @@
 		 */
 		public var node:BoneTransform;
 		
-		private var _boneVisible:Object;
-		/**
-		 * Whether this Bone instance and its associated DisplayObject are visible or not (true/false).
-		 * 
-		 */
-		public function get visible():Object
-		{
-			return _boneVisible;
-		}
-		public function set visible(value:Object):void
-		{
-			if(value == null)
-			{
-				_boneVisible = value;
-			}
-			else
-			{
-				_boneVisible = Boolean(value);
-			}
-		}
-		
 		/** @private */
 		dragonBones_internal var _tween:Tween;
 		/** @private */
@@ -139,6 +118,31 @@
 		
 		private var _colorTransformChange:Boolean;
 		private var _colorTransform:ColorTransform;
+		private var _boneVisible:Object;
+		
+		/**
+		 * @private
+		 */
+		public function set visible(value:Object):void
+		{
+			if(value == null)
+			{
+				_boneVisible = value;
+			}
+			else
+			{
+				_boneVisible = Boolean(value);
+			}
+		}
+		
+		/**
+		 * Whether this Bone instance and its associated DisplayObject are visible or not (true/false/null). null means that the visible will be controled by animation data.
+		 * 
+		 */
+		public function get visible():Object
+		{
+			return _boneVisible;
+		}
 		
 		/**
 		 * @private
@@ -150,8 +154,7 @@
 		}
 		
 		/**
-		 * The ColorTransform instance assiociated with this instance.
-		 * @param	The ColorTransform instance assiociated with this Bone instance.
+		 * The ColorTransform instance assiociated with this Bone instance. null means that the ColorTransform will be controled by animation data.
 		 */
 		public function get colorTransform():ColorTransform
 		{
