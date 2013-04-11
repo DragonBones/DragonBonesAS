@@ -57,7 +57,7 @@
 		 */
 		public var optimizeForRenderToTexture:Boolean;
 		/**
-		 * Apply a scale. Use 1 for no scale.
+		 * Apply a scale for SWF specific texture. Use 1 for no scale.
 		 */
 		public var scaleForTexture:Number;
 		
@@ -126,7 +126,7 @@
 			if (content is BitmapData)
 			{
 				bitmapData = content as BitmapData;
-				texture = Texture.fromBitmapData(bitmapData, generateMipMaps, optimizeForRenderToTexture, scaleForTexture);
+				texture = Texture.fromBitmapData(bitmapData, generateMipMaps, optimizeForRenderToTexture);
 			}
 			else if (content is MovieClip)
 			{
