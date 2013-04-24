@@ -212,6 +212,7 @@
 		/** @private */
 		dragonBones_internal function changeDisplay(displayIndex:int):void
 		{
+			var childArmature:Armature = this.childArmature;
 			if(displayIndex < 0)
 			{
 				if(_isOnStage)
@@ -219,6 +220,12 @@
 					_isOnStage = false;
 					//removeFromStage
 					_displayBridge.removeDisplay();
+					
+					if(childArmature)
+					{
+						childArmature.animation.stop();
+						childArmature.animation.clearMovement();
+					}
 				}
 			}
 			else
@@ -244,6 +251,11 @@
 					
 					//change
 					display = _displayList[_displayIndex];
+				}
+				
+				if(childArmature)
+				{
+					childArmature.animation.play();
 				}
 			}
 		}

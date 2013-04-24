@@ -140,7 +140,7 @@
 			for each (var armatureXML:XML in skeletonXML.elements(ConstValues.ARMATURES).elements(ConstValues.ARMATURE))
 			{
 				var armatureName:String = armatureXML.attribute(ConstValues.A_NAME);
-				var armatureData:ArmatureData = skeletonData.getArmatureData(animationName);
+				var armatureData:ArmatureData = skeletonData.getArmatureData(armatureName);
 				if (armatureData)
 				{
 					parseArmatureData(armatureXML, armatureData);
@@ -426,12 +426,15 @@
 		
 		private static function parseMovementFrameData(movementFrameXML:XML, movementFrameData:MovementFrameData):void
 		{
-			movementFrameData.setValues(
-				Number(movementFrameXML.attribute(ConstValues.A_DURATION)) / _currentSkeletonData._frameRate,
-				movementFrameXML.attribute(ConstValues.A_MOVEMENT),
-				movementFrameXML.attribute(ConstValues.A_EVENT),
-				movementFrameXML.attribute(ConstValues.A_SOUND)
-			);
+			if(_currentSkeletonData)
+			{
+				movementFrameData.setValues(
+					Number(movementFrameXML.attribute(ConstValues.A_DURATION)) / _currentSkeletonData._frameRate,
+					movementFrameXML.attribute(ConstValues.A_MOVEMENT),
+					movementFrameXML.attribute(ConstValues.A_EVENT),
+					movementFrameXML.attribute(ConstValues.A_SOUND)
+				);
+			}
 		}
 		
 		/** @private */

@@ -375,6 +375,12 @@
 			}
 		}
 		
+		/** @private */
+		dragonBones_internal function clearMovement():void
+		{
+			_movementID = null;
+		}
+		
 		/**
 		 * Stop the playhead.
 		 */
