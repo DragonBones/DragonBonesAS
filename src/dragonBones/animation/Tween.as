@@ -204,7 +204,7 @@
 		/** @private */
 		internal function advanceTime(progress:Number, playType:int):void
 		{
-			if(_isPause)
+			if(_isPause || !_movementBoneData)
 			{
 				return;
 			}
