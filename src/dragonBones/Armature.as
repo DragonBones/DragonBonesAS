@@ -307,8 +307,10 @@ package dragonBones
 		 */
 		public function advanceTime(passedTime:Number):void
 		{
-			for each(var bone:Bone in _boneDepthList)
+			var i:int = _boneDepthList.length;
+			while(i --)
 			{
+				var bone:Bone = _boneDepthList[i];
 				if(bone._isOnStage)
 				{
 					var childArmature:Armature = bone.childArmature;
@@ -346,9 +348,10 @@ package dragonBones
 		/** @private */
 		dragonBones_internal function update():void
 		{
-			for each(var bone:Bone in _rootBoneList)
+			var i:int = _rootBoneList.length;
+			while(i --)
 			{
-				bone.update();
+				_rootBoneList[i].update();
 			}
 			
 			_colorTransformChange = false;
