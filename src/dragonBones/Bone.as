@@ -190,9 +190,6 @@
 		{
 			return _displayBridge.display;
 		}
-		/**
-		 * @private
-		 */
 		public function set display(value:Object):void
 		{
 			if(_displayBridge.display == value)
@@ -205,6 +202,15 @@
 				value = (value as Armature).display;
 			}
 			_displayBridge.display = value;
+		}
+		
+		
+		/**
+		 * The DisplayObject list belonging to this Bone instance.
+		 */
+		public function get displayList():Array
+		{
+			return _displayList;
 		}
 		
 		/** @private */
