@@ -31,8 +31,12 @@
 			var version:String = skeletonXML.attribute(ConstValues.A_VERSION);
 			switch (version)
 			{
-				case ConstValues.VERSION_14:
-				case ConstValues.VERSION_20:
+				case "1.4":
+				case "1.5":
+				case "2.0":
+				case "2.1":
+				case "2.1.1":
+				case "2.1.2":
 				case ConstValues.VERSION:
 					break;
 				default: 
