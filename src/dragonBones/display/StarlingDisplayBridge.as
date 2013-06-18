@@ -55,6 +55,9 @@
 				}
 				
 				from.texture = to.texture;
+				//update pivot
+				from.pivotX = to.pivotX;
+				from.pivotY = to.pivotY;
 				from.readjustSize();
 				return;
 			}
