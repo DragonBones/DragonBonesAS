@@ -45,7 +45,8 @@
 			}
 			
 			//Thanks Jian
-			if (_display is Image && value is Image)
+			//bug replace image.texture will lost displayList[0].texture
+			/*if (_display is Image && value is Image)
 			{
 				var from:Image = _display as Image;
 				var to:Image = value as Image;
@@ -60,7 +61,7 @@
 				from.pivotY = to.pivotY;
 				from.readjustSize();
 				return;
-			}
+			}*/
 			
 			if (_display)
 			{
