@@ -6,10 +6,12 @@
 	* @langversion 3.0
 	* @version 2.0
 	*/
+	import dragonBones.core.dragonBones_internal;
 	import dragonBones.utils.ConstValues;
-	import dragonBones.utils.dragonBones_internal;
+	
 	import flash.display.BitmapData;
 	import flash.geom.Rectangle;
+	
 	import starling.textures.SubTexture;
 	import starling.textures.Texture;
 	import starling.textures.TextureAtlas;
@@ -118,11 +120,8 @@
 				var frameX:Number = parseFloat(subTexture.attribute("frameX")) / scale;
 				var frameY:Number = parseFloat(subTexture.attribute("frameY")) / scale;
 				var frameWidth:Number = parseFloat(subTexture.attribute("frameWidth")) / scale;
-				var frameHeight:Number = parseFloat(subTexture.attribute("frameHeight")) / scale;				
-				//1.4
-				var region:SubTextureData = new SubTextureData(x, y, width, height);
-				region.pivotX = int(subTexture.attribute(ConstValues.A_PIVOT_X));
-				region.pivotY = int(subTexture.attribute(ConstValues.A_PIVOT_Y));				
+				var frameHeight:Number = parseFloat(subTexture.attribute("frameHeight")) / scale;
+				var region:Rectangle = new Rectangle(x, y, width, height);				
 				var frame:Rectangle = frameWidth > 0 && frameHeight > 0 ? new Rectangle(frameX, frameY, frameWidth, frameHeight) : null;				
 				addRegion(name, region, frame);
 			}

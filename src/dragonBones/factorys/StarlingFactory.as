@@ -8,22 +8,23 @@
 	*/
 	import dragonBones.Armature;
 	import dragonBones.Bone;
+	import dragonBones.Slot;
+	import dragonBones.core.dragonBones_internal;
 	import dragonBones.display.StarlingDisplayBridge;
 	import dragonBones.textures.ITextureAtlas;
 	import dragonBones.textures.StarlingTextureAtlas;
-	import dragonBones.textures.SubTextureData;
 	import dragonBones.utils.ConstValues;
-	import dragonBones.utils.dragonBones_internal;	
+	
 	import flash.display.BitmapData;
 	import flash.display.MovieClip;
-	import flash.geom.Rectangle;
-	import flash.utils.ByteArray;	
+	
 	import starling.core.Starling;
 	import starling.display.Image;
 	import starling.display.Sprite;
 	import starling.textures.SubTexture;
 	import starling.textures.Texture;
-	import starling.textures.TextureAtlas;	
+	import starling.textures.TextureAtlas;
+
 	use namespace dragonBones_internal;
 	
 	/**
@@ -69,57 +70,9 @@
 			super();
 			scaleForTexture = 1;
 		}
-		/**
-		 * Generates an Armature instance.
-		 * @return Armature An Armature instance.
-		 */
-		override protected function generateArmature():Armature
-		{
-			var armature:Armature = new Armature(new Sprite());
-			return armature;
-		}
-		/**
-		 * Generates a Bone instance.
-		 * @return Bone A Bone instance.
-		 */
-		override protected function generateBone():Bone
-		{
-			var bone:Bone = new Bone(new StarlingDisplayBridge());
-			return bone;
-		}
-		/**
-		 * Generates a starling DisplayObject
-		 * @param	textureAtlas The TextureAtlas.
-		 * @param	fullName A qualified name.
-		 * @param	pivotX A pivot x based value.
-		 * @param	pivotY A pivot y based value.
-		 * @return
-		 */
-		override protected function generateTextureDisplay(textureAtlas:Object, fullName:String, pivotX:Number, pivotY:Number):Object
-		{
-			var starlingTextureAtlas:StarlingTextureAtlas = textureAtlas as StarlingTextureAtlas;
-			if (starlingTextureAtlas)
-			{
-				//1.4
-				var subTextureData:SubTextureData = starlingTextureAtlas.getRegion(fullName) as SubTextureData;
-				if (subTextureData)
-				{
-					pivotX = pivotX || subTextureData.pivotX;
-					pivotY = pivotY || subTextureData.pivotY;
-				}
-			}			
-			var subTexture:SubTexture = (textureAtlas as TextureAtlas).getTexture(fullName) as SubTexture;
-			if (subTexture)
-			{
-				var image:Image = new Image(subTexture);
-				image.pivotX = pivotX;
-				image.pivotY = pivotY;
-				return image;
-			}
-			return null;
-		}
 		
-		override protected function generateTextureAtlas(content:Object, textureAtlasXML:XML):Object
+		/** @private */
+		override protected function generateTextureAtlas(content:Object, textureAtlasXML:XML):ITextureAtlas
 		{
 			var texture:Texture;
 			var bitmapData:BitmapData;
@@ -130,8 +83,8 @@
 			}
 			else if (content is MovieClip)
 			{
-				var width:int = int(textureAtlasXML.attribute(ConstValues.A_WIDTH)) * scaleForTexture;
-				var height:int = int(textureAtlasXML.attribute(ConstValues.A_HEIGHT)) * scaleForTexture;				
+				var width:int = int(textureAtlasXML.@[ConstValues.A_WIDTH]) * scaleForTexture;
+				var height:int = int(textureAtlasXML.@[ConstValues.A_HEIGHT]) * scaleForTexture;				
 				_helpMatirx.a = 1;
 				_helpMatirx.b = 0;
 				_helpMatirx.c = 0;
@@ -148,7 +101,7 @@
 			}
 			else
 			{
-				//
+				throw new Error();
 			}			
 			var textureAtlas:StarlingTextureAtlas = new StarlingTextureAtlas(texture, textureAtlasXML);			
 			if (Starling.handleLostContext)
@@ -160,6 +113,34 @@
 				bitmapData.dispose();
 			}
 			return textureAtlas;
+		}
+		
+		/** @private */
+		override protected function generateArmature():Armature
+		{
+			var armature:Armature = new Armature(new Sprite());
+			return armature;
+		}
+		
+		/** @private */
+		override protected function generateSlot():Slot
+		{
+			var slot:Slot = new Slot(new StarlingDisplayBridge());
+			return slot;
+		}
+		
+		/** @private */
+		override protected function generateDisplay(textureAtlas:Object, fullName:String, pivotX:Number, pivotY:Number):Object
+		{
+			var subTexture:SubTexture = (textureAtlas as TextureAtlas).getTexture(fullName) as SubTexture;
+			if (subTexture)
+			{
+				var image:Image = new Image(subTexture);
+				image.pivotX = pivotX;
+				image.pivotY = pivotY;
+				return image;
+			}
+			return null;
 		}
 	}
 }
