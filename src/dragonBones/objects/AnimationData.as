@@ -2,8 +2,8 @@ package dragonBones.objects
 {
 	final public class AnimationData extends Timeline
 	{
-		public var name:String;
 		public var frameRate:uint;
+		public var name:String;
 		public var loop:int;
 		public var tweenEasing:Number;
 		
@@ -14,11 +14,11 @@ package dragonBones.objects
 		}
 		
 		private var _fadeTime:Number;
-		public function get fadeTime():Number
+		public function get fadeInTime():Number
 		{
 			return _fadeTime;
 		}
-		public function set fadeTime(value:Number):void
+		public function set fadeInTime(value:Number):void
 		{
 			_fadeTime = value > 0?value:0;
 		}

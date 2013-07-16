@@ -103,7 +103,7 @@
 			{
 				throw new Error();
 			}			
-			var textureAtlas:StarlingTextureAtlas = new StarlingTextureAtlas(texture, textureAtlasXML);			
+			var textureAtlas:StarlingTextureAtlas = new StarlingTextureAtlas(texture, textureAtlasXML, false);			
 			if (Starling.handleLostContext)
 			{
 				textureAtlas._bitmapData = bitmapData;

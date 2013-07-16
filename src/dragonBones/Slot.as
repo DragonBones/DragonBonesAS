@@ -125,7 +125,7 @@ package dragonBones
 					if(this._armature)
 					{
 						_displayBridge.addDisplay(this._armature.display, this._armature._slotList.indexOf(this));
-						//this._armature._slotsZOrderChanged = true;
+						this._armature._slotsZOrderChanged = true;
 					}
 				}
 				

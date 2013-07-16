@@ -7,12 +7,12 @@ package dragonBones.factorys
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.BoneData;
+	import dragonBones.objects.DataParser;
 	import dragonBones.objects.DecompressedData;
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.SkeletonData;
 	import dragonBones.objects.SkinData;
 	import dragonBones.objects.SlotData;
-	import dragonBones.objects.XMLDataParser;
 	import dragonBones.textures.ITextureAtlas;
 	import dragonBones.textures.NativeTextureAtlas;
 	import dragonBones.utils.BytesType;
@@ -85,13 +85,15 @@ package dragonBones.factorys
 			{
 				throw new ArgumentError();
 			}
-			var decompressedData:DecompressedData = XMLDataParser.decompressData(bytes);
-			var data:SkeletonData = XMLDataParser.parseSkeletonData(decompressedData.xml);
+			var decompressedData:DecompressedData = DataParser.decompressData(bytes);
+				
+			var data:SkeletonData = DataParser.parseData(decompressedData.dragonBonesData);
+			
 			dataName = dataName || data.name;
 			addSkeletonData(data, dataName);
 			var loader:Loader = new Loader();
 			loader.name = dataName;
-			_textureAtlasLoadingDic[dataName] = decompressedData.textureAtlasXML;
+			_textureAtlasLoadingDic[dataName] = decompressedData.textureAtlasData;
 			loader.contentLoaderInfo.addEventListener(Event.COMPLETE, loaderCompleteHandler);
 			loader.loadBytes(decompressedData.textureBytes, _loaderContext);
 			decompressedData.dispose();
@@ -354,7 +356,6 @@ package dragonBones.factorys
 							childArmature = buildArmature(displayData.name, null, null, _currentDataName, _currentTextureAtlasName);
 							if(childArmature)
 							{
-								//childArmature.animation.play();
 								_helpArr[i] = childArmature;
 							}
 							break;

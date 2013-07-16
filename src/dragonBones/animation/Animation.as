@@ -274,7 +274,7 @@
 			_isPlaying = true;
 			
 			//
-			fadeInTime = fadeInTime < 0?(animationData.fadeTime < 0?0.3:animationData.fadeTime):fadeInTime;
+			fadeInTime = fadeInTime < 0?(animationData.fadeInTime < 0?0.3:animationData.fadeInTime):fadeInTime;
 			durationScale = (durationScale < 0?1:durationScale) * (animationData.scale < 0?1:animationData.scale);
 			loop = isNaN(loop)?animationData.loop:loop;
 			layer = addLayer(layer);

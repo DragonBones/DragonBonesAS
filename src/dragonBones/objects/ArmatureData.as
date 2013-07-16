@@ -170,7 +170,7 @@ package dragonBones.objects
 				var boneData:BoneData = _boneDataList[i];
 				var level:int = 0;
 				var parentData:BoneData = boneData;
-				while(parentData)
+				while(parentData && parentData.parent)
 				{
 					level ++;
 					parentData = getBoneData(parentData.parent);

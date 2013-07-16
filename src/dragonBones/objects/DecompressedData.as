@@ -14,15 +14,15 @@ package dragonBones.objects
 	 */
 	public final class DecompressedData
 	{
-		public var dataType:String;
+		public var textureBytesDataType:String;
 		/**
 		 * A xml for DragonBones data.
 		 */
-		public var xml:XML;
+		public var dragonBonesData:Object;
 		/**
 		 * A xml for atlas data.
 		 */
-		public var textureAtlasXML:XML;
+		public var textureAtlasData:Object;
 		/**
 		 * The non parsed data map.
 		 */
@@ -34,17 +34,17 @@ package dragonBones.objects
 		 * @param	textureAtlasXML A xml for atlas data.
 		 * @param	textureBytes The non parsed data map.
 		 */
-		public function DecompressedData(xml:XML, textureAtlasXML:XML, textureBytes:ByteArray)
+		public function DecompressedData(dragonBonesData:Object, textureAtlasData:Object, textureBytes:ByteArray)
 		{
-			this.xml = xml;
-			this.textureAtlasXML = textureAtlasXML;
+			this.dragonBonesData = dragonBonesData;
+			this.textureAtlasData = textureAtlasData;
 			this.textureBytes = textureBytes;
 		}
 		
 		public function dispose():void
 		{
-			xml = null;
-			textureAtlasXML = null;
+			dragonBonesData = null;
+			textureAtlasData = null;
 			textureBytes = null;
 		}
 	}

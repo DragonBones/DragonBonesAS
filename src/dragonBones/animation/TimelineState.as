@@ -5,7 +5,7 @@ package dragonBones.animation
 	import dragonBones.objects.DBTransform;
 	import dragonBones.objects.TransformFrame;
 	import dragonBones.objects.TransformTimeline;
-	import dragonBones.utils.TransformUtils;
+	import dragonBones.utils.TransformUtil;
 	
 	import flash.geom.ColorTransform;
 	import flash.geom.Point;
@@ -161,10 +161,10 @@ package dragonBones.animation
 		
 		public function fadeOut():void
 		{
-			transform.skewX = TransformUtils.formatRadian(transform.skewX);
-			transform.skewY = TransformUtils.formatRadian(transform.skewY);
-			_originTransform.skewX = TransformUtils.formatRadian(_originTransform.skewX);
-			_originTransform.skewY = TransformUtils.formatRadian(_originTransform.skewY);
+			transform.skewX = TransformUtil.formatRadian(transform.skewX);
+			transform.skewY = TransformUtil.formatRadian(transform.skewY);
+			_originTransform.skewX = TransformUtil.formatRadian(_originTransform.skewX);
+			_originTransform.skewY = TransformUtil.formatRadian(_originTransform.skewY);
 		}
 		
 		private function updateNothing(progress:Number):void

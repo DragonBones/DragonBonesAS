@@ -30,7 +30,7 @@ package dragonBones.factorys
 		/** @private */
 		override protected function generateTextureAtlas(content:Object, textureAtlasXML:XML):ITextureAtlas
 		{
-			var textureAtlas:NativeTextureAtlas = new NativeTextureAtlas(content, textureAtlasXML);
+			var textureAtlas:NativeTextureAtlas = new NativeTextureAtlas(content, textureAtlasXML, 1, false);
 			return textureAtlas;
 		}
 		

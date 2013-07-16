@@ -15,7 +15,7 @@ package dragonBones.objects
 		}
 		public function set duration(value:Number):void
 		{
-			_duration = value > 0?value:0;
+			_duration = value >= 0?value:0;
 		}
 		
 		private var _scale:Number;
@@ -25,15 +25,7 @@ package dragonBones.objects
 		}
 		public function set scale(value:Number):void
 		{
-			if(value == Infinity || isNaN(value))
-			{
-				value = 1;
-			}
-			else if(value < 0)
-			{
-				value = 0;
-			}
-			_scale = value;
+			_scale = value >= 0?value:1;
 		}
 		
 		public function Timeline()

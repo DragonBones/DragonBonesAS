@@ -5,7 +5,7 @@ package dragonBones.utils
 	import flash.geom.Matrix;
 	
 	/** @private */
-	final public class TransformUtils
+	final public class TransformUtil
 	{
 		private static const HALF_PI:Number = Math.PI * 0.5;
 		private static const DOUBLE_PI:Number = Math.PI * 2;

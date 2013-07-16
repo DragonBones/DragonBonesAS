@@ -106,7 +106,7 @@ package dragonBones.objects
 			return _subTexturePivots[subTextureName];
 		}
 		
-		public function addSubTexturePivot(x:Number, y:Number, subTextureName:String):void
+		public function addSubTexturePivot(x:Number, y:Number, subTextureName:String):Point
 		{
 			var point:Point = _subTexturePivots[subTextureName];
 			if(point)
@@ -116,8 +116,10 @@ package dragonBones.objects
 			}
 			else
 			{
-				_subTexturePivots[subTextureName] = new Point(x, y);
+				_subTexturePivots[subTextureName] = point = new Point(x, y);
 			}
+			
+			return point;
 		}
 		
 		public function removeSubTexturePivot(subTextureName:String):void

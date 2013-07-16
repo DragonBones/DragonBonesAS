@@ -18,20 +18,11 @@ package dragonBones.objects
 		}
 		public function set offset(value:Number):void
 		{
-			_offset = (value || 0) - int(value);
-			
-			/*
-			if (_offset < 0)
+			_offset = (value || 0) % 1;
+			if(_offset < 0)
 			{
-			_offset += 1;
+				_offset += 1;
 			}
-			*/
-			
-			if (_offset > 0)
-			{
-				_offset -= 1;
-			}
-			_offset *= -1;
 		}
 		
 		public function TransformTimeline()

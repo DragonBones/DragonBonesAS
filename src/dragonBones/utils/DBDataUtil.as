@@ -10,12 +10,11 @@ package dragonBones.utils
 	import dragonBones.objects.SlotData;
 	import dragonBones.objects.TransformFrame;
 	import dragonBones.objects.TransformTimeline;
-	import dragonBones.utils.ConstValues;
 	
 	import flash.geom.Point;
 	
 	/** @private */
-	public final class DBDataUtils
+	public final class DBDataUtil
 	{
 		private static const _helpTransform1:DBTransform = new DBTransform();
 		private static const _helpTransform2:DBTransform = new DBTransform();
@@ -34,7 +33,7 @@ package dragonBones.utils
 					if(parentBoneData)
 					{
 						boneData.transform.copy(boneData.global);
-						TransformUtils.transformPointWithParent(boneData.transform, parentBoneData.global);
+						TransformUtil.transformPointWithParent(boneData.transform, parentBoneData.global);
 					}
 				}
 			}
@@ -95,7 +94,7 @@ package dragonBones.utils
 						
 						//get transform from parent timeline.
 						getTimelineTransform(parentTimeline, frame.position, _helpTransform2);
-						TransformUtils.transformPointWithParent(_helpTransform1, _helpTransform2);
+						TransformUtil.transformPointWithParent(_helpTransform1, _helpTransform2);
 						
 						//transform to tweenValues.
 						frame.transform.copy(_helpTransform1);
@@ -123,8 +122,8 @@ package dragonBones.utils
 					{
 						originTransform = timeline.originTransform;
 						originTransform.copy(frame.transform);
-						originTransform.skewX = TransformUtils.formatRadian(originTransform.skewX);
-						originTransform.skewY = TransformUtils.formatRadian(originTransform.skewY);
+						originTransform.skewX = TransformUtil.formatRadian(originTransform.skewX);
+						originTransform.skewY = TransformUtil.formatRadian(originTransform.skewY);
 						if(!timeline.transformed)
 						{
 							originPivot = timeline.originPivot;
@@ -135,8 +134,8 @@ package dragonBones.utils
 					
 					frame.transform.x -= originTransform.x;
 					frame.transform.y -= originTransform.y;
-					frame.transform.skewX = TransformUtils.formatRadian(frame.transform.skewX - originTransform.skewX);
-					frame.transform.skewY = TransformUtils.formatRadian(frame.transform.skewY - originTransform.skewY);
+					frame.transform.skewX = TransformUtil.formatRadian(frame.transform.skewX - originTransform.skewX);
+					frame.transform.skewY = TransformUtil.formatRadian(frame.transform.skewY - originTransform.skewY);
 					frame.transform.scaleX -= originTransform.scaleX;
 					frame.transform.scaleY -= originTransform.scaleY;
 					
@@ -178,8 +177,8 @@ package dragonBones.utils
 						}
 						else
 						{
-							frame.transform.skewX = prevFrame.transform.skewX + TransformUtils.formatRadian(frame.transform.skewX - prevFrame.transform.skewY);
-							frame.transform.skewY = prevFrame.transform.skewY + TransformUtils.formatRadian(frame.transform.skewY - prevFrame.transform.skewY);
+							frame.transform.skewX = prevFrame.transform.skewX + TransformUtil.formatRadian(frame.transform.skewX - prevFrame.transform.skewX);
+							frame.transform.skewY = prevFrame.transform.skewY + TransformUtil.formatRadian(frame.transform.skewY - prevFrame.transform.skewY);
 						}
 					}
 					
@@ -225,8 +224,8 @@ package dragonBones.utils
 						
 						retult.x = currentFrame.global.x +  (nextFrame.global.x - currentFrame.global.x) * progress;
 						retult.y = currentFrame.global.y +  (nextFrame.global.y - currentFrame.global.y) * progress;
-						retult.skewX = TransformUtils.formatRadian(currentFrame.global.skewX +  (nextFrame.global.skewX - currentFrame.global.skewX) * progress);
-						retult.skewY = TransformUtils.formatRadian(currentFrame.global.skewY +  (nextFrame.global.skewY - currentFrame.global.skewY) * progress);
+						retult.skewX = TransformUtil.formatRadian(currentFrame.global.skewX +  (nextFrame.global.skewX - currentFrame.global.skewX) * progress);
+						retult.skewY = TransformUtil.formatRadian(currentFrame.global.skewY +  (nextFrame.global.skewY - currentFrame.global.skewY) * progress);
 						retult.scaleX = currentFrame.global.scaleX +  (nextFrame.global.scaleX - currentFrame.global.scaleX) * progress;
 						retult.scaleY = currentFrame.global.scaleY +  (nextFrame.global.scaleY - currentFrame.global.scaleY) * progress;
 					}
