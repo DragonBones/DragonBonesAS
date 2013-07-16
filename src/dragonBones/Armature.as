@@ -148,32 +148,6 @@
 			//_display = null;
 		}
 		
-		/** @private */
-		dragonBones_internal function arriveAtFrame(frame:Frame, timelineState:TimelineState, animationState:AnimationState, isCross:Boolean):void
-		{
-			if(frame.event && this.hasEventListener(FrameEvent.ANIMATION_FRAME_EVENT))
-			{
-				var frameEvent:FrameEvent = new FrameEvent(FrameEvent.ANIMATION_FRAME_EVENT);
-				frameEvent.animationState = animationState;
-				frameEvent.frameLabel = frame.event;
-				dispatchEvent(frameEvent);
-			}
-			
-			if(frame.sound && this.hasEventListener(SoundEvent.SOUND))
-			{
-				var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
-				soundEvent.armature = this;
-				soundEvent.animationState = animationState;
-				soundEvent.sound = frame.sound;
-				_soundManager.dispatchEvent(soundEvent);
-			}
-			
-			if(frame.action && animationState.isPlaying)
-			{
-				animation.gotoAndPlay(frame.action);
-			}
-		}
-		
 		/**
 		 * Update the animation using this method typically in an ENTERFRAME Event or with a Timer.
 		 * @param	The amount of second to move the playhead ahead.
@@ -542,6 +516,32 @@
 				_boneList[i] = _helpArray[i].bone;
 			}
 			_helpArray.length = 0;
+		}
+		
+		/** @private */
+		dragonBones_internal function arriveAtFrame(frame:Frame, timelineState:TimelineState, animationState:AnimationState, isCross:Boolean):void
+		{
+			if(frame.event && this.hasEventListener(FrameEvent.ANIMATION_FRAME_EVENT))
+			{
+				var frameEvent:FrameEvent = new FrameEvent(FrameEvent.ANIMATION_FRAME_EVENT);
+				frameEvent.animationState = animationState;
+				frameEvent.frameLabel = frame.event;
+				dispatchEvent(frameEvent);
+			}
+			
+			if(frame.sound && this.hasEventListener(SoundEvent.SOUND))
+			{
+				var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
+				soundEvent.armature = this;
+				soundEvent.animationState = animationState;
+				soundEvent.sound = frame.sound;
+				_soundManager.dispatchEvent(soundEvent);
+			}
+			
+			if(frame.action && animationState.isPlaying)
+			{
+				animation.gotoAndPlay(frame.action);
+			}
 		}
 		
 		private function sortSlot(slot1:Slot, slot2:Slot):int

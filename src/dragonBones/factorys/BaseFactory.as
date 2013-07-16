@@ -20,6 +20,7 @@ package dragonBones.factorys
 	import flash.display.Loader;
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
+	import flash.errors.IllegalOperationError;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.geom.Matrix;
@@ -51,9 +52,14 @@ package dragonBones.factorys
 		/** @private */
 		protected var _currentTextureAtlasName:String;
 		
-		public function BaseFactory()
+		public function BaseFactory(self:BaseFactory)
 		{
 			super(this);
+			
+			if(self != this)
+			{
+				throw new IllegalOperationError("Abstract class can not be instantiated!");
+			}
 			
 			_dataDic = {};
 			_textureAtlasDic = {};
@@ -434,9 +440,9 @@ package dragonBones.factorys
 			loader.unloadAndStop();
 			
 			var name:String = loader.name;
-			var textureAtlasXML:XML = _textureAtlasLoadingDic[name];
+			var textureAtlasRawData:Object = _textureAtlasLoadingDic[name];
 			delete _textureAtlasLoadingDic[name];
-			if(name && textureAtlasXML)
+			if(name && textureAtlasRawData)
 			{
 				if (content is Bitmap)
 				{
@@ -451,7 +457,7 @@ package dragonBones.factorys
 					//
 				}
 				
-				var textureAtlas:Object = generateTextureAtlas(content, textureAtlasXML);
+				var textureAtlas:Object = generateTextureAtlas(content, textureAtlasRawData);
 				addTextureAtlas(textureAtlas, name);
 				
 				name = null;
@@ -468,7 +474,7 @@ package dragonBones.factorys
 		}
 		
 		/** @private */
-		protected function generateTextureAtlas(content:Object, textureAtlasXML:XML):ITextureAtlas
+		protected function generateTextureAtlas(content:Object, textureAtlasRawData:Object):ITextureAtlas
 		{
 			return null;
 		}

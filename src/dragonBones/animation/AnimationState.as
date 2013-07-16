@@ -423,23 +423,26 @@ package dragonBones.animation
 							}
 						}
 						_loopCount = loopCount;
-						if(_loopCount && _loop && _loopCount * _loopCount >= _loop * _loop - 1)//_loopCount >= Math.abs(_loop)
+						if(_loopCount)
 						{
-							_isComplete = true;
-							_isPlaying = false;
-							progress = 1;
-							if(_armature.hasEventListener(AnimationEvent.COMPLETE))
+							if(_loop && _loopCount * _loopCount >= _loop * _loop - 1)
 							{
-								event = new AnimationEvent(AnimationEvent.COMPLETE);
-								event.animationState = this;
+								_isComplete = true;
+								_isPlaying = false;
+								progress = 1;
+								if(_armature.hasEventListener(AnimationEvent.COMPLETE))
+								{
+									event = new AnimationEvent(AnimationEvent.COMPLETE);
+									event.animationState = this;
+								}
 							}
-						}
-						else
-						{
-							if(_armature.hasEventListener(AnimationEvent.LOOP_COMPLETE))
+							else
 							{
-								event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
-								event.animationState = this;
+								if(_armature.hasEventListener(AnimationEvent.LOOP_COMPLETE))
+								{
+									event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
+									event.animationState = this;
+								}
 							}
 						}
 					}

@@ -130,7 +130,7 @@ package dragonBones.objects
 			var slotData:SlotData = new SlotData();
 			slotData.name = slotObject[ConstValues.A_NAME];
 			slotData.parent = slotObject[ConstValues.A_PARENT];
-			slotData.zOrder = slotObject[ConstValues.A_Z_ORDER];
+			slotData.zOrder = Number(slotObject[ConstValues.A_Z_ORDER]);
 			for each(var displayObject:Object in slotObject[ConstValues.DISPLAY])
 			{
 				slotData.addDisplayData(parseDisplayData(displayObject, data));

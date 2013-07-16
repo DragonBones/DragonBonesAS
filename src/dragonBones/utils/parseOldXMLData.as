@@ -154,8 +154,8 @@ function parseSlotData(boneXML:XML, data:SkeletonData):SlotData
 	for each(var displayXML:XML in boneXML[DISPLAY])
 	{
 		var displayData:DisplayData = parseDisplayData(displayXML, data);
-		displayData.transform.x = -pivotX;
-		displayData.transform.y = -pivotY;
+		displayData.transform.x = pivotX;
+		displayData.transform.y = pivotY;
 		slotData.addDisplayData(displayData);
 	}
 	

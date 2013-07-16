@@ -24,13 +24,13 @@ package dragonBones.factorys
 		
 		public function NativeFactory()
 		{
-			super();
+			super(this);
 		}
 		
 		/** @private */
-		override protected function generateTextureAtlas(content:Object, textureAtlasXML:XML):ITextureAtlas
+		override protected function generateTextureAtlas(content:Object, textureAtlasRawData:Object):ITextureAtlas
 		{
-			var textureAtlas:NativeTextureAtlas = new NativeTextureAtlas(content, textureAtlasXML, 1, false);
+			var textureAtlas:NativeTextureAtlas = new NativeTextureAtlas(content, textureAtlasRawData, 1, false);
 			return textureAtlas;
 		}
 		

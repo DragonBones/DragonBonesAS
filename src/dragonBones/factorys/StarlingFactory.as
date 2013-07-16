@@ -67,12 +67,12 @@
 		 */
 		public function StarlingFactory()
 		{
-			super();
+			super(this);
 			scaleForTexture = 1;
 		}
 		
 		/** @private */
-		override protected function generateTextureAtlas(content:Object, textureAtlasXML:XML):ITextureAtlas
+		override protected function generateTextureAtlas(content:Object, textureAtlasRawData:Object):ITextureAtlas
 		{
 			var texture:Texture;
 			var bitmapData:BitmapData;
@@ -83,8 +83,18 @@
 			}
 			else if (content is MovieClip)
 			{
-				var width:int = int(textureAtlasXML.@[ConstValues.A_WIDTH]) * scaleForTexture;
-				var height:int = int(textureAtlasXML.@[ConstValues.A_HEIGHT]) * scaleForTexture;				
+				var width:int;
+				var height:int;
+				if(textureAtlasRawData is XML)
+				{
+					width = int(textureAtlasRawData.@[ConstValues.A_WIDTH]) * scaleForTexture;
+					height = int(textureAtlasRawData.@[ConstValues.A_HEIGHT]) * scaleForTexture;	
+				}
+				else
+				{
+					width = int(textureAtlasRawData[ConstValues.A_WIDTH]) * scaleForTexture;
+					height = int(textureAtlasRawData[ConstValues.A_HEIGHT]) * scaleForTexture;	
+				}
 				_helpMatirx.a = 1;
 				_helpMatirx.b = 0;
 				_helpMatirx.c = 0;
@@ -103,7 +113,7 @@
 			{
 				throw new Error();
 			}			
-			var textureAtlas:StarlingTextureAtlas = new StarlingTextureAtlas(texture, textureAtlasXML, false);			
+			var textureAtlas:StarlingTextureAtlas = new StarlingTextureAtlas(texture, textureAtlasRawData, false);			
 			if (Starling.handleLostContext)
 			{
 				textureAtlas._bitmapData = bitmapData;

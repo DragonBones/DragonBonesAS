@@ -143,10 +143,10 @@ package dragonBones.utils
 					{
 						var dLX:Number = frame.transform.skewX - prevFrame.transform.skewX;
 						
-						if(frame.tweenRotate)
+						if(prevFrame.tweenRotate)
 						{
 							
-							if(frame.tweenRotate > 0)
+							if(prevFrame.tweenRotate > 0)
 							{
 								if(dLX < 0)
 								{
@@ -154,10 +154,10 @@ package dragonBones.utils
 									frame.transform.skewY += Math.PI * 2;
 								}
 								
-								if(frame.tweenRotate > 1)
+								if(prevFrame.tweenRotate > 1)
 								{
-									frame.transform.skewX += Math.PI * 2 * (frame.tweenRotate - 1);
-									frame.transform.skewY += Math.PI * 2 * (frame.tweenRotate - 1);
+									frame.transform.skewX += Math.PI * 2 * (prevFrame.tweenRotate - 1);
+									frame.transform.skewY += Math.PI * 2 * (prevFrame.tweenRotate - 1);
 								}
 							}
 							else
@@ -168,10 +168,10 @@ package dragonBones.utils
 									frame.transform.skewY -= Math.PI * 2;
 								}
 								
-								if(frame.tweenRotate < 1)
+								if(prevFrame.tweenRotate < 1)
 								{
-									frame.transform.skewX += Math.PI * 2 * (frame.tweenRotate + 1);
-									frame.transform.skewY += Math.PI * 2 * (frame.tweenRotate + 1);
+									frame.transform.skewX += Math.PI * 2 * (prevFrame.tweenRotate + 1);
+									frame.transform.skewY += Math.PI * 2 * (prevFrame.tweenRotate + 1);
 								}
 							}
 						}
