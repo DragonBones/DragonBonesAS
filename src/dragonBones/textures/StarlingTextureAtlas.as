@@ -7,10 +7,9 @@
 	* @version 2.0
 	*/
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.utils.ConstValues;
+	import dragonBones.objects.DataParser;
 	
 	import flash.display.BitmapData;
-	import flash.geom.Rectangle;
 	
 	import starling.textures.SubTexture;
 	import starling.textures.Texture;
@@ -52,19 +51,16 @@
 		 * @param	textureAtlasXML A textureAtlas xml
 		 * @param	isDifferentXML
 		 */
-		public function StarlingTextureAtlas(texture:Texture, textureAtlasXML:XML, isDifferentXML:Boolean = false)
+		public function StarlingTextureAtlas(texture:Texture, textureAtlasRawData:Object, isDifferentXML:Boolean = true)
 		{
+			super(texture, null);
 			if (texture)
 			{
 				_scale = texture.scale;
 				_isDifferentXML = isDifferentXML;
-			}			
-			super(texture, textureAtlasXML);
-			if (textureAtlasXML)
-			{
-				_name = textureAtlasXML.attribute(ConstValues.A_NAME);
 			}
 			_subTextureDic = {};
+			parseData(textureAtlasRawData);
 		}
 		/**
 		 * Clean up all resources used by this StarlingTextureAtlas instance.
@@ -76,7 +72,7 @@
 			{
 				subTexture.dispose();
 			}			
-			_subTextureDic = {};
+			_subTextureDic = null;
 			
 			if (_bitmapData)
 			{
@@ -104,26 +100,19 @@
 		}
 		/**
 		 * @private
-		 * @param	atlasXml
 		 */
-		override protected function parseAtlasXml(atlasXml:XML):void
+		protected function parseData(textureAtlasRawData:Object):void
 		{
-			var scale:Number = _isDifferentXML ? _scale : 1;
-			
-			for each (var subTexture:XML in atlasXml.SubTexture)
+			var textureAtlasData:Object = DataParser.parseTextureAtlas(textureAtlasRawData, _isDifferentXML ? _scale : 1);
+			_name = textureAtlasData.__name;
+			//_width = textureAtlasData.__width;
+			//_height = textureAtlasData.__height;
+			delete textureAtlasData.__name;
+			delete textureAtlasData.__width;
+			delete textureAtlasData.__height;
+			for(var subTextureName:String in textureAtlasData)
 			{
-				var name:String = subTexture.attribute("name");
-				var x:Number = parseFloat(subTexture.attribute("x")) / scale;
-				var y:Number = parseFloat(subTexture.attribute("y")) / scale;
-				var width:Number = parseFloat(subTexture.attribute("width")) / scale;
-				var height:Number = parseFloat(subTexture.attribute("height")) / scale;
-				var frameX:Number = parseFloat(subTexture.attribute("frameX")) / scale;
-				var frameY:Number = parseFloat(subTexture.attribute("frameY")) / scale;
-				var frameWidth:Number = parseFloat(subTexture.attribute("frameWidth")) / scale;
-				var frameHeight:Number = parseFloat(subTexture.attribute("frameHeight")) / scale;
-				var region:Rectangle = new Rectangle(x, y, width, height);				
-				var frame:Rectangle = frameWidth > 0 && frameHeight > 0 ? new Rectangle(frameX, frameY, frameWidth, frameHeight) : null;				
-				addRegion(name, region, frame);
+				addRegion(subTextureName, textureAtlasData[subTextureName], null);
 			}
 		}
 	}

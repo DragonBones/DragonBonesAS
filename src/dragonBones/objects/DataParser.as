@@ -1,12 +1,10 @@
-package dragonBones.objects
+﻿package dragonBones.objects
 {
-	import dragonBones.core.DragonBones;
+	import dragonBones.objects.ObjectDataParser;
 	import dragonBones.objects.SkeletonData;
+	import dragonBones.objects.XMLDataParser;
 	import dragonBones.utils.BytesType;
-	import dragonBones.utils.ConstValues;
-	import dragonBones.utils.parseObjectData;
-	import dragonBones.utils.parseOldXMLData;
-	import dragonBones.utils.parserXMLData;
+	import dragonBones.utils.checkBytesTailisXML;
 	
 	import flash.utils.ByteArray;
 	
@@ -57,8 +55,8 @@ package dragonBones.objects
 				case BytesType.PNG: 
 				case BytesType.JPG: 
 				case BytesType.ATF: 
-					try
-					{
+					//try
+					//{
 						bytes.position = bytes.length - 4;
 						var strSize:int = bytes.readInt();
 						var position:uint = bytes.length - 4 - strSize;
@@ -69,7 +67,7 @@ package dragonBones.objects
 						bytes.length = position;
 						
 						var dragonBonesData:Object;
-						if(dataBytes[dataBytes.length - 1] == ">".charCodeAt(0))
+						if(checkBytesTailisXML(dataBytes))
 						{
 							dragonBonesData = XML(dataBytes.readUTFBytes(dataBytes.length));
 						}
@@ -88,7 +86,7 @@ package dragonBones.objects
 						bytes.length = position;
 						
 						var textureAtlasData:Object;
-						if(dataBytes[dataBytes.length-1]==">".charCodeAt(0))
+						if(checkBytesTailisXML(dataBytes))
 						{
 							textureAtlasData = XML(dataBytes.readUTFBytes(dataBytes.length));
 						}
@@ -96,11 +94,11 @@ package dragonBones.objects
 						{
 							textureAtlasData = dataBytes.readObject();
 						}
-					}
-					catch (e:Error)
-					{
-						throw new Error("Data error!");
-					}
+					//}
+					//catch (e:Error)
+					//{
+					//	throw new Error("Data error!");
+					//}
 					
 					var decompressedData:DecompressedData = new DecompressedData(dragonBonesData, textureAtlasData, bytes);
 					decompressedData.textureBytesDataType = dataType;
@@ -113,43 +111,29 @@ package dragonBones.objects
 			return null;
 		}
 		
-		public static function parseData(data:Object):SkeletonData
+		public static function parseTextureAtlas(rawData:Object, scale:Number = 1):Object
 		{
-			var version:String;
-			if(data is XML)
+			if(rawData is XML)
 			{
-				version = data.@[ConstValues.A_VERSION];
-				switch (version)
-				{
-					case "1.5":
-					case "2.0":
-					case "2.1":
-					case "2.1.1":
-					case "2.1.2":
-					case "2.2":
-						return parseOldXMLData(data as XML);
-					case DragonBones.DATA_VERSION:
-						return parserXMLData(data as XML);
-				}
+				return XMLDataParser.parseTextureAtlasData(rawData as XML, scale);
 			}
 			else
 			{
-				try
-				{
-					version = data[ConstValues.A_VERSION];
-					switch (version)
-					{
-						case DragonBones.DATA_VERSION:
-							return parseObjectData(data);
-					}
-				}
-				catch(e:Error)
-				{
-				}
+				return ObjectDataParser.parseTextureAtlasData(rawData, scale);
 			}
-			
-			throw new Error("Nonsupport version!");
-			
+			return null;
+		}
+		
+		public static function parseData(rawData:Object):SkeletonData
+		{
+			if(rawData is XML)
+			{
+				return XMLDataParser.parseSkeletonData(rawData as XML);
+			}
+			else
+			{
+				return ObjectDataParser.parseSkeletonData(rawData);
+			}
 			return null;
 		}
 	}

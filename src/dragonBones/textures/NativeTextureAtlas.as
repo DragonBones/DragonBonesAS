@@ -7,7 +7,7 @@ package dragonBones.textures
 	* @version 2.0
 	*/
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.utils.ConstValues;
+	import dragonBones.objects.DataParser;
 	
 	import flash.display.BitmapData;
 	import flash.display.MovieClip;
@@ -81,11 +81,10 @@ package dragonBones.textures
 		 * @param	textureScale A scale value (x and y axis)
 		 * @param	isDifferentXML 
 		 */
-		public function NativeTextureAtlas(texture:Object, textureAtlasXML:XML, textureScale:Number = 1, isDifferentXML:Boolean = false)
+		public function NativeTextureAtlas(texture:Object, textureAtlasRawData:Object, textureScale:Number = 1, isDifferentXML:Boolean = false)
 		{
 			_scale = textureScale;
 			_isDifferentXML = isDifferentXML;
-			_subTextureDataDic = {};
 			if (texture is BitmapData)
 			{
 				_bitmapData = texture as BitmapData;
@@ -95,7 +94,7 @@ package dragonBones.textures
 				_movieClip = texture as MovieClip;
 				_movieClip.stop();
 			}
-			parseData(textureAtlasXML);
+			parseData(textureAtlasRawData);
 		}
 		/**
 		 * Clean up all resources used by this NativeTextureAtlas instance.
@@ -108,7 +107,6 @@ package dragonBones.textures
 				_bitmapData.dispose();
 			}
 			_bitmapData = null;
-			_subTextureDataDic = {};
 		}
 		/**
 		 * The area occupied by all assets related to that name.
@@ -120,22 +118,16 @@ package dragonBones.textures
 			return _subTextureDataDic[name];
 		}
 		
-		protected function parseData(textureAtlasXML:XML):void
+		protected function parseData(textureAtlasRawData:Object):void
 		{
-			_name = textureAtlasXML.@[ConstValues.A_NAME];
-			_width = int(textureAtlasXML.@[ConstValues.A_WIDTH]);
-			_height = int(textureAtlasXML.@[ConstValues.A_HEIGHT]);
-			var scale:Number = _isDifferentXML ? _scale : 1;
-			for each (var subTextureXML:XML in textureAtlasXML[ConstValues.SUB_TEXTURE])
-			{
-				var subTextureName:String = subTextureXML.@[ConstValues.A_NAME];
-				var subTextureData:Rectangle = new Rectangle();
-				subTextureData.x = int(subTextureXML.@[ConstValues.A_X]) / scale;
-				subTextureData.y = int(subTextureXML.@[ConstValues.A_Y]) / scale;
-				subTextureData.width = int(subTextureXML.@[ConstValues.A_WIDTH]) / scale;
-				subTextureData.height = int(subTextureXML.@[ConstValues.A_HEIGHT]) / scale;
-				_subTextureDataDic[subTextureName] = subTextureData;
-			}
+			_subTextureDataDic = DataParser.parseTextureAtlas(textureAtlasRawData, _isDifferentXML ? _scale : 1);
+			_name = _subTextureDataDic.__name;
+			_width = _subTextureDataDic.__width;
+			_height = _subTextureDataDic.__height;
+			
+			delete _subTextureDataDic.__name;
+			delete _subTextureDataDic.__width;
+			delete _subTextureDataDic.__height;
 		}
 		
 		dragonBones_internal function movieClipToBitmapData():void

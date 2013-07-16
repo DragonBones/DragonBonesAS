@@ -3,19 +3,19 @@ package dragonBones.utils
 	import dragonBones.objects.SkeletonData;
 	import dragonBones.objects.ArmatureData;
 
-	public function parseOldXMLData(xml:XML):SkeletonData
+	public function parseOldXMLData(rawData:XML):SkeletonData
 	{
-		var frameRate:uint = int(xml.@[A_FRAME_RATE]);
+		var frameRate:uint = int(rawData.@[A_FRAME_RATE]);
 		
 		var data:SkeletonData = new SkeletonData();
-		data.name = xml.@[A_NAME];
+		data.name = rawData.@[A_NAME];
 		
-		for each(var armatureXML:XML in xml[ARMATURES][ARMATURE])
+		for each(var armatureXML:XML in rawData[ARMATURES][ARMATURE])
 		{
 			data.addArmatureData(parseArmatureData(armatureXML, data));
 		}
 		
-		for each(var animationsXML:XML in xml[ANIMATIONS][ANIMATION])
+		for each(var animationsXML:XML in rawData[ANIMATIONS][ANIMATION])
 		{
 			var armatureData:ArmatureData = data.getArmatureData(animationsXML.@[A_NAME]);
 			if(armatureData)
@@ -45,11 +45,10 @@ import dragonBones.objects.Timeline;
 import dragonBones.objects.TransformFrame;
 import dragonBones.objects.TransformTimeline;
 import dragonBones.utils.DBDataUtil;
+import dragonBones.utils.ConstValues;
 
 import flash.geom.ColorTransform;
 import flash.geom.Point;
-
-const ANGLE_TO_RADIAN:Number = Math.PI / 180;
 
 const ARMATURES:String = "armatures";
 const ANIMATIONS:String = "animations";
@@ -318,8 +317,8 @@ function parseTransform(transformXML:XML, transform:DBTransform, pivot:Point):vo
 		{
 			transform.x = Number(transformXML.@[A_X]);
 			transform.y = Number(transformXML.@[A_Y]);
-			transform.skewX = Number(transformXML.@[A_SKEW_X]) * ANGLE_TO_RADIAN;
-			transform.skewY = Number(transformXML.@[A_SKEW_Y]) * ANGLE_TO_RADIAN;
+			transform.skewX = Number(transformXML.@[A_SKEW_X]) * ConstValues.ANGLE_TO_RADIAN;
+			transform.skewY = Number(transformXML.@[A_SKEW_Y]) * ConstValues.ANGLE_TO_RADIAN;
 			transform.scaleX = Number(transformXML.@[A_SCALE_X]);
 			transform.scaleY = Number(transformXML.@[A_SCALE_Y]);
 		}

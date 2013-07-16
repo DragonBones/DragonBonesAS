@@ -14,7 +14,6 @@ package dragonBones.factorys
 	import dragonBones.objects.SkinData;
 	import dragonBones.objects.SlotData;
 	import dragonBones.textures.ITextureAtlas;
-	import dragonBones.textures.NativeTextureAtlas;
 	import dragonBones.utils.BytesType;
 	
 	import flash.display.Bitmap;
