@@ -51,7 +51,7 @@
 		 * @param	textureAtlasXML A textureAtlas xml
 		 * @param	isDifferentXML
 		 */
-		public function StarlingTextureAtlas(texture:Texture, textureAtlasRawData:Object, isDifferentXML:Boolean = true)
+		public function StarlingTextureAtlas(texture:Texture, textureAtlasRawData:Object, isDifferentXML:Boolean = false)
 		{
 			super(texture, null);
 			if (texture)
