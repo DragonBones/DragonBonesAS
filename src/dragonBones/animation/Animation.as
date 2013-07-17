@@ -344,7 +344,6 @@
 				}
 			}
 			
-			
 			_lastAnimationState = AnimationState.borrowObject();
 			_lastAnimationState.group = group;
 			_lastAnimationState.tweenEnabled = tweenEnabled;

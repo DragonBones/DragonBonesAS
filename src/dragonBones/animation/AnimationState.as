@@ -73,9 +73,10 @@ package dragonBones.animation
 		private var _fadeOut:Boolean;
 		private var _pauseBeforeFadeInComplete:Boolean;
 		
+		private var _name:String;
 		public function get name():String
 		{
-			return _clip?_clip.name:null;
+			return _name;
 		}
 		
 		private var _clip:AnimationData;
@@ -190,6 +191,7 @@ package dragonBones.animation
 		{
 			_armature = armature;
 			_clip = clip;
+			_name = _clip.name;
 			_layer = layer;
 			
 			_totalTime = _clip.duration;
