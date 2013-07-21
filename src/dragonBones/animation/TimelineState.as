@@ -179,7 +179,11 @@ package dragonBones.animation
 			if(_animationState.blend)
 			{
 				transform.copy(_originTransform);
-				pivot.copyFrom(_originPivot);
+			
+				//pivot.copyFrom(_originPivot);	
+				//FP 10
+				pivot.x = _originPivot.x;
+				pivot.y = _originPivot.y;
 			}
 			else
 			{
