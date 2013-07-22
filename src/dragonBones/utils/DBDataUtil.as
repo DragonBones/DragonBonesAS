@@ -5,6 +5,7 @@ package dragonBones.utils
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.BoneData;
 	import dragonBones.objects.DBTransform;
+	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.SkinData;
 	import dragonBones.objects.SlotData;
@@ -57,6 +58,7 @@ package dragonBones.utils
 			var boneData:BoneData;
 			var timeline:TransformTimeline;
 			var slotData:SlotData;
+			var displayData:DisplayData
 			var parentTimeline:TransformTimeline;
 			var frameList:Vector.<Frame>;
 			var originTransform:DBTransform;
@@ -113,8 +115,17 @@ package dragonBones.utils
 					
 					if(!timeline.transformed)
 					{
-						frame.pivot.x -= boneData.pivot.x;
-						frame.pivot.y -= boneData.pivot.y;
+						if(frame.displayIndex >= 0)
+						{
+							displayData = slotData.displayDataList[frame.displayIndex];
+							frame.pivot.x -= displayData.transform.x;
+							frame.pivot.y -= displayData.transform.y;
+						}
+						else
+						{
+							frame.pivot.x -= boneData.pivot.x;
+							frame.pivot.y -= boneData.pivot.y;
+						}
 						frame.zOrder -= slotData.zOrder;
 					}
 					

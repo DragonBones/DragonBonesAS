@@ -307,6 +307,12 @@ package dragonBones.animation
 					_durationTransform.scaleX = nextFrame.transform.scaleX - _currentFrame.transform.scaleX;
 					_durationTransform.scaleY = nextFrame.transform.scaleY - _currentFrame.transform.scaleY;
 					
+					if(frameIndex == 0)
+					{
+						_durationTransform.skewX = TransformUtil.formatRadian(_durationTransform.skewX);
+						_durationTransform.skewY = TransformUtil.formatRadian(_durationTransform.skewY);
+					}
+					
 					_durationPivot.x = nextFrame.pivot.x - _currentFrame.pivot.x;
 					_durationPivot.y = nextFrame.pivot.y - _currentFrame.pivot.y;
 					

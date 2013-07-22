@@ -88,7 +88,6 @@
 			
 			var data:SkeletonData = new SkeletonData();
 			data.name = rawData.@[ConstValues.A_NAME];
-			
 			for each(var armatureXML:XML in rawData[ConstValues.ARMATURE])
 			{
 				data.addArmatureData(parseArmatureData(armatureXML, data, frameRate));
