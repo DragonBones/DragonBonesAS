@@ -230,7 +230,7 @@
 		 * Move the playhead to that AnimationData
 		 * @param	The name of the AnimationData to play.
 		 * @param	A fade time to apply (> 0)
-		 * @param	The duration scale of that AnimationData.
+		 * @param	The duration of that AnimationData.
 		 * @param	Loop(0:loop forever, 1~+∞:loop times, -1~-∞:will fade animation after loop complete).
 		 * @param	The layer of the animation.
 		 * @param	Play mode.
@@ -243,7 +243,7 @@
 		public function gotoAndPlay(
 			animationName:String, 
 			fadeInTime:Number = -1, 
-			durationScale:Number = -1, 
+			duration:Number = -1, 
 			loop:Number = NaN, 
 			layer:uint = 0, 
 			playMode:String = FADE_OUT_SAME_LAYER,
@@ -275,7 +275,17 @@
 			
 			//
 			fadeInTime = fadeInTime < 0?(animationData.fadeInTime < 0?0.3:animationData.fadeInTime):fadeInTime;
-			durationScale = (durationScale < 0?1:durationScale) * (animationData.scale < 0?1:animationData.scale);
+			
+			var durationScale:Number;
+			if(duration < 0)
+			{
+				durationScale = animationData.scale < 0?1:animationData.scale;
+			}
+			else
+			{
+				durationScale = duration / animationData.duration;
+			}
+			
 			loop = isNaN(loop)?animationData.loop:loop;
 			layer = addLayer(layer);
 			
