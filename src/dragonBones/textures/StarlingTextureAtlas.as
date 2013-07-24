@@ -105,11 +105,7 @@
 		{
 			var textureAtlasData:Object = DataParser.parseTextureAtlas(textureAtlasRawData, _isDifferentXML ? _scale : 1);
 			_name = textureAtlasData.__name;
-			//_width = textureAtlasData.__width;
-			//_height = textureAtlasData.__height;
 			delete textureAtlasData.__name;
-			delete textureAtlasData.__width;
-			delete textureAtlasData.__height;
 			for(var subTextureName:String in textureAtlasData)
 			{
 				addRegion(subTextureName, textureAtlasData[subTextureName], null);

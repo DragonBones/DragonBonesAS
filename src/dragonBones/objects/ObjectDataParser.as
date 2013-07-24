@@ -29,8 +29,6 @@ package dragonBones.objects
 		{
 			var textureAtlasData:Object = {};
 			textureAtlasData.__name = rawData[ConstValues.A_NAME];
-			textureAtlasData.__width = int(rawData[ConstValues.A_WIDTH]);
-			textureAtlasData.__height = int(rawData[ConstValues.A_HEIGHT]);
 			for each (var subTextureObject:Object in rawData[ConstValues.SUB_TEXTURE])
 			{
 				var subTextureName:String = subTextureObject[ConstValues.A_NAME];

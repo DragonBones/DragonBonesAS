@@ -23,14 +23,6 @@ package dragonBones.textures
 		/**
 		 * @private
 		 */
-		protected var _width:int;
-		/**
-		 * @private
-		 */
-		protected var _height:int;
-		/**
-		 * @private
-		 */
 		protected var _subTextureDataDic:Object;
 		/**
 		 * @private
@@ -122,12 +114,8 @@ package dragonBones.textures
 		{
 			_subTextureDataDic = DataParser.parseTextureAtlas(textureAtlasRawData, _isDifferentXML ? _scale : 1);
 			_name = _subTextureDataDic.__name;
-			_width = _subTextureDataDic.__width;
-			_height = _subTextureDataDic.__height;
 			
 			delete _subTextureDataDic.__name;
-			delete _subTextureDataDic.__width;
-			delete _subTextureDataDic.__height;
 		}
 		
 		dragonBones_internal function movieClipToBitmapData():void
@@ -135,10 +123,15 @@ package dragonBones.textures
 			if (!_bitmapData && _movieClip)
 			{
 				_movieClip.gotoAndStop(1);
-				_bitmapData = new BitmapData(_width, _height, true, 0xFF00FF);
+				_bitmapData = new BitmapData(getNearest2N(_movieClip.width), getNearest2N(_movieClip.height), true, 0xFF00FF);
 				_bitmapData.draw(_movieClip);
 				_movieClip.gotoAndStop(_movieClip.totalFrames);
 			}
+		}
+		
+		private function getNearest2N(_n:uint):uint
+		{
+			return _n & _n - 1?1 << _n.toString(2).length:_n;
 		}
 	}
 }
