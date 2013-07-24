@@ -13,7 +13,6 @@
 	import dragonBones.display.StarlingDisplayBridge;
 	import dragonBones.textures.ITextureAtlas;
 	import dragonBones.textures.StarlingTextureAtlas;
-	import dragonBones.utils.ConstValues;
 	
 	import flash.display.BitmapData;
 	import flash.display.MovieClip;
@@ -83,18 +82,9 @@
 			}
 			else if (content is MovieClip)
 			{
-				var width:int;
-				var height:int;
-				if(textureAtlasRawData is XML)
-				{
-					width = int(textureAtlasRawData.@[ConstValues.A_WIDTH]) * scaleForTexture;
-					height = int(textureAtlasRawData.@[ConstValues.A_HEIGHT]) * scaleForTexture;	
-				}
-				else
-				{
-					width = int(textureAtlasRawData[ConstValues.A_WIDTH]) * scaleForTexture;
-					height = int(textureAtlasRawData[ConstValues.A_HEIGHT]) * scaleForTexture;	
-				}
+				var width:int = getNearest2N(content.width) * scaleForTexture;
+				var height:int = getNearest2N(content.height) * scaleForTexture;
+				
 				_helpMatirx.a = 1;
 				_helpMatirx.b = 0;
 				_helpMatirx.c = 0;
@@ -151,6 +141,11 @@
 				return image;
 			}
 			return null;
+		}
+		
+		private function getNearest2N(_n:uint):uint
+		{
+			return _n & _n - 1?1 << _n.toString(2).length:_n;
 		}
 	}
 }
