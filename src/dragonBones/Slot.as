@@ -56,10 +56,27 @@ package dragonBones
 		public function set display(value:Object):void
 		{
 			_displayList[_displayIndex] = value;
-			_displayBridge.display = value;
+			
+			if(_displayBridge.display)
+			{
+				_displayBridge.display = value;
+			}
+			else
+			{
+				_displayBridge.display = value;
+				if(this._armature)
+				{
+					_displayBridge.addDisplay(this._armature.display);
+					this._armature._slotsZOrderChanged = true;
+				}
+			}
 			if(!_isHideDisplay && _displayBridge.display)
 			{
 				_isDisplayOnStage = true;
+			}
+			else
+			{
+				_isDisplayOnStage = false;
 			}
 		}
 		

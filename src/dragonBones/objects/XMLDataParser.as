@@ -126,7 +126,7 @@
 			boneData.name = boneXML.@[ConstValues.A_NAME];
 			boneData.parent = boneXML.@[ConstValues.A_PARENT];
 			
-			parseTransform(boneXML[ConstValues.TRANSFORM][0], boneData.global, boneData.pivot);
+			parseTransform(boneXML[ConstValues.TRANSFORM][0], boneData.global);
 			boneData.transform.copy(boneData.global);
 			
 			return boneData;
@@ -199,7 +199,7 @@
 				animationData.addTimeline(timeline, timelineName);
 			}
 			
-			DBDataUtil.addHideTimeline(animationData, armatureData);
+			//DBDataUtil.addHideTimeline(animationData, armatureData);
 			DBDataUtil.transformAnimationData(animationData, armatureData);
 			
 			return animationData;
@@ -282,7 +282,7 @@
 			return frame;
 		}
 		
-		private static function parseTransform(transformXML:XML, transform:DBTransform, pivot:Point):void
+		private static function parseTransform(transformXML:XML, transform:DBTransform, pivot:Point = null):void
 		{
 			if(transformXML)
 			{

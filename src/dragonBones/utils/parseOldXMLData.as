@@ -120,11 +120,8 @@ function parseBoneData(boneXML:XML):BoneData
 	boneData.name = boneXML.@[A_NAME];
 	boneData.parent = boneXML.@[A_PARENT];
 	
-	parseTransform(boneXML, boneData.global, boneData.pivot);
+	parseTransform(boneXML, boneData.global);
 	boneData.transform.copy(boneData.global);
-	
-	boneData.pivot.x *= -1;
-	boneData.pivot.y *= -1;
 	
 	return boneData;
 }
@@ -309,7 +306,7 @@ function parseTransformFrame(frameXML:XML, frameRate:uint):TransformFrame
 	return frame;
 }
 
-function parseTransform(transformXML:XML, transform:DBTransform, pivot:Point):void
+function parseTransform(transformXML:XML, transform:DBTransform, pivot:Point = null):void
 {
 	if(transformXML)
 	{

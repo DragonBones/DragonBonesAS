@@ -55,8 +55,8 @@
 				case BytesType.PNG: 
 				case BytesType.JPG: 
 				case BytesType.ATF: 
-					//try
-					//{
+					try
+					{
 						bytes.position = bytes.length - 4;
 						var strSize:int = bytes.readInt();
 						var position:uint = bytes.length - 4 - strSize;
@@ -94,11 +94,11 @@
 						{
 							textureAtlasData = dataBytes.readObject();
 						}
-					//}
-					//catch (e:Error)
-					//{
-					//	throw new Error("Data error!");
-					//}
+					}
+					catch (e:Error)
+					{
+						throw new Error("Data error!");
+					}
 					
 					var decompressedData:DecompressedData = new DecompressedData(dragonBonesData, textureAtlasData, bytes);
 					decompressedData.textureBytesDataType = dataType;

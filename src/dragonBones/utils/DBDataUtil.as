@@ -62,7 +62,6 @@ package dragonBones.utils
 			var parentTimeline:TransformTimeline;
 			var frameList:Vector.<Frame>;
 			var originTransform:DBTransform;
-			var originPivot:Point;
 			var prevFrame:TransformFrame;
 			var frameListLength:uint;
 			var frame:TransformFrame;
@@ -76,14 +75,20 @@ package dragonBones.utils
 					continue;
 				}
 				
-				slotData = skinData.getSlotData(boneData.name);
+				slotData = null;
+				for each(slotData in skinData.slotDataList)
+				{
+					if(slotData.parent == boneData.name)
+					{
+						break;
+					}
+				}
 				
 				parentTimeline = boneData.parent?animationData.getTimeline(boneData.parent):null;
 				
 				frameList = timeline.frameList;
 				
 				originTransform = null;
-				originPivot = null;
 				prevFrame = null;
 				frameListLength = frameList.length;
 				for(var j:int = 0;j < frameListLength;j ++)
@@ -115,18 +120,10 @@ package dragonBones.utils
 					
 					if(!timeline.transformed)
 					{
-						if(frame.displayIndex >= 0)
+						if(slotData)
 						{
-							displayData = slotData.displayDataList[frame.displayIndex];
-							frame.pivot.x -= displayData.transform.x;
-							frame.pivot.y -= displayData.transform.y;
+							frame.zOrder -= slotData.zOrder;
 						}
-						else
-						{
-							frame.pivot.x -= boneData.pivot.x;
-							frame.pivot.y -= boneData.pivot.y;
-						}
-						frame.zOrder -= slotData.zOrder;
 					}
 					
 					if(!originTransform)
@@ -135,12 +132,6 @@ package dragonBones.utils
 						originTransform.copy(frame.transform);
 						originTransform.skewX = TransformUtil.formatRadian(originTransform.skewX);
 						originTransform.skewY = TransformUtil.formatRadian(originTransform.skewY);
-						if(!timeline.transformed)
-						{
-							originPivot = timeline.originPivot;
-							originPivot.x = frame.pivot.x;
-							originPivot.y = frame.pivot.y;
-						}
 					}
 					
 					frame.transform.x -= originTransform.x;
@@ -193,11 +184,6 @@ package dragonBones.utils
 						}
 					}
 					
-					if(!timeline.transformed)
-					{
-						frame.pivot.x -= originPivot.x;
-						frame.pivot.y -= originPivot.y;
-					}
 					prevFrame = frame;
 				}
 				timeline.transformed = true;

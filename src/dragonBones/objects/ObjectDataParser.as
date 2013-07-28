@@ -104,7 +104,7 @@ package dragonBones.objects
 			boneData.name = boneObject[ConstValues.A_NAME];
 			boneData.parent = boneObject[ConstValues.A_PARENT];
 			
-			parseTransform(boneObject[ConstValues.TRANSFORM], boneData.global, boneData.pivot);
+			parseTransform(boneObject[ConstValues.TRANSFORM], boneData.global);
 			boneData.transform.copy(boneData.global);
 			
 			return boneData;
@@ -259,7 +259,7 @@ package dragonBones.objects
 			return frame;
 		}
 		
-		private static function parseTransform(transformObject:Object, transform:DBTransform, pivot:Point):void
+		private static function parseTransform(transformObject:Object, transform:DBTransform, pivot:Point = null):void
 		{
 			if(transformObject)
 			{

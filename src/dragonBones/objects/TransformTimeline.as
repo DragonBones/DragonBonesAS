@@ -9,7 +9,6 @@ package dragonBones.objects
 		public var transformed:Boolean;
 		
 		public var originTransform:DBTransform;
-		public var originPivot:Point;
 		
 		private var _offset:Number;
 		public function get offset():Number
@@ -30,7 +29,6 @@ package dragonBones.objects
 			super();
 			
 			originTransform = new DBTransform();
-			originPivot = new Point();
 			
 			_offset = 0;
 		}
@@ -43,7 +41,6 @@ package dragonBones.objects
 			}
 			super.dispose();
 			originTransform = null;
-			originPivot = null;
 		}
 	}
 }
