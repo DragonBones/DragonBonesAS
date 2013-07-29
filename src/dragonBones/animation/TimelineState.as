@@ -86,6 +86,7 @@ package dragonBones.animation
 		private var _durationPivot:Point;
 		private var _durationColor:ColorTransform;
 		private var _originTransform:DBTransform;
+		private var _originPivot:Point;
 		
 		private var _tweenEasing:Number;
 		private var _tweenTransform:Boolean;
@@ -112,6 +113,7 @@ package dragonBones.animation
 			_timeline = timeline;
 			
 			_originTransform = _timeline.originTransform;
+			_originPivot = _timeline.originPivot;
 			//_originTransform.copy(_timeline.originTransform);
 			
 			/*
@@ -161,8 +163,8 @@ package dragonBones.animation
 		{
 			transform.skewX = TransformUtil.formatRadian(transform.skewX);
 			transform.skewY = TransformUtil.formatRadian(transform.skewY);
-			_originTransform.skewX = TransformUtil.formatRadian(_originTransform.skewX);
-			_originTransform.skewY = TransformUtil.formatRadian(_originTransform.skewY);
+			//_originTransform.skewX = TransformUtil.formatRadian(_originTransform.skewX);
+			//_originTransform.skewY = TransformUtil.formatRadian(_originTransform.skewY);
 		}
 		
 		private function updateNothing(progress:Number):void
@@ -177,6 +179,9 @@ package dragonBones.animation
 			if(_animationState.blend)
 			{
 				transform.copy(_originTransform);
+				
+				pivot.x = _originPivot.x;
+				pivot.y = _originPivot.y;
 			}
 			else
 			{
@@ -186,10 +191,10 @@ package dragonBones.animation
 					transform.skewY = 
 					transform.scaleX = 
 					transform.scaleY = 0;
+				
+				pivot.x = 0;
+				pivot.y = 0;
 			}
-			
-			pivot.x = 0;
-			pivot.y = 0;
 			
 			_currentFrame = _timeline.frameList[0] as TransformFrame;
 			
@@ -302,8 +307,8 @@ package dragonBones.animation
 					
 					if(frameIndex == 0)
 					{
-						//_durationTransform.skewX = TransformUtil.formatRadian(_durationTransform.skewX);
-						//_durationTransform.skewY = TransformUtil.formatRadian(_durationTransform.skewY);
+						_durationTransform.skewX = TransformUtil.formatRadian(_durationTransform.skewX);
+						_durationTransform.skewY = TransformUtil.formatRadian(_durationTransform.skewY);
 					}
 					
 					_durationPivot.x = nextFrame.pivot.x - _currentFrame.pivot.x;
@@ -399,6 +404,9 @@ package dragonBones.animation
 						transform.skewY = _originTransform.skewY + _currentFrame.transform.skewY;
 						transform.scaleX = _originTransform.scaleX + _currentFrame.transform.scaleX;
 						transform.scaleY = _originTransform.scaleY + _currentFrame.transform.scaleY;
+					
+						pivot.x = _originPivot.x + _currentFrame.pivot.x;
+						pivot.y = _originPivot.y + _currentFrame.pivot.y;
 					}
 					else
 					{
@@ -408,10 +416,10 @@ package dragonBones.animation
 						transform.skewY = _currentFrame.transform.skewY;
 						transform.scaleX = _currentFrame.transform.scaleX;
 						transform.scaleY = _currentFrame.transform.scaleY;
-					}
 					
-					pivot.x = _currentFrame.pivot.x;
-					pivot.y = _currentFrame.pivot.y;
+						pivot.x = _currentFrame.pivot.x;
+						pivot.y = _currentFrame.pivot.y;
+					}
 				}
 				
 				if(!_tweenColor)
@@ -455,6 +463,9 @@ package dragonBones.animation
 					transform.skewY = _originTransform.skewY + currentTransform.skewY + _durationTransform.skewY * progress;
 					transform.scaleX = _originTransform.scaleX + currentTransform.scaleX + _durationTransform.scaleX * progress;
 					transform.scaleY = _originTransform.scaleY + currentTransform.scaleY + _durationTransform.scaleY * progress;
+				
+					pivot.x = _originPivot.x + currentPivot.x + _durationPivot.x * progress;
+					pivot.y = _originPivot.y + currentPivot.y + _durationPivot.y * progress;
 				}
 				else
 				{
@@ -464,10 +475,10 @@ package dragonBones.animation
 					transform.skewY = currentTransform.skewY + _durationTransform.skewY * progress;
 					transform.scaleX = currentTransform.scaleX + _durationTransform.scaleX * progress;
 					transform.scaleY = currentTransform.scaleY + _durationTransform.scaleY * progress;
-				}
 				
-				pivot.x = currentPivot.x + _durationPivot.x * progress;
-				pivot.y = currentPivot.y + _durationPivot.y * progress;
+					pivot.x = currentPivot.x + _durationPivot.x * progress;
+					pivot.y = currentPivot.y + _durationPivot.y * progress;
+				}
 			}
 			
 			if(_tweenColor)
@@ -512,6 +523,7 @@ package dragonBones.animation
 			_timeline = null;
 			_currentFrame = null;
 			_originTransform = null;
+			_originPivot = null;
 		}
 	}
 }

@@ -44,8 +44,8 @@ import dragonBones.objects.SlotData;
 import dragonBones.objects.Timeline;
 import dragonBones.objects.TransformFrame;
 import dragonBones.objects.TransformTimeline;
-import dragonBones.utils.DBDataUtil;
 import dragonBones.utils.ConstValues;
+import dragonBones.utils.DBDataUtil;
 
 import flash.geom.ColorTransform;
 import flash.geom.Point;
@@ -144,15 +144,10 @@ function parseSlotData(boneXML:XML, data:SkeletonData):SlotData
 	slotData.name = boneXML.@[A_NAME];
 	slotData.parent = slotData.name;
 	slotData.zOrder = boneXML.@[A_Z_ORDER];
-	//
-	var pivotX:Number = -Number(boneXML.@[A_PIVOT_X]);
-	var pivotY:Number = -Number(boneXML.@[A_PIVOT_Y]);
 	
 	for each(var displayXML:XML in boneXML[DISPLAY])
 	{
 		var displayData:DisplayData = parseDisplayData(displayXML, data);
-		displayData.transform.x = pivotX;
-		displayData.transform.y = pivotY;
 		slotData.addDisplayData(displayData);
 	}
 	
@@ -173,8 +168,10 @@ function parseDisplayData(displayXML:XML, data:SkeletonData):DisplayData
 	}
 	
 	//
-	//displayData.transform.x = -Number(boneXML.@[A_PIVOT_X]);
-	//displayData.transform.y = -Number(boneXML.@[A_PIVOT_Y]);
+	//displayData.transform.x = -Number(frameXML.@[A_PIVOT_X]);
+	//displayData.transform.y = -Number(frameXML.@[A_PIVOT_Y]);
+	displayData.transform.x = NaN;
+	displayData.transform.y = NaN;
 	displayData.transform.skewX = 0;
 	displayData.transform.skewY = 0;
 	displayData.transform.scaleX = 1;
@@ -210,6 +207,9 @@ function parseAnimationData(animationXML:XML, armatureData:ArmatureData, frameRa
 	
 	parseTimeline(animationXML, animationData, parseMainFrame, frameRate);
 	
+	var skinData:SkinData = armatureData.skinDataList[0];
+	var slotData:SlotData;
+	
 	var timeline:TransformTimeline;
 	var timelineName:String;
 	for each(var timelineXML:XML in animationXML[BONE])
@@ -217,6 +217,11 @@ function parseAnimationData(animationXML:XML, armatureData:ArmatureData, frameRa
 		timeline = parseTransformTimeline(timelineXML, animationData.duration, frameRate);
 		timelineName = timelineXML.@[A_NAME];
 		animationData.addTimeline(timeline, timelineName);
+		if(skinData)
+		{
+			slotData = skinData.getSlotData(timelineName);
+			formatDisplayTransformXYAndTimelinePivot(slotData, timeline);
+		}
 	}
 	
 	DBDataUtil.addHideTimeline(animationData, armatureData);
@@ -323,6 +328,33 @@ function parseTransform(transformXML:XML, transform:DBTransform, pivot:Point = n
 		{
 			pivot.x = Number(transformXML.@[A_PIVOT_X]);
 			pivot.y = Number(transformXML.@[A_PIVOT_Y]);
+		}
+	}
+}
+
+function formatDisplayTransformXYAndTimelinePivot(slotData:SlotData, timeline:TransformTimeline):void
+{
+	if(!slotData)
+	{
+		return;
+	}
+	
+	var displayData:DisplayData;
+	for each(var frame:TransformFrame in timeline.frameList)
+	{
+		if(frame.displayIndex >= 0)
+		{
+			displayData = slotData.displayDataList[frame.displayIndex];
+			if(displayData.type == DisplayData.IMAGE)
+			{
+				if(isNaN(displayData.transform.x))
+				{
+					displayData.transform.x = frame.pivot.x;
+					displayData.transform.y = frame.pivot.y;
+				}
+				frame.pivot.x -= displayData.transform.x;
+				frame.pivot.y -= displayData.transform.y;
+			}
 		}
 	}
 }

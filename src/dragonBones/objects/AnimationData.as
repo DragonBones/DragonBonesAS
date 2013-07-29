@@ -20,7 +20,11 @@ package dragonBones.objects
 		}
 		public function set fadeInTime(value:Number):void
 		{
-			_fadeTime = value > 0?value:0;
+			if(isNaN(value))
+			{
+				value = 0;
+			}
+			_fadeTime = value;
 		}
 		
 		public function AnimationData()

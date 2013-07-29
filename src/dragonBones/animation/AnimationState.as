@@ -195,7 +195,7 @@ package dragonBones.animation
 			_layer = layer;
 			
 			_totalTime = _clip.duration;
-			if(_clip.duration * _clip.frameRate < 2 || timeScale == Infinity)
+			if(Math.round(_clip.duration * _clip.frameRate) < 2 || timeScale == Infinity)
 			{
 				_timeScale = 1;
 				_currentTime = _totalTime;

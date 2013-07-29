@@ -62,6 +62,7 @@ package dragonBones.utils
 			var parentTimeline:TransformTimeline;
 			var frameList:Vector.<Frame>;
 			var originTransform:DBTransform;
+			var originPivot:Point;
 			var prevFrame:TransformFrame;
 			var frameListLength:uint;
 			var frame:TransformFrame;
@@ -89,6 +90,7 @@ package dragonBones.utils
 				frameList = timeline.frameList;
 				
 				originTransform = null;
+				originPivot = null;
 				prevFrame = null;
 				frameListLength = frameList.length;
 				for(var j:int = 0;j < frameListLength;j ++)
@@ -132,6 +134,9 @@ package dragonBones.utils
 						originTransform.copy(frame.transform);
 						originTransform.skewX = TransformUtil.formatRadian(originTransform.skewX);
 						originTransform.skewY = TransformUtil.formatRadian(originTransform.skewY);
+						originPivot = timeline.originPivot;
+						originPivot.x = frame.pivot.x;
+						originPivot.y = frame.pivot.y;
 					}
 					
 					frame.transform.x -= originTransform.x;
@@ -140,6 +145,12 @@ package dragonBones.utils
 					frame.transform.skewY = TransformUtil.formatRadian(frame.transform.skewY - originTransform.skewY);
 					frame.transform.scaleX -= originTransform.scaleX;
 					frame.transform.scaleY -= originTransform.scaleY;
+					
+					if(!timeline.transformed)
+					{
+						frame.pivot.x -= originPivot.x;
+						frame.pivot.y -= originPivot.y;
+					}
 					
 					if(prevFrame)
 					{
