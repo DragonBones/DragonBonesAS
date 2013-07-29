@@ -236,7 +236,8 @@ package dragonBones.objects
 			frame.tweenEasing = Number(frameObject[ConstValues.A_TWEEN_EASING]);
 			frame.tweenRotate = Number(frameObject[ConstValues.A_TWEEN_ROTATE]);
 			frame.displayIndex = Number(frameObject[ConstValues.A_DISPLAY_INDEX]);
-			frame.zOrder = Number(frameObject[ConstValues.A_Z_ORDER]);
+			//
+			frame.zOrder = Number(frameObject[ConstValues.A_Z_ORDER][0]);
 			
 			parseTransform(frameObject[ConstValues.TRANSFORM], frame.global, frame.pivot);
 			frame.transform.copy(frame.global);

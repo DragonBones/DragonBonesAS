@@ -26,7 +26,7 @@
 			tweenRotate = 0;
 			displayIndex = 0;
 			visible = true;
-			zOrder = 0;
+			zOrder = NaN;
 			
 			global = new DBTransform();
 			transform = new DBTransform();

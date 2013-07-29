@@ -41,10 +41,8 @@ package dragonBones.objects
 				return;
 			}
 			super.dispose();
-			_offset = 0;
 			originTransform = null;
 			originPivot = null;
-			transformed = false;
 		}
 	}
 }

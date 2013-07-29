@@ -199,7 +199,7 @@
 				animationData.addTimeline(timeline, timelineName);
 			}
 			
-			//DBDataUtil.addHideTimeline(animationData, armatureData);
+			DBDataUtil.addHideTimeline(animationData, armatureData);
 			DBDataUtil.transformAnimationData(animationData, armatureData);
 			
 			return animationData;
@@ -259,7 +259,8 @@
 			frame.tweenEasing = Number(frameXML.@[ConstValues.A_TWEEN_EASING]);
 			frame.tweenRotate = Number(frameXML.@[ConstValues.A_TWEEN_ROTATE]);
 			frame.displayIndex = Number(frameXML.@[ConstValues.A_DISPLAY_INDEX]);
-			frame.zOrder = Number(frameXML.@[ConstValues.A_Z_ORDER]);
+			//
+			frame.zOrder = Number(frameXML.@[ConstValues.A_Z_ORDER][0]);
 			
 			parseTransform(frameXML[ConstValues.TRANSFORM][0], frame.global, frame.pivot);
 			frame.transform.copy(frame.global);

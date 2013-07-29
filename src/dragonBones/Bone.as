@@ -209,6 +209,25 @@
 			}
 		}
 		
+		/**
+		 * Get all Slot instance associated with this bone.
+		 * @return A Vector.&lt;Slot&gt; instance.
+		 * @see dragonBones.Slot
+		 */
+		public function getSlots():Vector.<Slot>
+		{
+			var slotList:Vector.<Slot> = new Vector.<Slot>;
+			var i:int = _children.length;
+			while(i --)
+			{
+				if(_children[i] is Slot)
+				{
+					slotList.unshift(_children[i]);
+				}
+			}
+			return slotList;
+		}
+		
 		/** @private */
 		dragonBones_internal function arriveAtFrame(frame:Frame, timelineState:TimelineState, animationState:AnimationState, isCross:Boolean):void
 		{
@@ -223,7 +242,7 @@
 						var displayIndex:int = tansformFrame.displayIndex;
 						if(displayIndex >= 0)
 						{
-							if(tansformFrame.zOrder != _slot._tweenZorder)
+							if(!isNaN(tansformFrame.zOrder) && tansformFrame.zOrder != _slot._tweenZorder)
 							{
 								_slot._tweenZorder = tansformFrame.zOrder;
 								this._armature._slotsZOrderChanged = true;
