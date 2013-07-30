@@ -24,7 +24,6 @@ package dragonBones.utils
 				{
 					armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate));
 				}
-				
 			}
 		}
 		
@@ -345,16 +344,13 @@ function formatDisplayTransformXYAndTimelinePivot(slotData:SlotData, timeline:Tr
 		if(frame.displayIndex >= 0)
 		{
 			displayData = slotData.displayDataList[frame.displayIndex];
-			if(displayData.type == DisplayData.IMAGE)
+			if(isNaN(displayData.transform.x))
 			{
-				if(isNaN(displayData.transform.x))
-				{
-					displayData.transform.x = frame.pivot.x;
-					displayData.transform.y = frame.pivot.y;
-				}
-				frame.pivot.x -= displayData.transform.x;
-				frame.pivot.y -= displayData.transform.y;
+				displayData.transform.x = frame.pivot.x;
+				displayData.transform.y = frame.pivot.y;
 			}
+			frame.pivot.x -= displayData.transform.x;
+			frame.pivot.y -= displayData.transform.y;
 		}
 	}
 }

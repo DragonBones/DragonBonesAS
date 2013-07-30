@@ -1,4 +1,4 @@
-package dragonBones.objects
+﻿package dragonBones.objects
 {
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
@@ -238,7 +238,7 @@ package dragonBones.objects
 			frame.tweenRotate = Number(frameObject[ConstValues.A_TWEEN_ROTATE]);
 			frame.displayIndex = Number(frameObject[ConstValues.A_DISPLAY_INDEX]);
 			//
-			frame.zOrder = Number(frameObject[ConstValues.A_Z_ORDER][0]);
+			frame.zOrder = Number(frameObject[ConstValues.A_Z_ORDER]);
 			
 			parseTransform(frameObject[ConstValues.TRANSFORM], frame.global, frame.pivot);
 			frame.transform.copy(frame.global);

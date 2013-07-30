@@ -363,6 +363,9 @@ package dragonBones.factorys
 							{
 								_helpArr[i] = childArmature;
 							}
+							
+							trace(displayData.name, childArmature);
+							
 							break;
 						case DisplayData.IMAGE:
 						default:
