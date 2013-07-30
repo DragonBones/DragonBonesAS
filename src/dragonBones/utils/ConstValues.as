@@ -25,6 +25,7 @@
 		public static const A_FRAME_RATE:String = "frameRate";
 		public static const A_NAME:String = "name";
 		public static const A_PARENT:String = "parent";
+		public static const A_LENGTH:String = "length";
 		public static const A_TYPE:String = "type";
 		public static const A_FADE_IN_TIME:String = "fadeInTime";
 		public static const A_DURATION:String = "duration";

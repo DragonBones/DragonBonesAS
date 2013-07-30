@@ -103,6 +103,7 @@ package dragonBones.objects
 			var boneData:BoneData = new BoneData();
 			boneData.name = boneObject[ConstValues.A_NAME];
 			boneData.parent = boneObject[ConstValues.A_PARENT];
+			boneData.length = Number(boneObject[ConstValues.A_LENGTH]) || 0;
 			
 			parseTransform(boneObject[ConstValues.TRANSFORM], boneData.global);
 			boneData.transform.copy(boneData.global);

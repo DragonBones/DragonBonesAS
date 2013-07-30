@@ -125,6 +125,7 @@
 			var boneData:BoneData = new BoneData();
 			boneData.name = boneXML.@[ConstValues.A_NAME];
 			boneData.parent = boneXML.@[ConstValues.A_PARENT];
+			boneData.length = Number(boneXML.@[ConstValues.A_LENGTH]);
 			
 			parseTransform(boneXML[ConstValues.TRANSFORM][0], boneData.global);
 			boneData.transform.copy(boneData.global);

@@ -231,6 +231,12 @@ package dragonBones.animation
 			{
 				progress /= _timeline.scale;
 			}
+			
+			if(progress == 1)
+			{
+				progress = 0.99999999;
+			}
+			
 			progress += _timeline.offset;
 			var loopCount:int = progress;
 			progress -= loopCount;
@@ -446,7 +452,7 @@ package dragonBones.animation
 				_bone.arriveAtFrame(_currentFrame, this, _animationState, false);
 			}
 			
-			if (_tweenTransform)
+			if(_tweenTransform)
 			{
 				progress = (playedTime - _currentFramePosition) / _currentFrameDuration;
 				if(_tweenEasing)
