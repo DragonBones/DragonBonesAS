@@ -116,20 +116,6 @@
 			_tweenPivot = null;
 		}
 		
-		/** @private */
-		override dragonBones_internal function update():void
-		{
-			super.update();
-			
-			var pivotX:Number = _tweenPivot.x;
-			var pivotY:Number = _tweenPivot.y;
-			if(pivotX || pivotY)
-			{
-				this._globalTransformMatrix.tx += this._globalTransformMatrix.a * pivotX + this._globalTransformMatrix.c * pivotY;
-				this._globalTransformMatrix.ty += this._globalTransformMatrix.b * pivotX + this._globalTransformMatrix.d * pivotY;
-			}
-		}
-		
 		public function contains(child:DBObject):Boolean
 		{
 			if(!child)

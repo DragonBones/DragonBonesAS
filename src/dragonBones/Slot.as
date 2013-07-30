@@ -5,6 +5,8 @@ package dragonBones
 	import dragonBones.display.IDisplayBridge;
 	import dragonBones.objects.DisplayData;
 	
+	import flash.geom.Matrix;
+	
 	use namespace dragonBones_internal;
 	
 	public class Slot extends DBObject
@@ -258,6 +260,15 @@ package dragonBones
 			
 			if(_isDisplayOnStage)
 			{
+				var pivotX:Number = _parent._tweenPivot.x;
+				var pivotY:Number = _parent._tweenPivot.y;
+				if(pivotX || pivotY)
+				{
+					var parentMatrix:Matrix = _parent._globalTransformMatrix;
+					this._globalTransformMatrix.tx += parentMatrix.a * pivotX + parentMatrix.c * pivotY;
+					this._globalTransformMatrix.ty += parentMatrix.b * pivotX + parentMatrix.d * pivotY;
+				}
+				
 				_displayBridge.updateTransform(this._globalTransformMatrix, this._global);
 			}
 		}

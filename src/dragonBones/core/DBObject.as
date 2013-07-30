@@ -31,7 +31,7 @@ package dragonBones.core
 		public var fixedRotation:Boolean;
 		
 		/** @private */
-		protected var _globalTransformMatrix:Matrix;
+		dragonBones_internal var _globalTransformMatrix:Matrix;
 		/** @private */
 		protected var _scaleType:int;
 		/** @private */
