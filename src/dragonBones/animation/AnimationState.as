@@ -137,7 +137,7 @@ package dragonBones.animation
 			{
 				value = 0;
 			}
-			//*
+			//
 			_currentTime = value;
 		}
 		
@@ -404,15 +404,15 @@ package dragonBones.animation
 					_pauseBeforeFadeInComplete = false;
 					_isPlaying = false;
 					var progress:Number = 0;
-					var loopCount:int = progress;
+					var currentLoopCount:int = progress;
 				}
 				else
 				{
 					progress = _currentTime / _totalTime;
 					
 					//update loopCount
-					loopCount = progress;
-					if(loopCount != _loopCount)
+					currentLoopCount = progress;
+					if(currentLoopCount != _loopCount)
 					{
 						if(_loopCount == -1)
 						{
@@ -424,7 +424,7 @@ package dragonBones.animation
 								event = null;
 							}
 						}
-						_loopCount = loopCount;
+						_loopCount = currentLoopCount;
 						if(_loopCount)
 						{
 							if(_loop && _loopCount * _loopCount >= _loop * _loop - 1)
@@ -432,6 +432,7 @@ package dragonBones.animation
 								_isComplete = true;
 								_isPlaying = false;
 								progress = 1;
+								currentLoopCount = 0;
 								if(_armature.hasEventListener(AnimationEvent.COMPLETE))
 								{
 									event = new AnimationEvent(AnimationEvent.COMPLETE);
@@ -459,7 +460,7 @@ package dragonBones.animation
 				//
 				if(_clip.frameList.length > 0)
 				{
-					var playedTime:Number = _totalTime * (progress - loopCount);
+					var playedTime:Number = _totalTime * (progress - currentLoopCount);
 					var isArrivedFrame:Boolean = false;
 					var frameIndex:int;
 					while(!_currentFrame || playedTime > _currentFrame.position + _currentFrame.duration || playedTime < _currentFrame.position)
