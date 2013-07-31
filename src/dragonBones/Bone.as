@@ -17,6 +17,10 @@
 		//0/1/2
 		public var scaleMode:int;
 		
+		public var displayControlLayer:int;
+		
+		public var displayControlGroup:String;
+		
 		/** @private */
 		dragonBones_internal var _tweenPivot:Point;
 		
@@ -94,6 +98,7 @@
 			_tweenPivot = new Point();
 			
 			scaleMode = 1;
+			displayControlLayer = -1;
 		}
 		
 		/**
@@ -222,20 +227,26 @@
 				var mixingType:int = animationState.getMixingTransform(name);
 				if(animationState.displayControl && (mixingType == 2 || mixingType == -1))
 				{
-					var tansformFrame:TransformFrame = frame as TransformFrame;
-					if(_slot)
+					if(
+						(displayControlGroup && displayControlGroup == animationState.group) ||
+						(displayControlLayer >= 0 && displayControlLayer == animationState.layer)
+					)
 					{
-						var displayIndex:int = tansformFrame.displayIndex;
-						if(displayIndex >= 0)
+						var tansformFrame:TransformFrame = frame as TransformFrame;
+						if(_slot)
 						{
-							if(!isNaN(tansformFrame.zOrder) && tansformFrame.zOrder != _slot._tweenZorder)
+							var displayIndex:int = tansformFrame.displayIndex;
+							if(displayIndex >= 0)
 							{
-								_slot._tweenZorder = tansformFrame.zOrder;
-								this._armature._slotsZOrderChanged = true;
+								if(!isNaN(tansformFrame.zOrder) && tansformFrame.zOrder != _slot._tweenZorder)
+								{
+									_slot._tweenZorder = tansformFrame.zOrder;
+									this._armature._slotsZOrderChanged = true;
+								}
 							}
+							_slot.changeDisplay(displayIndex);
+							_slot.updateVisible(tansformFrame.visible);
 						}
-						_slot.changeDisplay(displayIndex);
-						_slot.updateVisible(tansformFrame.visible);
 					}
 				}
 				
