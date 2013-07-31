@@ -228,8 +228,13 @@
 				if(animationState.displayControl && (mixingType == 2 || mixingType == -1))
 				{
 					if(
-						(displayControlGroup && displayControlGroup == animationState.group) ||
-						(displayControlLayer >= 0 && displayControlLayer == animationState.layer)
+						displayControlGroup?
+							displayControlGroup == animationState.group:
+							(
+								displayControlLayer >= 0?
+								displayControlLayer == animationState.layer:
+								true
+							)
 					)
 					{
 						var tansformFrame:TransformFrame = frame as TransformFrame;
