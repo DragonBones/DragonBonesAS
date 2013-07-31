@@ -4,7 +4,7 @@ package dragonBones.core
 	{
 		public static const DATA_VERSION:String = "2.3";
 		public static const VERSION:String = "2.3 Preview";
-		public static const VERSION_NUMBER:int = 2301;
+		public static const VERSION_NUMBER:int = 2302;
 		
 		public function DragonBones()
 		{
