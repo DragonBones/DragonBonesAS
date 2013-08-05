@@ -22,6 +22,7 @@
 		public static const SUB_TEXTURE:String = "SubTexture";
 		
 		public static const A_VERSION:String = "version";
+		public static const A_IMAGE_PATH:String = "imagePath";
 		public static const A_FRAME_RATE:String = "frameRate";
 		public static const A_NAME:String = "name";
 		public static const A_PARENT:String = "parent";

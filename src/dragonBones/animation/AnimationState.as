@@ -174,10 +174,10 @@ package dragonBones.animation
 			if(_displayControl != value)
 			{
 				_displayControl = value;
-				if(_displayControl)
+				/*if(_displayControl)
 				{
 					_armature.animation.setStatesDisplayControl(this);
-				}
+				}*/
 			}
 		}
 		

@@ -9,9 +9,6 @@
 	import dragonBones.Armature;
 	import dragonBones.Bone;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.events.AnimationEvent;
-	import dragonBones.events.FrameEvent;
-	import dragonBones.events.SoundEvent;
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.DBTransform;
 	
@@ -67,9 +64,11 @@
 	 */
 	public class Animation
 	{
-		public static const FADE_OUT_NONE:String = "fadeOutNone";
-		public static const FADE_OUT_SAME_LAYER:String = "fadeOutSameLayer";
-		public static const FADE_OUT_ALL_LAYER:String = "fadeOutAllLayer";
+		public static const NONE:String = "none";
+		public static const SAME_LAYER:String = "sameLayer";
+		public static const SAME_GROUP:String = "sameGroup";
+		public static const SAME_LAYER_AND_GROUP:String = "sameLayerAndGroup";
+		public static const ALL:String = "all";
 		
 		/**
 		 * Whether animation tweening is enabled or not.
@@ -205,6 +204,10 @@
 		 */
 		public function dispose():void
 		{
+			if(!_armature)
+			{
+				return;
+			}
 			stop();
 			var i:int = _animationLayer.length;
 			while(i --)
@@ -228,15 +231,15 @@
 		
 		/**
 		 * Move the playhead to that AnimationData
-		 * @param	The name of the AnimationData to play.
-		 * @param	A fade time to apply (> 0)
-		 * @param	The duration of that AnimationData.
-		 * @param	Loop(0:loop forever, 1~+∞:loop times, -1~-∞:will fade animation after loop complete).
-		 * @param	The layer of the animation.
-		 * @param	Play mode.
-		 * @param	Display control.
-		 * @param	Pause other animation playing.
-		 * @param	Pause this animation playing before fade in complete.
+		 * @param animationName The name of the AnimationData to play.
+		 * @param fadeInTime A fade time to apply (> 0)
+		 * @param duration The duration of that AnimationData.
+		 * @param loop Loop(0:loop forever, 1~+∞:loop times, -1~-∞:will fade animation after loop complete).
+		 * @param layer The layer of the animation.
+		 * @param fadeOutMode Fade out mode.
+		 * @param displayControl Display control.
+		 * @param pauseFadeOut Pause other animation playing.
+		 * @param pauseFadeIn Pause this animation playing before fade in complete.
 		 * @see dragonBones.objects.AnimationData.
 		 * @see dragonBones.animation.AnimationState.
 		 */
@@ -246,7 +249,8 @@
 			duration:Number = -1, 
 			loop:Number = NaN, 
 			layer:uint = 0, 
-			playMode:String = FADE_OUT_SAME_LAYER,
+			group:String = null,
+			fadeOutMode:String = SAME_LAYER_AND_GROUP,
 			displayControl:Boolean = true,
 			pauseFadeOut:Boolean = true,
 			pauseFadeIn:Boolean = true
@@ -290,40 +294,22 @@
 			layer = addLayer(layer);
 			
 			//autoSync = autoSync && !pauseFadeOut && !pauseFadeIn;
-			switch(playMode)
+			var animationState:AnimationState;
+			var animationStateList:Vector.<AnimationState>;
+			switch(fadeOutMode)
 			{
-				case FADE_OUT_NONE:
+				case NONE:
 					break;
-				case FADE_OUT_SAME_LAYER:
-					var animationStateList:Vector.<AnimationState> = _animationLayer[layer];
+				case SAME_LAYER:
+					animationStateList = _animationLayer[layer];
 					i = animationStateList.length;
 					while(i --)
 					{
-						var animationState:AnimationState = animationStateList[i];
-						if(!animationState.group)
-						{
-							animationState.fadeOut(fadeInTime, pauseFadeOut);
-						}
+						animationState = animationStateList[i];
+						animationState.fadeOut(fadeInTime, pauseFadeOut);
 					}
 					break;
-				case FADE_OUT_ALL_LAYER:
-					var j:int = _animationLayer.length;
-					while(j --)
-					{
-						animationStateList = _animationLayer[j];
-						i = animationStateList.length;
-						while(i --)
-						{
-							animationState = animationStateList[i];
-							if(!animationState.group)
-							{
-								animationState.fadeOut(fadeInTime, pauseFadeOut);
-							}
-						}
-					}
-					break;
-				default:
-					var group:String = playMode;
+				case SAME_GROUP:
 					j = _animationLayer.length;
 					while(j --)
 					{
@@ -339,8 +325,40 @@
 						}
 					}
 					break;
+				case ALL:
+					var j:int = _animationLayer.length;
+					while(j --)
+					{
+						animationStateList = _animationLayer[j];
+						i = animationStateList.length;
+						while(i --)
+						{
+							animationState = animationStateList[i];
+							animationState.fadeOut(fadeInTime, pauseFadeOut);
+						}
+					}
+					break;
+				case SAME_LAYER_AND_GROUP:
+				default:
+					animationStateList = _animationLayer[layer];
+					i = animationStateList.length;
+					while(i --)
+					{
+						animationState = animationStateList[i];
+						if(animationState.group == group)
+						{
+							animationState.fadeOut(fadeInTime, pauseFadeOut);
+						}
+					}
+					break;
 			}
 			
+			_lastAnimationState = AnimationState.borrowObject();
+			_lastAnimationState.group = group;
+			_lastAnimationState.tweenEnabled = tweenEnabled;
+			_lastAnimationState.fadeIn(_armature, animationData, fadeInTime, 1 / durationScale, loop, layer, displayControl, pauseFadeIn);
+			
+			addState(_lastAnimationState);
 			
 			var boneList:Vector.<Bone> = _armature._boneList;
 			var bone:Bone;
@@ -354,12 +372,6 @@
 				}
 			}
 			
-			_lastAnimationState = AnimationState.borrowObject();
-			_lastAnimationState.group = group;
-			_lastAnimationState.tweenEnabled = tweenEnabled;
-			_lastAnimationState.fadeIn(_armature, animationData, fadeInTime, 1 / durationScale, loop, layer, displayControl, pauseFadeIn);
-			
-			addState(_lastAnimationState);
 			return _lastAnimationState;
 		}
 		
@@ -423,6 +435,20 @@
 			}
 			
 			return null;
+		}
+		
+		public function hasAnimation(animationName:String):Boolean
+		{
+			var i:int = _animationDataList.length;
+			while(i --)
+			{
+				if(_animationDataList[i].name == animationName)
+				{
+					return true;
+				}
+			}
+			
+			return false;
 		}
 		
 		public function advanceTime(passedTime:Number):void
@@ -536,7 +562,7 @@
 		}
 		
 		/** @private */
-		dragonBones_internal function setStatesDisplayControl(animationState:AnimationState):void
+		/*dragonBones_internal function setStatesDisplayControl(animationState:AnimationState):void
 		{
 			var i:int = _animationLayer.length;
 			var animationStateList:Vector.<AnimationState> = _animationLayer[i];
@@ -550,7 +576,7 @@
 					animationStateList[j].displayControl = animationStateList[j] == animationState;
 				}
 			}
-		}
+		}*/
 		
 		private function addLayer(layer:uint):uint
 		{

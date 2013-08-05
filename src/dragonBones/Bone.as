@@ -5,6 +5,8 @@
 	import dragonBones.core.DBObject;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.FrameEvent;
+	import dragonBones.events.SoundEvent;
+	import dragonBones.events.SoundEventManager;
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.TransformFrame;
 	
@@ -14,12 +16,9 @@
 	
 	public class Bone extends DBObject
 	{
+		private static const _soundManager:SoundEventManager = SoundEventManager.getInstance();
 		//0/1/2
 		public var scaleMode:int;
-		
-		public var displayControlLayer:int;
-		
-		public var displayControlGroup:String;
 		
 		/** @private */
 		dragonBones_internal var _tweenPivot:Point;
@@ -56,6 +55,16 @@
 			{
 				_slot.display = value;
 			}
+		}
+		
+		private var _displayController:String;
+		public function get displayController():String
+		{
+			return _displayController;
+		}
+		public function set displayController(value:String):void
+		{
+			_displayController = value;
 		}
 		
 		/**
@@ -98,7 +107,6 @@
 			_tweenPivot = new Point();
 			
 			scaleMode = 1;
-			displayControlLayer = -1;
 		}
 		
 		/**
@@ -106,6 +114,10 @@
 		 */
 		override public function dispose():void
 		{
+			if(!_children)
+			{
+				return;
+			}
 			super.dispose();
 			
 			var i:int = _children.length;
@@ -228,13 +240,7 @@
 				if(animationState.displayControl && (mixingType == 2 || mixingType == -1))
 				{
 					if(
-						displayControlGroup?
-							displayControlGroup == animationState.group:
-							(
-								displayControlLayer >= 0?
-								displayControlLayer == animationState.layer:
-								true
-							)
+						!_displayController || _displayController == animationState.name
 					)
 					{
 						var tansformFrame:TransformFrame = frame as TransformFrame;
@@ -262,6 +268,15 @@
 					frameEvent.animationState = animationState;
 					frameEvent.frameLabel = frame.event;
 					this._armature.dispatchEvent(frameEvent);
+				}
+				
+				if(frame.sound && this._armature.hasEventListener(SoundEvent.SOUND))
+				{
+					var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
+					soundEvent.armature = this._armature;
+					soundEvent.animationState = animationState;
+					soundEvent.sound = frame.sound;
+					_soundManager.dispatchEvent(soundEvent);
 				}
 				
 				if(frame.action)

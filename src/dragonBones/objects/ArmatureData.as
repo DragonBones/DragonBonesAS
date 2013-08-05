@@ -2,8 +2,6 @@ package dragonBones.objects
 {
 	final public class ArmatureData
 	{
-		private static const _helpArray:Array = [];
-		
 		public var name:String;
 		
 		private var _boneDataList:Vector.<BoneData>;
@@ -164,7 +162,7 @@ package dragonBones.objects
 				return;
 			}
 			
-			_helpArray.length = 0;
+			var helpArray:Array = [];
 			while(i --)
 			{
 				var boneData:BoneData = _boneDataList[i];
@@ -175,17 +173,16 @@ package dragonBones.objects
 					level ++;
 					parentData = getBoneData(parentData.parent);
 				}
-				_helpArray[i] = {level:level, boneData:boneData};
+				helpArray[i] = {level:level, boneData:boneData};
 			}
 			
-			_helpArray.sortOn("level", Array.NUMERIC);
+			helpArray.sortOn("level", Array.NUMERIC);
 			
-			i = _helpArray.length;
+			i = helpArray.length;
 			while(i --)
 			{
-				_boneDataList[i] = _helpArray[i].boneData;
+				_boneDataList[i] = helpArray[i].boneData;
 			}
-			_helpArray.length = 0;
 		}
 	}
 }

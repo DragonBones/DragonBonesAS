@@ -108,7 +108,7 @@
 			delete textureAtlasData.__name;
 			for(var subTextureName:String in textureAtlasData)
 			{
-				addRegion(subTextureName, textureAtlasData[subTextureName], null);
+				this.addRegion(subTextureName, textureAtlasData[subTextureName], null);
 			}
 		}
 	}
