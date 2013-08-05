@@ -546,7 +546,7 @@
 				this.dispatchEvent(frameEvent);
 			}
 			
-			if(frame.sound && this.hasEventListener(SoundEvent.SOUND))
+			if(frame.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
 			{
 				var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
 				soundEvent.armature = this;

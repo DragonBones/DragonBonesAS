@@ -368,7 +368,7 @@
 				bone = boneList[i];
 				if(bone.childArmature)
 				{
-					bone.childArmature.animation.gotoAndPlay(animationName);
+					bone.childArmature.animation.gotoAndPlay(animationName, fadeInTime, -1, loop);
 				}
 			}
 			
