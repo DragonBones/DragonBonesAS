@@ -254,12 +254,15 @@
 		 */
 		public function getSlotByDisplay(display:Object):Slot
 		{
-			var i:int = _slotList.length;
-			while(i --)
+			if(display)
 			{
-				if(_slotList[i].display == display)
+				var i:int = _slotList.length;
+				while(i --)
 				{
-					return _slotList[i];
+					if(_slotList[i].display == display)
+					{
+						return _slotList[i];
+					}
 				}
 			}
 			return null;
