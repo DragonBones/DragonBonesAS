@@ -140,6 +140,7 @@ package dragonBones
 				if(!_isHideDisplay)
 				{
 					_isHideDisplay = true;
+					_displayBridge.removeDisplay();
 					updateChildArmatureAnimation();
 				}
 			}
