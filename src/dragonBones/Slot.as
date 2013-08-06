@@ -149,7 +149,7 @@ package dragonBones
 				if(_isHideDisplay)
 				{
 					_isHideDisplay = false;
-					
+					var changeShowState:Boolean = true;
 					if(this._armature)
 					{
 						_displayBridge.addDisplay(this._armature.display);
@@ -181,7 +181,7 @@ package dragonBones
 						this._origin.copy(_dislayDataList[_displayIndex].transform);
 					}
 				}
-				else
+				else if(changeShowState)
 				{
 					updateChildArmatureAnimation();
 				}
