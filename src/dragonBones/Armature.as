@@ -558,7 +558,7 @@
 				_soundManager.dispatchEvent(soundEvent);
 			}
 			
-			if(frame.action && animationState.isPlaying)
+			if(frame.action)
 			{
 				animation.gotoAndPlay(frame.action);
 			}

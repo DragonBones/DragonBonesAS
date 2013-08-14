@@ -207,15 +207,14 @@ package dragonBones.animation
 				{
 					_loop = -1;
 				}
-				_pauseBeforeFadeInComplete = false;
 			}
 			else
 			{
 				_timeScale = timeScale;
 				_currentTime = 0;
 				_loop = loop;
-				_pauseBeforeFadeInComplete = pauseBeforeFadeInComplete;
 			}
+			_pauseBeforeFadeInComplete = pauseBeforeFadeInComplete;
 			
 			_fadeInTime = fadeInTime * _timeScale;
 			
