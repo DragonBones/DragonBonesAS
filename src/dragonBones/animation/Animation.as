@@ -591,7 +591,7 @@
 		private function addState(animationState:AnimationState):void
 		{
 			var animationStateList:Vector.<AnimationState> = _animationLayer[animationState.layer];
-			animationStateList[animationStateList.length] = animationState;
+			animationStateList.unshift(animationState);
 		}
 		
 		private function removeState(animationState:AnimationState):void
