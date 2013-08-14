@@ -452,13 +452,17 @@ package dragonBones.animation
 				_bone.arriveAtFrame(_currentFrame, this, _animationState, false);
 			}
 			
-			if(_tweenTransform)
+			if(_tweenTransform || _tweenColor)
 			{
 				progress = (playedTime - _currentFramePosition) / _currentFrameDuration;
 				if(_tweenEasing)
 				{
 					progress = getEaseValue(progress, _tweenEasing);
 				}
+			}
+			
+			if(_tweenTransform)
+			{
 				var currentTransform:DBTransform = _currentFrame.transform;
 				var currentPivot:Point = _currentFrame.pivot;
 				if(_animationState.blend)
@@ -514,7 +518,7 @@ package dragonBones.animation
 						1 + _durationColor.redMultiplier * progress,
 						1 + _durationColor.greenMultiplier * progress,
 						1 + _durationColor.blueMultiplier * progress,
-						false
+						true
 					);
 				}
 			}
