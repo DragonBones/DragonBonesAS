@@ -229,7 +229,12 @@ package dragonBones.animation
 						}
 						var nextFrame:TransformFrame = _timeline.frameList[frameIndex] as TransformFrame;
 						
-						if(frameIndex == 0 && _animationState.loop && _animationState.loopCount >= Math.abs(_animationState.loop) - 1 && ((_currentFramePosition + _currentFrameDuration) / _totalTime + loopCount - _timeline.offset) * _timeline.scale > 0.999999)// >= 1
+						if(
+							frameIndex == 0 && 
+							_animationState.loop && 
+							_animationState.loopCount >= Math.abs(_animationState.loop) - 1 && 
+							((_currentFramePosition + _currentFrameDuration) / _totalTime + loopCount - _timeline.offset) * _timeline.scale > 0.99999999
+						)
 						{
 							_updateState = 0;
 							_tweenEasing = NaN;

@@ -267,7 +267,7 @@
 					frameEvent.bone = this;
 					frameEvent.animationState = animationState;
 					frameEvent.frameLabel = frame.event;
-					this._armature.dispatchEvent(frameEvent);
+					this._armature._eventList.push(frameEvent);
 				}
 				
 				if(frame.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
