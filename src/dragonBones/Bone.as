@@ -200,11 +200,6 @@
 				{
 					_slot = null;
 				}
-				
-				if(this._armature)
-				{
-					this._armature.removeDBObject(child);
-				}
 			}
 			else
 			{

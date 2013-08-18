@@ -369,7 +369,14 @@
 			
 			if(_boneList.indexOf(bone) >= 0)
 			{
-				bone.parent.removeChild(bone);
+				if(bone.parent)
+				{
+					bone.parent.removeChild(bone);
+				}
+				else
+				{
+					bone.setArmature(null);
+				}
 			}
 			else
 			{
