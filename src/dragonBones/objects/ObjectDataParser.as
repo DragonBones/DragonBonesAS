@@ -234,7 +234,14 @@
 			parseFrame(frameObject, frame, frameRate);
 			
 			frame.visible = uint(frameObject[ConstValues.A_HIDE]) != 1;
-			frame.tweenEasing = Number(frameObject[ConstValues.A_TWEEN_EASING]);
+			if(frameObject[ConstValues.A_TWEEN_EASING] == undefined)
+			{
+				frame.tweenEasing = 0;
+			}
+			else
+			{
+				frame.tweenEasing = Number(frameObject[ConstValues.A_TWEEN_EASING]);
+			}
 			frame.tweenRotate = Number(frameObject[ConstValues.A_TWEEN_ROTATE]);
 			frame.displayIndex = Number(frameObject[ConstValues.A_DISPLAY_INDEX]);
 			//

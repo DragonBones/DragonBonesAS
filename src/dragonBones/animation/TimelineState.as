@@ -124,6 +124,9 @@ package dragonBones.animation
 			_originTransform.skewY = bLRY + TransformUtils.formatRadian(_originTransform.skewY - bLRY);
 			*/
 			
+			_tweenTransform = false;
+			_tweenColor = false;
+			
 			_totalTime = _animationState.totalTime;
 			
 			transform.x = 0;

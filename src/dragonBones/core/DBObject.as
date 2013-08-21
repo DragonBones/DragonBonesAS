@@ -8,12 +8,11 @@ package dragonBones.core
 	import dragonBones.objects.DBTransform;
 	import dragonBones.objects.Frame;
 	
-	import flash.events.EventDispatcher;
 	import flash.geom.Matrix;
 	
 	use namespace dragonBones_internal;
 	
-	public class DBObject extends EventDispatcher
+	public class DBObject
 	{	
 		/**
 		 * The name of this DBObject instance's Armature instance.
@@ -129,8 +128,6 @@ package dragonBones.core
 		
 		public function DBObject()
 		{
-			super(this);
-			
 			_global = new DBTransform();
 			_origin = new DBTransform();
 			_offset = new DBTransform();
