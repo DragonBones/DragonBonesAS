@@ -37,7 +37,7 @@ package dragonBones.core
 		dragonBones_internal var _isColorChanged:Boolean;
 		
 		/** @private */
-		protected var _global:DBTransform;
+		dragonBones_internal var _global:DBTransform;
 		/**
 		 * This DBObject instance global transform instance.
 		 * @see dragonBones.objects.DBTransform
