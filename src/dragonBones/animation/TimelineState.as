@@ -1,14 +1,14 @@
 package dragonBones.animation
 {
+	import flash.geom.ColorTransform;
+	import flash.geom.Point;
+	
 	import dragonBones.Bone;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DBTransform;
 	import dragonBones.objects.TransformFrame;
 	import dragonBones.objects.TransformTimeline;
 	import dragonBones.utils.TransformUtil;
-	
-	import flash.geom.ColorTransform;
-	import flash.geom.Point;
 	
 	use namespace dragonBones_internal;
 	
@@ -73,6 +73,7 @@ package dragonBones.animation
 		
 		public var transform:DBTransform;
 		public var pivot:Point;
+		public var tweenActive:Boolean;
 		
 		private var _updateState:int;
 		
@@ -225,6 +226,7 @@ package dragonBones.animation
 					
 					if(isArrivedFrame)
 					{
+						tweenActive = _currentFrame.displayIndex >= 0;
 						frameIndex ++;
 						if(frameIndex >= _timeline.frameList.length)
 						{
@@ -242,7 +244,7 @@ package dragonBones.animation
 							_updateState = 0;
 							_tweenEasing = NaN;
 						}
-						else if(nextFrame.displayIndex < 0 || !_animationState.tweenEnabled)
+						else if(_currentFrame.displayIndex < 0 || nextFrame.displayIndex < 0 || !_animationState.tweenEnabled)
 						{
 							_tweenEasing = NaN;
 						}
@@ -505,6 +507,8 @@ package dragonBones.animation
 					}
 					
 					_currentFrame = _timeline.frameList[0] as TransformFrame;
+					
+					tweenActive = _currentFrame.displayIndex >= 0;
 					
 					if(_currentFrame.color)
 					{
