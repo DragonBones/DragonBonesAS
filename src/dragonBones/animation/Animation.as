@@ -236,6 +236,7 @@
 		 * @param duration The duration of that AnimationData.
 		 * @param loop Loop(0:loop forever, 1~+∞:loop times, -1~-∞:will fade animation after loop complete).
 		 * @param layer The layer of the animation.
+		 * @param group The group of the animation.
 		 * @param fadeOutMode Fade out mode.
 		 * @param displayControl Display control.
 		 * @param pauseFadeOut Pause other animation playing.
@@ -372,6 +373,8 @@
 				}
 			}
 			
+			_lastAnimationState.advanceTime(0);
+			
 			return _lastAnimationState;
 		}
 		
@@ -463,6 +466,7 @@
 			var i:int;
 			var j:int;
 			var k:int = l;
+			var stateListLength:uint;
 			var bone:Bone;
 			var boneName:String;
 			var weigthLeft:Number;
@@ -505,8 +509,8 @@
 				{
 					layerTotalWeight = 0;
 					animationStateList = _animationLayer[i];
-					j = animationStateList.length;
-					while(j --)
+					stateListLength = animationStateList.length;
+					for(j = 0;j < stateListLength;j ++)
 					{
 						animationState = animationStateList[j];
 						if(k == l)
@@ -514,13 +518,15 @@
 							if(animationState.advanceTime(passedTime))
 							{
 								removeState(animationState);
+								j --;
+								stateListLength --;
 								continue;
 							}
 						}
 						
 						timelineState = animationState._timelineStates[boneName];
 						
-						if(timelineState)
+						if(timelineState && timelineState.tweenActive)
 						{
 							weight = animationState._fadeWeight * animationState.weight * weigthLeft;
 							transform = timelineState.transform;
@@ -591,7 +597,7 @@
 		private function addState(animationState:AnimationState):void
 		{
 			var animationStateList:Vector.<AnimationState> = _animationLayer[animationState.layer];
-			animationStateList[animationStateList.length] = animationState;
+			animationStateList.push(animationState);
 		}
 		
 		private function removeState(animationState:AnimationState):void

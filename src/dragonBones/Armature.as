@@ -13,6 +13,7 @@
 	import dragonBones.objects.DBTransform;
 	import dragonBones.objects.Frame;
 	
+	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.geom.ColorTransform;
 	
@@ -89,6 +90,8 @@
 		dragonBones_internal var _slotList:Vector.<Slot>;
 		/** @private */
 		dragonBones_internal var _boneList:Vector.<Bone>;
+		/** @private */
+		dragonBones_internal var _eventList:Vector.<Event>;
 		
 		/** @private */
 		protected var _display:Object;
@@ -127,6 +130,7 @@
 			_slotList.fixed = true;
 			_boneList = new Vector.<Bone>;
 			_boneList.fixed = true;
+			_eventList = new Vector.<Event>;
 		}
 		
 		/**
@@ -157,10 +161,12 @@
 			_slotList.length = 0;
 			_boneList.fixed = false;
 			_boneList.length = 0;
+			_eventList.length = 0;
 			
 			_animation = null;
 			_slotList = null;
 			_boneList = null;
+			_eventList = null;
 			
 			//_display = null;
 		}
@@ -203,6 +209,15 @@
 				{
 					this.dispatchEvent(new ArmatureEvent(ArmatureEvent.Z_ORDER_UPDATED));
 				}
+			}
+			
+			if(_eventList.length)
+			{
+				for each(var event:Event in _eventList)
+				{
+					this.dispatchEvent(event);
+				}
+				_eventList.length = 0;
 			}
 		}
 		
@@ -354,7 +369,14 @@
 			
 			if(_boneList.indexOf(bone) >= 0)
 			{
-				bone.parent.removeChild(bone);
+				if(bone.parent)
+				{
+					bone.parent.removeChild(bone);
+				}
+				else
+				{
+					bone.setArmature(null);
+				}
 			}
 			else
 			{
@@ -546,7 +568,7 @@
 				var frameEvent:FrameEvent = new FrameEvent(FrameEvent.ANIMATION_FRAME_EVENT);
 				frameEvent.animationState = animationState;
 				frameEvent.frameLabel = frame.event;
-				this.dispatchEvent(frameEvent);
+				_eventList.push(frameEvent);
 			}
 			
 			if(frame.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
@@ -558,9 +580,12 @@
 				_soundManager.dispatchEvent(soundEvent);
 			}
 			
-			if(frame.action && animationState.isPlaying)
+			if(frame.action)
 			{
-				animation.gotoAndPlay(frame.action);
+				if(animationState.isPlaying)
+				{
+					animation.gotoAndPlay(frame.action);
+				}
 			}
 		}
 		

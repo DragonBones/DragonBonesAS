@@ -1,5 +1,9 @@
 ﻿package dragonBones.objects
 {
+	import flash.geom.ColorTransform;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
+	
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.AnimationData;
@@ -16,10 +20,6 @@
 	import dragonBones.objects.TransformTimeline;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.DBDataUtil;
-	
-	import flash.geom.ColorTransform;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
 	
 	use namespace dragonBones_internal;
 	
@@ -164,7 +164,26 @@
 			animationData.fadeInTime = Number(animationObject[ConstValues.A_FADE_IN_TIME]);
 			animationData.duration = Number(animationObject[ConstValues.A_DURATION]) / frameRate;
 			animationData.scale = Number(animationObject[ConstValues.A_SCALE]);
-			animationData.tweenEasing = Number(animationObject[ConstValues.A_TWEEN_EASING]);
+			
+			if(ConstValues.A_TWEEN_EASING in animationObject)
+			{
+				var tweenEase:* = animationObject[ConstValues.A_TWEEN_EASING];
+				if(
+					tweenEase == undefined ||
+					tweenEase == null
+				)
+				{
+					animationData.tweenEasing = NaN;
+				}
+				else
+				{
+					animationData.tweenEasing = Number(tweenEase);
+				}
+			}
+			else
+			{
+				animationData.tweenEasing = NaN;
+			}
 			
 			parseTimeline(animationObject, animationData, parseMainFrame, frameRate);
 			
@@ -234,7 +253,27 @@
 			parseFrame(frameObject, frame, frameRate);
 			
 			frame.visible = uint(frameObject[ConstValues.A_HIDE]) != 1;
-			frame.tweenEasing = Number(frameObject[ConstValues.A_TWEEN_EASING]);
+			
+			if(ConstValues.A_TWEEN_EASING in frameObject)
+			{
+				var tweenEase:* = frameObject[ConstValues.A_TWEEN_EASING];
+				if(
+					tweenEase == undefined ||
+					tweenEase == null
+				)
+				{
+					frame.tweenEasing = NaN;
+				}
+				else
+				{
+					frame.tweenEasing = Number(tweenEase);
+				}
+			}
+			else
+			{
+				frame.tweenEasing = 0;
+			}
+			
 			frame.tweenRotate = Number(frameObject[ConstValues.A_TWEEN_ROTATE]);
 			frame.displayIndex = Number(frameObject[ConstValues.A_DISPLAY_INDEX]);
 			//
