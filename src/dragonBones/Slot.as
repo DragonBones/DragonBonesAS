@@ -1,11 +1,11 @@
 package dragonBones
 {
+	import flash.geom.Matrix;
+	
 	import dragonBones.core.DBObject;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.display.IDisplayBridge;
 	import dragonBones.objects.DisplayData;
-	
-	import flash.geom.Matrix;
 	
 	use namespace dragonBones_internal;
 	
@@ -99,8 +99,9 @@ package dragonBones
 			
 			if(_displayIndex >= 0)
 			{
+				var displayIndexBackup:int = _displayIndex;
 				_displayIndex = -1;
-				changeDisplay(_displayIndex);
+				changeDisplay(displayIndexBackup);
 			}
 		}
 		
