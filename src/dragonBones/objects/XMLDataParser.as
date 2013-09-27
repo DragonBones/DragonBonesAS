@@ -170,6 +170,11 @@
 			slotData.name = slotXML.@[ConstValues.A_NAME];
 			slotData.parent = slotXML.@[ConstValues.A_PARENT];
 			slotData.zOrder = Number(slotXML.@[ConstValues.A_Z_ORDER]);
+            slotData.blendMode = slotXML.@[ConstValues.A_BLENDMODE];
+            if(!slotData.blendMode)
+            {
+                slotData.blendMode = "normal";
+            }
 			for each(var displayXML:XML in slotXML[ConstValues.DISPLAY])
 			{
 				slotData.addDisplayData(parseDisplayData(displayXML, data));
