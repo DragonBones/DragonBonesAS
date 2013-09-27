@@ -37,7 +37,7 @@ package dragonBones.factorys
 	public class BaseFactory extends EventDispatcher
 	{
 		/** @private */
-		protected static const _helpMatirx:Matrix = new Matrix();
+		protected static const _helpMatrix:Matrix = new Matrix();
 		private static const _loaderContext:LoaderContext = new LoaderContext(false, ApplicationDomain.currentDomain);
 		
 		/** @private */
@@ -384,8 +384,22 @@ package dragonBones.factorys
 				slot.changeDisplay(0);
 				bone.addChild(slot);
 			}
-			armature._slotsZOrderChanged = true;
-			armature.advanceTime(0);
+
+			//
+			i = armature._boneList.length;
+			while(i --)
+			{
+				armature._boneList[i].update();
+			}
+			
+			i = armature._slotList.length;
+			while(i --)
+			{
+				slot = armature._slotList[i];
+				slot.update();
+			}
+			armature.updateSlotsZOrder();
+			
 			return armature;
 		}
 		
