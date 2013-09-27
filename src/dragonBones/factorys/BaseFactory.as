@@ -354,6 +354,7 @@ package dragonBones.factorys
 				}
 				slot = generateSlot();
 				slot.name = slotData.name;
+                slot.blendMode = slotData.blendMode;
 				slot._originZOrder = slotData.zOrder;
 				slot._dislayDataList = slotData.displayDataList;
 				
