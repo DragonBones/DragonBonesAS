@@ -1,9 +1,5 @@
 ﻿package dragonBones.objects
 {
-	import flash.geom.ColorTransform;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
-	
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.AnimationData;
@@ -20,6 +16,10 @@
 	import dragonBones.objects.TransformTimeline;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.DBDataUtil;
+	
+	import flash.geom.ColorTransform;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	
 	use namespace dragonBones_internal;
 	
@@ -104,9 +104,10 @@
 			boneData.name = boneObject[ConstValues.A_NAME];
 			boneData.parent = boneObject[ConstValues.A_PARENT];
 			boneData.length = Number(boneObject[ConstValues.A_LENGTH]) || 0;
-			var scaleMode:int = boneObject[ConstValues.A_SCALE_MODE] as int;
-			if (scaleMode)
+            var scaleModeObj:Object = boneObject[ConstValues.A_SCALE_MODE];
+			if (scaleModeObj)
 			{
+                var scaleMode:int = scaleModeObj as int;
 				boneData.scaleMode = scaleMode;
 			}
 			var inheritRotation:Boolean = boneObject[ConstValues.A_FIXED_ROTATION] as Boolean;
