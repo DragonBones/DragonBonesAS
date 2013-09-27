@@ -25,6 +25,7 @@ package dragonBones
 		private var _isHideDisplay:Boolean;
 		private var _offsetZOrder:Number;
 		private var _displayIndex:int;
+        private var _blendMode:String;
 		
 		public function get zOrder():Number
 		{
@@ -42,6 +43,23 @@ package dragonBones
 				}
 			}
 		}
+        
+        public function get blendMode():String
+        {
+            return _blendMode;
+        }
+        
+        public function set blendMode(value:String):void
+        {
+            if(_blendMode != value)
+            {
+                _blendMode = value;
+				if (_displayBridge.display)
+				{
+					_displayBridge.updateBlendMode(_blendMode);
+				}
+            }
+        }
 		
 		/**
 		 * The DisplayObject belonging to this Bone instance. Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
@@ -122,6 +140,10 @@ package dragonBones
 			}
 			
 			updateChildArmatureAnimation();
+			if (display)
+			{
+				_displayBridge.updateBlendMode(_blendMode);
+			}
 			
 			if(!_isHideDisplay && _displayBridge.display)
 			{
@@ -239,6 +261,9 @@ package dragonBones
 			
 			_isDisplayOnStage = false;
 			_isHideDisplay = false;
+            
+            _blendMode = "normal";
+            _displayBridge.updateBlendMode(_blendMode);
 		}
 		
 		/**
