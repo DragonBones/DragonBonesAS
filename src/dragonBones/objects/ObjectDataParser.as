@@ -104,6 +104,16 @@
 			boneData.name = boneObject[ConstValues.A_NAME];
 			boneData.parent = boneObject[ConstValues.A_PARENT];
 			boneData.length = Number(boneObject[ConstValues.A_LENGTH]) || 0;
+			var scaleMode:int = boneObject[ConstValues.A_SCALE_MODE] as int;
+			if (scaleMode)
+			{
+				boneData.scaleMode = scaleMode;
+			}
+			var inheritRotation:Boolean = boneObject[ConstValues.A_FIXED_ROTATION] as Boolean;
+			if (inheritRotation)
+			{
+				boneData.fixedRotation = inheritRotation;
+			}
 			
 			parseTransform(boneObject[ConstValues.TRANSFORM], boneData.global);
 			boneData.transform.copy(boneData.global);
