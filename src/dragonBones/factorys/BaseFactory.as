@@ -295,6 +295,8 @@ package dragonBones.factorys
 			{
 				bone = new Bone();
 				bone.name = boneData.name;
+				bone.fixedRotation = boneData.fixedRotation;
+				bone.scaleMode = boneData.scaleMode;
 				bone.origin.copy(boneData.transform);
 				if(armatureData.getBoneData(boneData.parent))
 				{
