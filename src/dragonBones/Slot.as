@@ -84,7 +84,11 @@ package dragonBones
 		 */
 		public function get childArmature():Armature
 		{
-			return _displayList[_displayIndex] as Armature;
+			if(_displayList[_displayIndex] is Armature)
+			{
+				return _displayList[_displayIndex] as Armature;
+			}
+			return null;
 		}
 		public function set childArmature(value:Armature):void
 		{

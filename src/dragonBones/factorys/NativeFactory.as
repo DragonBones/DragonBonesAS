@@ -81,15 +81,15 @@ package dragonBones.factorys
 					if (subTextureData)
 					{
 						var displayShape:Shape = new Shape();
-						_helpMatirx.a = 1;
-						_helpMatirx.b = 0;
-						_helpMatirx.c = 0;
-						_helpMatirx.d = 1;
-						_helpMatirx.scale(nativeTextureAtlas.scale, nativeTextureAtlas.scale);
-						_helpMatirx.tx = -pivotX - subTextureData.x;
-						_helpMatirx.ty = -pivotY - subTextureData.y;
+						_helpMatrix.a = 1;
+						_helpMatrix.b = 0;
+						_helpMatrix.c = 0;
+						_helpMatrix.d = 1;
+						_helpMatrix.scale(nativeTextureAtlas.scale, nativeTextureAtlas.scale);
+						_helpMatrix.tx = -pivotX - subTextureData.x;
+						_helpMatrix.ty = -pivotY - subTextureData.y;
 						
-						displayShape.graphics.beginBitmapFill(nativeTextureAtlas.bitmapData, _helpMatirx, false, fillBitmapSmooth);
+						displayShape.graphics.beginBitmapFill(nativeTextureAtlas.bitmapData, _helpMatrix, false, fillBitmapSmooth);
 						displayShape.graphics.drawRect(-pivotX, -pivotY, subTextureData.width, subTextureData.height);
 						
 						return displayShape;
