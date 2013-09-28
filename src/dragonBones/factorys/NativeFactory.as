@@ -52,7 +52,11 @@ package dragonBones.factorys
 		/** @private */
 		override protected function generateDisplay(textureAtlas:Object, fullName:String, pivotX:Number, pivotY:Number):Object
 		{
-			var nativeTextureAtlas:NativeTextureAtlas = textureAtlas as NativeTextureAtlas;
+			if(textureAtlas is NativeTextureAtlas)
+			{
+				var nativeTextureAtlas:NativeTextureAtlas = textureAtlas as NativeTextureAtlas;
+			}
+			
 			if(nativeTextureAtlas)
 			{
 				var movieClip:MovieClip = nativeTextureAtlas.movieClip;
@@ -85,7 +89,7 @@ package dragonBones.factorys
 						_helpMatrix.b = 0;
 						_helpMatrix.c = 0;
 						_helpMatrix.d = 1;
-						_helpMatrix.scale(nativeTextureAtlas.scale, nativeTextureAtlas.scale);
+						_helpMatrix.scale(1 / nativeTextureAtlas.scale, 1 / nativeTextureAtlas.scale);
 						_helpMatrix.tx = -pivotX - subTextureData.x;
 						_helpMatrix.ty = -pivotY - subTextureData.y;
 						
