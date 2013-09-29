@@ -144,14 +144,11 @@ package dragonBones
 			}
 			
 			updateChildArmatureAnimation();
-			if (display)
-			{
-				_displayBridge.updateBlendMode(_blendMode);
-			}
 			
 			if(!_isHideDisplay && _displayBridge.display)
 			{
 				_isDisplayOnStage = true;
+				_displayBridge.updateBlendMode(_blendMode);
 			}
 			else
 			{
@@ -267,7 +264,10 @@ package dragonBones
 			_isHideDisplay = false;
             
             _blendMode = "normal";
-            _displayBridge.updateBlendMode(_blendMode);
+			if(_displayBridge.display)
+			{
+				_displayBridge.updateBlendMode(_blendMode);
+			}
 		}
 		
 		/**
