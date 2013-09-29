@@ -79,8 +79,6 @@
 		 */
 		public var name:String;
 		
-		public var alwaysUpdate:Boolean;
-		
 		/**
 		 * An object that can contain any user extra data.
 		 */
@@ -94,6 +92,9 @@
 		dragonBones_internal var _boneList:Vector.<Bone>;
 		/** @private */
 		dragonBones_internal var _eventList:Vector.<Event>;
+		
+		/** @private */
+		protected var _needUpdate:Boolean;
 		
 		/** @private */
 		protected var _display:Object;
@@ -134,7 +135,7 @@
 			_boneList.fixed = true;
 			_eventList = new Vector.<Event>;
 			
-			alwaysUpdate = false;
+			_needUpdate = false;
 		}
 		
 		/**
@@ -175,6 +176,11 @@
 			//_display = null;
 		}
 		
+		public function invalidUpdate():void
+		{
+			_needUpdate = true;
+		}
+		
 		/**
 		 * Update the animation using this method typically in an ENTERFRAME Event or with a Timer.
 		 * @param	The amount of second to move the playhead ahead.
@@ -184,8 +190,9 @@
 			var i:int;
 			var slot:Slot;
 			var childArmature:Armature;
-			if(_animation.isPlaying || alwaysUpdate)
+			if(_animation.isPlaying || _needUpdate)
 			{	
+				_needUpdate = false;
 				_animation.advanceTime(passedTime)
 				passedTime *= _animation.timeScale;
 				
