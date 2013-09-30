@@ -132,12 +132,14 @@
 				boneData.scaleMode = parseInt(inheritScale);
 			}
 			
-			var fixedRotation:String = boneXML.@[ConstValues.A_FIXED_ROTATION];
+			var fixedRotation:String = boneXML.@[ConstValues.A_FIXED_ROTATION][0];
 			switch (fixedRotation)
 			{
 				case "0":
 				case "false":
 				case "no":
+				case "":
+				case null:
 					boneData.fixedRotation = false;
 					break;
 				default:
