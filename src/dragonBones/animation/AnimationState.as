@@ -559,7 +559,7 @@
 				_isComplete = true;
 				if(_loop < 0)
 				{
-					fadeOut((_fadeOutWeight || _fadeInTime) / _timeScale, true);
+					fadeOut((_fadeOutTime || _fadeInTime) / _timeScale, true);
 				}
 				else
 				{
