@@ -400,9 +400,9 @@ package dragonBones.factorys
 						
 					}
 				}
+				bone.addChild(slot);
 				slot.displayList = helpArray;
 				slot.changeDisplay(0);
-				bone.addChild(slot);
 			}
 
 			//

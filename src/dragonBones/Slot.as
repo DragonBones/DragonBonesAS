@@ -117,6 +117,8 @@ package dragonBones
 			while(i --)
 			{
 				_displayList[i] = value[i];
+				changeDisplay(i);
+				update();
 			}
 			
 			if(_displayIndex >= 0)
