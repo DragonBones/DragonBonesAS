@@ -365,19 +365,27 @@
 			
 			addState(_lastAnimationState);
 			
+			//
+			_lastAnimationState.advanceTime(0);
+			
+			i = _armature._boneList.length;
+			while(i --)
+			{
+				_armature._boneList[i].update();
+			}
+			
 			var slotList:Vector.<Slot> = _armature._slotList;
 			var slot:Slot;
 			i = slotList.length;
 			while(i --)
 			{
 				slot = slotList[i];
+				slot.update();
 				if(slot.childArmature)
 				{
 					slot.childArmature.animation.gotoAndPlay(animationName, fadeInTime);
 				}
 			}
-			
-			_lastAnimationState.advanceTime(0);
 			
 			return _lastAnimationState;
 		}
