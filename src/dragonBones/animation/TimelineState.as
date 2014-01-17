@@ -512,6 +512,7 @@ package dragonBones.animation
 					
 					tweenActive = _currentFrame.displayIndex >= 0;
 					
+					_bone.arriveAtFrame(_currentFrame, this, _animationState, false);
 					if(_currentFrame.color)
 					{
 						_bone.updateColor(
@@ -530,9 +531,6 @@ package dragonBones.animation
 					{
 						_bone.updateColor(0, 0, 0, 0, 1, 1, 1, 1, false);
 					}
-					
-					
-					_bone.arriveAtFrame(_currentFrame, this, _animationState, false);
 				}
 			}
 		}
