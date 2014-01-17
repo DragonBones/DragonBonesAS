@@ -390,6 +390,7 @@ package dragonBones.animation
 							}
 						}
 						
+						_bone.arriveAtFrame(_currentFrame, this, _animationState, false);
 						if(!_tweenColor)
 						{
 							if(_currentFrame.color)
@@ -411,7 +412,6 @@ package dragonBones.animation
 								_bone.updateColor(0, 0, 0, 0, 1, 1, 1, 1, false);
 							}
 						}
-						_bone.arriveAtFrame(_currentFrame, this, _animationState, false);
 					}
 					
 					if(_tweenTransform || _tweenColor)
