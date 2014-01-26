@@ -6,12 +6,12 @@ package dragonBones.textures
 	* @langversion 3.0
 	* @version 2.0
 	*/
-	import dragonBones.core.dragonBones_internal;
-	import dragonBones.objects.DataParser;
-	
 	import flash.display.BitmapData;
 	import flash.display.MovieClip;
 	import flash.geom.Rectangle;
+	
+	import dragonBones.core.dragonBones_internal;
+	import dragonBones.objects.DataParser;
 	
 	use namespace dragonBones_internal;
 	
@@ -107,7 +107,24 @@ package dragonBones.textures
 		 */
 		public function getRegion(name:String):Rectangle
 		{
-			return _subTextureDataDic[name];
+			var textureData:TextureData = _subTextureDataDic[name] as TextureData;
+			if(textureData)
+			{
+				return textureData.region;
+			}
+			
+			return null;
+		}
+		
+		public function getFrame(name:String):Rectangle
+		{
+			var textureData:TextureData = _subTextureDataDic[name] as TextureData;
+			if(textureData)
+			{
+				return textureData.frame;
+			}
+			
+			return null;
 		}
 		
 		protected function parseData(textureAtlasRawData:Object):void

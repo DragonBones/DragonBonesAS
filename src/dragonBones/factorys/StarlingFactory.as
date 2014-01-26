@@ -6,6 +6,10 @@
 	* @langversion 3.0
 	* @version 2.0
 	*/
+	import flash.display.BitmapData;
+	import flash.display.MovieClip;
+	import flash.geom.Rectangle;
+	
 	import dragonBones.Armature;
 	import dragonBones.Bone;
 	import dragonBones.Slot;
@@ -13,9 +17,6 @@
 	import dragonBones.display.StarlingDisplayBridge;
 	import dragonBones.textures.ITextureAtlas;
 	import dragonBones.textures.StarlingTextureAtlas;
-	
-	import flash.display.BitmapData;
-	import flash.display.MovieClip;
 	
 	import starling.core.Starling;
 	import starling.display.Image;
@@ -135,6 +136,13 @@
 			var subTexture:SubTexture = (textureAtlas as TextureAtlas).getTexture(fullName) as SubTexture;
 			if (subTexture)
 			{
+				var subTextureFrame:Rectangle = (textureAtlas as TextureAtlas).getFrame(fullName);
+				if(subTextureFrame)
+				{
+					pivotX += subTextureFrame.x;
+					pivotY += subTextureFrame.y;
+				}
+				
 				var image:Image = new Image(subTexture);
 				image.pivotX = pivotX;
 				image.pivotY = pivotY;

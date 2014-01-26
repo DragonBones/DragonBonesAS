@@ -6,10 +6,10 @@
 	* @langversion 3.0
 	* @version 2.0
 	*/
+	import flash.display.BitmapData;
+	
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DataParser;
-	
-	import flash.display.BitmapData;
 	
 	import starling.textures.SubTexture;
 	import starling.textures.Texture;
@@ -108,7 +108,9 @@
 			delete textureAtlasData.__name;
 			for(var subTextureName:String in textureAtlasData)
 			{
-				this.addRegion(subTextureName, textureAtlasData[subTextureName], null);
+				var textureData:TextureData = textureAtlasData[subTextureName];
+				//, textureData.rotated
+				this.addRegion(subTextureName, textureData.region, textureData.frame);
 			}
 		}
 	}

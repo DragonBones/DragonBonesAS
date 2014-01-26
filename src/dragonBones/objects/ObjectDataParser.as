@@ -1,5 +1,9 @@
 ﻿package dragonBones.objects
 {
+	import flash.geom.ColorTransform;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
+	
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.AnimationData;
@@ -14,12 +18,9 @@
 	import dragonBones.objects.Timeline;
 	import dragonBones.objects.TransformFrame;
 	import dragonBones.objects.TransformTimeline;
+	import dragonBones.textures.TextureData;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.DBDataUtil;
-	
-	import flash.geom.ColorTransform;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
 	
 	use namespace dragonBones_internal;
 	
@@ -32,12 +33,31 @@
 			for each (var subTextureObject:Object in rawData[ConstValues.SUB_TEXTURE])
 			{
 				var subTextureName:String = subTextureObject[ConstValues.A_NAME];
-				var subTextureData:Rectangle = new Rectangle();
-				subTextureData.x = int(subTextureObject[ConstValues.A_X]) / scale;
-				subTextureData.y = int(subTextureObject[ConstValues.A_Y]) / scale;
-				subTextureData.width = int(subTextureObject[ConstValues.A_WIDTH]) / scale;
-				subTextureData.height = int(subTextureObject[ConstValues.A_HEIGHT]) / scale;
-				textureAtlasData[subTextureName] = subTextureData;
+				var subTextureRegion:Rectangle = new Rectangle();
+				subTextureRegion.x = int(subTextureObject[ConstValues.A_X]) / scale;
+				subTextureRegion.y = int(subTextureObject[ConstValues.A_Y]) / scale;
+				subTextureRegion.width = int(subTextureObject[ConstValues.A_WIDTH]) / scale;
+				subTextureRegion.height = int(subTextureObject[ConstValues.A_HEIGHT]) / scale;
+				
+				var rotated:Boolean = subTextureObject[ConstValues.A_ROTATED] == "true";
+				
+				var frameWidth:Number = int(subTextureObject[ConstValues.A_FRAME_WIDTH]) / scale;
+				var frameHeight:Number = int(subTextureObject[ConstValues.A_FRAME_HEIGHT]) / scale;
+				
+				if(frameWidth > 0 && frameHeight > 0)
+				{
+					var subTextureFrame:Rectangle = new Rectangle();
+					subTextureFrame.x = int(subTextureObject[ConstValues.A_FRAME_X]) / scale;
+					subTextureFrame.y = int(subTextureObject[ConstValues.A_FRAME_Y]) / scale;
+					subTextureFrame.width = frameWidth;
+					subTextureFrame.height = frameHeight;
+				}
+				else
+				{
+					subTextureFrame = null;
+				}
+				
+				textureAtlasData[subTextureName] = new TextureData(subTextureRegion, subTextureFrame, rotated);
 			}
 			
 			return textureAtlasData;

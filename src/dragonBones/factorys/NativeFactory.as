@@ -1,15 +1,18 @@
 package dragonBones.factorys
 {
-	import dragonBones.Armature;
-	import dragonBones.Slot;
-	import dragonBones.display.NativeDisplayBridge;
-	import dragonBones.textures.ITextureAtlas;
-	import dragonBones.textures.NativeTextureAtlas;
-	
 	import flash.display.MovieClip;
 	import flash.display.Shape;
 	import flash.display.Sprite;
 	import flash.geom.Rectangle;
+	
+	import dragonBones.Armature;
+	import dragonBones.Slot;
+	import dragonBones.core.dragonBones_internal;
+	import dragonBones.display.NativeDisplayBridge;
+	import dragonBones.textures.ITextureAtlas;
+	import dragonBones.textures.NativeTextureAtlas;
+	
+	use namespace dragonBones_internal;
 	
 	/**
 	* Copyright 2012-2013. DragonBones. All Rights Reserved.
@@ -21,6 +24,7 @@ package dragonBones.factorys
 	public class NativeFactory extends BaseFactory
 	{
 		public var fillBitmapSmooth:Boolean;
+		public var useBitmapDataTexture:Boolean;
 		
 		public function NativeFactory()
 		{
@@ -60,7 +64,12 @@ package dragonBones.factorys
 			if(nativeTextureAtlas)
 			{
 				var movieClip:MovieClip = nativeTextureAtlas.movieClip;
-				if (movieClip && movieClip.totalFrames >= 3)
+				if(useBitmapDataTexture && movieClip)
+				{
+					nativeTextureAtlas.movieClipToBitmapData();
+				}
+				
+				if (!useBitmapDataTexture && movieClip && movieClip.totalFrames >= 3)
 				{
 					movieClip.gotoAndStop(movieClip.totalFrames);
 					movieClip.gotoAndStop(fullName);
@@ -81,20 +90,27 @@ package dragonBones.factorys
 				}
 				else if(nativeTextureAtlas.bitmapData)
 				{
-					var subTextureData:Rectangle = nativeTextureAtlas.getRegion(fullName);
-					if (subTextureData)
+					var subTextureRegion:Rectangle = nativeTextureAtlas.getRegion(fullName);
+					if (subTextureRegion)
 					{
+						var subTextureFrame:Rectangle = nativeTextureAtlas.getFrame(fullName);
+						if(subTextureFrame)
+						{
+							pivotX += subTextureFrame.x;
+							pivotY += subTextureFrame.y;
+						}
+						
 						var displayShape:Shape = new Shape();
 						_helpMatrix.a = 1;
 						_helpMatrix.b = 0;
 						_helpMatrix.c = 0;
 						_helpMatrix.d = 1;
 						_helpMatrix.scale(1 / nativeTextureAtlas.scale, 1 / nativeTextureAtlas.scale);
-						_helpMatrix.tx = -pivotX - subTextureData.x;
-						_helpMatrix.ty = -pivotY - subTextureData.y;
+						_helpMatrix.tx = -pivotX - subTextureRegion.x;
+						_helpMatrix.ty = -pivotY - subTextureRegion.y;
 						
 						displayShape.graphics.beginBitmapFill(nativeTextureAtlas.bitmapData, _helpMatrix, false, fillBitmapSmooth);
-						displayShape.graphics.drawRect(-pivotX, -pivotY, subTextureData.width, subTextureData.height);
+						displayShape.graphics.drawRect(-pivotX, -pivotY, subTextureRegion.width, subTextureRegion.height);
 						
 						return displayShape;
 					}

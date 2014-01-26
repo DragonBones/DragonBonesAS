@@ -21,6 +21,12 @@
 		public static const TEXTURE_ATLAS:String = "TextureAtlas";
 		public static const SUB_TEXTURE:String = "SubTexture";
 		
+		public static const A_ROTATED:String = "rotated";
+		public static const A_FRAME_X:String = "frameX";
+		public static const A_FRAME_Y:String = "frameY";
+		public static const A_FRAME_WIDTH:String = "frameWidth";
+		public static const A_FRAME_HEIGHT:String = "frameHeight";
+		
 		public static const A_VERSION:String = "version";
 		public static const A_IMAGE_PATH:String = "imagePath";
 		public static const A_FRAME_RATE:String = "frameRate";
