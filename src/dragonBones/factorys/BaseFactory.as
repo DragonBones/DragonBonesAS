@@ -400,6 +400,22 @@ package dragonBones.factorys
 						
 					}
 				}
+				
+				//
+				for each(var displayObject:Object in helpArray)
+				{
+					if("name" in displayObject)
+					{
+						try
+						{
+							displayObject["name"] = slot.name;
+						}
+						catch(err:Error)
+						{
+						}
+					}
+				}
+				
 				bone.addChild(slot);
 				slot.displayList = helpArray;
 				slot.changeDisplay(0);
