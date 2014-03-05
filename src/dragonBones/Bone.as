@@ -16,8 +16,14 @@
 	
 	public class Bone extends DBObject
 	{
+		/**
+		 * 派发声音事件的单例
+		 */
 		private static const _soundManager:SoundEventManager = SoundEventManager.getInstance();
-		//0/1/2
+		
+		/**
+		 * 骨骼的缩放模式，默认为1，当为2时，bone的缩放将影响所有子bone和子slot的缩放，当为1时，只影响slot的缩放，为0时都不影响，
+		 */
 		public var scaleMode:int;
 		
 		/** @private */
@@ -27,6 +33,7 @@
 		
 		private var _slot:Slot;
 		/**
+		 * bone的第一个slot，方便访问.
 		 * The default Slot of this Bone instance.
 		 */
 		public function get slot():Slot
@@ -35,7 +42,7 @@
 		}
 		
 		/**
-		 * The sub-armature of default Slot of this Bone instance.
+		 * 子动画，为了兼容2.2版本保留的API，该属性应从slot中获取
 		 */
 		public function get childArmature():Armature
 		{
@@ -43,7 +50,7 @@
 		}
 		
 		/**
-		 * The DisplayObject of default Slot of this Bone instance.
+		 * 显示对象，为了兼容2.2版本保留的API，该属性应从slot中获取
 		 */
 		public function get display():Object
 		{
@@ -57,6 +64,9 @@
 			}
 		}
 		
+		/**
+		 * 该骨骼下的slot的显示切换会受到哪个AnimationState的控制，有时我们希望动画在融合、混合、或叠加时，slot的显示切换只受某个特定的AnimationState的控制
+		 */
 		public var displayController:String;
 		
 		/**
@@ -90,6 +100,9 @@
 			}
 		}
 		
+		/**
+		 * Creates a Bone blank instance.
+		 */
 		public function Bone()
 		{
 			super();
@@ -125,6 +138,12 @@
 			_tweenPivot = null;
 		}
 		
+		/**
+		 * 是否包含某个bone或slot
+		 * @param Slot或Bone实例
+		 * @return Boolean
+		 * @see dragonBones.core.DBObject
+		 */
 		public function contains(child:DBObject):Boolean
 		{
 			if(!child)
@@ -143,6 +162,11 @@
 			return ancestor == this;
 		}
 		
+		/**
+		 * 添加一个bone或slot
+		 * @param Slot或Bone实例
+		 * @see dragonBones.core.DBObject
+		 */
 		public function addChild(child:DBObject):void
 		{
 			if(!child)
@@ -171,6 +195,11 @@
 			}
 		}
 		
+		/**
+		 * 删除一个bone或slot
+		 * @param Slot或Bone实例
+		 * @see dragonBones.core.DBObject
+		 */
 		public function removeChild(child:DBObject):void
 		{
 			if(!child)
@@ -217,7 +246,7 @@
 			return slotList;
 		}
 		
-		/** @private */
+		/** @private 当TimelineState到达关键帧时，会调用此方法*/
 		dragonBones_internal function arriveAtFrame(frame:Frame, timelineState:TimelineState, animationState:AnimationState, isCross:Boolean):void
 		{
 			if(frame)
@@ -265,7 +294,7 @@
 					_soundManager.dispatchEvent(soundEvent);
 				}
 				
-				if(frame.action)
+				if(frame.action) //后续会扩展更多的action，目前只有gotoAndPlay的含义
 				{
 					for each(var child:DBObject in _children)
 					{

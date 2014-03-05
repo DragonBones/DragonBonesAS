@@ -11,27 +11,29 @@ package dragonBones
 	
 	public class Slot extends DBObject
 	{
-		/** @private */
+		/** @private 需要保持引用DisplayData（armature中唯一需要引用数据的地方，animation中引用的除外），slot在切换显示对象时，需要还原显示对象的原始轴点，因为在动画制作过程中，同一个slot的不同显示对象的轴点位置是不一定相同的*/
 		dragonBones_internal var _dislayDataList:Vector.<DisplayData>;
 		/** @private */
 		dragonBones_internal var _displayBridge:IDisplayBridge;
-		/** @private */
+		/** @private slot*/
 		dragonBones_internal var _originZOrder:Number;
 		/** @private */
 		dragonBones_internal var _tweenZorder:Number;
-		/** @private */
+		/** @private 标识slot的现实对象是否在舞台上显示，当此值为false时，将不会对slot排序和动画更新*/
 		dragonBones_internal var _isDisplayOnStage:Boolean;
 		
 		private var _isHideDisplay:Boolean;
 		private var _offsetZOrder:Number;
 		private var _displayIndex:int;
-        private var _blendMode:String;
 		
+		/**
+		 * zOrder，为了保证动态添加的slot和动画控制添加的slot可以正常的一起工作，zOrder支持小数点
+		 * @return zOrder.
+		 */
 		public function get zOrder():Number
 		{
 			return _originZOrder + _tweenZorder + _offsetZOrder;
 		}
-		
 		public function set zOrder(value:Number):void
 		{
 			if(zOrder != value)
@@ -44,22 +46,26 @@ package dragonBones
 			}
 		}
         
-        public function get blendMode():String
-        {
-            return _blendMode;
-        }
-        
-        public function set blendMode(value:String):void
-        {
-            if(_blendMode != value)
-            {
-                _blendMode = value;
+		private var _blendMode:String;
+		/**
+		 * blendMode
+		 * @return blendMode.
+		 */
+		public function get blendMode():String
+		{
+			return _blendMode;
+		}
+		public function set blendMode(value:String):void
+		{
+			if(_blendMode != value)
+			{
+				_blendMode = value;
 				if (_displayBridge.display)
 				{
 					_displayBridge.updateBlendMode(_blendMode);
 				}
-            }
-        }
+			}
+		}
 		
 		/**
 		 * The DisplayObject belonging to this Bone instance. Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
@@ -98,9 +104,11 @@ package dragonBones
 				setDisplay(value.display);
 			}
 		}
-		
+
+		//
 		private var _displayList:Array;
 		/**
+		 * 属于这个slot的显示对象的列表（display或armature），可以替换这个列表来换肤.
 		 * The DisplayObject list belonging to this Slot instance.
 		 */
 		public function get displayList():Array
@@ -135,7 +143,7 @@ package dragonBones
 			{
 				_displayBridge.display = display;
 			}
-			else
+			else //IDisplayBridge的接口设计的不太的完善，后续应该将设置display和addDisplay分开
 			{
 				_displayBridge.display = display;
 				if(this._armature)
@@ -250,6 +258,10 @@ package dragonBones
 			}
 		}
 		
+		
+		/**
+		 * Creates a Slot blank instance.
+		 */
 		public function Slot(displayBrideg:IDisplayBridge)
 		{
 			super();
@@ -265,7 +277,7 @@ package dragonBones
 			_isDisplayOnStage = false;
 			_isHideDisplay = false;
             
-            _blendMode = "normal";
+			_blendMode = "normal";
 			if(_displayBridge.display)
 			{
 				_displayBridge.updateBlendMode(_blendMode);
@@ -347,8 +359,7 @@ package dragonBones
 		}
 		
 		/**
-		 * Change all DisplayObject attached to this Bone instance.
-		 * @param	displayList An array of valid DisplayObject to attach to this Bone.
+		 * 为了兼容2.2版本的API，改用displayList属性
 		 */
 		public function changeDisplayList(displayList:Array):void
 		{
