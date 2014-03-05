@@ -20,64 +20,64 @@
 	use namespace dragonBones_internal;
 
 	/**
-	 * 当slot的zOrder发生改变时触发
+	 * Dispatched when slot's zOrder changed
 	 */
 	[Event(name="zOrderUpdated", type="dragonBones.events.ArmatureEvent")]
 
 	/**
-	 * 当AnimationState开始混合淡入时触发（即使混合时间设置为0，仍然触发）
+	 * Dispatched when an animation state begins fade in (Even if fade in time is 0)
 	 */
 	[Event(name="fadeIn", type="dragonBones.events.AnimationEvent")]
 
 	/**
-	 * 当AnimationState开始混合淡出时触发（即使混合时间设置为0，仍然触发）
+	 * Dispatched when an animation state begins fade out (Even if fade out time is 0)
 	 */
 	[Event(name="fadeOut", type="dragonBones.events.AnimationEvent")]
 
 	/**
-	 * 当AnimationState开始播放时触发（AnimationState并不一定会在混合淡入开始时开始播放，可以通过设置使AnimationState在混合淡入结束时才开始播放）
+	 * Dispatched when an animation state start to play(AnimationState may play when fade in start or end. It is controllable).
 	 */
 	[Event(name="start", type="dragonBones.events.AnimationEvent")]
 
 	/**
-	 * 当AnimationState完全播放完毕后触发（如果AnimationState的播放次数设置为0，即无限循环，则不会触发）
+	 * Dispatched when an animation state play complete (if playtimes equals to 0 means loop forever. Then this Event will not be triggered)
 	 */
 	[Event(name="complete", type="dragonBones.events.AnimationEvent")]
 
 	/**
-	 * 当AnimationState结束一次循环时触发
+	 * Dispatched when an animation state complete a loop.
 	 */
 	[Event(name="loopComplete", type="dragonBones.events.AnimationEvent")]
 
 	/**
-	 * 当AnimationState混合淡入结束时触发
+	 * Dispatched when an animation state fade in complete.
 	 */
 	[Event(name="fadeInComplete", type="dragonBones.events.AnimationEvent")]
 
 	/**
-	 * 当AnimationState混合淡出结束时触发
+	 * Dispatched when an animation state fade out complete.
 	 */
 	[Event(name="fadeOutComplete", type="dragonBones.events.AnimationEvent")]
 
 	/**
-	 * 当AnimationState进入一个事件关键帧时触发
+	 * Dispatched when an animation state enter a frame with animation frame event.
 	 */
 	[Event(name="animationFrameEvent", type="dragonBones.events.FrameEvent")]
 
 	/**
-	 * 当Bone进入一个事件关键帧时触发
+	 * Dispatched when an bone enter a frame with animation frame event.
 	 */
 	[Event(name="boneFrameEvent", type="dragonBones.events.FrameEvent")]
 
 	public class Armature extends EventDispatcher implements IAnimatable
 	{
 		/**
-		 * 派发声音事件的单例
+		 * The instance dispatch sound event.
 		 */
 		private static const _soundManager:SoundEventManager = SoundEventManager.getInstance();
 
 		/**
-		 * 名字，与ArmatureData的name一致
+		 * The name should be same with ArmatureData's name
 		 */
 		public var name:String;
 
@@ -86,23 +86,22 @@
 		 */
 		public var userData:Object;
 
-		/** @private 当slot的zOrder发生改变时，需要设置此属性为 true*/
+		/** @private Set it to true when slot's zorder changed*/
 		dragonBones_internal var _slotsZOrderChanged:Boolean;
-		/** @private 存储slot，顺序按照slot的zOrder升序排列*/
+		/** @private Store slots based on slots' zOrder*/
 		dragonBones_internal var _slotList:Vector.<Slot>;
-		/** @private 存储bone，顺序按照bone的从属关系从根向叶排列*/
+		/** @private Store bones based on bones' hierarchy (From root to leaf)*/
 		dragonBones_internal var _boneList:Vector.<Bone>;
-		/** @private 临时存储每帧需要触发的事件，当advanceTime将要结束时，按顺序触发*/
+		/** @private Store event needed to dispatch in current frame. When advanceTime execute complete, dispath them.*/
 		dragonBones_internal var _eventList:Vector.<Event>;
 
-		/** @private 强制对bone和slot进行更新*/
+		/** @private Force update bones and slots*/
 		protected var _needUpdate:Boolean;
 
 		/** @private */
 		protected var _display:Object;
 		/**
-		 * Armature的显示对象，此对象的类型与使用的渲染引擎有直接的关系，比如flash.display.DisplayObject或startling.display.DisplayObject或其他第三方渲染引擎的显示对象
-		 * Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
+		 * Armature's display object. It's instance type depends on render engine. For example "flash.display.DisplayObject" or "startling.display.DisplayObject"
 		 */
 		public function get display():Object
 		{
@@ -181,7 +180,7 @@
 		}
 		
 		/**
-		 * 强制对bone和slot进行更新，当bone的动画结束时，bone将不会再更新（如果动态设置bone或属于此bone的slot的属性时，将不会在armature.advanceTime中得到任何改变）
+		 * Force update bones and slots. (When bone's animation play complete, it will not update) 
 		 */
 		public function invalidUpdate():void
 		{
@@ -198,12 +197,12 @@
 			var slot:Slot;
 			var childArmature:Armature;
 			
-			if(_animation.isPlaying || _needUpdate) //当动画播放时或_needUpdate为true时，才会对bone和slot进行更新
+			if(_animation.isPlaying || _needUpdate) //If animation is playing or _needUpdate equals to true, then update bones and slots
 			{	
 				_needUpdate = false;
 				_animation.advanceTime(passedTime);
 				
-				passedTime *= _animation.timeScale;//_animation的时间缩放会对childArmature产生影响
+				passedTime *= _animation.timeScale;//_animation's time scale will impact childArmature
 				
 				i = _boneList.length;
 				while(i --)
@@ -242,13 +241,16 @@
 					{
 						this.dispatchEvent(event);
 					}
-					if(_eventList) //如果事件引起了armature.dispose()则，_eventList将不可再访问，或许应再派发事件前对_eventList进行复制，不知道有没有必要
+					//[TODO] if some events triggered armature.dispose, then eventList will be unreachable.
+					//Maybe we need more events to copy eventList. TBD...
+					//如果事件引起了armature.dispose()则，_eventList将不可再访问，或许应再派发事件前对_eventList进行复制，不知道有没有必要?
+					if(_eventList) 
 					{
 						_eventList.length = 0;
 					}
 				}
 			}
-			else //依然要对childArmature进行更新
+			else //still need to update childArmature
 			{
 				passedTime *= _animation.timeScale;
 				i = _slotList.length;
@@ -269,7 +271,7 @@
 
 		/**
 		 * Get all Slot instance associated with this armature.
-		 * @param 是否返回Vector的副本
+		 * @param if return Vector copy
 		 * @return A Vector.&lt;Slot&gt; instance.
 		 * @see dragonBones.Slot
 		 */
@@ -280,7 +282,7 @@
 
 		/**
 		 * Get all Bone instance associated with this armature.
-		 * @param 是否返回Vector的副本
+		 * @param if return Vector copy
 		 * @return A Vector.&lt;Bone&gt; instance.
 		 * @see dragonBones.Bone
 		 */
@@ -498,7 +500,7 @@
 		}
 
 		/**
-		 * 按照zOrder的升序重新排列所有slot
+		 * Sort all slots based on zOrder
 		 */
 		public function updateSlotsZOrder():void
 		{
@@ -608,7 +610,7 @@
 			_helpArray.length = 0;
 		}
 
-		/** @private 当AnimationState到达关键帧时，会调用此方法*/
+		/** @private When AnimationState enter a key frame, call this func*/
 		dragonBones_internal function arriveAtFrame(frame:Frame, timelineState:TimelineState, animationState:AnimationState, isCross:Boolean):void
 		{
 			if(frame.event && this.hasEventListener(FrameEvent.ANIMATION_FRAME_EVENT))
