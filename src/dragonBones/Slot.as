@@ -19,7 +19,7 @@ package dragonBones
 		dragonBones_internal var _originZOrder:Number;
 		/** @private */
 		dragonBones_internal var _tweenZorder:Number;
-		/** @private 标识slot的现实对象是否在舞台上显示，当此值为false时，将不会对slot排序和动画更新*/
+		/** @private Mark slot display object if displayed in stage.*/
 		dragonBones_internal var _isDisplayOnStage:Boolean;
 		
 		private var _isHideDisplay:Boolean;
@@ -27,7 +27,7 @@ package dragonBones
 		private var _displayIndex:int;
 		
 		/**
-		 * zOrder，为了保证动态添加的slot和动画控制添加的slot可以正常的一起工作，zOrder支持小数点
+		 * zOrder. Support decimal for ensure dynamically added slot work toghther with animation controled slot.  
 		 * @return zOrder.
 		 */
 		public function get zOrder():Number
@@ -108,8 +108,7 @@ package dragonBones
 		//
 		private var _displayList:Array;
 		/**
-		 * 属于这个slot的显示对象的列表（display或armature），可以替换这个列表来换肤.
-		 * The DisplayObject list belonging to this Slot instance.
+		 * The DisplayObject list belonging to this Slot instance (display or armature). Replace it to implement switch texture.
 		 */
 		public function get displayList():Array
 		{
@@ -143,7 +142,9 @@ package dragonBones
 			{
 				_displayBridge.display = display;
 			}
-			else //IDisplayBridge的接口设计的不太的完善，后续应该将设置display和addDisplay分开
+			else 
+			//[TODO] IDisplayBridge's interface still need to refine.
+			//IDisplayBridge的接口设计的不太的完善，后续应该将设置display和addDisplay分开
 			{
 				_displayBridge.display = display;
 				if(this._armature)
@@ -359,7 +360,7 @@ package dragonBones
 		}
 		
 		/**
-		 * 为了兼容2.2版本的API，改用displayList属性
+		 * use displayList for v2.2 compatibility
 		 */
 		public function changeDisplayList(displayList:Array):void
 		{

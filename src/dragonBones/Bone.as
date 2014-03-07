@@ -17,12 +17,16 @@
 	public class Bone extends DBObject
 	{
 		/**
-		 * 派发声音事件的单例
+		 * The instance dispatch sound event.
 		 */
 		private static const _soundManager:SoundEventManager = SoundEventManager.getInstance();
 		
 		/**
 		 * 骨骼的缩放模式，默认为1，当为2时，bone的缩放将影响所有子bone和子slot的缩放，当为1时，只影响slot的缩放，为0时都不影响，
+		 * Bone's scaleMode, could be 0, 1(default) or 2. 
+		 * scaleMode equals to 0: Bone's scale impact nothing.
+		 * scaleMode equals to 1: Bone's scale impact its slots.
+		 * scaleMode equals to 2: Bone's scale impact its child bones and slots.
 		 */
 		public var scaleMode:int;
 		
@@ -33,8 +37,7 @@
 		
 		private var _slot:Slot;
 		/**
-		 * bone的第一个slot，方便访问.
-		 * The default Slot of this Bone instance.
+		 * The first slot of this Bone instance.
 		 */
 		public function get slot():Slot
 		{
@@ -42,7 +45,7 @@
 		}
 		
 		/**
-		 * 子动画，为了兼容2.2版本保留的API，该属性应从slot中获取
+		 * childArmature, keep this API for v2.2 compatibility
 		 */
 		public function get childArmature():Armature
 		{
@@ -50,7 +53,7 @@
 		}
 		
 		/**
-		 * 显示对象，为了兼容2.2版本保留的API，该属性应从slot中获取
+		 * display object, keep this API for v2.2 compatibility
 		 */
 		public function get display():Object
 		{
@@ -65,7 +68,8 @@
 		}
 		
 		/**
-		 * 该骨骼下的slot的显示切换会受到哪个AnimationState的控制，有时我们希望动画在融合、混合、或叠加时，slot的显示切换只受某个特定的AnimationState的控制
+		 * AnimationState that slots belong to the bone will be controlled by.
+		 * Sometimes, we want slots controlled by a spedific animation state when animation is doing mix or addition.
 		 */
 		public var displayController:String;
 		
@@ -139,8 +143,8 @@
 		}
 		
 		/**
-		 * 是否包含某个bone或slot
-		 * @param Slot或Bone实例
+		 * If contains some bone or slot
+		 * @param Slot or Bone instance
 		 * @return Boolean
 		 * @see dragonBones.core.DBObject
 		 */
@@ -163,8 +167,8 @@
 		}
 		
 		/**
-		 * 添加一个bone或slot
-		 * @param Slot或Bone实例
+		 * Add a bone or slot as child
+		 * @param a Slot or Bone instance
 		 * @see dragonBones.core.DBObject
 		 */
 		public function addChild(child:DBObject):void
@@ -196,8 +200,8 @@
 		}
 		
 		/**
-		 * 删除一个bone或slot
-		 * @param Slot或Bone实例
+		 * remove a child bone or slot
+		 * @param a Slot or Bone instance
 		 * @see dragonBones.core.DBObject
 		 */
 		public function removeChild(child:DBObject):void
@@ -246,7 +250,7 @@
 			return slotList;
 		}
 		
-		/** @private 当TimelineState到达关键帧时，会调用此方法*/
+		/** @private When bone timeline enter a key frame, call this func*/
 		dragonBones_internal function arriveAtFrame(frame:Frame, timelineState:TimelineState, animationState:AnimationState, isCross:Boolean):void
 		{
 			if(frame)
@@ -294,7 +298,9 @@
 					_soundManager.dispatchEvent(soundEvent);
 				}
 				
-				if(frame.action) //后续会扩展更多的action，目前只有gotoAndPlay的含义
+				//[TODO]currently there is only gotoAndPlay belongs to frame action. In future, there will be more.  
+				//后续会扩展更多的action，目前只有gotoAndPlay的含义
+				if(frame.action) 
 				{
 					for each(var child:DBObject in _children)
 					{
