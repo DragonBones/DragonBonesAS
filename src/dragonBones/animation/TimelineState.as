@@ -51,25 +51,19 @@ package dragonBones.animation
 			}
 			_pool.length = 0;
 		}
-		
-		public static function getEaseValue(value:Number, easing:Number):Number
-		{
-			if (easing > 1)
-			{
-				var valueEase:Number = 0.5 * (1 - Math.cos(value * Math.PI )) - value;
-				easing -= 1;
-			}
-			else if (easing > 0)
-			{
-				valueEase = Math.sin(value * HALF_PI) - value;
-			}
-			else if (easing < 0)
-			{
-				valueEase = 1 - Math.cos(value * HALF_PI) - value;
-				easing *= -1;
-			}
-			return valueEase * easing + value;
-		}
+
+        public static function getEaseValue(value:Number, easing:Number):Number
+        {
+            if (easing > 0) //ease out
+            {
+                return 1-Math.pow(1-value,2) * easing
+            }
+            else if (easing < 0) //ease in
+            {
+                return Math.pow(value,2);
+            }
+            return value * easing;
+        }
 		
 		public var transform:DBTransform;
 		public var pivot:Point;
