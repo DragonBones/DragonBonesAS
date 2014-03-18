@@ -54,15 +54,19 @@ package dragonBones.animation
 
         public static function getEaseValue(value:Number, easing:Number):Number
         {
+            var valueEase:Number = 1;
+
             if (easing > 0) //ease out
             {
-                return 1-Math.pow(1-value,2) * easing
+                valueEase = 1 - Math.pow(1-value,2);
             }
             else if (easing < 0) //ease in
             {
-                return Math.pow(value,2);
+                easing *= -1;
+                valueEase =  Math.pow(value,2);
             }
-            return value * easing;
+
+            return (valueEase - value) * easing + value;
         }
 		
 		public var transform:DBTransform;
