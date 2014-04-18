@@ -2,16 +2,17 @@
 {
 	import dragonBones.Armature;
 	import dragonBones.Bone;
-	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.AnimationEvent;
 	import dragonBones.objects.AnimationData;
-	import dragonBones.objects.DBTransform;
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.TransformTimeline;
 	
 	use namespace dragonBones_internal;
-
+	/**
+	 * The AnimationState gives full control over animation blending.
+	 * In most cases the Animation interface is sufficient and easier to use. Use the AnimationState if you need full control over the animation blending any playback process.
+	 */
 	final public class AnimationState
 	{
 		private static var _pool:Vector.<AnimationState> = new Vector.<AnimationState>;
@@ -50,120 +51,201 @@
 			TimelineState.clear();
 		}
 		
-		public var tweenEnabled:Boolean;
-		public var blend:Boolean;
+		/**
+		 * The layer of the animation. When calculating the final blend weights, animations in higher layers will get their weights.
+		 */
+		public var layer:int;
+		
 		public var group:String;
+		
+		/**
+		 * 是否可以将动画中的 color change, displayIndex change, visible change 作用到display上.
+		 * Sometimes, we want slots controlled by a spedific animation state when animation is doing mix or addition.
+		 */
+		public var displayControl:Boolean;
+		
+		public var additiveBlending:Boolean;
+		public function setAdditiveBlending(value:Boolean):AnimationState
+		{
+			additiveBlending = value;
+			return this;
+		}
+		
+		public var autoFadeOut:Boolean;
+		public var fadeOutTime:Number;
+		public function setAutoFadeOut(value:Boolean, fadeOutTime:Number = -1):AnimationState
+		{
+			autoFadeOut = value;
+			this.fadeOutTime = fadeOutTime * _timeScale;
+			return this;
+		}
+		
+		/**
+		 * The weight of animation.
+		 */
 		public var weight:Number;
+		public function setWeight(value:Number):AnimationState
+		{
+			if(isNaN(value) || value < 0)
+			{
+				value = 1;
+			}
+			weight = value;
+			return this;
+		}
+		
+		public var autoTween:Boolean;
+		public var lastFrameAutoTween:Boolean;
+		public function setFrameTween(autoTween:Boolean, lastFrameAutoTween:Boolean):AnimationState
+		{
+			this.autoTween = autoTween;
+			this.lastFrameAutoTween = lastFrameAutoTween;
+			return this;
+		}
+		
 		
 		/** @private */
 		dragonBones_internal var _timelineStates:Object;
+		
 		/** @private */
 		dragonBones_internal var _fadeWeight:Number;
 		
 		private var _armature:Armature;
 		private var _currentFrame:Frame;
 		private var _mixingTransforms:Object;
-		private var _fadeState:int;
-		private var _fadeInTime:Number;
-		private var _fadeOutTime:Number;
-		private var _fadeOutBeginTime:Number;
-		private var _fadeOutWeight:Number;
-		private var _fadeIn:Boolean;
-		private var _fadeOut:Boolean;
-		private var _pauseBeforeFadeInCompleteState:int;
+		
+		private var _isPlaying:Boolean;
+		private var _time:Number;
+		
+		private var _pausePlayheadInFade:Boolean;
+		private var _isFadeOut:Boolean;
+		private var _fadeTotalWeight:Number;
+		private var _fadeCurrentTime:Number;
+		private var _fadeBeginTime:Number;
 		
 		private var _name:String;
+		/**
+		 * The name of the animation state.
+		 */
 		public function get name():String
 		{
 			return _name;
 		}
 		
 		private var _clip:AnimationData;
+		/**
+		 * The clip that is being played by this animation state.
+		 * @see dragonBones.objects.AnimationData.
+		 */
 		public function get clip():AnimationData
 		{
 			return _clip;
 		}
 		
-		private var _loopCount:int;
-		public function get loopCount():int
-		{
-			return _loopCount;
-		}
-		
-		private var _loop:int;
-		public function get loop():int
-		{
-			return _loop;
-		}
-		
-		private var _layer:uint;
-		public function get layer():uint
-		{
-			return _layer;
-		}
-		
-		private var _isPlaying:Boolean;
-		public function get isPlaying():Boolean
-		{
-			return _isPlaying && !_isComplete;
-		}
-		
 		private var _isComplete:Boolean;
+		/**
+		 * Is animation complete.
+		 */
 		public function get isComplete():Boolean
 		{
 			return _isComplete; 
 		}
-		
-		public function get fadeInTime():Number
+		/**
+		 * Is animation playing.
+		 */
+		public function get isPlaying():Boolean
 		{
-			return _fadeInTime;
+			return (_isPlaying && !_isComplete);
+		}
+		
+		private var _fadeState:int;
+		public function get fadeState():int
+		{
+			return _fadeState;
+		}
+		
+		private var _currentPlayTimes:int;
+		/**
+		 * 动画当前播放的次数
+		 */
+		public function get currentPlayTimes():int
+		{
+			return _currentPlayTimes;
 		}
 		
 		private var _totalTime:Number;
+		/**
+		 * The length of the animation clip in seconds.
+		 */
 		public function get totalTime():Number
 		{
 			return _totalTime;
 		}
 		
+		private var _fadeTotalTime:Number;
+		public function get fadeTotalTime():Number
+		{
+			return _fadeTotalTime;
+		}
+		
 		private var _currentTime:Number;
+		/**
+		 * The current time of the animation.
+		 */
 		public function get currentTime():Number
 		{
 			return _currentTime;
 		}
-		public function set currentTime(value:Number):void
+		public function setCurrentTime(value:Number):AnimationState
 		{
-			if(value < 0 || isNaN(value))
+			if(isNaN(value))
 			{
 				value = 0;
 			}
-			//
 			_currentTime = value;
+			return this;
 		}
 		
 		private var _timeScale:Number;
+		/**
+		 * The amount by which passed time should be scaled. Used to slow down or speed up the animation. Defaults to 1.
+		 */
 		public function get timeScale():Number
 		{
 			return _timeScale;
 		}
-		public function set timeScale(value:Number):void
+		public function setTimeScale(value:Number):AnimationState
 		{
-			if(value < 0)
-			{
-				value = 0;
-			}
-			else if(isNaN(value))
+			if(isNaN(value) || value == Infinity)
 			{
 				value = 1;
 			}
-			else if(_timeScale == Infinity)
-			{
-				//*
-				_timeScale = 1;
-			}
 			_timeScale = value;
+			return this;
 		}
 		
-		public var displayControl:Boolean;
+		private var _playTimes:int;
+		/**
+		 * playTimes Play times(0:loop forever, 1~+∞:play times, -1~-∞:will fade animation after play complete).
+		 */
+		public function get playTimes():int
+		{
+			return _playTimes;
+		}
+		public function setPlayTimes(value:int):AnimationState
+		{
+			if(Math.round(_totalTime * _clip.frameRate) < 2)
+			{
+				_playTimes = value < 0?-1:1;
+			}
+			else
+			{
+				_timeScale = timeScale;
+				_playTimes = value < 0?-value:value;
+			}
+			autoFadeOut = value < 0?true:false;
+			return this;
+		}
 		
 		public function AnimationState()
 		{ 
@@ -171,156 +253,196 @@
 		}
 		
 		/** @private */
-		dragonBones_internal function fadeIn(armature:Armature, clip:AnimationData, fadeInTime:Number, timeScale:Number, loop:int, layer:uint, displayControl:Boolean, pauseBeforeFadeInComplete:Boolean):void
+		dragonBones_internal function fadeIn(armature:Armature, clip:AnimationData, fadeTotalTime:Number, timeScale:Number, playTimes:Number, pausePlayhead:Boolean):AnimationState
 		{
 			_armature = armature;
 			_clip = clip;
+			_pausePlayheadInFade = pausePlayhead;
+			
 			_name = _clip.name;
-			_layer = layer;
-			
 			_totalTime = _clip.duration;
-			if(Math.round(_clip.duration * _clip.frameRate) < 2 || timeScale == Infinity)
-			{
-				_timeScale = 1;
-				_currentTime = _totalTime;
-				if(_loop >= 0)
-				{
-					_loop = 1;
-				}
-				else
-				{
-					_loop = -1;
-				}
-			}
-			else
-			{
-				_timeScale = timeScale;
-				_currentTime = 0;
-				_loop = loop;
-			}
 			
-			if(pauseBeforeFadeInComplete)
-			{
-				_pauseBeforeFadeInCompleteState = -1;
-			}
-			else
-			{
-				_pauseBeforeFadeInCompleteState = 1;
-			}
+			setTimeScale(timeScale);
+			setPlayTimes(playTimes);
 			
-			_fadeInTime = fadeInTime * _timeScale;
+			//clear
+			_currentFrame = null;
+			_mixingTransforms = null;
 			
-			
-			_loopCount = -1;
-			_fadeState = 1;
-			_fadeOutBeginTime = 0;
-			_fadeOutWeight = -1;
-			_fadeWeight = 0;
-			_isPlaying = true;
+			//reset
 			_isComplete = false;
-			_fadeIn = true;
-			_fadeOut = false;
+			_time = 0;
+			_currentPlayTimes = 0;
+			if(Math.round(_totalTime * _clip.frameRate) < 2 || timeScale == Infinity)
+			{
+				_currentTime = _totalTime;
+			}
+			else
+			{
+				_currentTime = 0;
+			}
 			
-			this.displayControl = displayControl;
+			//fade start
+			_isFadeOut = false;
+			_fadeWeight = 0;
+			_fadeTotalWeight = 1;
+			_fadeState = -1;
+			_fadeCurrentTime = 0;
+			_fadeBeginTime = _fadeCurrentTime;
+			_fadeTotalTime = fadeTotalTime * _timeScale;
 			
+			//default
+			_isPlaying = true;
+			displayControl = true;
+			autoTween = true;
+			lastFrameAutoTween = true;
+			additiveBlending = false;
 			weight = 1;
-			blend = true;
-			tweenEnabled = true;
+			fadeOutTime = fadeTotalTime;
 			
 			updateTimelineStates();
+			return this;
 		}
 		
-		public function fadeOut(fadeOutTime:Number, pause:Boolean = false):void
+		/**
+		 * 淡出这个animationState
+		 * @param fadeOutTime 淡出时间.
+		 * @param pauseBeforeFadeOutComplete 淡出时暂停动画播放
+		 */
+		public function fadeOut(fadeTotalTime:Number, pausePlayhead:Boolean):AnimationState
 		{
-			if(!_armature || _fadeOutWeight >= 0)
+			if(!_armature)
 			{
-				return;
+				return null;
 			}
-			_fadeState = -1;
-			_fadeOutWeight = _fadeWeight;
-			_fadeOutTime = fadeOutTime * _timeScale;
-			_fadeOutBeginTime = _currentTime;
 			
-			_isPlaying = !pause;
-			_fadeOut = true;
+			if(isNaN(fadeTotalTime) || fadeTotalTime < 0)
+			{
+				fadeTotalTime = 0;
+			}
+			_pausePlayheadInFade = pausePlayhead;
+			
+			if(_isFadeOut)
+			{
+				if(fadeTotalTime > _fadeTotalTime - (_fadeCurrentTime - _fadeBeginTime))
+				{
+					//如果已经在淡出中，新的淡出需要更长的淡出时间，则忽略
+					return this;
+				}
+			}
+			else
+			{
+				//第一次淡出
+				for each(var timelineState:TimelineState in _timelineStates)
+				{
+					timelineState.fadeOut();
+				}
+			}
+			
+			//fade start
+			_isFadeOut = true;
+			_fadeTotalWeight = _fadeWeight;
+			_fadeState = -1;
+			_fadeBeginTime = _fadeCurrentTime;
+			_fadeTotalTime = _fadeTotalWeight >= 0?fadeTotalTime * _timeScale:0;
+			
+			//default
 			displayControl = false;
 			
-			for each(var timelineState:TimelineState in _timelineStates)
-			{
-				timelineState.fadeOut();
-			}
+			return this;
 		}
 		
-		public function play():void
+		/**
+		 * 继续动画的播放, 如果动画已经播放完毕, 将不会继续播放.
+		 */
+		public function play():AnimationState
 		{
 			_isPlaying = true;
+			return this;
 		}
 		
-		public function stop():void
+		/**
+		 * 停止动画的播放, 并不会影响淡入或淡出的进行.
+		 */
+		public function stop():AnimationState
 		{
 			_isPlaying = false;
+			return this;
 		}
 		
 		public function getMixingTransform(timelineName:String):int
 		{
-			if(_mixingTransforms)
+			if(_mixingTransforms && _mixingTransforms[timelineName] != null)
 			{
 				return int(_mixingTransforms[timelineName]);
 			}
-			return -1;
+			return 0;
 		}
 		
-		public function addMixingTransform(timelineName:String, type:int = 2, recursive:Boolean = true):void
+		/**
+		 * Adds a transform which should be animated. This allows you to reduce the number of animations you have to create.
+		 * @param timelineName 骨骼的时间轴名.
+		 * @param type 动画影响类型，0：timeline的所有效果都起作用，1：timeline的displayControl无效
+		 * @param recursive 是否添加该骨骼的子骨骼时间轴.
+		 */
+		public function addMixingTransform(timelineName:String, type:int = 0, recursive:Boolean = true):AnimationState
 		{
-			if(_clip && _clip.getTimeline(timelineName))
+			if(recursive)
+			{
+				var boneList:Vector.<Bone> = _armature.getBones(false);
+				var i:int = boneList.length;
+				var currentBone:Bone;
+				while(i --)
+				{
+					var bone:Bone = boneList[i];
+					var boneName:String = bone.name;
+					if(boneName == timelineName)
+					{
+						currentBone = bone;
+					}
+					if(currentBone && (currentBone == bone || currentBone.contains(bone)))
+					{
+						if(_clip.getTimeline(boneName))
+						{
+							if(!_mixingTransforms)
+							{
+								_mixingTransforms = {};
+							}
+							_mixingTransforms[boneName] = type;
+						}
+					}
+				}
+			}
+			else if(_clip.getTimeline(timelineName))
 			{
 				if(!_mixingTransforms)
 				{
 					_mixingTransforms = {};
 				}
-				if(recursive)
-				{
-					var i:int = _armature._boneList.length;
-					var bone:Bone;
-					var currentBone:Bone;
-					while(i --)
-					{
-						bone = _armature._boneList[i];
-						if(bone.name == timelineName)
-						{
-							currentBone = bone;
-						}
-						if(currentBone && (currentBone == bone || currentBone.contains(bone)))
-						{
-							_mixingTransforms[bone.name] = type;
-						}
-					}
-				}
-				else
-				{
-					_mixingTransforms[timelineName] = type;
-				}
-				
-				updateTimelineStates();
+				_mixingTransforms[timelineName] = type;
 			}
-			else
-			{
-				throw new ArgumentError();
-			}
+			
+			updateTimelineStates();
+			return this;
 		}
 		
-		public function removeMixingTransform(timelineName:String = null, recursive:Boolean = true):void
+		/**
+		 * Removes a transform which should be animated.
+		 * @param timelineName 骨骼的时间轴名.
+		 * @param recursive 是否删除该骨骼的子骨骼时间轴.
+		 */
+		public function removeMixingTransform(timelineName:String = null, recursive:Boolean = true):AnimationState
 		{
-			if(timelineName)
+			if(timelineName && _mixingTransforms)
 			{
 				if(recursive)
 				{
-					var i:int = _armature._boneList.length;
-					var bone:Bone;
+					var boneList:Vector.<Bone> = _armature.getBones(false);
+					var i:int = boneList.length;
 					var currentBone:Bone;
 					while(i --)
 					{
-						bone = _armature._boneList[i];
+						var bone:Bone = boneList[i];
 						if(bone.name == timelineName)
 						{
 							currentBone = bone;
@@ -336,9 +458,10 @@
 					delete _mixingTransforms[timelineName];
 				}
 				
+				var hasMixing:Boolean = false;
 				for each(timelineName in _mixingTransforms)
 				{
-					var hasMixing:Boolean = true;
+					hasMixing = true;
 					break;
 				}
 				if(!hasMixing)
@@ -352,224 +475,28 @@
 			}
 			
 			updateTimelineStates();
+			
+			return this;
 		}
 		
-		public function advanceTime(passedTime:Number):Boolean
+		/** @private */
+		dragonBones_internal function advanceTime(passedTime:Number):Boolean
 		{
-			var event:AnimationEvent;
-			var isComplete:Boolean;
+			passedTime *= _timeScale;
 			
-			if(_fadeIn)
-			{	
-				_fadeIn = false;
-				_armature.animation.setActive(this, true);
-				if(_armature.hasEventListener(AnimationEvent.FADE_IN))
-				{
-					event = new AnimationEvent(AnimationEvent.FADE_IN);
-					event.animationState = this;
-					_armature._eventList.push(event);
-				}
-			}
+			advanceFadeTime(passedTime);
 			
-			if(_fadeOut)
-			{	
-				_fadeOut = false;
-				_armature.animation.setActive(this, true);
-				if(_armature.hasEventListener(AnimationEvent.FADE_OUT))
-				{
-					event = new AnimationEvent(AnimationEvent.FADE_OUT);
-					event.animationState = this;
-					_armature._eventList.push(event);
-				}
-			}
-			
-			_currentTime += passedTime * _timeScale;
-			
-			if(_isPlaying && !_isComplete && _pauseBeforeFadeInCompleteState)
+			if(_fadeWeight)
 			{
-				var progress:Number;
-				var currentLoopCount:int;
-				if(_pauseBeforeFadeInCompleteState == -1)
-				{
-					_pauseBeforeFadeInCompleteState = 0;
-					progress = 0;
-					currentLoopCount = progress;
-				}
-				else
-				{
-					progress = _currentTime / _totalTime;
-					//update loopCount
-					currentLoopCount = progress;
-					if(currentLoopCount != _loopCount)
-					{
-						if(_loopCount == -1)
-						{
-							_armature.animation.setActive(this, true);
-							if(_armature.hasEventListener(AnimationEvent.START))
-							{
-								event = new AnimationEvent(AnimationEvent.START);
-								event.animationState = this;
-								_armature._eventList.push(event);
-							}
-						}
-						_loopCount = currentLoopCount;
-						if(_loopCount)
-						{
-							if(_loop && _loopCount * _loopCount >= _loop * _loop - 1)
-							{
-								isComplete = true;
-								progress = 1;
-								currentLoopCount = 0;
-								if(_armature.hasEventListener(AnimationEvent.COMPLETE))
-								{
-									event = new AnimationEvent(AnimationEvent.COMPLETE);
-									event.animationState = this;
-									_armature._eventList.push(event);
-								}
-							}
-							else
-							{
-								if(_armature.hasEventListener(AnimationEvent.LOOP_COMPLETE))
-								{
-									event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
-									event.animationState = this;
-									_armature._eventList.push(event);
-								}
-							}
-						}
-					}
-				}
-				
-				
-				for each(var timeline:TimelineState in _timelineStates)
-				{
-					timeline.update(progress);
-				}
-				
-				//
-				if(_clip.frameList.length > 0)
-				{
-					var playedTime:Number = _totalTime * (progress - currentLoopCount);
-					var isArrivedFrame:Boolean = false;
-					var frameIndex:int;
-					while(!_currentFrame || playedTime > _currentFrame.position + _currentFrame.duration || playedTime < _currentFrame.position)
-					{
-						if(isArrivedFrame)
-						{
-							_armature.arriveAtFrame(_currentFrame, null, this, true);
-						}
-						isArrivedFrame = true;
-						if(_currentFrame)
-						{
-							frameIndex = _clip.frameList.indexOf(_currentFrame);
-							frameIndex ++;
-							if(frameIndex >= _clip.frameList.length)
-							{
-								frameIndex = 0;
-							}
-							_currentFrame = _clip.frameList[frameIndex];
-						}
-						else
-						{
-							_currentFrame = _clip.frameList[0];
-						}
-					}
-					
-					if(isArrivedFrame)
-					{
-						_armature.arriveAtFrame(_currentFrame, null, this, false);
-					}
-				}
+				advanceTimelinesTime(passedTime);
 			}
 			
-			//update weight and fadeState
-			if(_fadeState > 0)
-			{
-				if(_fadeInTime == 0)
-				{
-					_fadeWeight = 1;
-					_fadeState = 0;
-					_pauseBeforeFadeInCompleteState = 1;
-					_armature.animation.setActive(this, false);
-					if(_armature.hasEventListener(AnimationEvent.FADE_IN_COMPLETE))
-					{
-						event = new AnimationEvent(AnimationEvent.FADE_IN_COMPLETE);
-						event.animationState = this;
-						_armature._eventList.push(event);
-					}
-				}
-				else
-				{
-					_fadeWeight = _currentTime / _fadeInTime;
-					if(_fadeWeight >= 1)
-					{
-						_fadeWeight = 1;
-						_fadeState = 0;
-						if(_pauseBeforeFadeInCompleteState == 0)
-						{
-							_currentTime -= _fadeInTime;
-						}
-						_pauseBeforeFadeInCompleteState = 1;
-						_armature.animation.setActive(this, false);
-						if(_armature.hasEventListener(AnimationEvent.FADE_IN_COMPLETE))
-						{
-							event = new AnimationEvent(AnimationEvent.FADE_IN_COMPLETE);
-							event.animationState = this;
-							_armature._eventList.push(event);
-						}
-					}
-				}
-			}
-			else if(_fadeState < 0)
-			{
-				if(_fadeOutTime == 0)
-				{
-					_fadeWeight = 0;
-					_fadeState = 0;
-					_armature.animation.setActive(this, false);
-					if(_armature.hasEventListener(AnimationEvent.FADE_OUT_COMPLETE))
-					{
-						event = new AnimationEvent(AnimationEvent.FADE_OUT_COMPLETE);
-						event.animationState = this;
-						_armature._eventList.push(event);
-					}
-					return true;
-				}
-				else
-				{
-					_fadeWeight = (1 - (_currentTime - _fadeOutBeginTime) / _fadeOutTime) * _fadeOutWeight;
-					if(_fadeWeight <= 0)
-					{
-						_fadeWeight = 0;
-						_fadeState = 0;
-						_armature.animation.setActive(this, false);
-						if(_armature.hasEventListener(AnimationEvent.FADE_OUT_COMPLETE))
-						{
-							event = new AnimationEvent(AnimationEvent.FADE_OUT_COMPLETE);
-							event.animationState = this;
-							_armature._eventList.push(event);
-						}
-						return true;
-					}
-				}
-			}
-			
-			if(isComplete)
-			{
-				_isComplete = true;
-				if(_loop < 0)
-				{
-					fadeOut((_fadeOutTime || _fadeInTime) / _timeScale, true);
-				}
-				else
-				{
-					_armature.animation.setActive(this, false);
-				}
-			}
-			
-			return false;
+			return _isFadeOut && _fadeState == 1;
 		}
 		
+		/**
+		 * 根据mixing transforms和clip来更新timelineState
+		 */
 		private function updateTimelineStates():void
 		{
 			if(_mixingTransforms)
@@ -592,13 +519,14 @@
 			}
 			else
 			{
-				for(timelineName in _clip.timelines)
+				for each(var timeline:TransformTimeline in _clip.timelineList)
 				{
-					if(!_timelineStates[timelineName])
+					if(!_timelineStates[timeline.name])
 					{
-						addTimelineState(timelineName);
+						addTimelineState(timeline.name);
 					}
 				}
+				hideBones();
 			}
 		}
 		
@@ -608,8 +536,7 @@
 			if(bone)
 			{
 				var timelineState:TimelineState = TimelineState.borrowObject();
-				var timeline:TransformTimeline = _clip.getTimeline(timelineName);
-				timelineState.fadeIn(bone, this, timeline);
+				timelineState.fadeIn(bone, this, _clip.getTimeline(timelineName));
 				_timelineStates[timelineName] = timelineState;
 			}
 		}
@@ -618,6 +545,297 @@
 		{
 			TimelineState.returnObject(_timelineStates[timelineName] as TimelineState);
 			delete _timelineStates[timelineName];
+		}
+		
+		private function hideBones():void
+		{
+			for(var timelineName:String in _clip.hideTimelineNameMap)
+			{
+				var bone:Bone = _armature.getBone(timelineName);
+				if(bone)
+				{
+					bone.arriveAtFrame(null, null, this, false);
+				}
+			}
+		}
+		
+		private function advanceFadeTime(passedTime:Number):void
+		{
+			var fadeStartFlg:Boolean = false;
+			var fadeCompleteFlg:Boolean = false;
+			
+			if(_fadeBeginTime >= 0)
+			{
+				var fadeState:int;
+				_fadeCurrentTime += passedTime < 0?-passedTime:passedTime;
+				if(_fadeCurrentTime >= _fadeBeginTime + _fadeTotalTime)
+				{
+					//fade complete
+					fadeState = 1;
+					_fadeWeight = _isFadeOut?0:1;
+					_pausePlayheadInFade = false;
+				}
+				else if(_fadeCurrentTime >= _fadeBeginTime)
+				{
+					//fading
+					fadeState = 0;
+					//暂时只支持线性混合
+					_fadeWeight = (_fadeCurrentTime - _fadeBeginTime) / _fadeTotalTime * _fadeTotalWeight;
+					if(_isFadeOut)
+					{
+						_fadeWeight = _fadeTotalWeight - _fadeWeight;
+					}
+				}
+				else
+				{
+					//before fade
+					fadeState = -1;
+					_fadeWeight = _isFadeOut?1:0;
+				}
+				
+				if(_fadeState != fadeState)
+				{
+					//_fadeState == -1 && (fadeState == 0 || fadeState == 1)
+					if(_fadeState == -1)
+					{
+						fadeStartFlg = true;
+					}
+					
+					//(_fadeState == -1 || _fadeState == 0) && fadeState == -1
+					if(fadeState == 1)
+					{
+						fadeCompleteFlg = true;
+					}
+					_fadeState = fadeState;
+				}
+			}
+			
+			var event:AnimationEvent;
+			
+			if(fadeStartFlg)
+			{
+				if(_isFadeOut)
+				{
+					if(_armature.hasEventListener(AnimationEvent.FADE_OUT))
+					{
+						event = new AnimationEvent(AnimationEvent.FADE_OUT);
+						event.animationState = this;
+						_armature._eventList.push(event);
+					}
+				}
+				else
+				{
+					if(_armature.hasEventListener(AnimationEvent.FADE_IN))
+					{
+						event = new AnimationEvent(AnimationEvent.FADE_IN);
+						event.animationState = this;
+						_armature._eventList.push(event);
+					}
+				}
+			}
+			
+			if(fadeCompleteFlg)
+			{
+				if(_isFadeOut)
+				{
+					if(_armature.hasEventListener(AnimationEvent.FADE_OUT_COMPLETE))
+					{
+						event = new AnimationEvent(AnimationEvent.FADE_OUT_COMPLETE);
+						event.animationState = this;
+						_armature._eventList.push(event);
+					}
+				}
+				else
+				{
+					if(_armature.hasEventListener(AnimationEvent.FADE_IN_COMPLETE))
+					{
+						event = new AnimationEvent(AnimationEvent.FADE_IN_COMPLETE);
+						event.animationState = this;
+						_armature._eventList.push(event);
+					}
+				}
+			}
+		}
+		
+		private function advanceTimelinesTime(passedTime:Number):void
+		{
+			if(_isPlaying && !_pausePlayheadInFade)
+			{
+				_time += passedTime;
+			}
+			
+			var startFlg:Boolean = false;
+			var completeFlg:Boolean = false;
+			var loopCompleteFlg:Boolean = false;
+			
+			var currentTime:Number = _time;
+			var currentPlayTimes:int;
+			var isThisComplete:Boolean;
+			if(_playTimes != 0)
+			{
+				var totalTimes:Number = _playTimes * _totalTime;
+				if(currentTime >= totalTimes)
+				{
+					currentTime = totalTimes;
+					isThisComplete = true;
+				}
+				else if(currentTime <= -totalTimes)
+				{
+					currentTime = -totalTimes;
+					isThisComplete = true;
+				}
+				else
+				{
+					isThisComplete = false;
+				}
+				
+				if(currentTime < 0)
+				{
+					currentTime += totalTimes;
+				}
+				
+				currentPlayTimes = Math.ceil(currentTime/_totalTime) || 1;
+				//currentTime -= Math.floor(currentTime/_totalTime) * _totalTime;
+				currentTime -= int(currentTime/_totalTime) * _totalTime;
+				
+				if(isThisComplete)
+				{
+					currentTime = _totalTime;
+				}
+			}
+			else
+			{
+				isThisComplete = false;
+				currentPlayTimes = Math.ceil(Math.abs(currentTime)/_totalTime) || 1;
+				//currentTime -= Math.floor(currentTime/_totalTime) * _totalTime;
+				currentTime -= int(currentTime/_totalTime) * _totalTime;
+				
+				if(currentTime < 0)
+				{
+					currentTime += _totalTime;
+				}
+			}
+			
+			//update timeline
+			_isComplete = isThisComplete;
+			var progress:Number = _time / _totalTime;
+			for each(var timeline:TimelineState in _timelineStates)
+			{
+				timeline.update(progress);
+				_isComplete = timeline._isComplete && _isComplete;
+			}
+			
+			//update main timeline
+			if(_currentTime != currentTime || _currentPlayTimes == 0)
+			{
+				if(_currentPlayTimes != currentPlayTimes)    //check loop complete
+				{
+					_currentPlayTimes = currentPlayTimes;
+					if(_currentPlayTimes > 1)
+					{
+						loopCompleteFlg = true;
+					}
+				}
+				
+				if(_currentTime == 0 && _currentPlayTimes == 1)    //check start
+				{
+					startFlg = true;
+				}
+				
+				if(_isComplete)    //check complete
+				{
+					completeFlg = true;
+				}
+				
+				_currentTime = currentTime;
+				
+				if(isThisComplete)
+				{
+					currentTime = _totalTime * 0.99999999;
+				}
+				//[0, _totalTime)
+				updateMainTimeline(currentTime);
+			}
+			
+			var event:AnimationEvent;
+			if(startFlg)
+			{
+				if(_armature.hasEventListener(AnimationEvent.START))
+				{
+					event = new AnimationEvent(AnimationEvent.START);
+					event.animationState = this;
+					_armature._eventList.push(event);
+				}
+			}
+			
+			if(completeFlg)
+			{
+				if(_armature.hasEventListener(AnimationEvent.COMPLETE))
+				{
+					event = new AnimationEvent(AnimationEvent.COMPLETE);
+					event.animationState = this;
+					_armature._eventList.push(event);
+				}
+				if(autoFadeOut)
+				{
+					fadeOut(fadeOutTime, true);
+				}
+			}
+			else if(loopCompleteFlg)
+			{
+				if(_armature.hasEventListener(AnimationEvent.LOOP_COMPLETE))
+				{
+					event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
+					event.animationState = this;
+					_armature._eventList.push(event);
+				}
+			}
+		}
+		
+		private function updateMainTimeline(currentTime:Number):void
+		{
+			//事件与行为时间轴
+			var frameList:Vector.<Frame> = _clip.frameList;
+			if(frameList.length > 0)
+			{
+				var isArrivedAtNewFrame:Boolean = false;
+				var frameIndex:int = 0;
+				while(!_currentFrame || currentTime > _currentFrame.position + _currentFrame.duration || currentTime < _currentFrame.position)
+				{
+					if(isArrivedAtNewFrame)
+					{
+						_armature.arriveAtFrame(_currentFrame, null, this, true);
+					}
+					if(_currentFrame)
+					{
+						frameIndex = frameList.indexOf(_currentFrame);
+						frameIndex ++;
+						if(frameIndex >= frameList.length)
+						{
+							frameIndex = 0;
+						}
+						_currentFrame = frameList[frameIndex];
+					}
+					else
+					{
+						_currentFrame = frameList[0];
+					}
+					if(_currentFrame)
+					{
+						isArrivedAtNewFrame = true;
+					}
+					else
+					{
+						isArrivedAtNewFrame = false;
+						break;
+					}
+				}
+				
+				if(isArrivedAtNewFrame)
+				{
+					_armature.arriveAtFrame(_currentFrame, null, this, false);
+				}
+			}
 		}
 		
 		private function clear():void

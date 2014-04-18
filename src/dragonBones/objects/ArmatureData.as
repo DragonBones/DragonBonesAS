@@ -1,5 +1,6 @@
 package dragonBones.objects
 {
+	/** @private */
 	final public class ArmatureData
 	{
 		public var name:String;
@@ -22,11 +23,15 @@ package dragonBones.objects
 			return _animationDataList;
 		}
 		
+		private var _animationsCached:Object;
+		
 		public function ArmatureData()
 		{
 			_boneDataList = new Vector.<BoneData>(0, true);
 			_skinDataList = new Vector.<SkinData>(0, true);
 			_animationDataList = new Vector.<AnimationData>(0, true);
+			
+			_animationsCached = {};
 		}
 		
 		public function dispose():void
@@ -46,15 +51,31 @@ package dragonBones.objects
 			{
 				_animationDataList[i].dispose();
 			}
+			for each(var animation:Object in _animationsCached)
+			{
+				for each(var timelineCached:Vector.<FrameCached> in animation)
+				{
+					i = timelineCached.length;
+					while(i --)
+					{
+						timelineCached[i].dispose();
+					}
+					timelineCached.fixed = false;
+					timelineCached.length = 0;
+				}
+				//animation。clear();
+			}
 			_boneDataList.fixed = false;
 			_boneDataList.length = 0;
 			_skinDataList.fixed = false;
 			_skinDataList.length = 0;
 			_animationDataList.fixed = false;
 			_animationDataList.length = 0;
+			//_animationsCached。clear();
 			_boneDataList = null;
 			_skinDataList = null;
 			_animationDataList = null;
+			_animationsCached = null;
 		}
 		
 		public function getBoneData(boneName:String):BoneData
@@ -173,15 +194,15 @@ package dragonBones.objects
 					level ++;
 					parentData = getBoneData(parentData.parent);
 				}
-				helpArray[i] = {level:level, boneData:boneData};
+				helpArray[i] = [level, boneData];
 			}
 			
-			helpArray.sortOn("level", Array.NUMERIC);
+			helpArray.sortOn("0", Array.NUMERIC);
 			
 			i = helpArray.length;
 			while(i --)
 			{
-				_boneDataList[i] = helpArray[i].boneData;
+				_boneDataList[i] = helpArray[i][1];
 			}
 		}
 	}

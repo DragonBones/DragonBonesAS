@@ -1,11 +1,5 @@
 ﻿package dragonBones.animation
 {
-	/**
-	 * Copyright 2012-2013. DragonBones. All Rights Reserved.
-	 * @playerversion Flash 10.0
-	 * @langversion 3.0
-	 * @version 2.0
-	 */
 	import flash.geom.Point;
 	
 	import dragonBones.Armature;
@@ -19,46 +13,6 @@
 	
 	/**
 	 * An Animation instance is used to control the animation state of an Armature.
-	 * @example
-	 * <p>Download the example files <a href='http://dragonbones.github.com/downloads/DragonBones_Tutorial_Assets.zip'>here</a>: </p>
-	 * <listing>	
-	 *	package  
-	 *	{
-	 *		import dragonBones.Armature;
-	 *		import dragonBones.factorys.NativeFactory;
-	 *  	import flash.display.Sprite;
-	 *		import flash.events.Event;	
-	 *
-	 *		public class DragonAnimation extends Sprite 
-	 *		{		
-	 *			[Embed(source = "Dragon1.swf", mimeType = "application/octet-stream")]  
-	 *			private static const ResourcesData:Class;
-	 *			
-	 *			private var factory:NativeFactory;
-	 *			private var armature:Armature;		
-	 *			
-	 *			public function DragonAnimation() 
-	 *			{				
-	 *				factory = new NativeFactory();
-	 *				factory.addEventListener(Event.COMPLETE, handleParseData);
-	 *				factory.parseData(new ResourcesData(), 'Dragon');
-	 *			}
-	 *			
-	 *			private function handleParseData(e:Event):void 
-	 *			{			
-	 *				armature = factory.buildArmature('Dragon');
-	 *				addChild(armature.display as Sprite); 			
-	 *				armature.animation.play();
-	 *				addEventListener(Event.ENTER_FRAME, updateAnimation);			
-	 *			}
-	 *			
-	 *			private function updateAnimation(e:Event):void 
-	 *			{
-	 *				armature.advanceTime(stage.frameRate / 1000);
-	 *			}		
-	 *		}
-	 *	}
-	 * </listing>
 	 * @see dragonBones.Armature
 	 * @see dragonBones.animation.Animation
 	 * @see dragonBones.animation.AnimationState
@@ -71,43 +25,40 @@
 		public static const SAME_LAYER_AND_GROUP:String = "sameLayerAndGroup";
 		public static const ALL:String = "all";
 		
+		
 		/**
 		 * Whether animation tweening is enabled or not.
 		 */
 		public var tweenEnabled:Boolean;
 		
-		/** @private */
-		dragonBones_internal var _animationLayer:Vector.<Vector.<AnimationState>>;
-		
 		private var _armature:Armature;
-		private var _isActive:Boolean;
 		
-		/**
-		 * An vector containing all AnimationData names the Animation can play.
-		 * @see dragonBones.objects.AnimationData.
-		 */
-		public function get movementList():Vector.<String>
-		{
-			return _animationList;
-		}
+		private var _animationStateList:Vector.<AnimationState>;
 		
-		/**
-		 * The name of the last AnimationData played.
-		 * @see dragonBones.objects.AnimationData.
-		 */
-		public function get movementID():String
-		{
-			return _lastAnimationState?_lastAnimationState.name:null;
-		}
-		
+		/** @private */
 		dragonBones_internal var _lastAnimationState:AnimationState;
+		
+		/** @private */
+		dragonBones_internal var _isFading:Boolean
+		
+		/** @private */
+		dragonBones_internal var _animationStateCount:int;
+		
 		/**
-		 * The last AnimationData this Animation played.
+		 * The last AnimationState this Animation played.
 		 * @see dragonBones.objects.AnimationData.
 		 */
 		public function get lastAnimationState():AnimationState
 		{
 			return _lastAnimationState;
+		}
+		/**
+		 * The name of the last AnimationData played.
+		 * @see dragonBones.objects.AnimationData.
+		 */
+		public function get lastAnimationName():String
+		{
+			return _lastAnimationState?_lastAnimationState.name:null;
 		}
 		
 		private var _animationList:Vector.<String>;
@@ -121,11 +72,19 @@
 		}
 		
 		private var _isPlaying:Boolean;
+		/**
+		 * 动画是否在播放.
+		 * @see dragonBones.animation.AnimationState.
+		 */
 		public function get isPlaying():Boolean
 		{
-			return _isPlaying && _isActive;
+			return _isPlaying && !isComplete;
 		}
 		
+		/**
+		 * Is animation complete.
+		 * @see dragonBones.animation.AnimationState.
+		 */
 		public function get isComplete():Boolean
 		{
 			if(_lastAnimationState)
@@ -134,22 +93,34 @@
 				{
 					return false;
 				}
-				var j:int = _animationLayer.length;
-				while(j --)
+				var i:int = _animationStateList.length;
+				while(i --)
 				{
-					var animationStateList:Vector.<AnimationState> = _animationLayer[j];
-					var i:int = animationStateList.length;
-					while(i --)
+					if(!_animationStateList[i].isComplete)
 					{
-						if(!animationStateList[i].isComplete)
-						{
-							return false;
-						}
+						return false;
 					}
 				}
 				return true;
 			}
-			return false;
+			return true;
+		}
+		
+		private var _timeScale:Number;
+		/**
+		 * The amount by which passed time should be scaled. Used to slow down or speed up animations. Defaults to 1.
+		 */
+		public function get timeScale():Number
+		{
+			return _timeScale;
+		}
+		public function set timeScale(value:Number):void
+		{
+			if(isNaN(value) || value < 0)
+			{
+				value = 1;
+			}
+			_timeScale = value;
 		}
 		
 		private var _animationDataList:Vector.<AnimationData>;
@@ -171,35 +142,19 @@
 			}
 		}
 		
-		private var _timeScale:Number = 1;
-		/**
-		 * The amount by which passed time should be scaled. Used to slow down or speed up animations. Defaults to 1.
-		 */
-		public function get timeScale():Number
-		{
-			return _timeScale;
-		}
-		public function set timeScale(value:Number):void
-		{
-			if (value < 0)
-			{
-				value = 0;
-			}
-			_timeScale = value;
-		}
-		
 		/**
 		 * Creates a new Animation instance and attaches it to the passed Armature.
-		 * @param	An Armature to attach this Animation instance to.
+		 * @param An Armature to attach this Animation instance to.
 		 */
 		public function Animation(armature:Armature)
 		{
 			_armature = armature;
-			_animationLayer = new Vector.<Vector.<AnimationState>>;
 			_animationList = new Vector.<String>;
+			_animationStateList = new Vector.<AnimationState>;
 			
+			_timeScale = 1;
 			_isPlaying = false;
-			_isActive = false;
+			
 			tweenEnabled = true;
 		}
 		
@@ -212,39 +167,32 @@
 			{
 				return;
 			}
-			stop();
-			var i:int = _animationLayer.length;
+			var i:int = _animationStateList.length;
 			while(i --)
 			{
-				var animationStateList:Vector.<AnimationState> = _animationLayer[i];
-				var j:int = animationStateList.length;
-				while(j --)
-				{
-					AnimationState.returnObject(animationStateList[j]);
-				}
-				animationStateList.length = 0;
+				AnimationState.returnObject(_animationStateList[i]);
 			}
-			_animationLayer.length = 0;
 			_animationList.length = 0;
+			_animationStateList.length = 0;
 			
 			_armature = null;
-			_animationLayer = null;
 			_animationDataList = null;
 			_animationList = null;
+			_animationStateList = null;
 		}
 		
 		/**
-		 * Move the playhead to that AnimationData
+		 * Fades the animation with name animation in over a period of time seconds and fades other animations out.
 		 * @param animationName The name of the AnimationData to play.
-		 * @param fadeInTime A fade time to apply (> 0)
-		 * @param duration The duration of that AnimationData.
-		 * @param loop Loop(0:loop forever, 1~+∞:loop times, -1~-∞:will fade animation after loop complete).
+		 * @param fadeInTime A fade time to apply (>= 0), 混合影响到的其他动画会尝试使用这个时间淡出, 默认使用AnimationData.fadeInTime.
+		 * @param duration The duration of that AnimationData, 默认使用AnimationData.duration.
+		 * @param playTimes Play times(0:loop forever, 1~+∞:play times, -1~-∞:will fade animation after play complete), 默认使用AnimationData.loop.
 		 * @param layer The layer of the animation.
 		 * @param group The group of the animation.
-		 * @param fadeOutMode Fade out mode.
-		 * @param displayControl Display control.
+		 * @param fadeOutMode Fade out mode (none, sameLayer, sameGroup, sameLayerAndGroup, all).
 		 * @param pauseFadeOut Pause other animation playing.
 		 * @param pauseFadeIn Pause this animation playing before fade in complete.
+		 * @return AnimationState.
 		 * @see dragonBones.objects.AnimationData.
 		 * @see dragonBones.animation.AnimationState.
 		 */
@@ -252,11 +200,10 @@
 			animationName:String, 
 			fadeInTime:Number = -1, 
 			duration:Number = -1, 
-			loop:Number = NaN, 
+			playTimes:Number = NaN, 
 			layer:uint = 0, 
 			group:String = null,
 			fadeOutMode:String = SAME_LAYER_AND_GROUP,
-			displayControl:Boolean = true,
 			pauseFadeOut:Boolean = true,
 			pauseFadeIn:Boolean = true
 		):AnimationState
@@ -283,7 +230,7 @@
 			_isPlaying = true;
 			
 			//
-			fadeInTime = fadeInTime < 0?(animationData.fadeInTime < 0?0.3:animationData.fadeInTime):fadeInTime;
+			fadeInTime = fadeInTime < 0?(animationData.fadeTime < 0?0.3:animationData.fadeTime):fadeInTime;
 			
 			var durationScale:Number;
 			if(duration < 0)
@@ -295,62 +242,56 @@
 				durationScale = duration / animationData.duration;
 			}
 			
-			loop = isNaN(loop)?animationData.loop:loop;
-			layer = addLayer(layer);
+			playTimes = isNaN(playTimes)?animationData.playTimes:playTimes;
 			
 			//autoSync = autoSync && !pauseFadeOut && !pauseFadeIn;
 			var animationState:AnimationState;
-			var animationStateList:Vector.<AnimationState>;
+			var j:int;
 			switch(fadeOutMode)
 			{
 				case NONE:
 					break;
+				
 				case SAME_LAYER:
-					animationStateList = _animationLayer[layer];
-					i = animationStateList.length;
+					i = _animationStateList.length;
 					while(i --)
 					{
-						animationState = animationStateList[i];
-						animationState.fadeOut(fadeInTime, pauseFadeOut);
-					}
-					break;
-				case SAME_GROUP:
-					j = _animationLayer.length;
-					while(j --)
-					{
-						animationStateList = _animationLayer[j];
-						i = animationStateList.length;
-						while(i --)
+						animationState = _animationStateList[i];
+						if(animationState.layer == layer)
 						{
-							animationState = animationStateList[i];
-							if(animationState.group == group)
-							{
-								animationState.fadeOut(fadeInTime, pauseFadeOut);
-							}
-						}
-					}
-					break;
-				case ALL:
-					var j:int = _animationLayer.length;
-					while(j --)
-					{
-						animationStateList = _animationLayer[j];
-						i = animationStateList.length;
-						while(i --)
-						{
-							animationState = animationStateList[i];
 							animationState.fadeOut(fadeInTime, pauseFadeOut);
 						}
 					}
 					break;
-				case SAME_LAYER_AND_GROUP:
-				default:
-					animationStateList = _animationLayer[layer];
-					i = animationStateList.length;
+				
+				case SAME_GROUP:
+					i = _animationStateList.length;
 					while(i --)
 					{
-						animationState = animationStateList[i];
+						animationState = _animationStateList[i];
 						if(animationState.group == group)
+						{
+							animationState.fadeOut(fadeInTime, pauseFadeOut);
+						}
+					}
+					break;
+				
+				case ALL:
+					i = _animationStateList.length;
+					while(i --)
+					{
+						animationState = _animationStateList[i];
+						animationState.fadeOut(fadeInTime, pauseFadeOut);
+					}
+					break;
+				
+				case SAME_LAYER_AND_GROUP:
+				default:
+					i = _animationStateList.length;
+					while(i --)
+					{
+						animationState = _animationStateList[i];
+						if(animationState.layer == layer && animationState.group == group )
 						{
 							animationState.fadeOut(fadeInTime, pauseFadeOut);
 						}
@@ -359,28 +300,28 @@
 			}
 			
 			_lastAnimationState = AnimationState.borrowObject();
+			_lastAnimationState.layer = layer;
 			_lastAnimationState.group = group;
-			_lastAnimationState.tweenEnabled = tweenEnabled;
-			_lastAnimationState.fadeIn(_armature, animationData, fadeInTime, 1 / durationScale, loop, layer, displayControl, pauseFadeIn);
+			_lastAnimationState.autoTween = tweenEnabled;
+			_lastAnimationState.fadeIn(_armature, animationData, fadeInTime, 1 / durationScale, playTimes, pauseFadeIn);
 			
 			addState(_lastAnimationState);
-			
-			//
+			/*
 			_lastAnimationState.advanceTime(0);
-			
-			i = _armature._boneList.length;
+			var boneList:Vector.<Bone> = _armature.getBones(false);
+			i = boneList.length;
 			while(i --)
 			{
-				_armature._boneList[i].update();
+				boneList[i].update();
 			}
+			*/
 			
-			var slotList:Vector.<Slot> = _armature._slotList;
-			var slot:Slot;
+			var slotList:Vector.<Slot> = _armature.getSlots(false);
 			i = slotList.length;
 			while(i --)
 			{
-				slot = slotList[i];
-				slot.update();
+				var slot:Slot = slotList[i];
+				//slot.update();
 				if(slot.childArmature)
 				{
 					slot.childArmature.animation.gotoAndPlay(animationName, fadeInTime);
@@ -388,6 +329,49 @@
 			}
 			
 			return _lastAnimationState;
+		}
+		
+		/**
+		 * 控制一个animationState停止到指定的时间，如果指定的animationState不存在，则添加一个新的animationState
+		 * @param animationName The name of the animationState.
+		 * @param time 
+		 * @param normalizedTime 
+		 * @param fadeInTime A fade time to apply (>= 0), 混合影响到的其他动画会尝试使用这个时间淡出, 默认为0, 可以设置为-1来使用AnimationData.fadeInTime.
+		 * @param duration The duration of that AnimationData, 默认使用AnimationData.duration.
+		 * @param layer The layer of the animation.
+		 * @param group The group of the animation.
+		 * @return AnimationState.
+		 * @see dragonBones.objects.AnimationData.
+		 * @see dragonBones.animation.AnimationState.
+		 */
+		public function gotoAndStop(
+			animationName:String, 
+			time:Number, 
+			normalizedTime:Number = -1,
+			fadeInTime:Number = 0, 
+			duration:Number = -1, 
+			layer:uint = 0, 
+			group:String = null
+		):AnimationState
+		{
+			var animationState:AnimationState = getState(animationName, layer);
+			if(!animationState)
+			{
+				animationState = gotoAndPlay(animationName, fadeInTime, duration, NaN, layer, group);
+			}
+			
+			if(normalizedTime >= 0)
+			{
+				animationState.setCurrentTime(animationState.totalTime * normalizedTime);
+			}
+			else
+			{
+				animationState.setCurrentTime(time);
+			}
+			
+			animationState.stop();
+			
+			return animationState;
 		}
 		
 		/**
@@ -423,35 +407,25 @@
 		 * @return A AnimationState instance.
 		 * @see dragonBones.animation.AnimationState.
 		 */
-		public function getState(name:String, layer:uint = 0):AnimationState
+		public function getState(name:String, layer:int = 0):AnimationState
 		{
-			var l:int = _animationLayer.length;
-			if(l == 0)
-			{
-				return null;
-			}
-			else if(layer >= l)
-			{
-				layer = l - 1;
-			}
-			
-			var animationStateList:Vector.<AnimationState> = _animationLayer[layer];
-			if(!animationStateList)
-			{
-				return null;
-			}
-			var i:int = animationStateList.length;
+			var i:int = _animationStateList.length;
 			while(i --)
 			{
-				if(animationStateList[i].name == name)
+				var animationState:AnimationState = _animationStateList[i];
+				if(animationState.name == name && animationState.layer == layer)
 				{
-					return animationStateList[i];
+					return animationState;
 				}
 			}
-			
 			return null;
 		}
 		
+		/**
+		 * 检查是否包含指定的animationData.
+		 * @return Boolean.
+		 * @see dragonBones.animation.AnimationData.
+		 */
 		public function hasAnimation(animationName:String):Boolean
 		{
 			var i:int = _animationDataList.length;
@@ -466,178 +440,152 @@
 			return false;
 		}
 		
-		public function advanceTime(passedTime:Number):void
+		/** @private */
+		dragonBones_internal function advanceTime(passedTime:Number):void
 		{
-			/*
-			if(!_isPlaying || !_isActive)
+			if(!_isPlaying)
 			{
 				return;
 			}
-			*/
+			
+			_isFading = false;
+			
 			passedTime *= _timeScale;
+			var i:int = _animationStateList.length;
+			while(i --)
+			{
+				var animationState:AnimationState = _animationStateList[i];
+				if(animationState.advanceTime(passedTime))
+				{
+					removeState(animationState);
+				}
+				else if(animationState.fadeState != 0)
+				{
+					_isFading = true;
+				}
+			}
+			_animationStateCount = _animationStateList.length;
 			
-			var l:int = _armature._boneList.length;
-			var i:int;
-			var j:int;
-			var k:int = l;
-			var stateListLength:uint;
-			var bone:Bone;
-			var boneName:String;
-			var weigthLeft:Number;
+			var boneList:Vector.<Bone> = _armature.getBones(false);
+			var boneIndex:int = boneList.length;
 			
-			var x:Number;
-			var y:Number;
-			var skewX:Number;
-			var skewY:Number;
-			var scaleX:Number;
-			var scaleY:Number;
-			var pivotX:Number;
-			var pivotY:Number;
+			while(boneIndex --)
+			{
+				var bone:Bone = boneList[boneIndex];
+				if(_isFading)
+				{
+					bone.invalidUpdate();
+				}
+				else if(bone._needUpdate <= 0)
+				{
+					continue;
+				}
+				
+				if(_animationStateCount > 1 || _isFading)
+				{
+					blendingTimeline(bone);
+				}
+				else if(_lastAnimationState)
+				{
+					var timelineState:TimelineState = _lastAnimationState._timelineStates[bone.name];
+					if(timelineState && timelineState._blendEnabled)
+					{
+						bone._tween.copy(timelineState._transform);
+						bone._tweenPivot.copyFrom(timelineState._pivot);
+					}
+				}
+			}
+		}
+		
+		private function blendingTimeline(bone:Bone):void
+		{
+			var boneName:String = bone.name;
 			
-			var layerTotalWeight:Number;
-			var animationStateList:Vector.<AnimationState>;
-			var animationState:AnimationState;
-			var timelineState:TimelineState;
-			var weight:Number;
 			var transform:DBTransform;
 			var pivot:Point;
 			
-			l --;
-			while(k --)
+			var x:Number = 0;
+			var y:Number = 0;
+			var skewX:Number = 0;
+			var skewY:Number = 0;
+			var scaleX:Number = 0;
+			var scaleY:Number = 0;
+			var pivotX:Number = 0;
+			var pivotY:Number = 0;
+			
+			var i:int = _animationStateList.length;
+			while(i --)
 			{
-				bone = _armature._boneList[k];
-				boneName = bone.name;
-				weigthLeft = 1;
-				
-				x = 0;
-				y = 0;
-				skewX = 0;
-				skewY = 0;
-				scaleX = 0;
-				scaleY = 0;
-				pivotX = 0;
-				pivotY = 0;
-				
-				i = _animationLayer.length;
-				while(i --)
+				var weigthLeft:Number = 1;
+				var layerTotalWeight:Number = 0;
+				var animationState:AnimationState = _animationStateList[i];
+				var weight:Number = animationState._fadeWeight * animationState.weight * weigthLeft;
+				if(weight)
 				{
-					layerTotalWeight = 0;
-					animationStateList = _animationLayer[i];
-					stateListLength = animationStateList.length;
-					for(j = 0;j < stateListLength;j ++)
+					var timelineState:TimelineState = animationState._timelineStates[boneName];
+					if(timelineState && timelineState._blendEnabled)
 					{
-						animationState = animationStateList[j];
-						if(k == l)
-						{
-							if(animationState.advanceTime(passedTime))
-							{
-								removeState(animationState);
-								j --;
-								stateListLength --;
-								continue;
-							}
-						}
+						transform = timelineState._transform;
+						pivot = timelineState._pivot;
 						
-						timelineState = animationState._timelineStates[boneName];
+						x += transform.x * weight;
+						y += transform.y * weight;
+						skewX += transform.skewX * weight;
+						skewY += transform.skewY * weight;
+						scaleX += transform.scaleX * weight;
+						scaleY += transform.scaleY * weight;
+						pivotX += pivot.x * weight;
+						pivotY += pivot.y * weight;
 						
-						if(timelineState && timelineState.tweenActive)
-						{
-							weight = animationState._fadeWeight * animationState.weight * weigthLeft;
-							transform = timelineState.transform;
-							pivot = timelineState.pivot;
-							x += transform.x * weight;
-							y += transform.y * weight;
-							skewX += transform.skewX * weight;
-							skewY += transform.skewY * weight;
-							scaleX += transform.scaleX * weight;
-							scaleY += transform.scaleY * weight;
-							pivotX += pivot.x * weight;
-							pivotY += pivot.y * weight;
-							
-							layerTotalWeight += weight;
-						}
-					}
-					
-					if(layerTotalWeight >= weigthLeft)
-					{
-						break;
-					}
-					else
-					{
-						weigthLeft -= layerTotalWeight;
+						layerTotalWeight += weight;
 					}
 				}
-				transform = bone._tween;
-				pivot = bone._tweenPivot;
 				
-				transform.x = x;
-				transform.y = y;
-				transform.skewX = skewX;
-				transform.skewY = skewY;
-				transform.scaleX = scaleX;
-				transform.scaleY = scaleY;
-				pivot.x = pivotX;
-				pivot.y = pivotY;
-			}
-		}
-		
-		/** @private */
-		dragonBones_internal function setActive(animationState:AnimationState, active:Boolean):void
-		{
-			if(active)
-			{
-				_isActive = true;
-			}
-			else
-			{
-				var i:int = _animationLayer.length;
-				var j:int;
-				var animationStateList:Vector.<AnimationState>;
-				while(i --)
+				if(layerTotalWeight >= weigthLeft)
 				{
-					animationStateList = _animationLayer[i];
-					j = animationStateList.length;
-					while(j --)
-					{
-						if(animationStateList[j].isPlaying)
-						{
-							return;
-						}
-					}
+					break;
 				}
-				_isActive = false;
+				else
+				{
+					weigthLeft -= layerTotalWeight;
+				}
 			}
-		}
-		
-		private function addLayer(layer:uint):uint
-		{
-			if(layer >= _animationLayer.length)
-			{
-				layer = _animationLayer.length;
-				_animationLayer[layer] = new Vector.<AnimationState>;
-			}
-			return layer;
+			
+			transform = bone._tween;
+			pivot = bone._tweenPivot;
+			
+			transform.x = x;
+			transform.y = y;
+			transform.skewX = skewX;
+			transform.skewY = skewY;
+			transform.scaleX = scaleX;
+			transform.scaleY = scaleY;
+			pivot.x = pivotX;
+			pivot.y = pivotY;
 		}
 		
 		private function addState(animationState:AnimationState):void
 		{
-			var animationStateList:Vector.<AnimationState> = _animationLayer[animationState.layer];
-			animationStateList.push(animationState);
+			if(_animationStateList.indexOf(animationState) < 0)
+			{
+				_animationStateList.push(animationState);
+				_animationStateList.sort(sortState);
+			}
 		}
 		
 		private function removeState(animationState:AnimationState):void
 		{
-			var layer:int = animationState.layer;
-			var animationStateList:Vector.<AnimationState> = _animationLayer[layer];
-			animationStateList.splice(animationStateList.indexOf(animationState), 1);
-			
-			AnimationState.returnObject(animationState);
-			
-			if(animationStateList.length == 0 && layer == _animationLayer.length - 1)
+			var index:int = _animationStateList.indexOf(animationState);
+			if(index >= 0)
 			{
-				_animationLayer.length --;
+				_animationStateList.splice(index, 1);
+				AnimationState.returnObject(animationState);
 			}
 		}
+		
+		private function sortState(state1:AnimationState, state2:AnimationState):int
+		{
+			return state1.layer > state2.layer?1:-1;
+		}
 	}
-	
 }

@@ -22,14 +22,6 @@
 		/**
 		 * Dispatched when the playback of an animation fade in.
 		 */
-		public static function get MOVEMENT_CHANGE():String
-		{
-			return FADE_IN;
-		}
-		
-		/**
-		 * Dispatched when the playback of an animation fade in.
-		 */
 		public static const FADE_IN:String = "fadeIn";
 		
 		/**
@@ -82,8 +74,8 @@
 		
 		/**
 		 * Creates a new AnimationEvent instance.
-		 * @param	type
-		 * @param	cancelable
+		 * @param type
+		 * @param cancelable
 		 */
 		public function AnimationEvent(type:String, cancelable:Boolean = false)
 		{

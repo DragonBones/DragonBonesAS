@@ -1,30 +1,48 @@
 package dragonBones
 {
+	import flash.errors.IllegalOperationError;
 	import flash.geom.Matrix;
 	
-	import dragonBones.core.DBObject;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.display.IDisplayBridge;
 	import dragonBones.objects.DisplayData;
+	import dragonBones.objects.FrameCached;
+	import dragonBones.objects.TimelineCached;
+	import dragonBones.utils.TransformUtil;
 	
 	use namespace dragonBones_internal;
 	
-	public class Slot extends DBObject
+	public class Slot
 	{
-		/** @private 需要保持引用DisplayData（armature中唯一需要引用数据的地方，animation中引用的除外），slot在切换显示对象时，需要还原显示对象的原始轴点，因为在动画制作过程中，同一个slot的不同显示对象的轴点位置是不一定相同的*/
+		public var name:String;
+		
+		/**
+		 * An object that can contain any user extra data.
+		 */
+		public var userData:Object;
+		
+		/** @private 需要保持引用DisplayData，slot在切换显示对象时，需要还原显示对象的原始轴点，因为在动画制作过程中，同一个slot的不同显示对象的轴点位置是不一定相同的*/
 		dragonBones_internal var _dislayDataList:Vector.<DisplayData>;
+		
 		/** @private */
-		dragonBones_internal var _displayBridge:IDisplayBridge;
-		/** @private slot*/
 		dragonBones_internal var _originZOrder:Number;
+		
 		/** @private */
 		dragonBones_internal var _tweenZorder:Number;
-		/** @private Mark slot display object if displayed in stage.*/
-		dragonBones_internal var _isDisplayOnStage:Boolean;
 		
-		private var _isHideDisplay:Boolean;
-		private var _offsetZOrder:Number;
-		private var _displayIndex:int;
+		/** @private */
+		dragonBones_internal var _isShowDisplay:Boolean;
+		
+		/** @private */
+		protected var _localTransformMatrix:Matrix;
+		
+		/** @private */
+		protected var _globalTransformMatrix:Matrix;
+		
+		/** @private */
+		protected var _offsetZOrder:Number;
+		
+		/** @private */
+		protected var _displayIndex:int;
 		
 		/**
 		 * zOrder. Support decimal for ensure dynamically added slot work toghther with animation controled slot.  
@@ -39,14 +57,30 @@ package dragonBones
 			if(zOrder != value)
 			{
 				_offsetZOrder = value - _originZOrder - _tweenZorder;
-				if(this._armature)
+				if(_armature)
 				{
-					this._armature._slotsZOrderChanged = true;
+					_armature._slotsZOrderChanged = true;
 				}
 			}
 		}
-        
-		private var _blendMode:String;
+		
+		/** @private */
+		protected var _visible:Boolean;
+		public function get visible():Boolean
+		{
+			return _visible;
+		}
+		public function set visible(value:Boolean):void
+		{
+			_visible = value;
+			if(_visible != value)
+			{
+				_visible = value;
+				updateDisplayVisible(_visible);
+			}
+		}
+		
+		protected var _blendMode:String;
 		/**
 		 * blendMode
 		 * @return blendMode.
@@ -60,53 +94,95 @@ package dragonBones
 			if(_blendMode != value)
 			{
 				_blendMode = value;
-				if (_displayBridge.display)
-				{
-					_displayBridge.updateBlendMode(_blendMode);
-				}
+				updateDisplayBlendMode(_blendMode);
 			}
 		}
 		
+		/** @private */
+		protected var _armature:Armature;
 		/**
-		 * The DisplayObject belonging to this Bone instance. Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
+		 * The armature this Slot instance belongs to.
+		 */
+		public function get armature():Armature
+		{
+			return _armature;
+		}
+		/** @private */
+		dragonBones_internal function setArmature(value:Armature):void
+		{
+			_armature = value;
+		}
+		
+		/** @private */
+		protected var _parent:Bone;
+		/**
+		 * Indicates the Bone instance that directly contains this Slot instance if any.
+		 */
+		public function get parent():Bone
+		{
+			return _parent;
+		}
+		/** @private */
+		dragonBones_internal function setParent(value:Bone):void
+		{
+			if(_parent)
+			{
+				_parent.removeSlot(this);
+			}
+			_parent = value;
+			if(_parent)
+			{
+				_parent.addSlot(this);
+			}
+		}
+		
+		protected var _display:Object;
+		/**
+		 * The DisplayObject belonging to this Slot instance. Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
 		 */
 		public function get display():Object
 		{
-			var display:Object = _displayList[_displayIndex];
-			if(display is Armature)
-			{
-				return display.display;
-			}
-			return display;
+			return null;
 		}
 		public function set display(value:Object):void
 		{
+			if(_displayList[_displayIndex] == value)
+			{
+				return;
+			}
+			_childArmature = null;
 			_displayList[_displayIndex] = value;
-			setDisplay(value);
+			updateDisplay(value);
 		}
 		
+		protected var _childArmature:Armature;
 		/**
 		 * The sub-armature of this Slot instance.
 		 */
 		public function get childArmature():Armature
 		{
-			if(_displayList[_displayIndex] is Armature)
-			{
-				return _displayList[_displayIndex] as Armature;
-			}
-			return null;
+			return _childArmature;
 		}
 		public function set childArmature(value:Armature):void
 		{
-			_displayList[_displayIndex] = value;
-			if(value)
+			if(_displayList[_displayIndex] == value)
 			{
-				setDisplay(value.display);
+				return;
+			}
+			_childArmature = value;
+			_displayList[_displayIndex] = _childArmature;
+			if(_childArmature)
+			{
+				updateDisplay(_childArmature.display);
+			}
+			else
+			{
+				updateDisplay(null);
 			}
 		}
 
 		//
-		private var _displayList:Array;
+		protected var _displayList:Array;
 		/**
 		 * The DisplayObject list belonging to this Slot instance (display or armature). Replace it to implement switch texture.
 		 */
@@ -124,8 +200,8 @@ package dragonBones
 			while(i --)
 			{
 				_displayList[i] = value[i];
-				changeDisplay(i);
-				update();
+				//changeDisplay(i);
+				//update();
 			}
 			
 			if(_displayIndex >= 0)
@@ -136,67 +212,30 @@ package dragonBones
 			}
 		}
 		
-		private function setDisplay(display:Object):void
-		{
-			if(_displayBridge.display)
-			{
-				_displayBridge.display = display;
-			}
-			else 
-			//[TODO] IDisplayBridge's interface still need to refine.
-			//IDisplayBridge的接口设计的不太的完善，后续应该将设置display和addDisplay分开
-			{
-				_displayBridge.display = display;
-				if(this._armature)
-				{
-					_displayBridge.addDisplay(this._armature.display);
-					this._armature._slotsZOrderChanged = true;
-				}
-			}
-			
-			updateChildArmatureAnimation();
-			
-			if(!_isHideDisplay && _displayBridge.display)
-			{
-				_isDisplayOnStage = true;
-				_displayBridge.updateBlendMode(_blendMode);
-			}
-			else
-			{
-				_isDisplayOnStage = false;
-			}
-		}
-		
 		/** @private */
 		dragonBones_internal function changeDisplay(displayIndex:int):void
 		{
 			if(displayIndex < 0)
 			{
-				if(!_isHideDisplay)
+				if(_isShowDisplay)
 				{
-					_isHideDisplay = true;
-					_displayBridge.removeDisplay();
+					_isShowDisplay = false;
+					removeDisplayFromContainer();
 					updateChildArmatureAnimation();
 				}
 			}
 			else
 			{
-				if(_isHideDisplay)
+				var length:uint = _displayList.length;
+				if(displayIndex >= length)
 				{
-					_isHideDisplay = false;
-					var changeShowState:Boolean = true;
-					if(this._armature)
+					displayIndex = length - 1;
+					if(displayIndex < 0)
 					{
-						_displayBridge.addDisplay(this._armature.display);
-						this._armature._slotsZOrderChanged = true;
+						displayIndex = 0;
 					}
 				}
 				
-				var length:uint = _displayList.length;
-				if(displayIndex >= length && length > 0)
-				{
-					displayIndex = length - 1;
-				}
 				if(_displayIndex != displayIndex)
 				{
 					_displayIndex = displayIndex;
@@ -204,135 +243,136 @@ package dragonBones
 					var content:Object = _displayList[_displayIndex];
 					if(content is Armature)
 					{
-						setDisplay((content as Armature).display);
+						_childArmature = content as Armature;
+						updateDisplay(_childArmature.display);
 					}
 					else
 					{
-						setDisplay(content);
+						_childArmature = null;
+						updateDisplay(content);
 					}
 					
-					if(_dislayDataList && _displayIndex <= _dislayDataList.length)
+					if(
+						_dislayDataList && 
+						_dislayDataList.length > 0 && 
+						_displayIndex < _dislayDataList.length
+					)
 					{
-						this._origin.copy(_dislayDataList[_displayIndex].transform);
+						TransformUtil.transformToMatrix(_dislayDataList[_displayIndex].transform, _localTransformMatrix);
 					}
 				}
-				else if(changeShowState)
+				else if(!_isShowDisplay)
 				{
+					if(_armature)
+					{
+						addDisplayToContainer(_armature.display);
+						_armature._slotsZOrderChanged = true;
+					}
 					updateChildArmatureAnimation();
+					_isShowDisplay = true;
 				}
 			}
-			
-			if(!_isHideDisplay && _displayBridge.display)
-			{
-				_isDisplayOnStage = true;
-			}
-			else
-			{
-				_isDisplayOnStage = false;
-			}
 		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function set visible(value:Boolean):void
-		{
-			if(value != this._visible)
-			{
-				this._visible = value;
-				updateVisible(this._visible);
-			}
-		}
-		
-		/** @private */
-		override dragonBones_internal function setArmature(value:Armature):void
-		{
-			super.setArmature(value);
-			if(this._armature)
-			{
-				this._armature._slotsZOrderChanged = true;
-				_displayBridge.addDisplay(this._armature.display);
-			}
-			else
-			{
-				_displayBridge.removeDisplay();
-			}
-		}
-		
 		
 		/**
 		 * Creates a Slot blank instance.
 		 */
-		public function Slot(displayBrideg:IDisplayBridge)
+		public function Slot(self:Slot)
 		{
-			super();
-			_displayBridge = displayBrideg;
+			if(self != this)
+			{
+				throw new IllegalOperationError("Abstract class can not be instantiated!");
+			}
+			
 			_displayList = [];
 			_displayIndex = -1;
-			_scaleType = 1;
 			
 			_originZOrder = 0;
 			_tweenZorder = 0;
 			_offsetZOrder = 0;
+			_dislayDataList = null;
+			_isShowDisplay = false;
 			
-			_isDisplayOnStage = false;
-			_isHideDisplay = false;
-            
-			_blendMode = "normal";
-			if(_displayBridge.display)
-			{
-				_displayBridge.updateBlendMode(_blendMode);
-			}
+			_visible = true;
+			_parent = null;
+			_childArmature = null;
+			_display = null;
+			
+			_localTransformMatrix = new Matrix();
+			_globalTransformMatrix = new Matrix();
+			
+			userData = null;
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function dispose():void
+		public function dispose():void
 		{
-			if(!_displayBridge)
+			_displayList.length = 0;
+			
+			_displayList = null;
+			_dislayDataList = null;
+			_childArmature = null;
+			_armature = null;
+			_parent = null;
+			_childArmature = null;
+			_display = null;
+			
+			_localTransformMatrix = null;
+			_globalTransformMatrix = null;
+			
+			userData = null;
+		}
+		
+		/** @private */
+		dragonBones_internal function update():void
+		{
+			if(_parent._needUpdate <= 0)
 			{
 				return;
 			}
-			super.dispose();
 			
-			_displayBridge.dispose();
-			_displayList.length = 0;
-			
-			_displayBridge = null;
-			_displayList = null;
-			_dislayDataList = null;
-		}
-		
-		/** @private */
-		override dragonBones_internal function update():void
-		{
-			super.update();
-			
-			if(_isDisplayOnStage)
+			var frameCached:FrameCached;
+			if(name && _parent._frameCached)
 			{
-				var pivotX:Number = _parent._tweenPivot.x;
-				var pivotY:Number = _parent._tweenPivot.y;
-				if(pivotX || pivotY)
+				frameCached = _parent._frameCached.slotFrameCachedMap[name];
+				if(frameCached)
 				{
-					var parentMatrix:Matrix = _parent._globalTransformMatrix;
-					this._globalTransformMatrix.tx += parentMatrix.a * pivotX + parentMatrix.c * pivotY;
-					this._globalTransformMatrix.ty += parentMatrix.b * pivotX + parentMatrix.d * pivotY;
+					_globalTransformMatrix.copyFrom(frameCached.matrix);
+					
+					updateTransform();
+					return;
 				}
 				
-				_displayBridge.updateTransform(this._globalTransformMatrix, this._global);
+				_parent._frameCached.slotFrameCachedMap[name] = frameCached = new FrameCached();
 			}
-		}
-		
-		/** @private */
-		dragonBones_internal function updateVisible(value:Boolean):void
-		{
-			_displayBridge.visible = this._parent.visible && this._visible && value;
+			
+			var parentMatrix:Matrix = _parent._globalTransformMatrix;
+			
+			_globalTransformMatrix.copyFrom(_localTransformMatrix);
+			_globalTransformMatrix.concat(parentMatrix);
+			
+			var pivotX:Number = _parent._tweenPivot.x;
+			var pivotY:Number = _parent._tweenPivot.y;
+			if(pivotX || pivotY)
+			{
+				_globalTransformMatrix.tx += parentMatrix.a * pivotX + parentMatrix.c * pivotY;
+				_globalTransformMatrix.ty += parentMatrix.b * pivotX + parentMatrix.d * pivotY;
+			}
+			
+			if(frameCached)
+			{
+				frameCached.matrix = new Matrix();
+				frameCached.matrix.copyFrom(_globalTransformMatrix);
+			}
+			
+			updateTransform();
 		}
 		
 		private function updateChildArmatureAnimation():void
 		{
-			var childArmature:Armature = this.childArmature;
+			/*var childArmature:Armature = this.childArmature;
 			
 			if(childArmature)
 			{
@@ -344,27 +384,114 @@ package dragonBones
 				else
 				{
 					if(
-						this._armature &&
-						this._armature.animation.lastAnimationState &&
-						childArmature.animation.hasAnimation(this._armature.animation.lastAnimationState.name)
+						_armature &&
+						_armature.animation.lastAnimationState &&
+						childArmature.animation.hasAnimation(_armature.animation.lastAnimationState.name)
 					)
 					{
-						childArmature.animation.gotoAndPlay(this._armature.animation.lastAnimationState.name);
+						childArmature.animation.gotoAndPlay(_armature.animation.lastAnimationState.name);
 					}
 					else
 					{
 						childArmature.animation.play();
 					}
 				}
+			}*/
+		}
+		
+		/** @private 
+		 * Updates the display of the slot.
+		 */
+		dragonBones_internal function updateDisplay(value:Object):void
+		{
+			_display = value;
+			if(_armature)
+			{
+				addDisplayToContainer(_armature.display);
+				_armature._slotsZOrderChanged = true;
 			}
+			updateDisplayBlendMode(_blendMode);
+			
+			updateChildArmatureAnimation();
+		}
+		
+		
+		//Abstract method
+		
+		/**
+		 * @private
+		 * Updates the transform of the slot.
+		 */
+		dragonBones_internal function updateTransform():void
+		{
+			throw new IllegalOperationError("Abstract method needs to be implemented in subclass!");
 		}
 		
 		/**
-		 * use displayList for v2.2 compatibility
+		 * @private
+		 * Adds the original display object to another display object.
+		 * @param container
+		 * @param index
 		 */
-		public function changeDisplayList(displayList:Array):void
+		dragonBones_internal function addDisplayToContainer(container:Object, index:int = -1):void
 		{
-			this.displayList = displayList;
+			throw new IllegalOperationError("Abstract method needs to be implemented in subclass!");
+		}
+		
+		/**
+		 * @private
+		 * remove the original display object from its parent.
+		 */
+		dragonBones_internal function removeDisplayFromContainer():void
+		{
+			throw new IllegalOperationError("Abstract method needs to be implemented in subclass!");
+		}
+		
+		/**
+		 * @private
+		 */
+		dragonBones_internal function updateDisplayVisible(value:Boolean):void
+		{
+			/**
+			 * bone.visible && slot.visible && updateVisible
+			 * this._parent.visible && this._visible && value;
+			 */
+			throw new IllegalOperationError("Abstract method needs to be implemented in subclass!");
+		}
+		
+		/**
+		 * @private
+		 * Updates the color of the display object.
+		 * @param a
+		 * @param r
+		 * @param g
+		 * @param b
+		 * @param aM
+		 * @param rM
+		 * @param gM
+		 * @param bM
+		 */
+		dragonBones_internal function updateDisplayColor(
+			aOffset:Number, 
+			rOffset:Number, 
+			gOffset:Number, 
+			bOffset:Number, 
+			aMultiplier:Number, 
+			rMultiplier:Number, 
+			gMultiplier:Number, 
+			bMultiplier:Number):void
+		{
+			throw new IllegalOperationError("Abstract method needs to be implemented in subclass!");
+		}
+		
+		/**
+		 * @private
+         * Update the blend mode of the display object.
+         * @param value The blend mode to use. 
+         */
+		dragonBones_internal function updateDisplayBlendMode(value:String):void
+		{
+			throw new IllegalOperationError("Abstract method needs to be implemented in subclass!");
 		}
 	}
 }

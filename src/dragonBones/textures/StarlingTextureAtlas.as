@@ -29,7 +29,7 @@
 		/**
 		 * @private
 		 */
-		protected var _isDifferentXML:Boolean;	
+		protected var _isDifferentConfig:Boolean;	
 		/**
 		 * @private
 		 */
@@ -47,17 +47,17 @@
 		}
 		/**
 		 * Creates a new StarlingTextureAtlas instance.
-		 * @param	texture A texture instance.
-		 * @param	textureAtlasXML A textureAtlas xml
-		 * @param	isDifferentXML
+		 * @param texture A texture instance.
+		 * @param textureAtlasRawData A textureAtlas config data
+		 * @param isDifferentXML
 		 */
-		public function StarlingTextureAtlas(texture:Texture, textureAtlasRawData:Object, isDifferentXML:Boolean = false)
+		public function StarlingTextureAtlas(texture:Texture, textureAtlasRawData:Object, isDifferentConfig:Boolean = false)
 		{
 			super(texture, null);
 			if (texture)
 			{
 				_scale = texture.scale;
-				_isDifferentXML = isDifferentXML;
+				_isDifferentConfig = isDifferentConfig;
 			}
 			_subTextureDic = {};
 			parseData(textureAtlasRawData);
@@ -80,9 +80,10 @@
 			}
 			_bitmapData = null;
 		}
+		
 		/**
 		 * Get the Texture with that name.
-		 * @param	name The name ofthe Texture instance.
+		 * @param name The name ofthe Texture instance.
 		 * @return The Texture instance.
 		 */
 		override public function getTexture(name:String):Texture
@@ -103,7 +104,7 @@
 		 */
 		protected function parseData(textureAtlasRawData:Object):void
 		{
-			var textureAtlasData:Object = DataParser.parseTextureAtlas(textureAtlasRawData, _isDifferentXML ? _scale : 1);
+			var textureAtlasData:Object = DataParser.parseTextureAtlas(textureAtlasRawData, _isDifferentConfig ? _scale : 1);
 			_name = textureAtlasData.__name;
 			delete textureAtlasData.__name;
 			for(var subTextureName:String in textureAtlasData)

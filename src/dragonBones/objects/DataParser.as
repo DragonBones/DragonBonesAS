@@ -12,9 +12,9 @@
 	{
 		/**
 		 * Compress all data into a ByteArray for serialization.
-		 * @param	The DragonBones data.
-		 * @param	The TextureAtlas data.
-		 * @param	The ByteArray representing the map.
+		 * @param The DragonBones data.
+		 * @param The TextureAtlas data.
+		 * @param The ByteArray representing the map.
 		 * @return ByteArray. A DragonBones compatible ByteArray.
 		 */
 		public static function compressData(dragonBonesData:Object, textureAtlasData:Object, textureDataBytes:ByteArray):ByteArray
@@ -43,7 +43,7 @@
 		
 		/**
 		 * Decompress a compatible DragonBones data.
-		 * @param	compressedByteArray The ByteArray to decompress.
+		 * @param compressedByteArray The ByteArray to decompress.
 		 * @return A DecompressedData instance.
 		 */
 		public static function decompressData(bytes:ByteArray):DecompressedData
@@ -107,8 +107,10 @@
 					var decompressedData:DecompressedData = new DecompressedData(dragonBonesData, textureAtlasData, bytes);
 					decompressedData.textureBytesDataType = dataType;
 					return decompressedData;
+					
 				case BytesType.ZIP:
 					throw new Error("Can not decompress zip!");
+					
 				default: 
 					throw new Error("Nonsupport data!");
 			}
