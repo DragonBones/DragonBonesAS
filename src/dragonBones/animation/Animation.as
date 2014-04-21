@@ -1,13 +1,9 @@
 ﻿package dragonBones.animation
 {
-	import flash.geom.Point;
-	
 	import dragonBones.Armature;
-	import dragonBones.Bone;
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.AnimationData;
-	import dragonBones.objects.DBTransform;
 	
 	use namespace dragonBones_internal;
 	
@@ -23,7 +19,23 @@
 		public static const SAME_LAYER:String = "sameLayer";
 		public static const SAME_GROUP:String = "sameGroup";
 		public static const SAME_LAYER_AND_GROUP:String = "sameLayerAndGroup";
-		public static const ALL:String = "all";
+		public static const ALL:String = "all";		
+		
+		/**
+		* 不推荐的API.
+		*/
+		public function get movementList():Vector.<String>
+		{
+			return _animationList;
+		}
+		
+		/**
+		 * 不推荐的API.
+		 */
+		public function get movementID():String
+		{
+			return lastAnimationName;
+		}
 		
 		
 		/**
@@ -201,7 +213,7 @@
 			fadeInTime:Number = -1, 
 			duration:Number = -1, 
 			playTimes:Number = NaN, 
-			layer:uint = 0, 
+			layer:int = 0, 
 			group:String = null,
 			fadeOutMode:String = SAME_LAYER_AND_GROUP,
 			pauseFadeOut:Boolean = true,
@@ -228,6 +240,7 @@
 			}
 			
 			_isPlaying = true;
+			_isFading = true;
 			
 			//
 			fadeInTime = fadeInTime < 0?(animationData.fadeTime < 0?0.3:animationData.fadeTime):fadeInTime;
@@ -244,7 +257,6 @@
 			
 			playTimes = isNaN(playTimes)?animationData.playTimes:playTimes;
 			
-			//autoSync = autoSync && !pauseFadeOut && !pauseFadeIn;
 			var animationState:AnimationState;
 			var j:int;
 			switch(fadeOutMode)
@@ -300,28 +312,18 @@
 			}
 			
 			_lastAnimationState = AnimationState.borrowObject();
-			_lastAnimationState.layer = layer;
-			_lastAnimationState.group = group;
+			_lastAnimationState._layer = layer;
+			_lastAnimationState._group = group;
 			_lastAnimationState.autoTween = tweenEnabled;
 			_lastAnimationState.fadeIn(_armature, animationData, fadeInTime, 1 / durationScale, playTimes, pauseFadeIn);
 			
 			addState(_lastAnimationState);
-			/*
-			_lastAnimationState.advanceTime(0);
-			var boneList:Vector.<Bone> = _armature.getBones(false);
-			i = boneList.length;
-			while(i --)
-			{
-				boneList[i].update();
-			}
-			*/
 			
 			var slotList:Vector.<Slot> = _armature.getSlots(false);
 			i = slotList.length;
 			while(i --)
 			{
 				var slot:Slot = slotList[i];
-				//slot.update();
 				if(slot.childArmature)
 				{
 					slot.childArmature.animation.gotoAndPlay(animationName, fadeInTime);
@@ -350,7 +352,7 @@
 			normalizedTime:Number = -1,
 			fadeInTime:Number = 0, 
 			duration:Number = -1, 
-			layer:uint = 0, 
+			layer:int = 0, 
 			group:String = null
 		):AnimationState
 		{
@@ -368,7 +370,7 @@
 			{
 				animationState.setCurrentTime(time);
 			}
-			
+			                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 			animationState.stop();
 			
 			return animationState;
@@ -448,7 +450,7 @@
 				return;
 			}
 			
-			_isFading = false;
+			var isFading:Boolean = false;
 			
 			passedTime *= _timeScale;
 			var i:int = _animationStateList.length;
@@ -459,117 +461,22 @@
 				{
 					removeState(animationState);
 				}
-				else if(animationState.fadeState != 0)
+				else if(animationState.fadeState != 1)
 				{
-					_isFading = true;
-				}
-			}
-			_animationStateCount = _animationStateList.length;
-			
-			var boneList:Vector.<Bone> = _armature.getBones(false);
-			var boneIndex:int = boneList.length;
-			
-			while(boneIndex --)
-			{
-				var bone:Bone = boneList[boneIndex];
-				if(_isFading)
-				{
-					bone.invalidUpdate();
-				}
-				else if(bone._needUpdate <= 0)
-				{
-					continue;
-				}
-				
-				if(_animationStateCount > 1 || _isFading)
-				{
-					blendingTimeline(bone);
-				}
-				else if(_lastAnimationState)
-				{
-					var timelineState:TimelineState = _lastAnimationState._timelineStates[bone.name];
-					if(timelineState && timelineState._blendEnabled)
-					{
-						bone._tween.copy(timelineState._transform);
-						bone._tweenPivot.copyFrom(timelineState._pivot);
-					}
-				}
-			}
-		}
-		
-		private function blendingTimeline(bone:Bone):void
-		{
-			var boneName:String = bone.name;
-			
-			var transform:DBTransform;
-			var pivot:Point;
-			
-			var x:Number = 0;
-			var y:Number = 0;
-			var skewX:Number = 0;
-			var skewY:Number = 0;
-			var scaleX:Number = 0;
-			var scaleY:Number = 0;
-			var pivotX:Number = 0;
-			var pivotY:Number = 0;
-			
-			var i:int = _animationStateList.length;
-			while(i --)
-			{
-				var weigthLeft:Number = 1;
-				var layerTotalWeight:Number = 0;
-				var animationState:AnimationState = _animationStateList[i];
-				var weight:Number = animationState._fadeWeight * animationState.weight * weigthLeft;
-				if(weight)
-				{
-					var timelineState:TimelineState = animationState._timelineStates[boneName];
-					if(timelineState && timelineState._blendEnabled)
-					{
-						transform = timelineState._transform;
-						pivot = timelineState._pivot;
-						
-						x += transform.x * weight;
-						y += transform.y * weight;
-						skewX += transform.skewX * weight;
-						skewY += transform.skewY * weight;
-						scaleX += transform.scaleX * weight;
-						scaleY += transform.scaleY * weight;
-						pivotX += pivot.x * weight;
-						pivotY += pivot.y * weight;
-						
-						layerTotalWeight += weight;
-					}
-				}
-				
-				if(layerTotalWeight >= weigthLeft)
-				{
-					break;
-				}
-				else
-				{
-					weigthLeft -= layerTotalWeight;
+					isFading = true;
 				}
 			}
 			
-			transform = bone._tween;
-			pivot = bone._tweenPivot;
-			
-			transform.x = x;
-			transform.y = y;
-			transform.skewX = skewX;
-			transform.skewY = skewY;
-			transform.scaleX = scaleX;
-			transform.scaleY = scaleY;
-			pivot.x = pivotX;
-			pivot.y = pivotY;
+			_isFading = isFading;
 		}
 		
 		private function addState(animationState:AnimationState):void
 		{
 			if(_animationStateList.indexOf(animationState) < 0)
 			{
-				_animationStateList.push(animationState);
-				_animationStateList.sort(sortState);
+				_animationStateList.unshift(animationState);
+				
+				_animationStateCount = _animationStateList.length;
 			}
 		}
 		
@@ -580,12 +487,21 @@
 			{
 				_animationStateList.splice(index, 1);
 				AnimationState.returnObject(animationState);
+				
+				if(_lastAnimationState == animationState)
+				{
+					if(_animationStateList.length > 0)
+					{
+						_lastAnimationState = _animationStateList[0];
+					}
+					else
+					{
+						_lastAnimationState = null;
+					}
+				}
+				
+				_animationStateCount = _animationStateList.length;
 			}
-		}
-		
-		private function sortState(state1:AnimationState, state2:AnimationState):int
-		{
-			return state1.layer > state2.layer?1:-1;
 		}
 	}
 }

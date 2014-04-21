@@ -51,10 +51,10 @@
 			var dataType:String = BytesType.getType(bytes);
 			switch (dataType)
 			{
-				case BytesType.SWF: 
-				case BytesType.PNG: 
-				case BytesType.JPG: 
-				case BytesType.ATF: 
+				case BytesType.SWF:
+				case BytesType.PNG:
+				case BytesType.JPG:
+				case BytesType.ATF:
 					try
 					{
 						var bytesCopy:ByteArray = new ByteArray();

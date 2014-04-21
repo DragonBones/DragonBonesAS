@@ -1,12 +1,18 @@
-package dragonBones.objects
+﻿package dragonBones.objects
 {
+	import flash.geom.Matrix;
+
 	public final class TimelineCached
 	{
-		private var _timeline:Vector.<BoneFrameCached>;
+		private var _timeline:Vector.<FrameCached>;
+		public function get timeline():Vector.<FrameCached>
+		{
+			return _timeline;
+		}
 		
 		public function TimelineCached()
 		{
-			_timeline = new Vector.<BoneFrameCached>;
+			_timeline = new Vector.<FrameCached>;
 		}
 		
 		public function dispose():void
@@ -21,26 +27,33 @@ package dragonBones.objects
 			_timeline = null;
 		}
 		
-		public function getFrame(framePosition:int):BoneFrameCached
+		public function getFrame(framePosition:int):FrameCached
 		{
 			return _timeline.length > framePosition?_timeline[framePosition]:null;
 		}
 		
-		public function addFrame(framePosition:int, frameDuration:int):BoneFrameCached
+		public function addFrame(transform:DBTransform, matrix:Matrix, framePosition:int, frameDuration:int):void
 		{
-			var frame:BoneFrameCached = new BoneFrameCached();
-			_timeline.fixed = false;
-			if(_timeline.length < framePosition)
+			if(_timeline.length < framePosition + frameDuration)
 			{
-				_timeline.length = framePosition;
+				_timeline.fixed = false;
+				_timeline.length = framePosition + frameDuration;
+				_timeline.fixed = true;
 			}
+			
+			var frame:FrameCached = new FrameCached();
+			if(transform)
+			{
+				frame.transform = new DBTransform();
+				frame.transform.copy(transform);
+			}
+			frame.matrix = new Matrix();
+			frame.matrix.copyFrom(matrix);
+			
 			for(var i:int = framePosition;i < framePosition + frameDuration;i ++)
 			{
 				_timeline[i] = frame;
 			}
-			_timeline.fixed = true;
-			
-			return frame;
 		}
 	}
 }

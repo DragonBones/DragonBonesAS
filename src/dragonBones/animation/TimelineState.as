@@ -5,8 +5,8 @@ package dragonBones.animation
 	
 	import dragonBones.Armature;
 	import dragonBones.Bone;
+	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.objects.BoneFrameCached;
 	import dragonBones.objects.DBTransform;
 	import dragonBones.objects.TimelineCached;
 	import dragonBones.objects.TransformFrame;
@@ -101,13 +101,13 @@ package dragonBones.animation
 		private var _tweenColor:Boolean;
 		
 		private var _armature:Armature;
+		private var _animation:Animation;
 		private var _bone:Bone;
 		private var _animationState:AnimationState;
 		private var _timeline:TransformTimeline;
 		private var _currentFrame:TransformFrame;
 		private var _originTransform:DBTransform;
 		private var _originPivot:Point;
-		private var _cachedTimeline:TimelineCached;
 		
 		private var _durationTransform:DBTransform;
 		private var _durationPivot:Point;
@@ -120,6 +120,16 @@ package dragonBones.animation
 		public function get name():String
 		{
 			return _name;
+		}
+		
+		public function get layer():int
+		{
+			return _animationState.layer;
+		}
+		
+		public function get weight():Number
+		{
+			return _animationState.fadeWeight * _animationState.weight;
 		}
 		
 		public function TimelineState()
@@ -137,10 +147,10 @@ package dragonBones.animation
 		{
 			_bone = bone;
 			_armature = _bone.armature;
+			_animation = _armature.animation;
 			_animationState = animationState;
 			_timeline = timeline;
 			_currentFrame = null;
-			_cachedTimeline = null;
 			_originTransform = _timeline.originTransform;
 			_originPivot = _timeline.originPivot;
 			
@@ -188,6 +198,8 @@ package dragonBones.animation
 					_updateState = 1;
 					break;
 			}
+			
+			_bone.addState(this);
 		}
 		
 		/** @private */
@@ -513,29 +525,7 @@ package dragonBones.animation
 			
 			if(!_tweenTransform)
 			{
-				var isCachedFrame:Boolean = false;
-				if(
-					_armature.cacheFrameRate > 0 &&
-					_armature.animation._animationStateCount < 2 &&
-					!_armature.animation._isFading
-				)
-				{
-					//Math.floor
-					var framePosition:int = _currentFramePosition * _rawAnimationScale * _armature.cacheFrameRate;
-					var frameCached:BoneFrameCached = _cachedTimeline.getFrame(framePosition);
-					if(frameCached)
-					{
-						isCachedFrame = true;
-					}
-					else
-					{
-						var frameDuration:int = _currentFrameDuration * _rawAnimationScale * _armature.cacheFrameRate;
-						frameCached = _cachedTimeline.addFrame(framePosition, frameDuration);
-					}
-					_bone._frameCached = frameCached;
-				}
-				
-				if(!isCachedFrame)
+				if(!updateTimelineCached(true))
 				{
 					if(_animationState.additiveBlending)
 					{
@@ -581,7 +571,7 @@ package dragonBones.animation
 			
 			if(!_tweenColor && _animationState.displayControl)
 			{
-				/*if(_currentFrame.color)
+				if(_currentFrame.color)
 				{
 					_bone.updateColor(
 						_currentFrame.color.alphaOffset, 
@@ -591,13 +581,14 @@ package dragonBones.animation
 						_currentFrame.color.alphaMultiplier, 
 						_currentFrame.color.redMultiplier, 
 						_currentFrame.color.greenMultiplier, 
-						_currentFrame.color.blueMultiplier
+						_currentFrame.color.blueMultiplier,
+						true
 					);
 				}
 				else if(_bone._isColorChanged)
 				{
-					_bone.updateColor(0, 0, 0, 0, 1, 1, 1, 1);
-				}*/
+					_bone.updateColor(0, 0, 0, 0, 1, 1, 1, 1, false);
+				}
 				
 			}
 		}
@@ -612,32 +603,7 @@ package dragonBones.animation
 			
 			if(_tweenTransform)
 			{
-				var isCachedFrame:Boolean = false;
-				if(
-					_armature.cacheFrameRate > 0 &&
-					_armature.animation._animationStateCount < 2 &&
-					!_armature.animation._isFading
-				)
-				{
-					if(!_cachedTimeline)
-					{
-						_cachedTimeline = _animationState.clip.getTimelineCached(_name);
-					}
-					//Math.floor
-					var framePosition:int = _currentTime * _rawAnimationScale * _armature.cacheFrameRate;
-					var frameCached:BoneFrameCached = _cachedTimeline.getFrame(framePosition);
-					if(frameCached)
-					{
-						isCachedFrame = true;
-					}
-					else
-					{
-						frameCached = _cachedTimeline.addFrame(framePosition, 1);
-					}
-					_bone._frameCached = frameCached;
-				}
-				
-				if(!isCachedFrame)
+				if(!updateTimelineCached(false))
 				{
 					var currentTransform:DBTransform = _currentFrame.transform;
 					var currentPivot:Point = _currentFrame.pivot;
@@ -680,7 +646,7 @@ package dragonBones.animation
 			
 			if(_tweenColor && _animationState.displayControl)
 			{
-				/*if(_currentFrame.color)
+				if(_currentFrame.color)
 				{
 					_bone.updateColor(
 						_currentFrame.color.alphaOffset + _durationColor.alphaOffset * progress,
@@ -690,7 +656,8 @@ package dragonBones.animation
 						_currentFrame.color.alphaMultiplier + _durationColor.alphaMultiplier * progress,
 						_currentFrame.color.redMultiplier + _durationColor.redMultiplier * progress,
 						_currentFrame.color.greenMultiplier + _durationColor.greenMultiplier * progress,
-						_currentFrame.color.blueMultiplier + _durationColor.blueMultiplier * progress
+						_currentFrame.color.blueMultiplier + _durationColor.blueMultiplier * progress,
+						true
 					);
 				}
 				else
@@ -703,10 +670,57 @@ package dragonBones.animation
 						1 + _durationColor.alphaMultiplier * progress,
 						1 + _durationColor.redMultiplier * progress,
 						1 + _durationColor.greenMultiplier * progress,
-						1 + _durationColor.blueMultiplier * progress
+						1 + _durationColor.blueMultiplier * progress,
+						true
 					);
-				}*/
+				}
 			}
+		}
+		
+		private function updateTimelineCached(isNoTweenFrame:Boolean):Boolean
+		{
+			var slot:Slot;
+			var isCachedFrame:Boolean = false;
+			if(
+				_armature.cacheFrameRate > 0 &&
+				_animation._animationStateCount < 2 &&
+				!_animation._isFading
+			)
+			{
+				var timelineCached:TimelineCached = _timeline.timelineCached;
+				if(!_bone._timelineCached)
+				{
+					_bone._timelineCached = timelineCached;
+					for each(slot in _bone.getSlots(false))
+					{
+						slot._timelineCached = _timeline.getSlotTimelineCached(slot.name);
+					}
+				}
+				//Math.floor
+				var framePosition:int = (isNoTweenFrame?_currentFramePosition:_currentTime) * _rawAnimationScale * _armature.cacheFrameRate;
+				_bone._frameCachedPosition = framePosition;
+				if(timelineCached.getFrame(framePosition))
+				{
+					isCachedFrame = true;
+					_bone._frameCachedDuration = -1;
+				}
+				else
+				{
+					_bone._frameCachedDuration = isNoTweenFrame?(_currentFrameDuration * _rawAnimationScale * _armature.cacheFrameRate || 1):1;
+				}
+			}
+			else if(_bone._timelineCached)
+			{
+				_bone._timelineCached = null;
+				for each(slot in _bone.getSlots(false))
+				{
+					slot._timelineCached = null;
+				}
+				_bone._frameCachedPosition = -1;
+				_bone._frameCachedDuration = -1;
+			}
+			
+			return isCachedFrame;
 		}
 		
 		private function updateSingleFrame():void
@@ -755,35 +769,37 @@ package dragonBones.animation
 				
 				if(_animationState.displayControl)
 				{
-					/*if(_currentFrame.color )
+					if(_currentFrame.color)
 					{
-					_bone.updateColor(
-					_currentFrame.color.alphaOffset, 
-					_currentFrame.color.redOffset, 
-					_currentFrame.color.greenOffset, 
-					_currentFrame.color.blueOffset, 
-					_currentFrame.color.alphaMultiplier, 
-					_currentFrame.color.redMultiplier, 
-					_currentFrame.color.greenMultiplier, 
-					_currentFrame.color.blueMultiplier
-					);
+						_bone.updateColor(
+							_currentFrame.color.alphaOffset, 
+							_currentFrame.color.redOffset, 
+							_currentFrame.color.greenOffset, 
+							_currentFrame.color.blueOffset, 
+							_currentFrame.color.alphaMultiplier, 
+							_currentFrame.color.redMultiplier, 
+							_currentFrame.color.greenMultiplier, 
+							_currentFrame.color.blueMultiplier,
+							true
+						);
 					}
 					else if(_bone._isColorChanged)
 					{
-					_bone.updateColor(0, 0, 0, 0, 1, 1, 1, 1);
-					}*/
+						_bone.updateColor(0, 0, 0, 0, 1, 1, 1, 1, false);
+					}
 				}
 			}
 		}
 		
 		private function clear():void
 		{
+			_bone.removeState(this);
 			_bone = null;
 			_armature = null;
+			_animation = null;
 			_animationState = null;
 			_timeline = null;
 			_currentFrame = null;
-			_cachedTimeline = null;
 			_originTransform = null;
 			_originPivot = null;
 		}

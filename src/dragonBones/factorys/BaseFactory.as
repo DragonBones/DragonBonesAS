@@ -276,7 +276,7 @@ package dragonBones.factorys
 			buildBones(armature, armatureData);
 			
 			//
-			buildSlots(armature, null, skinData, skinDataCopy);
+			buildSlots(armature, armatureData, skinData, skinDataCopy);
 			
 			//
 			armature.animation.play();
@@ -338,8 +338,10 @@ package dragonBones.factorys
 		/** @private */
 		protected function buildBones(armature:Armature, armatureData:ArmatureData):void
 		{
-			for each(var boneData:BoneData in armatureData.boneDataList)
+			//按照从属关系的顺序建立
+			for(var i:int = 0;i < armatureData.boneDataList.length;i ++)
 			{
+				var boneData:BoneData = armatureData.boneDataList[i];
 				var bone:Bone = new Bone();
 				bone.name = boneData.name;
 				bone.inheritRotation = boneData.inheritRotation;
@@ -371,7 +373,7 @@ package dragonBones.factorys
 				slot.name = slotData.name;
 				slot.blendMode = slotData.blendMode;
 				slot._originZOrder = slotData.zOrder;
-				slot._dislayDataList = slotData.displayDataList;
+				slot._displayDataList = slotData.displayDataList;
 				
 				helpArray.length = 0;
 				var i:int = slotData.displayDataList.length;
@@ -406,7 +408,8 @@ package dragonBones.factorys
 					}
 				}
 				
-				//如果显示对象有name属性并且name属性可以设置的话，将name设置为与slot同名，dragonBones并不依赖这些属性，只是为了方便开发者
+				//==================================================
+				//如果显示对象有name属性并且name属性可以设置的话，将name设置为与slot同名，dragonBones并不依赖这些属性，只是方便开发者
 				for each(var displayObject:Object in helpArray)
 				{
 					if(displayObject && "name" in displayObject)
@@ -420,8 +423,9 @@ package dragonBones.factorys
 						}
 					}
 				}
+				//==================================================
 				
-				armature.addSlot(slot, bone.name);
+				bone.addChild(slot);
 				slot.displayList = helpArray;
 				slot.changeDisplay(0);
 			}
@@ -467,6 +471,10 @@ package dragonBones.factorys
 			return null;
 		}
 		
+		
+		
+		//==================================================
+		//解析dbswf和dbpng，如果不能序列化amf3格式无法实现解析
 		/** @private */
 		protected var _textureAtlasLoadingDic:Object = {};
 		
@@ -549,5 +557,6 @@ package dragonBones.factorys
 				}
 			}
 		}
+		//==================================================
 	}
 }

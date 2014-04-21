@@ -19,8 +19,6 @@ package dragonBones.objects
 			return _timelineList;
 		}
 		
-		private var _timelineCachedMap:Object;
-		
 		public function AnimationData()
 		{
 			super();
@@ -31,8 +29,6 @@ package dragonBones.objects
 			
 			_timelineList = new Vector.<TransformTimeline>;
 			_timelineList.fixed = true;
-			
-			_timelineCachedMap = {};
 		}
 		
 		override public function dispose():void
@@ -50,13 +46,6 @@ package dragonBones.objects
 			_timelineList.fixed = false;
 			_timelineList.length = 0;
 			_timelineList = null;
-			
-			for each(var timelineCached:TimelineCached in _timelineCachedMap)
-			{
-				timelineCached.dispose();
-			}
-			//clear
-			_timelineCachedMap = null;
 		}
 		
 		public function getTimeline(timelineName:String):TransformTimeline
@@ -85,17 +74,6 @@ package dragonBones.objects
 				_timelineList[_timelineList.length] = timeline;
 				_timelineList.fixed = true;
 			}
-		}
-		
-		public function getTimelineCached(timelineName:String):TimelineCached
-		{
-			var timelineCached:TimelineCached = _timelineCachedMap[timelineName];
-			if(!timelineCached)
-			{
-				_timelineCachedMap[timelineName] =
-					timelineCached = new TimelineCached();
-			}
-			return timelineCached;
 		}
 	}
 }

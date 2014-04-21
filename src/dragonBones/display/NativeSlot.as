@@ -30,6 +30,7 @@ package dragonBones.display
 			_colorTransform = null;
 		}
 		
+		/** @private */
 		override dragonBones_internal function updateDisplay(value:Object):void
 		{
 			_nativeDisplay = value as DisplayObject;
@@ -37,6 +38,10 @@ package dragonBones.display
 			super.updateDisplay(value);
 		}
 		
+		
+		//Abstract method
+		
+		/** @private */
 		override dragonBones_internal function updateTransform():void
 		{
 			if(_nativeDisplay)
@@ -45,8 +50,12 @@ package dragonBones.display
 			}
 		}
 		
-		
-		//Abstract method
+		/** @private */
+		override dragonBones_internal function getDisplayIndex(value:Object):int
+		{
+			var nativeDisplay:DisplayObject = value as DisplayObject;
+			return nativeDisplay.parent.getChildIndex(nativeDisplay);
+		}
 		
 		/** @private */
 		override dragonBones_internal function addDisplayToContainer(container:Object, index:int = -1):void

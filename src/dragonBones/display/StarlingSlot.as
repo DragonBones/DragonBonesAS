@@ -52,6 +52,17 @@ package dragonBones.display
 			super.updateDisplay(value);
 		}
 		
+		
+		//Abstract method
+		
+		/** @private */
+		override dragonBones_internal function getDisplayIndex(value:Object):int
+		{
+			var startlingDisplay:DisplayObject = value as DisplayObject;
+			return startlingDisplay.parent.getChildIndex(startlingDisplay);
+		}
+		
+		/** @private */
 		override dragonBones_internal function updateTransform():void
 		{
 			if(_starlingDisplay)
@@ -61,7 +72,7 @@ package dragonBones.display
 				
 				if(updateMatrix)
 				{
-					_display.transformationMatrix = _globalTransformMatrix;
+					_starlingDisplay.transformationMatrix = _globalTransformMatrix;
 					if(pivotX || pivotY)
 					{
 						_display.pivotX = pivotX;
@@ -70,19 +81,25 @@ package dragonBones.display
 				}
 				else
 				{
-					_starlingDisplay.transformationMatrix.copyFrom(_globalTransformMatrix);
+					var displayMatrix:Matrix = _starlingDisplay.transformationMatrix;
+					displayMatrix.a = _globalTransformMatrix.a;
+					displayMatrix.b = _globalTransformMatrix.b;
+					displayMatrix.c = _globalTransformMatrix.c;
+					displayMatrix.d = _globalTransformMatrix.d;
+					//displayMatrix.copyFrom(_globalTransformMatrix);
 					if(pivotX || pivotY)
 					{
-						var displayMatrix:Matrix = _starlingDisplay.transformationMatrix;
-						displayMatrix.tx -= displayMatrix.a * pivotX + displayMatrix.c * pivotY;
-						displayMatrix.ty -= displayMatrix.b * pivotX + displayMatrix.d * pivotY;
+						displayMatrix.tx = _globalTransformMatrix.tx - (displayMatrix.a * pivotX + displayMatrix.c * pivotY);
+						displayMatrix.ty = _globalTransformMatrix.ty - (displayMatrix.b * pivotX + displayMatrix.d * pivotY);
+					}
+					else
+					{
+						displayMatrix.tx = _globalTransformMatrix.tx;
+						displayMatrix.ty = _globalTransformMatrix.ty;
 					}
 				}
 			}
 		}
-		
-		
-		//Abstract method
 		
 		/** @private */
 		override dragonBones_internal function addDisplayToContainer(container:Object, index:int = -1):void
@@ -166,7 +183,6 @@ package dragonBones.display
 						break;
 					
 					default:
-						//_nativeDisplay.blendMode = BlendMode.NORMAL;
 						break;
 				}
 			}

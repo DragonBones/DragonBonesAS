@@ -52,18 +52,14 @@
 		}
 		
 		/**
-		 * The layer of the animation. When calculating the final blend weights, animations in higher layers will get their weights.
-		 */
-		public var layer:int;
-		
-		public var group:String;
-		
-		/**
 		 * 是否可以将动画中的 color change, displayIndex change, visible change 作用到display上.
 		 * Sometimes, we want slots controlled by a spedific animation state when animation is doing mix or addition.
 		 */
 		public var displayControl:Boolean;
 		
+		/**
+		 * 动画的混合是否采用加法混合.
+		 */
 		public var additiveBlending:Boolean;
 		public function setAdditiveBlending(value:Boolean):AnimationState
 		{
@@ -71,12 +67,21 @@
 			return this;
 		}
 		
+		/**
+		 * 动画播放完毕后是否自动淡出.
+		 */
 		public var autoFadeOut:Boolean;
+		/**
+		 * 动画自动淡出时花费的时间，默认使用淡入时的时间.
+		 */
 		public var fadeOutTime:Number;
 		public function setAutoFadeOut(value:Boolean, fadeOutTime:Number = -1):AnimationState
 		{
 			autoFadeOut = value;
-			this.fadeOutTime = fadeOutTime * _timeScale;
+			if(fadeOutTime >= 0)
+			{
+				this.fadeOutTime = fadeOutTime * _timeScale;
+			}
 			return this;
 		}
 		
@@ -94,7 +99,13 @@
 			return this;
 		}
 		
+		/**
+		 * 是否自动补间.
+		 */
 		public var autoTween:Boolean;
+		/**
+		 * 是否为最后一桢到第一帧进行补间.
+		 */
 		public var lastFrameAutoTween:Boolean;
 		public function setFrameTween(autoTween:Boolean, lastFrameAutoTween:Boolean):AnimationState
 		{
@@ -103,15 +114,9 @@
 			return this;
 		}
 		
-		
-		/** @private */
-		dragonBones_internal var _timelineStates:Object;
-		
-		/** @private */
-		dragonBones_internal var _fadeWeight:Number;
-		
 		private var _armature:Armature;
 		private var _currentFrame:Frame;
+		private var _timelineStateList:Vector.<TimelineState>;
 		private var _mixingTransforms:Object;
 		
 		private var _isPlaying:Boolean;
@@ -130,6 +135,26 @@
 		public function get name():String
 		{
 			return _name;
+		}
+		
+		/** @private */
+		dragonBones_internal var _layer:int;
+		/**
+		 * The layer of the animation. When calculating the final blend weights, animations in higher layers will get their weights.
+		 */
+		public function get layer():int
+		{
+			return _layer;
+		}
+		
+		/** @private */
+		dragonBones_internal var _group:String;
+		/**
+		 * The group of the animation.
+		 */
+		public function get group():String
+		{
+			return _group;
 		}
 		
 		private var _clip:AnimationData;
@@ -158,12 +183,6 @@
 			return (_isPlaying && !_isComplete);
 		}
 		
-		private var _fadeState:int;
-		public function get fadeState():int
-		{
-			return _fadeState;
-		}
-		
 		private var _currentPlayTimes:int;
 		/**
 		 * 动画当前播放的次数
@@ -182,12 +201,6 @@
 			return _totalTime;
 		}
 		
-		private var _fadeTotalTime:Number;
-		public function get fadeTotalTime():Number
-		{
-			return _fadeTotalTime;
-		}
-		
 		private var _currentTime:Number;
 		/**
 		 * The current time of the animation.
@@ -204,6 +217,24 @@
 			}
 			_currentTime = value;
 			return this;
+		}
+		
+		private var _fadeWeight:Number;
+		public function get fadeWeight():Number
+		{
+			return _fadeWeight;
+		}
+		
+		private var _fadeState:int;
+		public function get fadeState():int
+		{
+			return _fadeState;
+		}
+		
+		private var _fadeTotalTime:Number;
+		public function get fadeTotalTime():Number
+		{
+			return _fadeTotalTime;
 		}
 		
 		private var _timeScale:Number;
@@ -249,7 +280,7 @@
 		
 		public function AnimationState()
 		{ 
-			_timelineStates = {};
+			_timelineStateList = new Vector.<TimelineState>;
 		}
 		
 		/** @private */
@@ -324,7 +355,7 @@
 			
 			if(_isFadeOut)
 			{
-				if(fadeTotalTime > _fadeTotalTime - (_fadeCurrentTime - _fadeBeginTime))
+				if(fadeTotalTime > _fadeTotalTime / _timeScale - (_fadeCurrentTime - _fadeBeginTime))
 				{
 					//如果已经在淡出中，新的淡出需要更长的淡出时间，则忽略
 					return this;
@@ -333,7 +364,7 @@
 			else
 			{
 				//第一次淡出
-				for each(var timelineState:TimelineState in _timelineStates)
+				for each(var timelineState:TimelineState in _timelineStateList)
 				{
 					timelineState.fadeOut();
 				}
@@ -499,34 +530,37 @@
 		 */
 		private function updateTimelineStates():void
 		{
+			var timelineName:String;
 			if(_mixingTransforms)
 			{
-				for(var timelineName:String in _timelineStates)
+				for each(var timelineState:TimelineState in _timelineStateList)
 				{
-					if(_mixingTransforms[timelineName] == null)
+					if(!_mixingTransforms[timelineState.name])
 					{
-						removeTimelineState(timelineName);
+						removeTimelineState(timelineState);
 					}
 				}
 				
 				for(timelineName in _mixingTransforms)
 				{
-					if(!_timelineStates[timelineName])
-					{
-						addTimelineState(timelineName);
-					}
+					addTimelineState(timelineName);
 				}
 			}
 			else
 			{
 				for each(var timeline:TransformTimeline in _clip.timelineList)
 				{
-					if(!_timelineStates[timeline.name])
+					addTimelineState(timeline.name);
+				}
+				
+				for(timelineName in _clip.hideTimelineNameMap)
+				{
+					var bone:Bone = _armature.getBone(timelineName);
+					if(bone)
 					{
-						addTimelineState(timeline.name);
+						bone.arriveAtFrame(null, null, this, false);
 					}
 				}
-				hideBones();
 			}
 		}
 		
@@ -535,28 +569,24 @@
 			var bone:Bone = _armature.getBone(timelineName);
 			if(bone)
 			{
+				for each(var eachState:TimelineState in _timelineStateList)
+				{
+					if(eachState.name == timelineName)
+					{
+						return;
+					}
+				}
 				var timelineState:TimelineState = TimelineState.borrowObject();
 				timelineState.fadeIn(bone, this, _clip.getTimeline(timelineName));
-				_timelineStates[timelineName] = timelineState;
+				_timelineStateList.push(timelineState);
 			}
 		}
 		
-		private function removeTimelineState(timelineName:String):void
+		private function removeTimelineState(timelineState:TimelineState):void
 		{
-			TimelineState.returnObject(_timelineStates[timelineName] as TimelineState);
-			delete _timelineStates[timelineName];
-		}
-		
-		private function hideBones():void
-		{
-			for(var timelineName:String in _clip.hideTimelineNameMap)
-			{
-				var bone:Bone = _armature.getBone(timelineName);
-				if(bone)
-				{
-					bone.arriveAtFrame(null, null, this, false);
-				}
-			}
+			var index:int = _timelineStateList.indexOf(timelineState);
+			_timelineStateList.splice(index, 1);
+			TimelineState.returnObject(timelineState);
 		}
 		
 		private function advanceFadeTime(passedTime:Number):void
@@ -579,7 +609,7 @@
 				{
 					//fading
 					fadeState = 0;
-					//暂时只支持线性混合
+					//暂时只支持线性淡入淡出
 					_fadeWeight = (_fadeCurrentTime - _fadeBeginTime) / _fadeTotalTime * _fadeTotalWeight;
 					if(_isFadeOut)
 					{
@@ -719,7 +749,7 @@
 			//update timeline
 			_isComplete = isThisComplete;
 			var progress:Number = _time / _totalTime;
-			for each(var timeline:TimelineState in _timelineStates)
+			for each(var timeline:TimelineState in _timelineStateList)
 			{
 				timeline.update(progress);
 				_isComplete = timeline._isComplete && _isComplete;
@@ -794,7 +824,6 @@
 		
 		private function updateMainTimeline(currentTime:Number):void
 		{
-			//事件与行为时间轴
 			var frameList:Vector.<Frame> = _clip.frameList;
 			if(frameList.length > 0)
 			{
@@ -840,15 +869,17 @@
 		
 		private function clear():void
 		{
+			
+			for each(var timelineState:TimelineState in _timelineStateList)
+			{
+				TimelineState.returnObject(timelineState);
+			}
+			_timelineStateList.length = 0;
+			
 			_armature = null;
 			_currentFrame = null;
 			_clip = null;
 			_mixingTransforms = null;
-			
-			for(var timelineName:String in _timelineStates)
-			{
-				removeTimelineState(timelineName);
-			}
 		}
 	}
 }

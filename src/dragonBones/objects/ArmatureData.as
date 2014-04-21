@@ -23,15 +23,11 @@ package dragonBones.objects
 			return _animationDataList;
 		}
 		
-		private var _animationsCached:Object;
-		
 		public function ArmatureData()
 		{
 			_boneDataList = new Vector.<BoneData>(0, true);
 			_skinDataList = new Vector.<SkinData>(0, true);
 			_animationDataList = new Vector.<AnimationData>(0, true);
-			
-			_animationsCached = {};
 		}
 		
 		public function dispose():void
@@ -51,20 +47,7 @@ package dragonBones.objects
 			{
 				_animationDataList[i].dispose();
 			}
-			for each(var animation:Object in _animationsCached)
-			{
-				for each(var timelineCached:Vector.<FrameCached> in animation)
-				{
-					i = timelineCached.length;
-					while(i --)
-					{
-						timelineCached[i].dispose();
-					}
-					timelineCached.fixed = false;
-					timelineCached.length = 0;
-				}
-				//animation。clear();
-			}
+			
 			_boneDataList.fixed = false;
 			_boneDataList.length = 0;
 			_skinDataList.fixed = false;
@@ -75,7 +58,6 @@ package dragonBones.objects
 			_boneDataList = null;
 			_skinDataList = null;
 			_animationDataList = null;
-			_animationsCached = null;
 		}
 		
 		public function getBoneData(boneName:String):BoneData

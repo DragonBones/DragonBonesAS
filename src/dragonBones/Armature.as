@@ -7,6 +7,7 @@
 	import dragonBones.animation.AnimationState;
 	import dragonBones.animation.IAnimatable;
 	import dragonBones.animation.TimelineState;
+	import dragonBones.core.DBObject;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.ArmatureEvent;
 	import dragonBones.events.FrameEvent;
@@ -164,7 +165,7 @@
 			
 			_armatureData = null;
 			
-			_cacheFrameRate = 0;
+			_cacheFrameRate = 60;
 		}
 		
 		/**
@@ -181,15 +182,15 @@
 			userData = null;
 			
 			_animation.dispose();
-			
-			for each(var slot:Slot in _slotList)
+			var i:int = _slotList.length;
+			while(i --)
 			{
-				slot.dispose();
+				_slotList[i].dispose();
 			}
-			
-			for each(var bone:Bone in _boneList)
+			i = _boneList.length;
+			while(i --)
 			{
-				bone.dispose();
+				_boneList[i].dispose();
 			}
 			
 			_slotList.fixed = false;
@@ -199,7 +200,6 @@
 			_eventList.length = 0;
 			
 			_armatureData = null;
-			
 			_animation = null;
 			_slotList = null;
 			_boneList = null;
@@ -213,10 +213,9 @@
 		 */
 		public function invalidUpdate(boneName:String = null):void
 		{
-			var bone:Bone;
 			if(boneName)
 			{
-				bone = getBone(boneName);
+				var bone:Bone = getBone(boneName);
 				if(bone)
 				{
 					bone.invalidUpdate();
@@ -224,9 +223,10 @@
 			}
 			else
 			{
-				for each(bone in _boneList)
+				var i:int = _boneList.length;
+				while(i --)
 				{
-					bone.invalidUpdate();
+					_boneList[i].invalidUpdate();
 				}
 			}
 		}
@@ -243,10 +243,16 @@
 			
 			passedTime *= _animation.timeScale;    //_animation's time scale will impact childArmature
 			
+			var _isFading:Boolean = animation._isFading;
 			var i:int = _boneList.length;
 			while(i --)
 			{
-				_boneList[i].update();
+				var bone:Bone = _boneList[i];
+				if(_isFading)
+				{
+					bone.invalidUpdate();
+				}
+				bone.update();
 			}
 			
 			i = _slotList.length;
@@ -309,12 +315,11 @@
 		 */
 		public function getSlot(slotName:String):Slot
 		{
-			var i:int = _slotList.length;
-			while(i --)
+			for each(var slot:Slot in _slotList)
 			{
-				if(_slotList[i].name == slotName)
+				if(slot.name == slotName)
 				{
-					return _slotList[i];
+					return slot;
 				}
 			}
 			return null;
@@ -330,12 +335,11 @@
 		{
 			if(display)
 			{
-				var i:int = _slotList.length;
-				while(i --)
+				for each(var slot:Slot in _slotList)
 				{
-					if(_slotList[i].display == display)
+					if(slot.display == display)
 					{
-						return _slotList[i];
+						return slot;
 					}
 				}
 			}
@@ -343,60 +347,17 @@
 		}
 		
 		/**
-		 * Add a slot to a bone as child;
-		 * @param a Slot instance
+		 * Add a slot to a bone as child.
+		 * @param slot A Slot instance
+		 * @param boneName bone name
 		 * @see dragonBones.core.DBObject
 		 */
-		public function addSlot(slot:Slot, parentName:String):void
+		public function addSlot(slot:Slot, boneName:String):void
 		{
-			if(slot.armature)
+			var bone:Bone = getBone(boneName);
+			if (bone)
 			{
-				slot.armature.removeSlot(slot);
-			}
-			
-			var slotParent:Bone;
-			if(parentName)
-			{
-				slotParent = getBone(parentName);
-				if (!slotParent)
-				{
-					throw new ArgumentError();
-				}
-			}
-			
-			slot.setParent(slotParent);
-			slot.setArmature(this);
-			
-			if(_slotList.indexOf(slot) < 0)
-			{
-				_slotList.fixed = false;
-				_slotList[_slotList.length] = slot;
-				_slotList.fixed = true;
-			}
-			
-			_slotsZOrderChanged = true;
-		}
-
-		/**
-		 * Remove a Slot instance from this Armature instance.
-		 * @param The Slot instance to remove.
-		 * @see dragonBones.Slot
-		 */
-		public function removeSlot(slot:Slot):void
-		{
-			if(!slot)
-			{
-				throw new ArgumentError();
-			}
-			var index:int = _slotList.indexOf(slot);
-			if(index >= 0)
-			{
-				slot.setParent(null);
-				slot.setArmature(null);
-				
-				_slotList.fixed = false;
-				_slotList.splice(index, 1);
-				_slotList.fixed = true;
+				bone.addChild(slot);
 			}
 			else
 			{
@@ -406,21 +367,27 @@
 
 		/**
 		 * Remove a Slot instance from this Armature instance.
+		 * @param The Slot instance to remove.
+		 * @see dragonBones.Slot
+		 */
+		public function removeSlot(slot:Slot):void
+		{
+			slot.parent.removeChild(slot);
+		}
+
+		/**
+		 * Remove a Slot instance from this Armature instance.
 		 * @param The name of the Slot instance to remove.
 		 * @see dragonBones.Slot
 		 */
-		public function removeSlotByName(slotName:String):void
+		public function removeSlotByName(slotName:String):Slot
 		{
-			if(!slotName)
-			{
-				return;
-			}
-			
 			var slot:Slot = getSlot(slotName);
 			if(slot)
 			{
 				removeSlot(slot);
 			}
+			return slot;
 		}
 		
 		/**
@@ -442,12 +409,11 @@
 		 */
 		public function getBone(boneName:String):Bone
 		{
-			var i:int = _boneList.length;
-			while(i --)
+			for each(var bone:Bone in _boneList)
 			{
-				if(_boneList[i].name == boneName)
+				if(bone.name == boneName)
 				{
-					return _boneList[i];
+					return bone;
 				}
 			}
 			return null;
@@ -473,43 +439,26 @@
 		 */
 		public function addBone(bone:Bone, parentName:String = null):void
 		{
-			if(!bone)
-			{
-				throw new ArgumentError();
-			}
-			
-			var boneParent:Bone;
 			if(parentName)
 			{
-				boneParent = getBone(parentName);
+				var boneParent:Bone = getBone(parentName);
 				if (boneParent)
 				{
-					if(boneParent.contains(bone))
-					{
-						throw new ArgumentError("An Bone cannot be added as a child to itself or one of its children (or children's children, etc.)");
-					}
+					boneParent.addChild(bone);
 				}
 				else
 				{
 					throw new ArgumentError();
 				}
 			}
-			
-			if(bone.armature)
+			else
 			{
-				bone.armature.removeBone(bone);
+				if(bone.parent)
+				{
+					bone.parent.removeChild(bone);
+				}
+				bone.setArmature(this);
 			}
-			
-			bone.setParent(boneParent);
-			bone.setArmature(this);
-			
-			if(_boneList.indexOf(bone) < 0)
-			{
-				_boneList.fixed = false;
-				_boneList[_boneList.length] = bone;
-				_boneList.fixed = true;
-			}
-			sortBoneList();
 		}
 
 		/**
@@ -519,45 +468,7 @@
 		 */
 		public function removeBone(bone:Bone):void
 		{
-			if(!bone)
-			{
-				throw new ArgumentError();
-			}
-			var index:int = _boneList.indexOf(bone);
-			if(index >= 0)
-			{
-				var boneParent:Bone = bone.parent;
-				var i:int = _boneList.length;
-				while(i --)
-				{
-					var eachBone:Bone = _boneList[i];
-					if(eachBone.parent == bone)
-					{
-						eachBone.setParent(boneParent);
-					}
-				}
-				
-				i = _slotList.length;
-				while(i --)
-				{
-					var slot:Slot = _slotList[i];
-					if(slot.parent == bone)
-					{
-						removeSlot(slot);
-					}
-				}
-				
-				bone.setParent(null);
-				bone.setArmature(null);
-				
-				_boneList.fixed = false;
-				_boneList.splice(index, 1);
-				_boneList.fixed = true;
-			}
-			else
-			{
-				throw new ArgumentError();
-			}
+			bone.parent.removeChild(bone);
 		}
 
 		/**
@@ -565,17 +476,66 @@
 		 * @param The name of the Bone instance to remove.
 		 * @see dragonBones.Bone
 		 */
-		public function removeBoneByName(boneName:String):void
+		public function removeBoneByName(boneName:String):Bone
 		{
-			if(!boneName)
-			{
-				return;
-			}
-			
 			var bone:Bone = getBone(boneName);
 			if(bone)
 			{
 				removeBone(bone);
+			}
+			return bone;
+		}
+		
+		/** @private */
+		dragonBones_internal function addDBObject(object:DBObject):void
+		{
+			if(object is Slot)
+			{
+				var slot:Slot = object as Slot;
+				if(_slotList.indexOf(slot) < 0)
+				{
+					_slotList.fixed = false;
+					_slotList[_slotList.length] = slot;
+					_slotList.fixed = true;
+				}
+			}
+			else if(object is Bone)
+			{
+				var bone:Bone = object as Bone;
+				if(_boneList.indexOf(bone) < 0)
+				{
+					_boneList.fixed = false;
+					_boneList[_boneList.length] = bone;
+					sortBoneList();
+					_boneList.fixed = true;
+				}
+			}
+		}
+		
+		/** @private */
+		dragonBones_internal function removeDBObject(object:DBObject):void
+		{
+			if(object is Slot)
+			{
+				var slot:Slot = object as Slot;
+				var index:int = _slotList.indexOf(slot);
+				if(index >= 0)
+				{
+					_slotList.fixed = false;
+					_slotList.splice(index, 1);
+					_slotList.fixed = true;
+				}
+			}
+			else if(object is Bone)
+			{
+				var bone:Bone = object as Bone;
+				index = _boneList.indexOf(bone);
+				if(index >= 0)
+				{
+					_boneList.fixed = false;
+					_boneList.splice(index, 1);
+					_boneList.fixed = true;
+				}
 			}
 		}
 
