@@ -279,7 +279,6 @@ package dragonBones.factorys
 			buildSlots(armature, armatureData, skinData, skinDataCopy);
 			
 			//
-			armature.animation.play();
 			armature.advanceTime(0);
 			
 			return armature;

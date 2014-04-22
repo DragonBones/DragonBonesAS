@@ -29,6 +29,7 @@
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.DBDataUtil;
 	import dragonBones.utils.TransformUtil;
+	import dragonBones.utils.parseOldXMLData;
 	
 	use namespace dragonBones_internal;
 	
@@ -89,8 +90,16 @@
 			var version:String = rawData.@[ConstValues.A_VERSION];
 			switch (version)
 			{
+				case "1.5":
+				case "2.0":
+				case "2.1":
+				case "2.1.1":
+				case "2.1.2":
+				case "2.2":
+					return parseOldXMLData(rawData as XML);
+					
 				case "2.3":
-					Update2_3To2_4.format(rawData as XML);
+					Update2_3To3_0.format(rawData as XML);
 					break;
 				
 				case DragonBones.DATA_VERSION:
@@ -144,8 +153,8 @@
 			boneData.name = boneXML.@[ConstValues.A_NAME];
 			boneData.parent = boneXML.@[ConstValues.A_PARENT];
 			boneData.length = Number(boneXML.@[ConstValues.A_LENGTH]);
-			boneData.inheritRotation = getBoolean(boneXML.@[ConstValues.A_INHERIT_ROTATION][0], true);
-			boneData.inheritScale = getBoolean(boneXML.@[ConstValues.A_SCALE_MODE][0], false);
+			boneData.inheritRotation = getBoolean(boneXML, ConstValues.A_INHERIT_ROTATION, true);
+			boneData.inheritScale = getBoolean(boneXML, ConstValues.A_SCALE_MODE, false);
 			
 			parseTransform(boneXML[ConstValues.TRANSFORM][0], boneData.global);
 			boneData.transform.copy(boneData.global);
@@ -207,9 +216,10 @@
 			animationData.playTimes = int(animationXML.@[ConstValues.A_LOOP]);
 			animationData.fadeTime = Number(animationXML.@[ConstValues.A_FADE_IN_TIME]);
 			animationData.duration = (Number(animationXML.@[ConstValues.A_DURATION]) || 1) / frameRate;
-			animationData.scale = getNumber(animationXML.@[ConstValues.A_SCALE][0], 1) || 0;
-			//NaN:no tween, default:auto tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2] ease in out
-			animationData.tweenEasing = getNumber(animationXML.@[ConstValues.A_TWEEN_EASING][0], -2);
+			animationData.scale = getNumber(animationXML, ConstValues.A_SCALE, 1) || 0;
+			//NaN:auto tween, -2:no tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
+			//default:NaN
+			animationData.tweenEasing = getNumber(animationXML, ConstValues.A_TWEEN_EASING, NaN);
 			
 			parseTimeline(animationXML, animationData, parseMainFrame, frameRate);
 			
@@ -255,8 +265,8 @@
 			var timeline:TransformTimeline = new TransformTimeline();
 			timeline.name = timelineXML.@[ConstValues.A_NAME];
 			timeline.duration = duration;
-			timeline.scale = getNumber(timelineXML.@[ConstValues.A_SCALE][0], 1) || 0;
-			timeline.offset = getNumber(timelineXML.@[ConstValues.A_OFFSET][0], 0) || 0;
+			timeline.scale = getNumber(timelineXML, ConstValues.A_SCALE, 1) || 0;
+			timeline.offset = getNumber(timelineXML, ConstValues.A_OFFSET, 0) || 0;
 			
 			parseTimeline(timelineXML, timeline, parseTransformFrame, frameRate);
 			
@@ -283,16 +293,17 @@
 			var frame:TransformFrame = new TransformFrame();
 			parseFrame(frameXML, frame, frameRate);
 			
-			frame.visible = !getBoolean(frameXML.@[ConstValues.A_HIDE][0], false);
+			frame.visible = !getBoolean(frameXML, ConstValues.A_HIDE, false);
 			
-			//NaN:no tween, default:auto tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2] ease in out
-			frame.tweenEasing = getNumber(frameXML.@[ConstValues.A_TWEEN_EASING][0], -2);
+			//NaN:auto tween, -2:no tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
+			//default:NaN
+			frame.tweenEasing = getNumber(frameXML, ConstValues.A_TWEEN_EASING, NaN);
 			frame.tweenRotate = Number(frameXML.@[ConstValues.A_TWEEN_ROTATE]);
-			frame.tweenScale = getBoolean(frameXML.@[ConstValues.A_TWEEN_SCALE][0], true);
+			frame.tweenScale = getBoolean(frameXML, ConstValues.A_TWEEN_SCALE, true);
 			frame.displayIndex = Number(frameXML.@[ConstValues.A_DISPLAY_INDEX]);
 			
 			//如果为NaN，则说明没有改变过zOrder
-			frame.zOrder = Number(frameXML.@[ConstValues.A_Z_ORDER][0]);
+			frame.zOrder = getNumber(frameXML, ConstValues.A_Z_ORDER, NaN);
 			
 			parseTransform(frameXML[ConstValues.TRANSFORM][0], frame.global, frame.pivot);
 			frame.transform.copy(frame.global);
@@ -325,8 +336,8 @@
 					transform.y = Number(transformXML.@[ConstValues.A_Y]) || 0;
 					transform.skewX = Number(transformXML.@[ConstValues.A_SKEW_X]) * ConstValues.ANGLE_TO_RADIAN || 0;
 					transform.skewY = Number(transformXML.@[ConstValues.A_SKEW_Y]) * ConstValues.ANGLE_TO_RADIAN || 0;
-					transform.scaleX = getNumber(transformXML.@[ConstValues.A_SCALE_X][0], 1) || 0;
-					transform.scaleY = getNumber(transformXML.@[ConstValues.A_SCALE_Y][0], 1) || 0;
+					transform.scaleX = getNumber(transformXML, ConstValues.A_SCALE_X, 1) || 0;
+					transform.scaleY = getNumber(transformXML, ConstValues.A_SCALE_Y, 1) || 0;
 					
 					TransformUtil.formatTransform(transform);
 				}
@@ -338,11 +349,11 @@
 			}
 		}
 		
-		private static function getBoolean(attribute:XML, defaultValue:Boolean):Boolean
+		private static function getBoolean(data:XML, key:String, defaultValue:Boolean):Boolean
 		{
-			if(attribute)
+			if(data.@[key].length > 0)
 			{
-				switch(attribute.toString())
+				switch(String(data.@[key]))
 				{
 					case "0":
 					case "NaN":
@@ -361,11 +372,11 @@
 			return defaultValue;
 		}
 		
-		private static function getNumber(attribute:XML, defaultValue:Number):Number
+		private static function getNumber(data:XML, key:String, defaultValue:Number):Number
 		{
-			if(attribute)
+			if(data.@[key].length > 0)
 			{
-				switch(attribute.toString())
+				switch(String(data.@[key]))
 				{
 					case "NaN":
 					case "":
@@ -375,9 +386,10 @@
 						return NaN;
 						
 					default:
-						return Number(attribute);
+						return Number(data.@[key]);
 				}
 			}
+			
 			return defaultValue;
 		}
 	}
@@ -385,19 +397,10 @@
 
 import dragonBones.utils.ConstValues;
 
-class Update2_3To2_4
+class Update2_3To3_0
 {
 	public static function format(skeleton:XML):void
 	{
-		//删除为NaN的TweenEasing, 未设置tweenEasing的animation则使用auto tween
-		for each(var animationXML:XML in skeleton[ConstValues.ARMATURE][ConstValues.ANIMATION])
-		{
-			if(String(animationXML.@[ConstValues.A_TWEEN_EASING]) == ConstValues.V_NAN)
-			{
-				delete animationXML.@[ConstValues.A_TWEEN_EASING];
-			}
-		}
-		
 		//删除两个旧属性
 		for each(var boneXML:XML in skeleton[ConstValues.ARMATURE][ConstValues.BONE])
 		{

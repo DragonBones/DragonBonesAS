@@ -30,31 +30,23 @@ package dragonBones.display
 			_colorTransform = null;
 		}
 		
-		/** @private */
-		override dragonBones_internal function updateDisplay(value:Object):void
-		{
-			_nativeDisplay = value as DisplayObject;
-			
-			super.updateDisplay(value);
-		}
-		
 		
 		//Abstract method
 		
 		/** @private */
-		override dragonBones_internal function updateTransform():void
+		override dragonBones_internal function updateDisplay(value:Object):void
 		{
-			if(_nativeDisplay)
-			{
-				_nativeDisplay.transform.matrix = this._globalTransformMatrix;
-			}
+			_nativeDisplay = value as DisplayObject;
 		}
 		
 		/** @private */
-		override dragonBones_internal function getDisplayIndex(value:Object):int
+		override dragonBones_internal function getDisplayIndex():int
 		{
-			var nativeDisplay:DisplayObject = value as DisplayObject;
-			return nativeDisplay.parent.getChildIndex(nativeDisplay);
+			if(_nativeDisplay && _nativeDisplay.parent)
+			{
+				return _nativeDisplay.parent.getChildIndex(_nativeDisplay);
+			}
+			return -1;
 		}
 		
 		/** @private */
@@ -80,6 +72,15 @@ package dragonBones.display
 			if(_nativeDisplay && _nativeDisplay.parent)
 			{
 				_nativeDisplay.parent.removeChild(_nativeDisplay);
+			}
+		}
+		
+		/** @private */
+		override dragonBones_internal function updateTransform():void
+		{
+			if(_nativeDisplay)
+			{
+				_nativeDisplay.transform.matrix = this._globalTransformMatrix;
 			}
 		}
 		

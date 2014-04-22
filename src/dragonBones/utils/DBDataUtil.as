@@ -201,14 +201,14 @@ package dragonBones.utils
 				if(currentFrame.position <= position && currentFrame.position + currentFrame.duration > position)
 				{
 					var tweenEasing:Number = currentFrame.tweenEasing;
-					if(i == frameList.length - 1 || isNaN(tweenEasing) || position == currentFrame.position)
+					if(i == frameList.length - 1 || tweenEasing == -2 || position == currentFrame.position)
 					{
 						retult.copy(currentFrame.global);
 					}
 					else
 					{
 						var progress:Number = (position - currentFrame.position) / currentFrame.duration;
-						if(tweenEasing && tweenEasing != -2)
+						if(tweenEasing > 0)
 						{
 							progress = TimelineState.getEaseValue(progress, tweenEasing);
 						}

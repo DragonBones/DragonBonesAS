@@ -6,7 +6,7 @@
 	/** @private */
 	final public class TransformFrame extends Frame
 	{
-		//NaN:no tween, -2:auto tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2] ease in out
+		//NaN:auto tween, -2:no tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
 		public var tweenEasing:Number;
 		public var tweenRotate:int;
 		public var tweenScale:Boolean;
@@ -24,7 +24,7 @@
 		{
 			super();
 			
-			tweenEasing = -2;
+			tweenEasing = NaN;
 			tweenRotate = 0;
 			tweenScale = true;
 			displayIndex = 0;

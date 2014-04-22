@@ -76,6 +76,7 @@
 			switch (version)
 			{
 				case "2.3":
+					Update2_3To3_0.format(rawData);
 					break;
 				
 				case DragonBones.DATA_VERSION:
@@ -194,8 +195,9 @@
 			animationData.fadeTime = Number(animationObject[ConstValues.A_FADE_IN_TIME]);
 			animationData.duration = (Number(animationObject[ConstValues.A_DURATION]) || 1)/ frameRate;
 			animationData.scale = getNumber(animationObject, ConstValues.A_SCALE, 1) || 0;
-			//NaN:no tween, default:auto tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2] ease in out
-			animationData.tweenEasing = getNumber(animationObject, ConstValues.A_TWEEN_EASING, -2);
+			//NaN:auto tween, -2:no tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
+			//default:NaN
+			animationData.tweenEasing = getNumber(animationObject, ConstValues.A_TWEEN_EASING, NaN);
 			
 			parseTimeline(animationObject, animationData, parseMainFrame, frameRate);
 			
@@ -271,14 +273,15 @@
 			
 			frame.visible = !getBoolean(frameObject, ConstValues.A_HIDE, false);
 			
-			//NaN:no tween, default:auto tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2] ease in out
-			frame.tweenEasing = getNumber(frameObject, ConstValues.A_TWEEN_EASING, -2);
+			//NaN:auto tween, -2:no tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
+			//default:NaN
+			frame.tweenEasing = getNumber(frameObject, ConstValues.A_TWEEN_EASING, NaN);
 			frame.tweenRotate = Number(frameObject[ConstValues.A_TWEEN_ROTATE]);
 			frame.tweenScale = getBoolean(frameObject, ConstValues.A_TWEEN_SCALE, true);
 			frame.displayIndex = Number(frameObject[ConstValues.A_DISPLAY_INDEX]);
 			
 			//如果为NaN，则说明没有改变过zOrder
-			frame.zOrder = Number(frameObject[ConstValues.A_Z_ORDER]);
+			frame.zOrder = getNumber(frameObject, ConstValues.A_Z_ORDER, NaN);
 			
 			parseTransform(frameObject[ConstValues.TRANSFORM], frame.global, frame.pivot);
 			frame.transform.copy(frame.global);
@@ -371,25 +374,16 @@
 
 import dragonBones.utils.ConstValues;
 
-class Update2_3To2_4
+class Update2_3To3_0
 {
 	public static function format(skeleton:Object):void
 	{
 		//删除为NaN的TweenEasing, 未设置tweenEasing的animation则使用auto tween
 		for each(var armatureObject:Object in skeleton[ConstValues.ARMATURE])
 		{
-			for each(var animationObject:Object in armatureObject[ConstValues.ANIMATION])
-			{
-				if(String(animationObject[ConstValues.A_TWEEN_EASING]) == ConstValues.V_NAN)
-				{
-					delete animationObject[ConstValues.A_TWEEN_EASING];
-				}
-			}
-			
 			//删除两个旧属性
 			for each(var boneObject:Object in armatureObject[ConstValues.BONE])
 			{
-				
 				if(String(boneObject[ConstValues.A_FIXED_ROTATION]) == "true")
 				{
 					boneObject[ConstValues.A_INHERIT_ROTATION] = 0;

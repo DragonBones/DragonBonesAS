@@ -20,6 +20,14 @@
 	public class AnimationEvent extends Event
 	{
 		/**
+		 * 不推荐使用.
+		 */
+		public static function get MOVEMENT_CHANGE():String
+		{
+			return FADE_IN;
+		}
+		
+		/**
 		 * Dispatched when the playback of an animation fade in.
 		 */
 		public static const FADE_IN:String = "fadeIn";
@@ -55,6 +63,14 @@
 		public static const FADE_OUT_COMPLETE:String = "fadeOutComplete";
 		
 		/**
+		 * 不推荐的API.
+		 */
+		public function get movementID():String
+		{
+			return animationName;
+		}
+		
+		/**
 		 * The animationState instance.
 		 */
 		public var animationState:AnimationState;
@@ -67,7 +83,7 @@
 			return target as Armature;
 		}
 		
-		public function get movementID():String
+		public function get animationName():String
 		{
 			return animationState.name;
 		}

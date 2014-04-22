@@ -216,6 +216,7 @@
 				value = 0;
 			}
 			_currentTime = value;
+			_time = _currentTime;
 			return this;
 		}
 		
@@ -526,22 +527,35 @@
 		}
 		
 		/**
+		 * @private
 		 * 根据mixing transforms和clip来更新timelineState
 		 */
-		private function updateTimelineStates():void
+		dragonBones_internal function updateTimelineStates():void
 		{
-			var timelineName:String;
+			var timelineState:TimelineState;
+			var i:int = _timelineStateList.length;
+			while(i --)
+			{
+				timelineState = _timelineStateList[i];
+				if(!_armature.getBone(timelineState.name))
+				{
+					removeTimelineState(timelineState);
+				}
+			}
+			
 			if(_mixingTransforms)
 			{
-				for each(var timelineState:TimelineState in _timelineStateList)
+				i = _timelineStateList.length;
+				while(i --)
 				{
-					if(!_mixingTransforms[timelineState.name])
+					timelineState = _timelineStateList[i];
+					if(_mixingTransforms[timelineState.name] == null)
 					{
 						removeTimelineState(timelineState);
 					}
 				}
 				
-				for(timelineName in _mixingTransforms)
+				for(var timelineName:String in _mixingTransforms)
 				{
 					addTimelineState(timelineName);
 				}
@@ -551,15 +565,6 @@
 				for each(var timeline:TransformTimeline in _clip.timelineList)
 				{
 					addTimelineState(timeline.name);
-				}
-				
-				for(timelineName in _clip.hideTimelineNameMap)
-				{
-					var bone:Bone = _armature.getBone(timelineName);
-					if(bone)
-					{
-						bone.arriveAtFrame(null, null, this, false);
-					}
 				}
 			}
 		}
@@ -655,6 +660,8 @@
 				}
 				else
 				{
+					hideBones();
+					
 					if(_armature.hasEventListener(AnimationEvent.FADE_IN))
 					{
 						event = new AnimationEvent(AnimationEvent.FADE_IN);
@@ -863,6 +870,18 @@
 				if(isArrivedAtNewFrame)
 				{
 					_armature.arriveAtFrame(_currentFrame, null, this, false);
+				}
+			}
+		}
+		
+		private function hideBones():void
+		{
+			for(var timelineName:String in _clip.hideTimelineNameMap)
+			{
+				var bone:Bone = _armature.getBone(timelineName);
+				if(bone)
+				{
+					bone.arriveAtFrame(null, null, this, false);
 				}
 			}
 		}

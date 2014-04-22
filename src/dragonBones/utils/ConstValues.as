@@ -72,8 +72,6 @@
 		
 		public static const A_SCALE_MODE:String = "scaleMode";
 		public static const A_FIXED_ROTATION:String = "fixedRotation";
-		
-		public static const V_NAN:String = "NaN";
 	}
 
 }

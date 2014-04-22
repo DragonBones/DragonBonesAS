@@ -161,7 +161,7 @@ package dragonBones.animation
 			_currentTime = -1;
 			_isComplete = false;
 			_blendEnabled = false;
-			_tweenEasing = NaN;
+			_tweenEasing = -2;
 			_tweenTransform = false;
 			_tweenScale = false;
 			_tweenColor = false;
@@ -239,12 +239,12 @@ package dragonBones.animation
 			if(playTimes != 0)
 			{
 				var totalTimes:Number = playTimes * _totalTime;
-				if(currentTime > totalTimes)
+				if(currentTime >= totalTimes)
 				{
 					currentTime = totalTimes;
 					_isComplete = true;
 				}
-				else if(currentTime < -totalTimes)
+				else if(currentTime <= -totalTimes)
 				{
 					currentTime = -totalTimes;
 					_isComplete = true;
@@ -335,7 +335,7 @@ package dragonBones.animation
 					}
 					else
 					{
-						_tweenEasing = NaN;
+						_tweenEasing = -2;
 						_tweenTransform = false;
 						_tweenScale = false;
 						_tweenColor = false;
@@ -365,33 +365,31 @@ package dragonBones.animation
 				)
 			)
 			{
-				_tweenEasing = NaN;
+				_tweenEasing = -2;
 				tweenEnabled = false;
 			}
 			else if(_currentFrame.displayIndex < 0 || nextFrame.displayIndex < 0)
 			{
-				_tweenEasing = NaN;
+				_tweenEasing = -2;
 				tweenEnabled = false;
 			}
 			else
 			{
 				_tweenEasing = _currentFrame.tweenEasing;
-				if(isNaN(_tweenEasing) || _tweenEasing > 2)    //frame no tween
+				if(_tweenEasing == -2)    //frame no tween
 				{
-					_tweenEasing = NaN;
 					tweenEnabled = false;
 				}
-				else if(_tweenEasing <= -2)    //frame auto tween
+				else if(isNaN(_tweenEasing))    //frame auto tween
 				{
 					if(_animationState.autoTween)    //animationState alow auto tween
 					{
 						_tweenEasing = _animationState.clip.tweenEasing;
-						if(isNaN(_tweenEasing) || _tweenEasing > 2)
+						if(_tweenEasing == -2)
 						{
-							_tweenEasing = NaN;
 							tweenEnabled = false;
 						}
-						else if(_tweenEasing <= -2)    //animationData auto tween
+						else if(isNaN(_tweenEasing))    //animationData auto tween
 						{
 							_tweenEasing = 0;
 							tweenEnabled = true;
@@ -404,7 +402,7 @@ package dragonBones.animation
 					}
 					else
 					{
-						_tweenEasing = NaN;
+						_tweenEasing = -2;
 						tweenEnabled = false;
 					}
 				}
@@ -596,7 +594,7 @@ package dragonBones.animation
 		private function updateTween():void
 		{
 			var progress:Number = (_currentTime - _currentFramePosition) / _currentFrameDuration;
-			if(_tweenEasing)
+			if(_tweenEasing > 0)
 			{
 				progress = getEaseValue(progress, _tweenEasing);
 			}
@@ -794,6 +792,7 @@ package dragonBones.animation
 		private function clear():void
 		{
 			_bone.removeState(this);
+			
 			_bone = null;
 			_armature = null;
 			_animation = null;

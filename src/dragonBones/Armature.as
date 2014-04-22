@@ -165,7 +165,7 @@
 			
 			_armatureData = null;
 			
-			_cacheFrameRate = 60;
+			_cacheFrameRate = 0;
 		}
 		
 		/**
@@ -243,16 +243,12 @@
 			
 			passedTime *= _animation.timeScale;    //_animation's time scale will impact childArmature
 			
-			var _isFading:Boolean = animation._isFading;
+			var isFading:Boolean = animation._isFading;
 			var i:int = _boneList.length;
 			while(i --)
 			{
 				var bone:Bone = _boneList[i];
-				if(_isFading)
-				{
-					bone.invalidUpdate();
-				}
-				bone.update();
+				bone.update(isFading);
 			}
 			
 			i = _slotList.length;
@@ -372,6 +368,11 @@
 		 */
 		public function removeSlot(slot:Slot):void
 		{
+			if(!slot || slot.armature != this)
+			{
+				throw new ArgumentError();
+			}
+			
 			slot.parent.removeChild(slot);
 		}
 
@@ -468,7 +469,20 @@
 		 */
 		public function removeBone(bone:Bone):void
 		{
-			bone.parent.removeChild(bone);
+			if(!bone || bone.armature != this)
+			{
+				throw new ArgumentError();
+			}
+			
+			if(bone.parent)
+			{
+				bone.parent.removeChild(bone);
+			}
+			else
+			{
+				bone.setArmature(null);
+			}
+			
 		}
 
 		/**
@@ -508,6 +522,7 @@
 					_boneList[_boneList.length] = bone;
 					sortBoneList();
 					_boneList.fixed = true;
+					_animation.updateAnimationStates();
 				}
 			}
 		}
@@ -535,6 +550,7 @@
 					_boneList.fixed = false;
 					_boneList.splice(index, 1);
 					_boneList.fixed = true;
+					_animation.updateAnimationStates();
 				}
 			}
 		}

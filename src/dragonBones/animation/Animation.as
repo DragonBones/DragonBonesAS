@@ -244,7 +244,6 @@
 			
 			//
 			fadeInTime = fadeInTime < 0?(animationData.fadeTime < 0?0.3:animationData.fadeTime):fadeInTime;
-			
 			var durationScale:Number;
 			if(duration < 0)
 			{
@@ -342,6 +341,7 @@
 		 * @param duration The duration of that AnimationData, 默认使用AnimationData.duration.
 		 * @param layer The layer of the animation.
 		 * @param group The group of the animation.
+		 * @param fadeOutMode Fade out mode (none, sameLayer, sameGroup, sameLayerAndGroup, all).
 		 * @return AnimationState.
 		 * @see dragonBones.objects.AnimationData.
 		 * @see dragonBones.animation.AnimationState.
@@ -353,13 +353,14 @@
 			fadeInTime:Number = 0, 
 			duration:Number = -1, 
 			layer:int = 0, 
-			group:String = null
+			group:String = null, 
+			fadeOutMode:String = ALL
 		):AnimationState
 		{
 			var animationState:AnimationState = getState(animationName, layer);
 			if(!animationState)
 			{
-				animationState = gotoAndPlay(animationName, fadeInTime, duration, NaN, layer, group);
+				animationState = gotoAndPlay(animationName, fadeInTime, duration, NaN, layer, group, fadeOutMode);
 			}
 			
 			if(normalizedTime >= 0)
@@ -370,7 +371,7 @@
 			{
 				animationState.setCurrentTime(time);
 			}
-			                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+			
 			animationState.stop();
 			
 			return animationState;
@@ -468,6 +469,15 @@
 			}
 			
 			_isFading = isFading;
+		}
+		/** @private */
+		dragonBones_internal function updateAnimationStates():void
+		{
+			var i:int = _animationStateList.length;
+			while(i --)
+			{
+				_animationStateList[i].updateTimelineStates();
+			}
 		}
 		
 		private function addState(animationState:AnimationState):void

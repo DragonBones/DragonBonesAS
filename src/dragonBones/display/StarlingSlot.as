@@ -27,6 +27,7 @@ package dragonBones.display
 			
 			updateMatrix = false;
 		}
+		
 		override public function dispose():void
 		{
 			for each(var content:Object in this._displayList)
@@ -45,60 +46,23 @@ package dragonBones.display
 			_starlingDisplay = null;
 		}
 		
+		/** @private */
 		override dragonBones_internal function updateDisplay(value:Object):void
 		{
 			_starlingDisplay = value as DisplayObject;
-			
-			super.updateDisplay(value);
 		}
 		
 		
 		//Abstract method
 		
 		/** @private */
-		override dragonBones_internal function getDisplayIndex(value:Object):int
+		override dragonBones_internal function getDisplayIndex():int
 		{
-			var startlingDisplay:DisplayObject = value as DisplayObject;
-			return startlingDisplay.parent.getChildIndex(startlingDisplay);
-		}
-		
-		/** @private */
-		override dragonBones_internal function updateTransform():void
-		{
-			if(_starlingDisplay)
+			if(_starlingDisplay && _starlingDisplay.parent)
 			{
-				var pivotX:Number = _starlingDisplay.pivotX;
-				var pivotY:Number = _starlingDisplay.pivotY;
-				
-				if(updateMatrix)
-				{
-					_starlingDisplay.transformationMatrix = _globalTransformMatrix;
-					if(pivotX || pivotY)
-					{
-						_display.pivotX = pivotX;
-						_display.pivotY = pivotY;
-					}
-				}
-				else
-				{
-					var displayMatrix:Matrix = _starlingDisplay.transformationMatrix;
-					displayMatrix.a = _globalTransformMatrix.a;
-					displayMatrix.b = _globalTransformMatrix.b;
-					displayMatrix.c = _globalTransformMatrix.c;
-					displayMatrix.d = _globalTransformMatrix.d;
-					//displayMatrix.copyFrom(_globalTransformMatrix);
-					if(pivotX || pivotY)
-					{
-						displayMatrix.tx = _globalTransformMatrix.tx - (displayMatrix.a * pivotX + displayMatrix.c * pivotY);
-						displayMatrix.ty = _globalTransformMatrix.ty - (displayMatrix.b * pivotX + displayMatrix.d * pivotY);
-					}
-					else
-					{
-						displayMatrix.tx = _globalTransformMatrix.tx;
-						displayMatrix.ty = _globalTransformMatrix.ty;
-					}
-				}
+				return _starlingDisplay.parent.getChildIndex(_starlingDisplay);
 			}
+			return -1;
 		}
 		
 		/** @private */
@@ -124,6 +88,45 @@ package dragonBones.display
 			if(_starlingDisplay && _starlingDisplay.parent)
 			{
 				_starlingDisplay.parent.removeChild(_starlingDisplay);
+			}
+		}
+		
+		/** @private */
+		override dragonBones_internal function updateTransform():void
+		{
+			if(_starlingDisplay)
+			{
+				var pivotX:Number = _starlingDisplay.pivotX;
+				var pivotY:Number = _starlingDisplay.pivotY;
+				
+				if(updateMatrix)
+				{
+					_starlingDisplay.transformationMatrix = _globalTransformMatrix;
+					if(pivotX || pivotY)
+					{
+						_starlingDisplay.pivotX = pivotX;
+						_starlingDisplay.pivotY = pivotY;
+					}
+				}
+				else
+				{
+					var displayMatrix:Matrix = _starlingDisplay.transformationMatrix;
+					displayMatrix.a = _globalTransformMatrix.a;
+					displayMatrix.b = _globalTransformMatrix.b;
+					displayMatrix.c = _globalTransformMatrix.c;
+					displayMatrix.d = _globalTransformMatrix.d;
+					//displayMatrix.copyFrom(_globalTransformMatrix);
+					if(pivotX || pivotY)
+					{
+						displayMatrix.tx = _globalTransformMatrix.tx - (displayMatrix.a * pivotX + displayMatrix.c * pivotY);
+						displayMatrix.ty = _globalTransformMatrix.ty - (displayMatrix.b * pivotX + displayMatrix.d * pivotY);
+					}
+					else
+					{
+						displayMatrix.tx = _globalTransformMatrix.tx;
+						displayMatrix.ty = _globalTransformMatrix.ty;
+					}
+				}
 			}
 		}
 		

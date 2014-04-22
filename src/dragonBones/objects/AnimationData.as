@@ -6,7 +6,7 @@ package dragonBones.objects
 		public var frameRate:uint;
 		public var fadeTime:Number;
 		public var playTimes:int;
-		//NaN:no tween, -2:auto tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2] ease in out
+		//NaN:auto tween, -2:no tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
 		public var tweenEasing:Number;
 		public var lastFrameDuration:Number;
 		
@@ -24,7 +24,7 @@ package dragonBones.objects
 			super();
 			fadeTime = 0;
 			playTimes = 0;
-			tweenEasing = -2;
+			tweenEasing = NaN;
 			hideTimelineNameMap = {};
 			
 			_timelineList = new Vector.<TransformTimeline>;

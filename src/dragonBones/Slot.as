@@ -1,4 +1,4 @@
-package dragonBones
+﻿package dragonBones
 {
 	import flash.errors.IllegalOperationError;
 	import flash.geom.Matrix;
@@ -88,18 +88,20 @@ package dragonBones
 		 */
 		public function get display():Object
 		{
-			return null;
+			return _display;
 		}
 		public function set display(value:Object):void
 		{
-			if(_displayList[_displayIndex] == value)
+			var displayIndex:int = _displayIndex < 0?0:_displayIndex;
+			if(_displayList[displayIndex] == value)
 			{
 				return;
 			}
-			_displayList[_displayIndex] = value;
+			_displayList[displayIndex] = value;
 			_childArmature = null;
-			updateDisplay(value);
+			updateSlotDisplay(value);
 			updateChildArmatureAnimation();
+			updateTransform();
 		}
 		
 		protected var _childArmature:Armature;
@@ -112,21 +114,23 @@ package dragonBones
 		}
 		public function set childArmature(value:Armature):void
 		{
-			if(_displayList[_displayIndex] == value)
+			var displayIndex:int = _displayIndex < 0?0:_displayIndex;
+			if(_displayList[displayIndex] == value)
 			{
 				return;
 			}
-			_displayList[_displayIndex] = _childArmature;
+			_displayList[displayIndex] = _childArmature;
 			_childArmature = value;
 			if(_childArmature)
 			{
-				updateDisplay(_childArmature.display);
+				updateSlotDisplay(_childArmature.display);
 			}
 			else
 			{
-				updateDisplay(null);
+				updateSlotDisplay(null);
 			}
 			updateChildArmatureAnimation();
+			updateTransform();
 		}
 
 		//
@@ -148,8 +152,6 @@ package dragonBones
 			while(i --)
 			{
 				_displayList[i] = value[i];
-				//changeDisplay(i);
-				//update();
 			}
 			
 			if(_displayIndex >= 0)
@@ -157,6 +159,7 @@ package dragonBones
 				var displayIndexBackup:int = _displayIndex;
 				_displayIndex = -1;
 				changeDisplay(displayIndexBackup);
+				updateTransform();
 			}
 		}
 		
@@ -288,19 +291,6 @@ package dragonBones
 			this._globalTransformMatrix.c = -this._global.scaleY * Math.sin(this._global.skewX);
 			this._globalTransformMatrix.d = this._global.scaleY * Math.cos(this._global.skewX);
 			
-			/*
-			this._globalTransformMatrix.a = _localTransformMatrix.a;
-			this._globalTransformMatrix.b = _localTransformMatrix.b;
-			this._globalTransformMatrix.c = _localTransformMatrix.c;
-			this._globalTransformMatrix.d = _localTransformMatrix.d;
-			this._globalTransformMatrix.tx = _localTransformMatrix.tx;
-			this._globalTransformMatrix.ty = _localTransformMatrix.ty;
-			//this._globalTransformMatrix.copyFrom(_localTransformMatrix);
-			
-			var parentMatrix:Matrix = this._parent._globalTransformMatrix;
-			this._globalTransformMatrix.concat(parentMatrix);
-			*/
-			
 			if(frameCachedDuration > 0)    // && frameCachedPosition >= 0
 			{
 				_timelineCached.addFrame(null, this._globalTransformMatrix, frameCachedPosition, frameCachedDuration);
@@ -362,8 +352,21 @@ package dragonBones
 				
 				if(_displayIndex != displayIndex)
 				{
-					
+					_isShowDisplay = true;
 					_displayIndex = displayIndex;
+					
+					var content:Object = _displayList[_displayIndex];
+					if(content is Armature)
+					{
+						_childArmature = content as Armature;
+						updateSlotDisplay(_childArmature.display);
+					}
+					else
+					{
+						_childArmature = null;
+						updateSlotDisplay(content);
+					}
+					updateChildArmatureAnimation();
 					
 					if(
 						_displayDataList && 
@@ -373,29 +376,15 @@ package dragonBones
 					{
 						this._origin.copy(_displayDataList[_displayIndex].transform);
 					}
-					
-					var content:Object = _displayList[_displayIndex];
-					if(content is Armature)
-					{
-						_childArmature = content as Armature;
-						updateDisplay(_childArmature.display);
-					}
-					else
-					{
-						_childArmature = null;
-						updateDisplay(content);
-					}
-					_isShowDisplay = true;
-					updateChildArmatureAnimation();
 				}
 				else if(!_isShowDisplay)
 				{
+					_isShowDisplay = true;
 					if(this._armature)
 					{
 						this._armature._slotsZOrderChanged = true;
 						addDisplayToContainer(this._armature.display);
 					}
-					_isShowDisplay = true;
 					updateChildArmatureAnimation();
 				}
 				
@@ -405,22 +394,28 @@ package dragonBones
 		/** @private 
 		 * Updates the display of the slot.
 		 */
-		dragonBones_internal function updateDisplay(value:Object):void
+		dragonBones_internal function updateSlotDisplay(value:Object):void
 		{
-			var exDisplay:Object = _display;
-			_display = value;
+			var exIndex:int = -1;
 			if(_display)
 			{
-				if(this._armature)
+				exIndex = getDisplayIndex();
+				removeDisplayFromContainer();
+			}
+			_display = value;
+			updateDisplay(_display);
+			if(_display)
+			{
+				if(this._armature && _isShowDisplay)
 				{
-					if(exDisplay)
-					{
-						addDisplayToContainer(this._armature.display, getDisplayIndex(exDisplay));
-					}
-					else
+					if(exIndex < 0)
 					{
 						this._armature._slotsZOrderChanged = true;
 						addDisplayToContainer(this._armature.display);
+					}
+					else
+					{
+						addDisplayToContainer(this._armature.display, exIndex);
 					}
 				}
 				updateDisplayBlendMode(_blendMode);
@@ -432,9 +427,8 @@ package dragonBones
 		
 		/**
 		 * @private
-		 * Updates the transform of the slot.
 		 */
-		dragonBones_internal function updateTransform():void
+		dragonBones_internal function updateDisplay(value:Object):void
 		{
 			throw new IllegalOperationError("Abstract method needs to be implemented in subclass!");
 		}
@@ -442,7 +436,7 @@ package dragonBones
 		/**
 		 * @private
 		 */
-		dragonBones_internal function getDisplayIndex(value:Object):int
+		dragonBones_internal function getDisplayIndex():int
 		{
 			throw new IllegalOperationError("Abstract method needs to be implemented in subclass!");
 		}
@@ -463,6 +457,15 @@ package dragonBones
 		 * remove the original display object from its parent.
 		 */
 		dragonBones_internal function removeDisplayFromContainer():void
+		{
+			throw new IllegalOperationError("Abstract method needs to be implemented in subclass!");
+		}
+		
+		/**
+		 * @private
+		 * Updates the transform of the slot.
+		 */
+		dragonBones_internal function updateTransform():void
 		{
 			throw new IllegalOperationError("Abstract method needs to be implemented in subclass!");
 		}

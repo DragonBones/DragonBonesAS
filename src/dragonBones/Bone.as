@@ -44,7 +44,6 @@
 		 */
 		public function get display():Object
 		{
-			
 			var slot:Slot = this.slot;
 			if(slot)
 			{
@@ -286,7 +285,7 @@
 				bone.setParent(this);
 				bone.setArmature(this._armature);
 			}
-			else
+			else if(child is Slot)
 			{
 				var slot:Slot = child as Slot;
 				_slotList.fixed = false;
@@ -310,9 +309,9 @@
 			}
 			
 			var index:int;
-			var bone:Bone = child as Bone;
-			if(bone)
+			if(child is Bone)
 			{
+				var bone:Bone = child as Bone;
 				index = _boneList.indexOf(bone);
 				if(index >= 0)
 				{
@@ -327,7 +326,7 @@
 					throw new ArgumentError();
 				}
 			}
-			else
+			else if(child is Slot)
 			{
 				var slot:Slot = child as Slot;
 				index = _slotList.indexOf(slot);
@@ -336,6 +335,8 @@
 					_slotList.fixed = false;
 					_slotList.splice(index, 1);
 					_slotList.fixed = true;
+					slot.setParent(null);
+					slot.setArmature(null);
 				}
 				else
 				{
@@ -345,13 +346,10 @@
 		}
 		
 		/** @private */
-		dragonBones_internal function update():void
+		dragonBones_internal function update(needUpdate:Boolean = false):void
 		{
 			_needUpdate --;
-			if(_needUpdate > 0)
-			{
-			}
-			else if(this._parent && this._parent._needUpdate > 0)
+			if(needUpdate || _needUpdate > 0 || (this._parent && this._parent._needUpdate > 0))
 			{
 				_needUpdate = 1;
 			}
@@ -555,24 +553,26 @@
 			var timelineState:TimelineState;
 			var transform:DBTransform;
 			var pivot:Point;
+			var weight:Number;
 			
 			var i:int = _timelineStateList.length;
 			if(i == 1)
 			{
 				timelineState = _timelineStateList[0];
+				weight = timelineState.weight;
 				transform = timelineState._transform;
 				pivot = timelineState._pivot;
 				
-				_tween.x = transform.x;
-				_tween.y = transform.y;
-				_tween.skewX = transform.skewX;
-				_tween.skewY = transform.skewY;
-				_tween.scaleX = transform.scaleX;
-				_tween.scaleY = transform.scaleY;
+				_tween.x = transform.x * weight;
+				_tween.y = transform.y * weight;
+				_tween.skewX = transform.skewX * weight;
+				_tween.skewY = transform.skewY * weight;
+				_tween.scaleX = transform.scaleX * weight;
+				_tween.scaleY = transform.scaleY * weight;
 				//_tween.copy(transform);
 				
-				_tweenPivot.x = pivot.x;
-				_tweenPivot.y = pivot.y;
+				_tweenPivot.x = pivot.x * weight;
+				_tweenPivot.y = pivot.y * weight;
 				//_tweenPivot.copyFrom(pivot);
 			}
 			else if(i > 1)
@@ -586,13 +586,30 @@
 				var pivotX:Number = 0;
 				var pivotY:Number = 0;
 				
+				var weigthLeft:Number = 1;
+				var layerTotalWeight:Number = 0;
+				var exLayer:int = _timelineStateList[i - 1].layer;
+				var currentLayer:int;
+				//layer由高到低依次遍历
 				while(i --)
 				{
 					timelineState = _timelineStateList[i];
 					
-					var weigthLeft:Number = 1;
-					var layerTotalWeight:Number = 0;
-					var weight:Number = timelineState.weight * weigthLeft;
+					currentLayer = timelineState.layer;
+					if(exLayer != currentLayer)
+					{
+						if(layerTotalWeight >= weigthLeft)
+						{
+							break;
+						}
+						else
+						{
+							weigthLeft -= layerTotalWeight;
+						}
+					}
+					exLayer = currentLayer;
+					
+					weight = timelineState.weight * weigthLeft;
 					if(weight && timelineState._blendEnabled)
 					{
 						transform = timelineState._transform;
@@ -609,15 +626,6 @@
 						
 						layerTotalWeight += weight;
 					}
-					
-					if(layerTotalWeight >= weigthLeft)
-					{
-						break;
-					}
-					else
-					{
-						weigthLeft -= layerTotalWeight;
-					}
 				}
 				
 				_tween.x = x;
@@ -633,7 +641,7 @@
 		
 		private function sortState(state1:TimelineState, state2:TimelineState):int
 		{
-			return state1.layer > state2.layer?1:-1;
+			return state1.layer < state2.layer?-1:1;
 		}
 	}
 }
