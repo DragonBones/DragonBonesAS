@@ -93,7 +93,7 @@ package dragonBones.factorys
 			}
 			if(_dataDic[name])
 			{
-				
+				throw new ArgumentError();
 			}
 			_dataDic[name] = data;
 		}
@@ -138,7 +138,7 @@ package dragonBones.factorys
 			}
 			if(_textureAtlasDic[name])
 			{
-				
+				throw new ArgumentError();
 			}
 			_textureAtlasDic[name] = textureAtlas;
 		}

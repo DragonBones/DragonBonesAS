@@ -6,7 +6,6 @@
 	import dragonBones.objects.SkeletonData;
 	import dragonBones.objects.XMLDataParser;
 	import dragonBones.utils.BytesType;
-	import dragonBones.utils.checkBytesTailisXML;
 	
 	public final class DataParser
 	{
@@ -55,6 +54,8 @@
 				case BytesType.PNG:
 				case BytesType.JPG:
 				case BytesType.ATF:
+					var dragonBonesData:Object;
+					var textureAtlasData:Object;
 					try
 					{
 						var bytesCopy:ByteArray = new ByteArray();
@@ -70,15 +71,7 @@
 						dataBytes.uncompress();
 						bytes.length = position;
 						
-						var dragonBonesData:Object;
-						if(checkBytesTailisXML(dataBytes))
-						{
-							dragonBonesData = XML(dataBytes.readUTFBytes(dataBytes.length));
-						}
-						else
-						{
-							dragonBonesData = dataBytes.readObject();
-						}
+						dragonBonesData = dataBytes.readObject();
 						
 						bytes.position = bytes.length - 4;
 						strSize = bytes.readInt();
@@ -89,15 +82,7 @@
 						dataBytes.uncompress();
 						bytes.length = position;
 						
-						var textureAtlasData:Object;
-						if(checkBytesTailisXML(dataBytes))
-						{
-							textureAtlasData = XML(dataBytes.readUTFBytes(dataBytes.length));
-						}
-						else
-						{
-							textureAtlasData = dataBytes.readObject();
-						}
+						textureAtlasData = dataBytes.readObject();
 					}
 					catch (e:Error)
 					{

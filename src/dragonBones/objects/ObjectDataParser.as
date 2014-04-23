@@ -76,7 +76,7 @@
 			switch (version)
 			{
 				case "2.3":
-					Update2_3To3_0.format(rawData);
+					//Update2_3To3_0.format(rawData);
 					break;
 				
 				case DragonBones.DATA_VERSION:
@@ -372,6 +372,7 @@
 	}
 }
 
+/*
 import dragonBones.utils.ConstValues;
 
 class Update2_3To3_0
@@ -399,3 +400,4 @@ class Update2_3To3_0
 		}
 	}
 }
+*/

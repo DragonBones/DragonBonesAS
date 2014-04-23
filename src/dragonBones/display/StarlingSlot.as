@@ -7,6 +7,7 @@ package dragonBones.display
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
 	
+	import starling.display.BlendMode;
 	import starling.display.DisplayObject;
 	import starling.display.DisplayObjectContainer;
 	import starling.display.Quad;
@@ -167,22 +168,46 @@ package dragonBones.display
 			{
 				switch(blendMode)
 				{
-					case BlendMode.ADD:
-					case BlendMode.ALPHA:
-					case BlendMode.DARKEN:
-					case BlendMode.DIFFERENCE:
-					case BlendMode.ERASE:
-					case BlendMode.HARDLIGHT:
-					case BlendMode.INVERT:
-					case BlendMode.LAYER:
-					case BlendMode.LIGHTEN:
-					case BlendMode.MULTIPLY:
-					case BlendMode.NORMAL:
-					case BlendMode.OVERLAY:
-					case BlendMode.SCREEN:
-					case BlendMode.SHADER:
-					case BlendMode.SUBTRACT:
+					case starling.display.BlendMode.NONE:
+					case starling.display.BlendMode.AUTO:
+					case starling.display.BlendMode.ADD:
+					case starling.display.BlendMode.ERASE:
+					case starling.display.BlendMode.MULTIPLY:
+					case starling.display.BlendMode.NORMAL:
+					case starling.display.BlendMode.SCREEN:
 						_starlingDisplay.blendMode = blendMode;
+						break;
+					
+					case flash.display.BlendMode.ADD:
+						_starlingDisplay.blendMode = starling.display.BlendMode.ADD;
+						break;
+					
+					case flash.display.BlendMode.ERASE:
+						_starlingDisplay.blendMode = starling.display.BlendMode.ERASE;
+						break;
+					
+					case flash.display.BlendMode.MULTIPLY:
+						_starlingDisplay.blendMode = starling.display.BlendMode.MULTIPLY;
+						break;
+					
+					case flash.display.BlendMode.NORMAL:
+						_starlingDisplay.blendMode = starling.display.BlendMode.NORMAL;
+						break;
+					
+					case flash.display.BlendMode.SCREEN:
+						_starlingDisplay.blendMode = starling.display.BlendMode.SCREEN;
+						break;
+					
+					case flash.display.BlendMode.ALPHA:
+					case flash.display.BlendMode.DARKEN:
+					case flash.display.BlendMode.DIFFERENCE:
+					case flash.display.BlendMode.HARDLIGHT:
+					case flash.display.BlendMode.INVERT:
+					case flash.display.BlendMode.LAYER:
+					case flash.display.BlendMode.LIGHTEN:
+					case flash.display.BlendMode.OVERLAY:
+					case flash.display.BlendMode.SHADER:
+					case flash.display.BlendMode.SUBTRACT:
 						break;
 					
 					default:

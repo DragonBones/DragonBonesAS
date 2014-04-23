@@ -29,7 +29,6 @@
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.DBDataUtil;
 	import dragonBones.utils.TransformUtil;
-	import dragonBones.utils.parseOldXMLData;
 	
 	use namespace dragonBones_internal;
 	
@@ -90,16 +89,8 @@
 			var version:String = rawData.@[ConstValues.A_VERSION];
 			switch (version)
 			{
-				case "1.5":
-				case "2.0":
-				case "2.1":
-				case "2.1.1":
-				case "2.1.2":
-				case "2.2":
-					return parseOldXMLData(rawData as XML);
-					
 				case "2.3":
-					Update2_3To3_0.format(rawData as XML);
+					//Update2_3To3_0.format(rawData as XML);
 					break;
 				
 				case DragonBones.DATA_VERSION:
@@ -374,7 +365,7 @@
 		
 		private static function getNumber(data:XML, key:String, defaultValue:Number):Number
 		{
-			if(data.@[key].length > 0)
+			if(data.@[key].length() > 0)
 			{
 				switch(String(data.@[key]))
 				{
@@ -395,6 +386,7 @@
 	}
 }
 
+/*
 import dragonBones.utils.ConstValues;
 
 class Update2_3To3_0
@@ -418,3 +410,4 @@ class Update2_3To3_0
 		}
 	}
 }
+*/
