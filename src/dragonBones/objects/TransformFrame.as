@@ -6,8 +6,10 @@
 	/** @private */
 	final public class TransformFrame extends Frame
 	{
+		//NaN:no tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
 		public var tweenEasing:Number;
 		public var tweenRotate:int;
+		public var tweenScale:Boolean;
 		public var displayIndex:int;
 		public var visible:Boolean;
 		public var zOrder:Number;
@@ -24,6 +26,7 @@
 			
 			tweenEasing = 0;
 			tweenRotate = 0;
+			tweenScale = true;
 			displayIndex = 0;
 			visible = true;
 			zOrder = NaN;
@@ -38,7 +41,6 @@
 			super.dispose();
 			global = null;
 			transform = null;
-			//SkeletonData pivots
 			pivot = null;
 			color = null;
 		}

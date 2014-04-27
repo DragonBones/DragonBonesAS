@@ -23,7 +23,7 @@ package dragonBones.textures
 		function dispose():void;
 		/**
 		 * Get the specific region of the TextureAtlas occupied by assets defined by that name.
-		 * @param	name The name of the assets represented by that name.
+		 * @param name The name of the assets represented by that name.
 		 * @return Rectangle The rectangle area occupied by those assets.
 		 */
 		function getRegion(name:String):Rectangle

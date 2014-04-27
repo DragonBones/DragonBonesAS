@@ -1,8 +1,8 @@
 package dragonBones.utils
 {
-	import dragonBones.objects.DBTransform;
-	
 	import flash.geom.Matrix;
+	
+	import dragonBones.objects.DBTransform;
 	
 	/** @private */
 	final public class TransformUtil
@@ -11,6 +11,16 @@ package dragonBones.utils
 		private static const DOUBLE_PI:Number = Math.PI * 2;
 		
 		private static const _helpMatrix:Matrix = new Matrix();
+		
+		public static function formatTransform(transform:DBTransform):void
+		{
+			var dSkew:Number = formatRadian(transform.skewY - transform.skewX);
+			if(dSkew > HALF_PI || dSkew < -HALF_PI)
+			{
+				transform.scaleX *= -1;
+				transform.skewY = formatRadian(transform.skewY - Math.PI);
+			}
+		} 
 		
 		public static function transformPointWithParent(transform:DBTransform, parent:DBTransform):void
 		{
@@ -25,6 +35,8 @@ package dragonBones.utils
 			
 			transform.skewX = formatRadian(transform.skewX - parent.skewX);
 			transform.skewY = formatRadian(transform.skewY - parent.skewY);
+			
+			formatTransform(transform);
 		}
 		
 		public static function transformToMatrix(transform:DBTransform, matrix:Matrix):void

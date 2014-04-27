@@ -20,7 +20,7 @@
 	public class AnimationEvent extends Event
 	{
 		/**
-		 * Dispatched when the playback of an animation fade in.
+		 * 不推荐使用.
 		 */
 		public static function get MOVEMENT_CHANGE():String
 		{
@@ -63,6 +63,14 @@
 		public static const FADE_OUT_COMPLETE:String = "fadeOutComplete";
 		
 		/**
+		 * 不推荐的API.
+		 */
+		public function get movementID():String
+		{
+			return animationName;
+		}
+		
+		/**
 		 * The animationState instance.
 		 */
 		public var animationState:AnimationState;
@@ -75,15 +83,15 @@
 			return target as Armature;
 		}
 		
-		public function get movementID():String
+		public function get animationName():String
 		{
 			return animationState.name;
 		}
 		
 		/**
 		 * Creates a new AnimationEvent instance.
-		 * @param	type
-		 * @param	cancelable
+		 * @param type
+		 * @param cancelable
 		 */
 		public function AnimationEvent(type:String, cancelable:Boolean = false)
 		{
