@@ -161,11 +161,7 @@ package dragonBones.animation
 			_currentTime = -1;
 			_isComplete = false;
 			_blendEnabled = false;
-<<<<<<< HEAD
 			_tweenEasing = NaN;
-=======
-			_tweenEasing = -2;
->>>>>>> 653d606cd9ac0e0fb69e707ff6c17b09a310e84f
 			_tweenTransform = false;
 			_tweenScale = false;
 			_tweenColor = false;
@@ -336,7 +332,6 @@ package dragonBones.animation
 							frameIndex = 0;
 						}
 						updateToNextFrame(frameIndex, currentPlayTimes);
-<<<<<<< HEAD
 					}
 					else
 					{
@@ -395,96 +390,16 @@ package dragonBones.animation
 					}
 				}
 				else    //animationData overwrite tween
-=======
-					}
-					else
-					{
-						_tweenEasing = -2;
-						_tweenTransform = false;
-						_tweenScale = false;
-						_tweenColor = false;
-					}
-				}
-				
-				if(_blendEnabled)
-				{
-					updateTween();
-				}
-			}
-		}
-		
-		private function updateToNextFrame(nextFrameIndex:int, currentPlayTimes:int):void
-		{
-			var nextFrame:TransformFrame = _timeline.frameList[nextFrameIndex] as TransformFrame;
-			var tweenEnabled:Boolean = false;
-			if(
-				nextFrameIndex == 0 &&
-				(
-					!_animationState.lastFrameAutoTween ||
-					(
-						_animationState.playTimes &&
-						_animationState.currentPlayTimes >= _animationState.playTimes && 
-						((_currentFramePosition + _currentFrameDuration) / _totalTime + currentPlayTimes - _timeline.offset) * _timeline.scale > 0.99999999
-					)
-				)
-			)
-			{
-				_tweenEasing = -2;
-				tweenEnabled = false;
-			}
-			else if(_currentFrame.displayIndex < 0 || nextFrame.displayIndex < 0)
-			{
-				_tweenEasing = -2;
-				tweenEnabled = false;
-			}
-			else
-			{
-				_tweenEasing = _currentFrame.tweenEasing;
-				if(_tweenEasing == -2)    //frame no tween
-				{
-					tweenEnabled = false;
-				}
-				else if(isNaN(_tweenEasing))    //frame auto tween
-				{
-					if(_animationState.autoTween)    //animationState alow auto tween
-					{
-						_tweenEasing = _animationState.clip.tweenEasing;
-						if(_tweenEasing == -2)
-						{
-							tweenEnabled = false;
-						}
-						else if(isNaN(_tweenEasing))    //animationData auto tween
-						{
-							_tweenEasing = 0;
-							tweenEnabled = true;
-						}
-						else
-						{
-							//_tweenEasing [-1, 0) 0 (0, 1] (1, 2]
-							tweenEnabled = true;
-						}
-					}
-					else
-					{
-						_tweenEasing = -2;
-						tweenEnabled = false;
-					}
-				}
-				else
->>>>>>> 653d606cd9ac0e0fb69e707ff6c17b09a310e84f
 				{
 					//_tweenEasing [-1, 0) 0 (0, 1] (1, 2]
 					tweenEnabled = true;
 				}
 			}
-<<<<<<< HEAD
 			else
 			{
 				_tweenEasing = NaN;
 				tweenEnabled = false;
 			}
-=======
->>>>>>> 653d606cd9ac0e0fb69e707ff6c17b09a310e84f
 			
 			if(tweenEnabled)
 			{
@@ -532,21 +447,12 @@ package dragonBones.animation
 					_durationColor.redOffset = nextFrame.color.redOffset - _currentFrame.color.redOffset;
 					_durationColor.greenOffset = nextFrame.color.greenOffset - _currentFrame.color.greenOffset;
 					_durationColor.blueOffset = nextFrame.color.blueOffset - _currentFrame.color.blueOffset;
-<<<<<<< HEAD
 					
 					_durationColor.alphaMultiplier = nextFrame.color.alphaMultiplier - _currentFrame.color.alphaMultiplier;
 					_durationColor.redMultiplier = nextFrame.color.redMultiplier - _currentFrame.color.redMultiplier;
 					_durationColor.greenMultiplier = nextFrame.color.greenMultiplier - _currentFrame.color.greenMultiplier;
 					_durationColor.blueMultiplier = nextFrame.color.blueMultiplier - _currentFrame.color.blueMultiplier;
 					
-=======
-					
-					_durationColor.alphaMultiplier = nextFrame.color.alphaMultiplier - _currentFrame.color.alphaMultiplier;
-					_durationColor.redMultiplier = nextFrame.color.redMultiplier - _currentFrame.color.redMultiplier;
-					_durationColor.greenMultiplier = nextFrame.color.greenMultiplier - _currentFrame.color.greenMultiplier;
-					_durationColor.blueMultiplier = nextFrame.color.blueMultiplier - _currentFrame.color.blueMultiplier;
-					
->>>>>>> 653d606cd9ac0e0fb69e707ff6c17b09a310e84f
 					if(
 						_durationColor.alphaOffset ||
 						_durationColor.redOffset ||
@@ -559,19 +465,11 @@ package dragonBones.animation
 					)
 					{
 						_tweenColor = true;
-<<<<<<< HEAD
 					}
 					else
 					{
 						_tweenColor = false;
 					}
-=======
-					}
-					else
-					{
-						_tweenColor = false;
-					}
->>>>>>> 653d606cd9ac0e0fb69e707ff6c17b09a310e84f
 				}
 				else if(_currentFrame.color)
 				{

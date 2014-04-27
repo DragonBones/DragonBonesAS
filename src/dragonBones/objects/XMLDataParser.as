@@ -208,16 +208,10 @@
 			animationData.fadeTime = Number(animationXML.@[ConstValues.A_FADE_IN_TIME]);
 			animationData.duration = (Number(animationXML.@[ConstValues.A_DURATION]) || 1) / frameRate;
 			animationData.scale = getNumber(animationXML, ConstValues.A_SCALE, 1) || 0;
-<<<<<<< HEAD
 			//use frame tweenEase, NaN
 			//overwrite frame tweenEase, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
 			animationData.tweenEasing = getNumber(animationXML, ConstValues.A_TWEEN_EASING, NaN);
 			animationData.autoTween = getBoolean(animationXML, ConstValues.A_AUTO_TWEEN, true);
-=======
-			//NaN:auto tween, -2:no tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
-			//default:NaN
-			animationData.tweenEasing = getNumber(animationXML, ConstValues.A_TWEEN_EASING, NaN);
->>>>>>> 653d606cd9ac0e0fb69e707ff6c17b09a310e84f
 			
 			parseTimeline(animationXML, animationData, parseMainFrame, frameRate);
 			
@@ -293,14 +287,8 @@
 			
 			frame.visible = !getBoolean(frameXML, ConstValues.A_HIDE, false);
 			
-<<<<<<< HEAD
 			//NaN:no tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
 			frame.tweenEasing = getNumber(frameXML, ConstValues.A_TWEEN_EASING, 0);
-=======
-			//NaN:auto tween, -2:no tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
-			//default:NaN
-			frame.tweenEasing = getNumber(frameXML, ConstValues.A_TWEEN_EASING, NaN);
->>>>>>> 653d606cd9ac0e0fb69e707ff6c17b09a310e84f
 			frame.tweenRotate = Number(frameXML.@[ConstValues.A_TWEEN_ROTATE]);
 			frame.tweenScale = getBoolean(frameXML, ConstValues.A_TWEEN_SCALE, true);
 			frame.displayIndex = Number(frameXML.@[ConstValues.A_DISPLAY_INDEX]);
@@ -354,11 +342,7 @@
 		
 		private static function getBoolean(data:XML, key:String, defaultValue:Boolean):Boolean
 		{
-<<<<<<< HEAD
 			if(data.@[key].length() > 0)
-=======
-			if(data.@[key].length > 0)
->>>>>>> 653d606cd9ac0e0fb69e707ff6c17b09a310e84f
 			{
 				switch(String(data.@[key]))
 				{

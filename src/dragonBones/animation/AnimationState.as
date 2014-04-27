@@ -297,11 +297,8 @@
 			setTimeScale(timeScale);
 			setPlayTimes(playTimes);
 			
-<<<<<<< HEAD
 			autoTween = _clip.autoTween;
 			
-=======
->>>>>>> 653d606cd9ac0e0fb69e707ff6c17b09a310e84f
 			//clear
 			_currentFrame = null;
 			_mixingTransforms = null;
@@ -331,10 +328,6 @@
 			//default
 			_isPlaying = true;
 			displayControl = true;
-<<<<<<< HEAD
-=======
-			autoTween = true;
->>>>>>> 653d606cd9ac0e0fb69e707ff6c17b09a310e84f
 			lastFrameAutoTween = true;
 			additiveBlending = false;
 			weight = 1;
@@ -363,7 +356,6 @@
 			_pausePlayheadInFade = pausePlayhead;
 			
 			if(_isFadeOut)
-<<<<<<< HEAD
 			{
 				if(fadeTotalTime > _fadeTotalTime / _timeScale - (_fadeCurrentTime - _fadeBeginTime))
 				{
@@ -373,17 +365,6 @@
 			}
 			else
 			{
-=======
-			{
-				if(fadeTotalTime > _fadeTotalTime / _timeScale - (_fadeCurrentTime - _fadeBeginTime))
-				{
-					//如果已经在淡出中，新的淡出需要更长的淡出时间，则忽略
-					return this;
-				}
-			}
-			else
-			{
->>>>>>> 653d606cd9ac0e0fb69e707ff6c17b09a310e84f
 				//第一次淡出
 				for each(var timelineState:TimelineState in _timelineStateList)
 				{

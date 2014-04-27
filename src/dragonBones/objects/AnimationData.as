@@ -6,15 +6,10 @@ package dragonBones.objects
 		public var frameRate:uint;
 		public var fadeTime:Number;
 		public var playTimes:int;
-<<<<<<< HEAD
 		//use frame tweenEase, NaN
 		//overwrite frame tweenEase, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
 		public var tweenEasing:Number;
 		public var autoTween:Boolean;
-=======
-		//NaN:auto tween, -2:no tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
-		public var tweenEasing:Number;
->>>>>>> 653d606cd9ac0e0fb69e707ff6c17b09a310e84f
 		public var lastFrameDuration:Number;
 		
 		//string map
@@ -31,10 +26,7 @@ package dragonBones.objects
 			super();
 			fadeTime = 0;
 			playTimes = 0;
-<<<<<<< HEAD
 			autoTween = true;
-=======
->>>>>>> 653d606cd9ac0e0fb69e707ff6c17b09a310e84f
 			tweenEasing = NaN;
 			hideTimelineNameMap = {};
 			
