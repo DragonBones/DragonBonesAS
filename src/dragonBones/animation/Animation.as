@@ -470,6 +470,7 @@
 			
 			_isFading = isFading;
 		}
+		
 		/** @private */
 		dragonBones_internal function updateAnimationStates():void
 		{

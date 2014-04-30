@@ -607,7 +607,13 @@
 				if(_fadeCurrentTime >= _fadeBeginTime + _fadeTotalTime)
 				{
 					//fade complete
-					fadeState = 1;
+					if(
+						_fadeWeight == 1 || 
+						_fadeWeight == 0
+					)
+					{
+						fadeState = 1;
+					}
 					_fadeWeight = _isFadeOut?0:1;
 					_pausePlayheadInFade = false;
 				}
