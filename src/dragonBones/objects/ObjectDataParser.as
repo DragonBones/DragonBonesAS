@@ -316,8 +316,6 @@
 					transform.skewY = Number(transformObject[ConstValues.A_SKEW_Y]) * ConstValues.ANGLE_TO_RADIAN || 0;
 					transform.scaleX = getNumber(transformObject, ConstValues.A_SCALE_X, 1) || 0;
 					transform.scaleY = getNumber(transformObject, ConstValues.A_SCALE_Y, 1) || 0;
-					
-					TransformUtil.formatTransform(transform);
 				}
 				if(pivot)
 				{
