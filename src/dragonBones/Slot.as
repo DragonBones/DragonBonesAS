@@ -13,7 +13,7 @@
 	
 	public class Slot extends DBObject
 	{
-		/** @private 需要保持引用DisplayData，slot在切换显示对象时，需要还原显示对象的原始轴点，因为在动画制作过程中，同一个slot的不同显示对象的轴点位置是不一定相同的*/
+		/** @private Need to keep the reference of DisplayData. When slot switch displayObject, it need to restore the display obect's origional pivot. */
 		dragonBones_internal var _displayDataList:Vector.<DisplayData>;
 		
 		/** @private */

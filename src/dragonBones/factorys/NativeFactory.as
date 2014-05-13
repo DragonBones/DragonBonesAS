@@ -1,4 +1,4 @@
-package dragonBones.factorys
+﻿package dragonBones.factorys
 {
 	import flash.display.MovieClip;
 	import flash.display.Shape;
@@ -24,12 +24,12 @@ package dragonBones.factorys
 	public class NativeFactory extends BaseFactory
 	{
 		/**
-		 * 是否启用平滑位图填充
+		 * If enable BitmapSmooth
 		 */		
 		public var fillBitmapSmooth:Boolean;
 		
 		/**
-		 * 是否使用BitmapData贴图（当使用dbswf时，可以使用矢量原件，如果开启useBitmapDataTexture，则会强制将dbswf转为BitmapData）
+		 * If use bitmapData Texture（When using dbswf，you can use vector element，if enable useBitmapDataTexture，dbswf will be force converted to BitmapData）
 		 */		
 		public var useBitmapDataTexture:Boolean;
 		

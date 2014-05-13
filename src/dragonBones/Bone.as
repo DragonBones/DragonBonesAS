@@ -27,7 +27,7 @@
 		
 		
 		/**
-		 * 不推荐的API.
+		 * Unrecommended API. Recommend use slot.childArmature.
 		 */
 		public function get childArmature():Armature
 		{
@@ -40,7 +40,7 @@
 		}
 		
 		/**
-		 * 不推荐的API.
+		 * Unrecommended API. Recommend use slot.display.
 		 */
 		public function get display():Object
 		{
@@ -61,7 +61,7 @@
 		}
 		
 		/**
-		 * 不推荐的API.
+		 * Unrecommended API. Recommend use offset.
 		 */
 		public function get node():DBTransform
 		{
@@ -204,7 +204,7 @@
 		}
 		
 		/**
-		 * 当没有transform的改变时，将不会再更新，通过调用这个方法，让bone在下一帧更新transform
+		 * Force update the bone in next frame even if the bone is not moving.
 		 */
 		public function invalidUpdate():void
 		{
@@ -590,7 +590,10 @@
 				var layerTotalWeight:Number = 0;
 				var exLayer:int = _timelineStateList[i - 1].layer;
 				var currentLayer:int;
+				
+				//Traversal the layer from up to down
 				//layer由高到低依次遍历
+
 				while(i --)
 				{
 					timelineState = _timelineStateList[i];
