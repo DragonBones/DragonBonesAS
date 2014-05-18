@@ -22,7 +22,7 @@
 		public static const ALL:String = "all";		
 		
 		/**
-		* 不推荐的API.
+		* Unrecommended API. Recommend use animationList.
 		*/
 		public function get movementList():Vector.<String>
 		{
@@ -30,8 +30,8 @@
 		}
 		
 		/**
-		 * 不推荐的API.
-		 */
+		* Unrecommended API. Recommend use lastAnimationName.
+		*/
 		public function get movementID():String
 		{
 			return lastAnimationName;
@@ -85,7 +85,7 @@
 		
 		private var _isPlaying:Boolean;
 		/**
-		 * 动画是否在播放.
+		 * Is the animation playing.
 		 * @see dragonBones.animation.AnimationState.
 		 */
 		public function get isPlaying():Boolean
@@ -196,9 +196,9 @@
 		/**
 		 * Fades the animation with name animation in over a period of time seconds and fades other animations out.
 		 * @param animationName The name of the AnimationData to play.
-		 * @param fadeInTime A fade time to apply (>= 0), 混合影响到的其他动画会尝试使用这个时间淡出, 默认使用AnimationData.fadeInTime.
-		 * @param duration The duration of that AnimationData, 默认使用AnimationData.duration.
-		 * @param playTimes Play times(0:loop forever, 1~+∞:play times, -1~-∞:will fade animation after play complete), 默认使用AnimationData.loop.
+		 * @param fadeInTime A fade time to apply (>= 0), -1 means use xml data's fadeInTime. 
+		 * @param duration The duration of that Animation. -1 means use xml data's duration.
+		 * @param playTimes Play times(0:loop forever, >=1:play times, -1~-∞:will fade animation after play complete), 默认使用AnimationData.loop.
 		 * @param layer The layer of the animation.
 		 * @param group The group of the animation.
 		 * @param fadeOutMode Fade out mode (none, sameLayer, sameGroup, sameLayerAndGroup, all).
@@ -333,12 +333,12 @@
 		}
 		
 		/**
-		 * 控制一个animationState停止到指定的时间，如果指定的animationState不存在，则添加一个新的animationState
+		 * Control the animation to stop with a specified time. If related animationState haven't been created, then create a new animationState.
 		 * @param animationName The name of the animationState.
 		 * @param time 
 		 * @param normalizedTime 
-		 * @param fadeInTime A fade time to apply (>= 0), 混合影响到的其他动画会尝试使用这个时间淡出, 默认为0, 可以设置为-1来使用AnimationData.fadeInTime.
-		 * @param duration The duration of that AnimationData, 默认使用AnimationData.duration.
+		 * @param fadeInTime A fade time to apply (>= 0), -1 means use xml data's fadeInTime. 
+		 * @param duration The duration of that Animation. -1 means use xml data's duration.
 		 * @param layer The layer of the animation.
 		 * @param group The group of the animation.
 		 * @param fadeOutMode Fade out mode (none, sameLayer, sameGroup, sameLayerAndGroup, all).
@@ -425,7 +425,7 @@
 		}
 		
 		/**
-		 * 检查是否包含指定的animationData.
+		 * check if contains a AnimationData by name.
 		 * @return Boolean.
 		 * @see dragonBones.animation.AnimationData.
 		 */

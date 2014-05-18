@@ -52,13 +52,13 @@
 		}
 		
 		/**
-		 * 是否可以将动画中的 color change, displayIndex change, visible change 作用到display上.
 		 * Sometimes, we want slots controlled by a spedific animation state when animation is doing mix or addition.
+		 * It determine if animation's color change, displayIndex change, visible change can apply to its display
 		 */
 		public var displayControl:Boolean;
 		
 		/**
-		 * 动画的混合是否采用加法混合.
+		 * If animation mixing use additive blending.
 		 */
 		public var additiveBlending:Boolean;
 		public function setAdditiveBlending(value:Boolean):AnimationState
@@ -68,11 +68,11 @@
 		}
 		
 		/**
-		 * 动画播放完毕后是否自动淡出.
+		 * If animation auto fade out after play complete.
 		 */
 		public var autoFadeOut:Boolean;
 		/**
-		 * 动画自动淡出时花费的时间，默认使用淡入时的时间.
+		 * Duration of fade out. By default, it equals to fade in time.
 		 */
 		public var fadeOutTime:Number;
 		public function setAutoFadeOut(value:Boolean, fadeOutTime:Number = -1):AnimationState
@@ -100,11 +100,11 @@
 		}
 		
 		/**
-		 * 是否自动补间.
+		 * If auto genterate tween between keyframes.
 		 */
 		public var autoTween:Boolean;
 		/**
-		 * 是否为最后一桢到第一帧进行补间.
+		 * If generate tween between the lastFrame to the first frame for loop animation.
 		 */
 		public var lastFrameAutoTween:Boolean;
 		public function setFrameTween(autoTween:Boolean, lastFrameAutoTween:Boolean):AnimationState
@@ -185,7 +185,7 @@
 		
 		private var _currentPlayTimes:int;
 		/**
-		 * 动画当前播放的次数
+		 * Current animation played times
 		 */
 		public function get currentPlayTimes():int
 		{
@@ -338,9 +338,9 @@
 		}
 		
 		/**
-		 * 淡出这个animationState
-		 * @param fadeOutTime 淡出时间.
-		 * @param pauseBeforeFadeOutComplete 淡出时暂停动画播放
+		 * Fade out the animation state
+		 * @param fadeOutTime 
+		 * @param pauseBeforeFadeOutComplete pause the animation before fade out complete
 		 */
 		public function fadeOut(fadeTotalTime:Number, pausePlayhead:Boolean):AnimationState
 		{
@@ -360,12 +360,14 @@
 				if(fadeTotalTime > _fadeTotalTime / _timeScale - (_fadeCurrentTime - _fadeBeginTime))
 				{
 					//如果已经在淡出中，新的淡出需要更长的淡出时间，则忽略
+					//If the animation is already in fade out, the new fade out will be ignored.
 					return this;
 				}
 			}
 			else
 			{
 				//第一次淡出
+				//The first time to fade out.
 				for each(var timelineState:TimelineState in _timelineStateList)
 				{
 					timelineState.fadeOut();
@@ -386,7 +388,7 @@
 		}
 		
 		/**
-		 * 继续动画的播放, 如果动画已经播放完毕, 将不会继续播放.
+		 * Play the current animation. 如果动画已经播放完毕, 将不会继续播放.
 		 */
 		public function play():AnimationState
 		{
@@ -395,7 +397,7 @@
 		}
 		
 		/**
-		 * 停止动画的播放, 并不会影响淡入或淡出的进行.
+		 * Stop playing current animation.
 		 */
 		public function stop():AnimationState
 		{
@@ -414,9 +416,9 @@
 		
 		/**
 		 * Adds a transform which should be animated. This allows you to reduce the number of animations you have to create.
-		 * @param timelineName 骨骼的时间轴名.
-		 * @param type 动画影响类型，0：timeline的所有效果都起作用，1：timeline的displayControl无效
-		 * @param recursive 是否添加该骨骼的子骨骼时间轴.
+		 * @param timelineName Bone's timeline name.
+		 * @param type Animation mixing type，0：all timeline effect will be applied，1：Invalid the timeline's displayControl 
+		 * @param recursive if involved child armature's timeline.
 		 */
 		public function addMixingTransform(timelineName:String, type:int = 0, recursive:Boolean = true):AnimationState
 		{
@@ -460,9 +462,9 @@
 		}
 		
 		/**
-		 * Removes a transform which should be animated.
-		 * @param timelineName 骨骼的时间轴名.
-		 * @param recursive 是否删除该骨骼的子骨骼时间轴.
+		 * Removes a transform which was supposed be animated.
+		 * @param timelineName Bone's timeline name.
+		 * @param recursive If involved child armature's timeline.
 		 */
 		public function removeMixingTransform(timelineName:String = null, recursive:Boolean = true):AnimationState
 		{
@@ -529,7 +531,7 @@
 		
 		/**
 		 * @private
-		 * 根据mixing transforms和clip来更新timelineState
+		 * Update timeline state based on mixing transforms and clip.
 		 */
 		dragonBones_internal function updateTimelineStates():void
 		{
@@ -622,6 +624,7 @@
 					//fading
 					fadeState = 0;
 					//暂时只支持线性淡入淡出
+					//Currently only support Linear fadein and fadeout
 					_fadeWeight = (_fadeCurrentTime - _fadeBeginTime) / _fadeTotalTime * _fadeTotalWeight;
 					if(_isFadeOut)
 					{
