@@ -28,7 +28,6 @@
 	import dragonBones.textures.TextureData;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.DBDataUtil;
-	import dragonBones.utils.TransformUtil;
 	
 	use namespace dragonBones_internal;
 	

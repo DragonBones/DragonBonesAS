@@ -53,7 +53,11 @@ package dragonBones.utils
 		{
 			var skinData:SkinData = armatureData.getSkinData(null);
 			var boneDataList:Vector.<BoneData> = armatureData.boneDataList;
-			var slotDataList:Vector.<SlotData> = skinData.slotDataList;
+			var slotDataList:Vector.<SlotData>;
+			if(skinData)
+			{
+				slotDataList = skinData.slotDataList;
+			}
 			var i:int = boneDataList.length;
 			
 			while(i --)
@@ -66,11 +70,14 @@ package dragonBones.utils
 				}
 				
 				var slotData:SlotData = null;
-				for each(slotData in slotDataList)
+				if(slotDataList)
 				{
-					if(slotData.parent == boneData.name)
+					for each(slotData in slotDataList)
 					{
-						break;
+						if(slotData.parent == boneData.name)
+						{
+							break;
+						}
 					}
 				}
 				

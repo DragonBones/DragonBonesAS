@@ -75,7 +75,7 @@ package dragonBones.objects
 		
 		public function getSkinData(skinName:String):SkinData
 		{
-			if(!skinName)
+			if(!skinName && _skinDataList.length > 0)
 			{
 				return _skinDataList[0];
 			}

@@ -71,6 +71,10 @@
 		public static const A_GREEN_MULTIPLIER:String = "gM";
 		public static const A_BLUE_MULTIPLIER:String = "bM";
 		
+		
+		public static const A_MATRIX3D:String = "matrix3D"
+		
+		
 		public static const A_SCALE_MODE:String = "scaleMode";
 		public static const A_FIXED_ROTATION:String = "fixedRotation";
 	}

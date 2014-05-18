@@ -284,9 +284,13 @@ package dragonBones.animation
 			if(_currentTime != currentTime)
 			{
 				_currentTime = currentTime;
+				if(_isComplete)
+				{
+					currentTime *= 0.99999999;
+				}
 				var isArrivedAtNewFrame:Boolean = false;
 				var frameIndex:int = 0;
-				while (!_currentFrame || _currentTime > _currentFramePosition + _currentFrameDuration || _currentTime < _currentFramePosition)
+				while (!_currentFrame || currentTime > _currentFramePosition + _currentFrameDuration || currentTime < _currentFramePosition)
 				{
 					if(isArrivedAtNewFrame)
 					{

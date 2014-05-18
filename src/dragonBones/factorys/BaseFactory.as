@@ -254,10 +254,6 @@ package dragonBones.factorys
 			}
 			
 			skinData = armatureData.getSkinData(skinName);
-			if(!skinData)
-			{
-				throw new ArgumentError();
-			}
 			
 			var armature:Armature = generateArmature();
 			armature.name = armatureName;
@@ -276,11 +272,13 @@ package dragonBones.factorys
 			buildBones(armature, armatureData);
 			
 			//
-			buildSlots(armature, armatureData, skinData, skinDataCopy);
+			if(skinData)
+			{
+				buildSlots(armature, armatureData, skinData, skinDataCopy);
+			}
 			
 			//
 			armature.advanceTime(0);
-			
 			return armature;
 		}
 		
