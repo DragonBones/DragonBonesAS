@@ -1,9 +1,5 @@
 ﻿package dragonBones.objects
 {
-	import flash.geom.ColorTransform;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
-	
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.AnimationData;
@@ -22,6 +18,11 @@
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.DBDataUtil;
 	import dragonBones.utils.TransformUtil;
+	
+	import flash.geom.ColorTransform;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
+	import flash.utils.Dictionary;
 	
 	use namespace dragonBones_internal;
 	
@@ -65,7 +66,7 @@
 			return textureAtlasData;
 		}
 		
-		public static function parseSkeletonData(rawData:Object):SkeletonData
+		public static function parseSkeletonData(rawData:Object, ifSkipAnimationData:Boolean=false):SkeletonData
 		{
 			if(!rawData)
 			{
@@ -93,13 +94,13 @@
 			
 			for each(var armatureObject:Object in rawData[ConstValues.ARMATURE])
 			{
-				data.addArmatureData(parseArmatureData(armatureObject, data, frameRate));
+				data.addArmatureData(parseArmatureData(armatureObject, data, frameRate, ifSkipAnimationData));
 			}
 			
 			return data;
 		}
 		
-		private static function parseArmatureData(armatureObject:Object, data:SkeletonData, frameRate:uint):ArmatureData
+		private static function parseArmatureData(armatureObject:Object, data:SkeletonData, frameRate:uint, ifSkipAnimationData:Boolean):ArmatureData
 		{
 			var armatureData:ArmatureData = new ArmatureData();
 			armatureData.name = armatureObject[ConstValues.A_NAME];
@@ -117,9 +118,12 @@
 			DBDataUtil.transformArmatureData(armatureData);
 			armatureData.sortBoneDataList();
 			
-			for each(var animationObject:Object in armatureObject[ConstValues.ANIMATION])
+			if(!ifSkipAnimationData)
 			{
-				armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate));
+				for each(var animationObject:Object in armatureObject[ConstValues.ANIMATION])
+				{
+					armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate));
+				}
 			}
 			
 			return armatureData;
@@ -186,7 +190,20 @@
 			return displayData;
 		}
 		
-		private static function parseAnimationData(animationObject:Object, armatureData:ArmatureData, frameRate:uint):AnimationData
+		/** @private */
+		dragonBones_internal static function parseAnimationRawDataDictionary(rawData:Object, outputDictionary:Dictionary):void
+		{
+			for each(var armatureObject:Object in rawData[ConstValues.ARMATURE])
+			{	
+				for each(var animationObject:Object in armatureObject[ConstValues.ANIMATION])
+				{
+					outputDictionary[animationObject[ConstValues.A_NAME]] = animationObject;
+				}
+			}
+		}
+		
+		/** @private */
+		dragonBones_internal static function parseAnimationData(animationObject:Object, armatureData:ArmatureData, frameRate:uint):AnimationData
 		{
 			var animationData:AnimationData = new AnimationData();
 			animationData.name = animationObject[ConstValues.A_NAME];
