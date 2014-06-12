@@ -798,7 +798,7 @@
 				
 				if(isThisComplete)
 				{
-					currentTime = _totalTime * 0.99999999;
+					currentTime = _totalTime * 0.999999;
 				}
 				//[0, _totalTime)
 				updateMainTimeline(currentTime);

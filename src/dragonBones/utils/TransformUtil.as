@@ -29,17 +29,26 @@ package dragonBones.utils
 		
 		public static function transformToMatrix(transform:DBTransform, matrix:Matrix):void
 		{
+			/*
 			matrix.a = transform.scaleX * Math.cos(transform.skewY)
 			matrix.b = transform.scaleX * Math.sin(transform.skewY)
 			matrix.c = -transform.scaleY * Math.sin(transform.skewX);
 			matrix.d = transform.scaleY * Math.cos(transform.skewX);
 			matrix.tx = transform.x;
 			matrix.ty = transform.y;
+			*/
+			
+			matrix.a = Math.cos(transform.skewY)
+			matrix.b = Math.sin(transform.skewY)
+			matrix.c = -Math.sin(transform.skewX);
+			matrix.d = Math.cos(transform.skewX);
+			matrix.tx = transform.x;
+			matrix.ty = transform.y;
 		}
 		
 		public static function formatRadian(radian:Number):Number
 		{
-			radian %= DOUBLE_PI;
+			//radian %= DOUBLE_PI;
 			if (radian > Math.PI)
 			{
 				radian -= DOUBLE_PI;

@@ -18,6 +18,7 @@
 		public var transform:DBTransform;
 		public var pivot:Point;
 		public var color:ColorTransform;
+		public var offsetScale:Point;
 		
 		
 		public function TransformFrame()
@@ -34,6 +35,7 @@
 			global = new DBTransform();
 			transform = new DBTransform();
 			pivot = new Point();
+			offsetScale = new Point();
 		}
 		
 		override public function dispose():void
@@ -42,6 +44,7 @@
 			global = null;
 			transform = null;
 			pivot = null;
+			offsetScale = null;
 			color = null;
 		}
 	}

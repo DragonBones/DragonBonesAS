@@ -229,7 +229,7 @@ package dragonBones.animation
 			if(_timeline.scale == 0)
 			{
 				//normalizedTime [0, 1)
-				progress = 0.99999999;
+				progress = 0.999999;
 			}
 			progress /= _timeline.scale;
 			progress += _timeline.offset;
@@ -286,7 +286,7 @@ package dragonBones.animation
 				_currentTime = currentTime;
 				if(_isComplete)
 				{
-					currentTime *= 0.99999999;
+					currentTime *= 0.999999;
 				}
 				var isArrivedAtNewFrame:Boolean = false;
 				var frameIndex:int = 0;
@@ -364,7 +364,7 @@ package dragonBones.animation
 					(
 						_animationState.playTimes &&
 						_animationState.currentPlayTimes >= _animationState.playTimes && 
-						((_currentFramePosition + _currentFrameDuration) / _totalTime + currentPlayTimes - _timeline.offset) * _timeline.scale > 0.99999999
+						((_currentFramePosition + _currentFrameDuration) / _totalTime + currentPlayTimes - _timeline.offset) * _timeline.scale > 0.999999
 					)
 				)
 			)
@@ -412,8 +412,8 @@ package dragonBones.animation
 				_durationTransform.y = nextFrame.transform.y - _currentFrame.transform.y;
 				_durationTransform.skewX = nextFrame.transform.skewX - _currentFrame.transform.skewX;
 				_durationTransform.skewY = nextFrame.transform.skewY - _currentFrame.transform.skewY;
-				_durationTransform.scaleX = nextFrame.transform.scaleX - _currentFrame.transform.scaleX;
-				_durationTransform.scaleY = nextFrame.transform.scaleY - _currentFrame.transform.scaleY;
+				_durationTransform.scaleX = nextFrame.transform.scaleX - _currentFrame.transform.scaleX + nextFrame.offsetScale.x;
+				_durationTransform.scaleY = nextFrame.transform.scaleY - _currentFrame.transform.scaleY + nextFrame.offsetScale.y;
 				
 				if(nextFrameIndex == 0)
 				{
