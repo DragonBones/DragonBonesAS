@@ -403,6 +403,17 @@ package dragonBones.animation
 			{
 				_tweenEasing = NaN;
 				tweenEnabled = false;
+				
+				/*_tweenEasing = _currentFrame.tweenEasing;
+				if(isNaN(_tweenEasing))    //frame no tween
+				{
+					tweenEnabled = false;
+				}
+				else
+				{
+					//_tweenEasing [-1, 0) 0 (0, 1] (1, 2]
+					tweenEnabled = true;
+				}*/
 			}
 			
 			if(tweenEnabled)
@@ -412,8 +423,8 @@ package dragonBones.animation
 				_durationTransform.y = nextFrame.transform.y - _currentFrame.transform.y;
 				_durationTransform.skewX = nextFrame.transform.skewX - _currentFrame.transform.skewX;
 				_durationTransform.skewY = nextFrame.transform.skewY - _currentFrame.transform.skewY;
-				_durationTransform.scaleX = nextFrame.transform.scaleX - _currentFrame.transform.scaleX + nextFrame.offsetScale.x;
-				_durationTransform.scaleY = nextFrame.transform.scaleY - _currentFrame.transform.scaleY + nextFrame.offsetScale.y;
+				_durationTransform.scaleX = nextFrame.transform.scaleX - _currentFrame.transform.scaleX + nextFrame.scaleOffset.x;
+				_durationTransform.scaleY = nextFrame.transform.scaleY - _currentFrame.transform.scaleY + nextFrame.scaleOffset.y;
 				
 				if(nextFrameIndex == 0)
 				{

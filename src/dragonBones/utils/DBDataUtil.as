@@ -13,6 +13,7 @@ package dragonBones.utils
 	import dragonBones.objects.SlotData;
 	import dragonBones.objects.TransformFrame;
 	import dragonBones.objects.TransformTimeline;
+	import dragonBones.utils.TransformUtil;
 	
 	/** @private */
 	public final class DBDataUtil
@@ -242,27 +243,16 @@ package dragonBones.utils
 							var x:Number = currentTransform.x + parentTimeline.originTransform.x + parentData.transform.x;
 							var y:Number = currentTransform.y + parentTimeline.originTransform.y + parentData.transform.y;
 							
-							helpMatrix.tx = globalTransform.x = helpMatrix.a * x + helpMatrix.c * y + helpMatrix.tx;
-							helpMatrix.ty = globalTransform.y = helpMatrix.d * y + helpMatrix.b * x + helpMatrix.ty;
-							
-							/*
-							helpMatrix.a = globalTransform.scaleX * Math.cos(globalTransform.skewY);
-							helpMatrix.b = globalTransform.scaleX * Math.sin(globalTransform.skewY);
-							helpMatrix.c = -globalTransform.scaleY * Math.sin(globalTransform.skewX);
-							helpMatrix.d = globalTransform.scaleY * Math.cos(globalTransform.skewX);
-							*/
-							
-							helpMatrix.a = Math.cos(globalTransform.skewY);
-							helpMatrix.b = Math.sin(globalTransform.skewY);
-							helpMatrix.c = -Math.sin(globalTransform.skewX);
-							helpMatrix.d = Math.cos(globalTransform.skewX);
+							globalTransform.x = helpMatrix.a * x + helpMatrix.c * y + helpMatrix.tx;
+							globalTransform.y = helpMatrix.d * y + helpMatrix.b * x + helpMatrix.ty;
 						}
 						else
 						{
 							globalTransform = new DBTransform();
 							globalTransform.copy(currentTransform);
-							TransformUtil.transformToMatrix(globalTransform, helpMatrix);
 						}
+						
+						TransformUtil.transformToMatrix(globalTransform, helpMatrix);
 					}
 					TransformUtil.transformPointWithParent(frame.transform, globalTransform);
 					

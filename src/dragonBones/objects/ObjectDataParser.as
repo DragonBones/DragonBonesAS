@@ -17,7 +17,6 @@
 	import dragonBones.textures.TextureData;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.DBDataUtil;
-	import dragonBones.utils.TransformUtil;
 	
 	import flash.geom.ColorTransform;
 	import flash.geom.Point;
@@ -302,6 +301,9 @@
 			
 			parseTransform(frameObject[ConstValues.TRANSFORM], frame.global, frame.pivot);
 			frame.transform.copy(frame.global);
+			
+			frame.scaleOffset.x = getNumber(frameObject, ConstValues.A_SCALE_X_OFFSET, 0);
+			frame.scaleOffset.y = getNumber(frameObject, ConstValues.A_SCALE_Y_OFFSET, 0);
 			
 			var colorTransformObject:Object = frameObject[ConstValues.COLOR_TRANSFORM];
 			if(colorTransformObject)

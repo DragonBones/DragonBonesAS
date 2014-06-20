@@ -71,8 +71,8 @@
 		public static const A_GREEN_MULTIPLIER:String = "gM";
 		public static const A_BLUE_MULTIPLIER:String = "bM";
 		
-		public static const A_OFFSET_SCALE_X:String = "offsetScaleX";
-		public static const A_OFFSET_SCALE_Y:String = "offsetScaleY";
+		public static const A_SCALE_X_OFFSET:String = "scXOffset";
+		public static const A_SCALE_Y_OFFSET:String = "scYOffset";
 		
 		public static const A_SCALE_MODE:String = "scaleMode";
 		public static const A_FIXED_ROTATION:String = "fixedRotation";

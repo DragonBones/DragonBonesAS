@@ -402,6 +402,7 @@ package dragonBones.factorys
 								helpArray[i] = childArmature;
 							}
 							break;
+						
 						case DisplayData.IMAGE:
 						default:
 							helpArray[i] = generateDisplay(_textureAtlasDic[_currentTextureAtlasName], displayData.name, displayData.pivot.x, displayData.pivot.y);

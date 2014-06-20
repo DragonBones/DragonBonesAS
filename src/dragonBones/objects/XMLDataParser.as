@@ -304,6 +304,9 @@
 			parseTransform(frameXML[ConstValues.TRANSFORM][0], frame.global, frame.pivot);
 			frame.transform.copy(frame.global);
 			
+			frame.scaleOffset.x = getNumber(frameXML, ConstValues.A_SCALE_X_OFFSET, 0);
+			frame.scaleOffset.y = getNumber(frameXML, ConstValues.A_SCALE_Y_OFFSET, 0);
+			
 			var colorTransformXML:XML = frameXML[ConstValues.COLOR_TRANSFORM][0];
 			if(colorTransformXML)
 			{

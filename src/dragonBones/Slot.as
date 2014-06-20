@@ -291,13 +291,6 @@
 			this._globalTransformMatrix.c = -this._global.scaleY * Math.sin(this._global.skewX);
 			this._globalTransformMatrix.d = this._global.scaleY * Math.cos(this._global.skewX);
 			
-			/*
-			this._globalTransformMatrix.a = Math.cos(this._global.skewY);
-			this._globalTransformMatrix.b = Math.sin(this._global.skewY);
-			this._globalTransformMatrix.c = -Math.sin(this._global.skewX);
-			this._globalTransformMatrix.d = Math.cos(this._global.skewX);
-			*/
-			
 			if(frameCachedDuration > 0)    // && frameCachedPosition >= 0
 			{
 				_timelineCached.addFrame(null, this._globalTransformMatrix, frameCachedPosition, frameCachedDuration);
