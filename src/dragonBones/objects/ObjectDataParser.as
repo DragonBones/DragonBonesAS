@@ -290,8 +290,8 @@
 			
 			frame.visible = !getBoolean(frameObject, ConstValues.A_HIDE, false);
 			
-			//NaN:no tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
-			frame.tweenEasing = getNumber(frameObject, ConstValues.A_TWEEN_EASING, 0);
+			//NaN:no tween, 10:auto tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
+			frame.tweenEasing = getNumber(frameObject, ConstValues.A_TWEEN_EASING, 10);
 			frame.tweenRotate = Number(frameObject[ConstValues.A_TWEEN_ROTATE]);
 			frame.tweenScale = getBoolean(frameObject, ConstValues.A_TWEEN_SCALE, true);
 			frame.displayIndex = Number(frameObject[ConstValues.A_DISPLAY_INDEX]);
@@ -388,33 +388,3 @@
 		}
 	}
 }
-
-/*
-import dragonBones.utils.ConstValues;
-
-class Update2_3To3_0
-{
-	public static function format(skeleton:Object):void
-	{
-		//删除为NaN的TweenEasing, 未设置tweenEasing的animation则使用auto tween
-		for each(var armatureObject:Object in skeleton[ConstValues.ARMATURE])
-		{
-			//删除两个旧属性
-			for each(var boneObject:Object in armatureObject[ConstValues.BONE])
-			{
-				if(String(boneObject[ConstValues.A_FIXED_ROTATION]) == "true")
-				{
-					boneObject[ConstValues.A_INHERIT_ROTATION] = 0;
-				}
-				delete boneObject[ConstValues.A_FIXED_ROTATION];
-				
-				if(String(boneObject[ConstValues.A_SCALE_MODE]) == "2")
-				{
-					boneObject[ConstValues.A_INHERIT_SCALE] = 1;
-				}
-				delete boneObject[ConstValues.A_SCALE_MODE];
-			}
-		}
-	}
-}
-*/

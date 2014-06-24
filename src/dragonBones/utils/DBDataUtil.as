@@ -278,7 +278,7 @@ package dragonBones.utils
 					else
 					{
 						var progress:Number = (position - currentFrame.position) / currentFrame.duration;
-						if(tweenEasing)
+						if(tweenEasing && tweenEasing != 10)
 						{
 							progress = TimelineState.getEaseValue(progress, tweenEasing);
 						}

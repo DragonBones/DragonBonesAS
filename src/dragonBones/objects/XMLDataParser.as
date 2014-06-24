@@ -292,8 +292,8 @@
 			
 			frame.visible = !getBoolean(frameXML, ConstValues.A_HIDE, false);
 			
-			//NaN:no tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
-			frame.tweenEasing = getNumber(frameXML, ConstValues.A_TWEEN_EASING, 0);
+			//NaN:no tween, 10:auto tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
+			frame.tweenEasing = getNumber(frameXML, ConstValues.A_TWEEN_EASING, 10);
 			frame.tweenRotate = Number(frameXML.@[ConstValues.A_TWEEN_ROTATE]);
 			frame.tweenScale = getBoolean(frameXML, ConstValues.A_TWEEN_SCALE, true);
 			frame.displayIndex = Number(frameXML.@[ConstValues.A_DISPLAY_INDEX]);
@@ -386,34 +386,7 @@
 						return Number(data.@[key]);
 				}
 			}
-			
 			return defaultValue;
 		}
 	}
 }
-
-/*
-import dragonBones.utils.ConstValues;
-
-class Update2_3To3_0
-{
-	public static function format(skeleton:XML):void
-	{
-		//删除两个旧属性
-		for each(var boneXML:XML in skeleton[ConstValues.ARMATURE][ConstValues.BONE])
-		{
-			if(String(boneXML.@[ConstValues.A_FIXED_ROTATION]) == "true")
-			{
-				boneXML.@[ConstValues.A_INHERIT_ROTATION] = 0;
-			}
-			delete boneXML.@[ConstValues.A_FIXED_ROTATION];
-			
-			if(String(boneXML.@[ConstValues.A_SCALE_MODE]) == "2")
-			{
-				boneXML.@[ConstValues.A_INHERIT_SCALE] = 1;
-			}
-			delete boneXML.@[ConstValues.A_SCALE_MODE];
-		}
-	}
-}
-*/
