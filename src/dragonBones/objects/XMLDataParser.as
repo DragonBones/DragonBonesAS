@@ -7,16 +7,16 @@
 	 * @version 2.0
 	 */
 	
+	import flash.geom.ColorTransform;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
+	import flash.utils.Dictionary;
+	
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.textures.TextureData;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.DBDataUtil;
-	
-	import flash.geom.ColorTransform;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
-	import flash.utils.Dictionary;
 	
 	use namespace dragonBones_internal;
 	
@@ -125,6 +125,16 @@
 					armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate));
 				}
 			}
+			
+			for each(var rectangleXML:XML in armatureXML[ConstValues.RECTANGLE])
+			{
+				armatureData.addAreaData(parseRectangleData(rectangleXML));
+			}
+			
+			for each(var ellipseXML:XML in armatureXML[ConstValues.ELLIPSE])
+			{
+				armatureData.addAreaData(parseEllipseData(ellipseXML));
+			}
 				
 			return armatureData;
 		}
@@ -141,7 +151,41 @@
 			parseTransform(boneXML[ConstValues.TRANSFORM][0], boneData.global);
 			boneData.transform.copy(boneData.global);
 			
+			for each(var rectangleXML:XML in boneXML[ConstValues.RECTANGLE])
+			{
+				boneData.addAreaData(parseRectangleData(rectangleXML));
+			}
+			
+			for each(var ellipseXML:XML in boneXML[ConstValues.ELLIPSE])
+			{
+				boneData.addAreaData(parseEllipseData(ellipseXML));
+			}
+			
 			return boneData;
+		}
+		
+		private static function parseRectangleData(rectangleXML:XML):RectangleData
+		{
+			var rectangleData:RectangleData = new RectangleData();
+			rectangleData.name = rectangleXML.@[ConstValues.A_NAME];
+			rectangleData.width = Number(rectangleXML.@[ConstValues.A_WIDTH]);
+			rectangleData.height = Number(rectangleXML.@[ConstValues.A_HEIGHT]);
+			
+			parseTransform(rectangleXML[ConstValues.TRANSFORM][0], rectangleData.transform, rectangleData.pivot);
+			
+			return rectangleData;
+		}
+		
+		private static function parseEllipseData(ellipseXML:XML):EllipseData
+		{
+			var ellipseData:EllipseData = new EllipseData();
+			ellipseData.name = ellipseXML.@[ConstValues.A_NAME];
+			ellipseData.width = Number(ellipseXML.@[ConstValues.A_WIDTH]);
+			ellipseData.height = Number(ellipseXML.@[ConstValues.A_HEIGHT]);
+			
+			parseTransform(ellipseXML[ConstValues.TRANSFORM][0], ellipseData.transform, ellipseData.pivot);
+			
+			return ellipseData;
 		}
 		
 		private static function parseSkinData(skinXML:XML, data:SkeletonData):SkinData

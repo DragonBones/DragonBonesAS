@@ -125,6 +125,16 @@
 				}
 			}
 			
+			for each(var rectangleObject:Object in armatureObject[ConstValues.RECTANGLE])
+			{
+				armatureData.addAreaData(parseRectangleData(rectangleObject));
+			}
+			
+			for each(var ellipseObject:Object in armatureObject[ConstValues.ELLIPSE])
+			{
+				armatureData.addAreaData(parseEllipseData(ellipseObject));
+			}
+			
 			return armatureData;
 		}
 		
@@ -140,7 +150,41 @@
 			parseTransform(boneObject[ConstValues.TRANSFORM], boneData.global);
 			boneData.transform.copy(boneData.global);
 			
+			for each(var rectangleObject:Object in boneData[ConstValues.RECTANGLE])
+			{
+				boneData.addAreaData(parseRectangleData(rectangleObject));
+			}
+			
+			for each(var ellipseObject:Object in boneData[ConstValues.ELLIPSE])
+			{
+				boneData.addAreaData(parseEllipseData(ellipseObject));
+			}
+			
 			return boneData;
+		}
+		
+		private static function parseRectangleData(rectangleObject:Object):RectangleData
+		{
+			var rectangleData:RectangleData = new RectangleData();
+			rectangleData.name = rectangleObject[ConstValues.A_NAME];
+			rectangleData.width = Number(rectangleObject[ConstValues.A_WIDTH]);
+			rectangleData.height = Number(rectangleObject[ConstValues.A_HEIGHT]);
+			
+			parseTransform(rectangleObject[ConstValues.TRANSFORM], rectangleData.transform, rectangleData.pivot);
+			
+			return rectangleData;
+		}
+		
+		private static function parseEllipseData(ellipseObject:Object):EllipseData
+		{
+			var ellipseData:EllipseData = new EllipseData();
+			ellipseData.name = ellipseObject[ConstValues.A_NAME];
+			ellipseData.width = Number(ellipseObject[ConstValues.A_WIDTH]);
+			ellipseData.height = Number(ellipseObject[ConstValues.A_HEIGHT]);
+			
+			parseTransform(ellipseObject[ConstValues.TRANSFORM], ellipseData.transform, ellipseData.pivot);
+			
+			return ellipseData;
 		}
 		
 		private static function parseSkinData(skinObject:Object, data:SkeletonData):SkinData
