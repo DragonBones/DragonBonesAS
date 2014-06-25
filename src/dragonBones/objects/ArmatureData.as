@@ -198,10 +198,14 @@ package dragonBones.objects
 		
 		public function getAreaData(areaName:String):IAreaData
 		{
+			if(!areaName && _areaDataList.length > 0)
+			{
+				return _areaDataList[0];
+			}
 			var i:int = _areaDataList.length;
 			while(i --)
 			{
-				if(_areaDataList[i].name == _areaDataList)
+				if(_areaDataList[i]["name"] == areaName)
 				{
 					return _areaDataList[i];
 				}
