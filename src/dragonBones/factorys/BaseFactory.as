@@ -282,6 +282,12 @@ package dragonBones.factorys
 			return armature;
 		}
 		
+		/**
+		 * Add a new animation to armature.
+		 * @param animationRawData (XML, JSON).
+		 * @param target armature.
+		 * @param frame rate.
+		 */
 		public function addAnimationToArmature(animationRawData:Object, armature:Armature, frameRate:uint):void
 		{
 			armature._armatureData.addAnimationData(DataParser.parseAnimationDataByAnimationRawData(animationRawData,armature._armatureData, frameRate));
