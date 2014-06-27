@@ -512,7 +512,7 @@ package dragonBones.factorys
 			}
 			var decompressedData:DecompressedData = DataParser.decompressData(bytes);
 			
-			var data:SkeletonData = DataParser.parseData(decompressedData.dragonBonesData);
+			var data:SkeletonData = DataParser.parseData(decompressedData.dragonBonesData, ifSkipAnimationData);
 			
 			dataName = dataName || data.name;
 			addSkeletonData(data, dataName);
