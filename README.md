@@ -1,4 +1,4 @@
-SkeletonAnimationLibrary
+DragonBones ActionScript Library
 ======================
 http://dragonbones.github.com/  
 
