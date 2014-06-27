@@ -1,5 +1,6 @@
 package dragonBones.objects
 {
+	/** @private */
 	final public class ArmatureData
 	{
 		public var name:String;
@@ -22,11 +23,19 @@ package dragonBones.objects
 			return _animationDataList;
 		}
 		
+		private var _areaDataList:Vector.<IAreaData>;
+		public function get areaDataList():Vector.<IAreaData>
+		{
+			return _areaDataList;
+		}
+		
 		public function ArmatureData()
 		{
 			_boneDataList = new Vector.<BoneData>(0, true);
 			_skinDataList = new Vector.<SkinData>(0, true);
 			_animationDataList = new Vector.<AnimationData>(0, true);
+			
+			_areaDataList = new Vector.<IAreaData>(0, true);
 		}
 		
 		public function dispose():void
@@ -46,12 +55,14 @@ package dragonBones.objects
 			{
 				_animationDataList[i].dispose();
 			}
+			
 			_boneDataList.fixed = false;
 			_boneDataList.length = 0;
 			_skinDataList.fixed = false;
 			_skinDataList.length = 0;
 			_animationDataList.fixed = false;
 			_animationDataList.length = 0;
+			//_animationsCached。clear();
 			_boneDataList = null;
 			_skinDataList = null;
 			_animationDataList = null;
@@ -72,7 +83,7 @@ package dragonBones.objects
 		
 		public function getSkinData(skinName:String):SkinData
 		{
-			if(!skinName)
+			if(!skinName && _skinDataList.length > 0)
 			{
 				return _skinDataList[0];
 			}
@@ -173,15 +184,47 @@ package dragonBones.objects
 					level ++;
 					parentData = getBoneData(parentData.parent);
 				}
-				helpArray[i] = {level:level, boneData:boneData};
+				helpArray[i] = [level, boneData];
 			}
 			
-			helpArray.sortOn("level", Array.NUMERIC);
+			helpArray.sortOn("0", Array.NUMERIC);
 			
 			i = helpArray.length;
 			while(i --)
 			{
-				_boneDataList[i] = helpArray[i].boneData;
+				_boneDataList[i] = helpArray[i][1];
+			}
+		}
+		
+		public function getAreaData(areaName:String):IAreaData
+		{
+			if(!areaName && _areaDataList.length > 0)
+			{
+				return _areaDataList[0];
+			}
+			var i:int = _areaDataList.length;
+			while(i --)
+			{
+				if(_areaDataList[i]["name"] == areaName)
+				{
+					return _areaDataList[i];
+				}
+			}
+			return null;
+		}
+		
+		public function addAreaData(areaData:IAreaData):void
+		{
+			if(!areaData)
+			{
+				throw new ArgumentError();
+			}
+			
+			if(_areaDataList.indexOf(areaData) < 0)
+			{
+				_areaDataList.fixed = false;
+				_areaDataList[_areaDataList.length] = areaData;
+				_areaDataList.fixed = true;
 			}
 		}
 	}

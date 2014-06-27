@@ -1,20 +1,21 @@
 ﻿package dragonBones.objects
 {
-	import flash.utils.ByteArray;
-	
-	import dragonBones.objects.ObjectDataParser;
-	import dragonBones.objects.SkeletonData;
-	import dragonBones.objects.XMLDataParser;
+	import dragonBones.core.dragonBones_internal;
 	import dragonBones.utils.BytesType;
-	import dragonBones.utils.checkBytesTailisXML;
+	import dragonBones.utils.ConstValues;
+	
+	import flash.utils.ByteArray;
+	import flash.utils.Dictionary;
+	
+	use namespace dragonBones_internal;
 	
 	public final class DataParser
 	{
 		/**
 		 * Compress all data into a ByteArray for serialization.
-		 * @param	The DragonBones data.
-		 * @param	The TextureAtlas data.
-		 * @param	The ByteArray representing the map.
+		 * @param The DragonBones data.
+		 * @param The TextureAtlas data.
+		 * @param The ByteArray representing the map.
 		 * @return ByteArray. A DragonBones compatible ByteArray.
 		 */
 		public static function compressData(dragonBonesData:Object, textureAtlasData:Object, textureDataBytes:ByteArray):ByteArray
@@ -43,7 +44,7 @@
 		
 		/**
 		 * Decompress a compatible DragonBones data.
-		 * @param	compressedByteArray The ByteArray to decompress.
+		 * @param compressedByteArray The ByteArray to decompress.
 		 * @return A DecompressedData instance.
 		 */
 		public static function decompressData(bytes:ByteArray):DecompressedData
@@ -51,10 +52,12 @@
 			var dataType:String = BytesType.getType(bytes);
 			switch (dataType)
 			{
-				case BytesType.SWF: 
-				case BytesType.PNG: 
-				case BytesType.JPG: 
-				case BytesType.ATF: 
+				case BytesType.SWF:
+				case BytesType.PNG:
+				case BytesType.JPG:
+				case BytesType.ATF:
+					var dragonBonesData:Object;
+					var textureAtlasData:Object;
 					try
 					{
 						var bytesCopy:ByteArray = new ByteArray();
@@ -70,15 +73,7 @@
 						dataBytes.uncompress();
 						bytes.length = position;
 						
-						var dragonBonesData:Object;
-						if(checkBytesTailisXML(dataBytes))
-						{
-							dragonBonesData = XML(dataBytes.readUTFBytes(dataBytes.length));
-						}
-						else
-						{
-							dragonBonesData = dataBytes.readObject();
-						}
+						dragonBonesData = dataBytes.readObject();
 						
 						bytes.position = bytes.length - 4;
 						strSize = bytes.readInt();
@@ -89,15 +84,7 @@
 						dataBytes.uncompress();
 						bytes.length = position;
 						
-						var textureAtlasData:Object;
-						if(checkBytesTailisXML(dataBytes))
-						{
-							textureAtlasData = XML(dataBytes.readUTFBytes(dataBytes.length));
-						}
-						else
-						{
-							textureAtlasData = dataBytes.readObject();
-						}
+						textureAtlasData = dataBytes.readObject();
 					}
 					catch (e:Error)
 					{
@@ -107,8 +94,10 @@
 					var decompressedData:DecompressedData = new DecompressedData(dragonBonesData, textureAtlasData, bytes);
 					decompressedData.textureBytesDataType = dataType;
 					return decompressedData;
+					
 				case BytesType.ZIP:
 					throw new Error("Can not decompress zip!");
+					
 				default: 
 					throw new Error("Nonsupport data!");
 			}
@@ -128,17 +117,53 @@
 			return null;
 		}
 		
-		public static function parseData(rawData:Object):SkeletonData
+		public static function parseData(rawData:Object, ifSkipAnimationData:Boolean = false):SkeletonData
 		{
 			if(rawData is XML)
 			{
-				return XMLDataParser.parseSkeletonData(rawData as XML);
+				return XMLDataParser.parseSkeletonData(rawData as XML, ifSkipAnimationData);
 			}
 			else
 			{
-				return ObjectDataParser.parseSkeletonData(rawData);
+				return ObjectDataParser.parseSkeletonData(rawData, ifSkipAnimationData);
 			}
 			return null;
+		}
+		
+		public static function parseAnimationDataByAnimationRawData(animationRawData:Object, armatureData:ArmatureData, fameRate:uint):AnimationData
+		{
+			if(animationRawData is XML)
+			{
+				return XMLDataParser.parseAnimationData((animationRawData as XML), armatureData, fameRate);
+			}
+			else
+			{
+				return ObjectDataParser.parseAnimationData(animationRawData, armatureData, fameRate);
+			}
+		}
+		
+		public static function parseAnimationRawDataDictionary(rawData:Object, outputDictionary:Dictionary):void
+		{
+			if(rawData is XML)
+			{
+				return XMLDataParser.parseAnimationRawDataDictionary((rawData as XML), outputDictionary);
+			}
+			else
+			{
+				return ObjectDataParser.parseAnimationRawDataDictionary(rawData, outputDictionary);
+			}
+		}
+		
+		public static function parseFrameRate(rawData:Object):uint
+		{
+			if(rawData is XML)
+			{
+				return uint(rawData.@[ConstValues.A_FRAME_RATE]);
+			}
+			else
+			{
+				return uint(rawData[ConstValues.A_FRAME_RATE]);
+			}
 		}
 	}
 }

@@ -1,5 +1,6 @@
 package dragonBones.utils
 {
+	import flash.geom.Matrix;
 	import flash.geom.Point;
 	
 	import dragonBones.animation.TimelineState;
@@ -7,31 +8,27 @@ package dragonBones.utils
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.BoneData;
 	import dragonBones.objects.DBTransform;
-	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.SkinData;
 	import dragonBones.objects.SlotData;
 	import dragonBones.objects.TransformFrame;
 	import dragonBones.objects.TransformTimeline;
+	import dragonBones.utils.TransformUtil;
 	
 	/** @private */
 	public final class DBDataUtil
 	{
-		private static const _helpTransform1:DBTransform = new DBTransform();
-		private static const _helpTransform2:DBTransform = new DBTransform();
-		
 		public static function transformArmatureData(armatureData:ArmatureData):void
 		{
 			var boneDataList:Vector.<BoneData> = armatureData.boneDataList;
 			var i:int = boneDataList.length;
-			var boneData:BoneData;
-			var parentBoneData:BoneData;
+			
 			while(i --)
 			{
-				boneData = boneDataList[i];
+				var boneData:BoneData = boneDataList[i];
 				if(boneData.parent)
 				{
-					parentBoneData = armatureData.getBoneData(boneData.parent);
+					var parentBoneData:BoneData = armatureData.getBoneData(boneData.parent);
 					if(parentBoneData)
 					{
 						boneData.transform.copy(boneData.global);
@@ -55,66 +52,43 @@ package dragonBones.utils
 		{
 			var skinData:SkinData = armatureData.getSkinData(null);
 			var boneDataList:Vector.<BoneData> = armatureData.boneDataList;
-			var slotDataList:Vector.<SlotData> = skinData.slotDataList;
-			var i:int = boneDataList.length;
-			
-			var boneData:BoneData;
-			var timeline:TransformTimeline;
-			var slotData:SlotData;
-			var displayData:DisplayData
-			var parentTimeline:TransformTimeline;
-			var frameList:Vector.<Frame>;
-			var originTransform:DBTransform;
-			var originPivot:Point;
-			var prevFrame:TransformFrame;
-			var frameListLength:uint;
-			var frame:TransformFrame;
-			
-			while(i --)
+			var slotDataList:Vector.<SlotData>;
+			if(skinData)
 			{
-				boneData = boneDataList[i];
-				timeline = animationData.getTimeline(boneData.name);
+				slotDataList = skinData.slotDataList;
+			}
+			
+			for(var i:int = 0;i < boneDataList.length;i ++)
+			{
+				var boneData:BoneData = boneDataList[i];
+				var timeline:TransformTimeline = animationData.getTimeline(boneData.name);
 				if(!timeline)
 				{
 					continue;
 				}
 				
-				slotData = null;
-				for each(slotData in slotDataList)
+				var slotData:SlotData = null;
+				if(slotDataList)
 				{
-					if(slotData.parent == boneData.name)
+					for each(slotData in slotDataList)
 					{
-						break;
+						if(slotData.parent == boneData.name)
+						{
+							break;
+						}
 					}
 				}
 				
-				parentTimeline = boneData.parent?animationData.getTimeline(boneData.parent):null;
+				var frameList:Vector.<Frame> = timeline.frameList;
 				
-				frameList = timeline.frameList;
-				
-				originTransform = null;
-				originPivot = null;
-				prevFrame = null;
-				frameListLength = frameList.length;
+				var originTransform:DBTransform = null;
+				var originPivot:Point = null;
+				var prevFrame:TransformFrame = null;
+				var frameListLength:uint = frameList.length;
 				for(var j:int = 0;j < frameListLength;j ++)
 				{
-					frame = frameList[j] as TransformFrame;
-					if(parentTimeline)
-					{
-						//tweenValues to transform.
-						_helpTransform1.copy(frame.global);
-						
-						//get transform from parent timeline.
-						getTimelineTransform(parentTimeline, frame.position, _helpTransform2);
-						TransformUtil.transformPointWithParent(_helpTransform1, _helpTransform2);
-						
-						//transform to tweenValues.
-						frame.transform.copy(_helpTransform1);
-					}
-					else
-					{
-						frame.transform.copy(frame.global);
-					}
+					var frame:TransformFrame = frameList[j] as TransformFrame;
+					setFrameTransform(animationData, armatureData, boneData, frame);
 					
 					frame.transform.x -= boneData.transform.x;
 					frame.transform.y -= boneData.transform.y;
@@ -204,41 +178,121 @@ package dragonBones.utils
 			}
 		}
 		
-		public static function getTimelineTransform(timeline:TransformTimeline, position:Number, retult:DBTransform):void
+		private static function setFrameTransform(animationData:AnimationData, armatureData:ArmatureData, boneData:BoneData, frame:TransformFrame):void
+		{
+			frame.transform.copy(frame.global);
+			var parentData:BoneData = armatureData.getBoneData(boneData.parent);
+			if(parentData)
+			{
+				var parentTimeline:TransformTimeline = animationData.getTimeline(parentData.name);
+				if(parentTimeline)
+				{
+					/*
+					var currentTransform:DBTransform = new DBTransform();
+					getTimelineTransform(parentTimeline, frame.position, currentTransform, true);
+					TransformUtil.transformPointWithParent(frame.transform, currentTransform);
+					*/
+					
+					var parentTimelineList:Vector.<TransformTimeline> = new Vector.<TransformTimeline>;
+					var parentDataList:Vector.<BoneData> = new Vector.<BoneData>;
+					while(parentTimeline)
+					{
+						parentTimelineList.push(parentTimeline);
+						parentDataList.push(parentData);
+						parentData = armatureData.getBoneData(parentData.parent);
+						if(parentData)
+						{
+							parentTimeline = animationData.getTimeline(parentData.name);
+						}
+						else
+						{
+							parentTimeline = null;
+						}
+					}
+					
+					var i:int = parentTimelineList.length;
+					
+					var helpMatrix:Matrix = new Matrix();
+					var globalTransform:DBTransform;
+					var currentTransform:DBTransform = new DBTransform();
+					while(i --)
+					{
+						parentTimeline = parentTimelineList[i];
+						parentData = parentDataList[i];
+						getTimelineTransform(parentTimeline, frame.position, currentTransform, !globalTransform);
+						
+						if(globalTransform)
+						{
+							//if(inheritRotation)
+							//{
+								globalTransform.skewX += currentTransform.skewX + parentTimeline.originTransform.skewX + parentData.transform.skewX;
+								globalTransform.skewY += currentTransform.skewY + parentTimeline.originTransform.skewY + parentData.transform.skewY;
+							//}
+							
+							//if(inheritScale)
+							//{
+							//	globalTransform.scaleX *= currentTransform.scaleX + parentTimeline.originTransform.scaleX;
+							//	globalTransform.scaleY *= currentTransform.scaleY + parentTimeline.originTransform.scaleY;
+							//}
+							//else
+							//{
+								globalTransform.scaleX = currentTransform.scaleX + parentTimeline.originTransform.scaleX + parentData.transform.scaleX;
+								globalTransform.scaleY = currentTransform.scaleY + parentTimeline.originTransform.scaleY + parentData.transform.scaleY;
+							//}
+								
+							var x:Number = currentTransform.x + parentTimeline.originTransform.x + parentData.transform.x;
+							var y:Number = currentTransform.y + parentTimeline.originTransform.y + parentData.transform.y;
+							
+							globalTransform.x = helpMatrix.a * x + helpMatrix.c * y + helpMatrix.tx;
+							globalTransform.y = helpMatrix.d * y + helpMatrix.b * x + helpMatrix.ty;
+						}
+						else
+						{
+							globalTransform = new DBTransform();
+							globalTransform.copy(currentTransform);
+						}
+						
+						TransformUtil.transformToMatrix(globalTransform, helpMatrix);
+					}
+					TransformUtil.transformPointWithParent(frame.transform, globalTransform);
+					
+				}
+			}
+		}
+		
+		private static function getTimelineTransform(timeline:TransformTimeline, position:Number, retult:DBTransform, isGlobal:Boolean):void
 		{
 			var frameList:Vector.<Frame> = timeline.frameList;
 			var i:int = frameList.length;
 			
-			var currentFrame:TransformFrame;
-			var tweenEasing:Number;
-			var progress:Number;
-			var nextFrame:TransformFrame;
 			while(i --)
 			{
-				currentFrame = frameList[i] as TransformFrame;
+				var currentFrame:TransformFrame = frameList[i] as TransformFrame;
 				if(currentFrame.position <= position && currentFrame.position + currentFrame.duration > position)
 				{
-					tweenEasing = currentFrame.tweenEasing;
-					if(i == frameList.length - 1 || isNaN(tweenEasing) || position == currentFrame.position)
+					var tweenEasing:Number = currentFrame.tweenEasing;
+					if(i == frameList.length - 1 || position == currentFrame.position)
 					{
-						retult.copy(currentFrame.global);
+						retult.copy(isGlobal?currentFrame.global:currentFrame.transform);
 					}
 					else
 					{
-						progress = (position - currentFrame.position) / currentFrame.duration;
-						if(tweenEasing)
+						var progress:Number = (position - currentFrame.position) / currentFrame.duration;
+						if(tweenEasing && tweenEasing != 10)
 						{
 							progress = TimelineState.getEaseValue(progress, tweenEasing);
 						}
+						var nextFrame:TransformFrame = frameList[i + 1] as TransformFrame;
 						
-						nextFrame = frameList[i + 1] as TransformFrame;
+						var currentTransform:DBTransform = isGlobal?currentFrame.global:currentFrame.transform;
+						var nextTransform:DBTransform = isGlobal?nextFrame.global:nextFrame.transform;
 						
-						retult.x = currentFrame.global.x +  (nextFrame.global.x - currentFrame.global.x) * progress;
-						retult.y = currentFrame.global.y +  (nextFrame.global.y - currentFrame.global.y) * progress;
-						retult.skewX = TransformUtil.formatRadian(currentFrame.global.skewX +  (nextFrame.global.skewX - currentFrame.global.skewX) * progress);
-						retult.skewY = TransformUtil.formatRadian(currentFrame.global.skewY +  (nextFrame.global.skewY - currentFrame.global.skewY) * progress);
-						retult.scaleX = currentFrame.global.scaleX +  (nextFrame.global.scaleX - currentFrame.global.scaleX) * progress;
-						retult.scaleY = currentFrame.global.scaleY +  (nextFrame.global.scaleY - currentFrame.global.scaleY) * progress;
+						retult.x = currentTransform.x +  (nextTransform.x - currentTransform.x) * progress;
+						retult.y = currentTransform.y +  (nextTransform.y - currentTransform.y) * progress;
+						retult.skewX = TransformUtil.formatRadian(currentTransform.skewX +  (nextTransform.skewX - currentTransform.skewX) * progress);
+						retult.skewY = TransformUtil.formatRadian(currentTransform.skewY +  (nextTransform.skewY - currentTransform.skewY) * progress);
+						retult.scaleX = currentTransform.scaleX +  (nextTransform.scaleX - currentTransform.scaleX) * progress;
+						retult.scaleY = currentTransform.scaleY +  (nextTransform.scaleY - currentTransform.scaleY) * progress;
 					}
 					break;
 				}
@@ -250,15 +304,13 @@ package dragonBones.utils
 			var boneDataList:Vector.<BoneData> =armatureData.boneDataList;
 			var i:int = boneDataList.length;
 			
-			var boneData:BoneData;
-			var boneName:String;
 			while(i --)
 			{
-				boneData = boneDataList[i];
-				boneName = boneData.name;
+				var boneData:BoneData = boneDataList[i];
+				var boneName:String = boneData.name;
 				if(!animationData.getTimeline(boneName))
 				{
-					animationData.addTimeline(TransformTimeline.HIDE_TIMELINE, boneName);
+					animationData.hideTimelineNameMap[boneName] = true;
 				}
 			}
 		}
