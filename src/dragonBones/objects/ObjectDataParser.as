@@ -150,12 +150,12 @@
 			parseTransform(boneObject[ConstValues.TRANSFORM], boneData.global);
 			boneData.transform.copy(boneData.global);
 			
-			for each(var rectangleObject:Object in boneData[ConstValues.RECTANGLE])
+			for each(var rectangleObject:Object in boneObject[ConstValues.RECTANGLE])
 			{
 				boneData.addAreaData(parseRectangleData(rectangleObject));
 			}
 			
-			for each(var ellipseObject:Object in boneData[ConstValues.ELLIPSE])
+			for each(var ellipseObject:Object in boneObject[ConstValues.ELLIPSE])
 			{
 				boneData.addAreaData(parseEllipseData(ellipseObject));
 			}
