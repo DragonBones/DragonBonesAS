@@ -242,7 +242,7 @@
 			_isFading = true;
 			
 			//
-			fadeInTime = fadeInTime < 0?(animationData.fadeTime < 0?300:animationData.fadeTime):fadeInTime;
+			fadeInTime = fadeInTime < 0?(animationData.fadeTime < 0?0.3:animationData.fadeTime):fadeInTime;
 			var durationScale:Number;
 			if(duration < 0)
 			{
@@ -256,7 +256,6 @@
 			playTimes = isNaN(playTimes)?animationData.playTimes:playTimes;
 			
 			var animationState:AnimationState;
-			var j:int;
 			switch(fadeOutMode)
 			{
 				case NONE:

@@ -588,18 +588,11 @@
 				var timelineState:TimelineState = TimelineState.borrowObject();
 				timelineState.fadeIn(bone, this, _clip.getTimeline(timelineName));
 				_timelineStateList.push(timelineState);
-				bone.addState(timelineState);
 			}
 		}
 		
 		private function removeTimelineState(timelineState:TimelineState):void
 		{
-			var bone:Bone = _armature.getBone(timelineState.name);
-			if (bone)
-			{
-				bone.removeState(timelineState);
-			}
-			
 			var index:int = _timelineStateList.indexOf(timelineState);
 			_timelineStateList.splice(index, 1);
 			TimelineState.returnObject(timelineState);
@@ -726,7 +719,19 @@
 			var currentTime:int = _time;
 			var currentPlayTimes:int;
 			var isThisComplete:Boolean;
-			if(_playTimes != 0)
+			if(_playTimes == 0)
+			{
+				isThisComplete = false;
+				currentPlayTimes = Math.ceil(Math.abs(currentTime) / _totalTime) || 1;
+				//currentTime -= Math.floor(currentTime / _totalTime) * _totalTime;
+				currentTime -= int(currentTime / _totalTime) * _totalTime;
+				
+				if(currentTime < 0)
+				{
+					currentTime += _totalTime;
+				}
+			}
+			else
 			{
 				var totalTimes:int = _playTimes * _totalTime;
 				if(currentTime >= totalTimes)
@@ -756,18 +761,6 @@
 				if(isThisComplete)
 				{
 					currentTime = _totalTime;
-				}
-			}
-			else
-			{
-				isThisComplete = false;
-				currentPlayTimes = Math.ceil(Math.abs(currentTime) / _totalTime) || 1;
-				//currentTime -= Math.floor(currentTime / _totalTime) * _totalTime;
-				currentTime -= int(currentTime / _totalTime) * _totalTime;
-				
-				if(currentTime < 0)
-				{
-					currentTime += _totalTime;
 				}
 			}
 			
@@ -853,14 +846,10 @@
 			var frameList:Vector.<Frame> = _clip.frameList;
 			if(frameList.length > 0)
 			{
+				var prevFrame:Frame;
 				var currentFrame:Frame;
 				while(true)
 				{
-					if(currentFrame)
-					{
-						_armature.arriveAtFrame(currentFrame, null, this, true);
-					}
-					
 					if(_currentFrameIndex < 0)
 					{
 						_currentFrameIndex = 0;
@@ -897,8 +886,14 @@
 						break;
 					}
 					
+					if(prevFrame)
+					{
+						_armature.arriveAtFrame(prevFrame, null, this, true);
+					}
+					
 					_currentFrameDuration = currentFrame.duration;
 					_currentFramePosition = currentFrame.position;
+					prevFrame = currentFrame;
 				}
 				
 				if(currentFrame)

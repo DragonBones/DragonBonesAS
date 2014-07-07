@@ -151,7 +151,6 @@ package dragonBones.animation
 			_animation = _armature.animation;
 			_animationState = animationState;
 			_timeline = timeline;
-			_currentFrameIndex = -1;
 			_originTransform = _timeline.originTransform;
 			_originPivot = _timeline.originPivot;
 			
@@ -159,6 +158,7 @@ package dragonBones.animation
 			_totalTime = _timeline.duration;
 			_rawAnimationScale = _animationState.clip.scale;
 			
+			_currentFrameIndex = -1;
 			_currentTime = -1;
 			_isComplete = false;
 			_blendEnabled = false;
@@ -199,6 +199,8 @@ package dragonBones.animation
 					_updateState = 1;
 					break;
 			}
+			
+			_bone.addState(this);
 		}
 		
 		/** @private */
@@ -235,7 +237,19 @@ package dragonBones.animation
 			
 			var currentTime:int = _totalTime * progress;
 			var playTimes:int = _animationState.playTimes;
-			if(playTimes != 0)
+			if(playTimes == 0)
+			{
+				_isComplete = false;
+				currentPlayTimes = Math.ceil(Math.abs(currentTime) / _totalTime) || 1;
+				//currentTime -= Math.floor(currentTime / _totalTime) * _totalTime;
+				currentTime -= int(currentTime / _totalTime) * _totalTime;
+				
+				if(currentTime < 0)
+				{
+					currentTime += _totalTime;
+				}
+			}
+			else
 			{
 				var totalTimes:int = playTimes * _totalTime;
 				if(currentTime >= totalTimes)
@@ -259,24 +273,14 @@ package dragonBones.animation
 				}
 				
 				currentPlayTimes = Math.ceil(currentTime / _totalTime) || 1;
-				//currentTime -= Math.floor(currentTime / _totalTime) * _totalTime;
-				currentTime -= int(currentTime / _totalTime) * _totalTime;
-				
 				if(_isComplete)
 				{
 					currentTime = _totalTime;
 				}
-			}
-			else
-			{
-				_isComplete = false;
-				currentPlayTimes = Math.ceil(Math.abs(currentTime) / _totalTime) || 1;
-				//currentTime -= Math.floor(currentTime / _totalTime) * _totalTime;
-				currentTime -= int(currentTime / _totalTime) * _totalTime;
-				
-				if(currentTime < 0)
+				else
 				{
-					currentTime += _totalTime;
+					//currentTime -= Math.floor(currentTime / _totalTime) * _totalTime;
+					currentTime -= int(currentTime / _totalTime) * _totalTime;
 				}
 			}
 			
@@ -285,14 +289,10 @@ package dragonBones.animation
 				_currentTime = currentTime;
 				
 				var frameList:Vector.<Frame> = _timeline.frameList;
+				var prevFrame:TransformFrame;
 				var currentFrame:TransformFrame;
 				while(true)
 				{
-					if(currentFrame)
-					{
-						_bone.arriveAtFrame(currentFrame, this, _animationState, true);
-					}
-					
 					if(_currentFrameIndex < 0)
 					{
 						_currentFrameIndex = 0;
@@ -327,6 +327,11 @@ package dragonBones.animation
 					else
 					{
 						break;
+					}
+					
+					if(prevFrame)
+					{
+						_bone.arriveAtFrame(prevFrame, this, _animationState, true);
 					}
 					
 					_currentFrameDuration = currentFrame.duration;
