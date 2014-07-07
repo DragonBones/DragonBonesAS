@@ -65,7 +65,7 @@
 			return textureAtlasData;
 		}
 		
-		public static function parseSkeletonData(rawData:Object, ifSkipAnimationData:Boolean=false):SkeletonData
+		public static function parseSkeletonData(rawData:Object, ifSkipAnimationData:Boolean=false, outputAnimationDictionary:Dictionary = null):SkeletonData
 		{
 			if(!rawData)
 			{
@@ -93,13 +93,13 @@
 			
 			for each(var armatureObject:Object in rawData[ConstValues.ARMATURE])
 			{
-				data.addArmatureData(parseArmatureData(armatureObject, data, frameRate, ifSkipAnimationData));
+				data.addArmatureData(parseArmatureData(armatureObject, data, frameRate, ifSkipAnimationData, outputAnimationDictionary));
 			}
 			
 			return data;
 		}
 		
-		private static function parseArmatureData(armatureObject:Object, data:SkeletonData, frameRate:uint, ifSkipAnimationData:Boolean):ArmatureData
+		private static function parseArmatureData(armatureObject:Object, data:SkeletonData, frameRate:uint, ifSkipAnimationData:Boolean, outputAnimationDictionary:Dictionary):ArmatureData
 		{
 			var armatureData:ArmatureData = new ArmatureData();
 			armatureData.name = armatureObject[ConstValues.A_NAME];
@@ -117,12 +117,33 @@
 			DBDataUtil.transformArmatureData(armatureData);
 			armatureData.sortBoneDataList();
 			
-			for each(var animationObject:Object in armatureObject[ConstValues.ANIMATION])
+			var animationObject:Object;
+			if(ifSkipAnimationData)
 			{
-				armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate));
-				if(ifSkipAnimationData)
+				if(outputAnimationDictionary!= null)
 				{
-					break;
+					outputAnimationDictionary[armatureData.name] = new Dictionary();
+				}
+				
+				var index:int = 0;
+				for each(animationObject in armatureObject[ConstValues.ANIMATION])
+				{
+					if(index == 0)
+					{
+						armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate));
+					}
+					else if(outputAnimationDictionary != null)
+					{
+						outputAnimationDictionary[armatureData.name][animationObject[ConstValues.A_NAME]] = animationObject;
+					}
+					index++;
+				}
+			}
+			else
+			{
+				for each(animationObject in armatureObject[ConstValues.ANIMATION])
+				{
+					armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate));
 				}
 			}
 			
@@ -232,18 +253,6 @@
 			parseTransform(displayObject[ConstValues.TRANSFORM], displayData.transform, displayData.pivot);
 			
 			return displayData;
-		}
-		
-		/** @private */
-		dragonBones_internal static function parseAnimationRawDataDictionary(rawData:Object, outputDictionary:Dictionary):void
-		{
-			for each(var armatureObject:Object in rawData[ConstValues.ARMATURE])
-			{	
-				for each(var animationObject:Object in armatureObject[ConstValues.ANIMATION])
-				{
-					outputDictionary[animationObject[ConstValues.A_NAME]] = animationObject;
-				}
-			}
 		}
 		
 		/** @private */

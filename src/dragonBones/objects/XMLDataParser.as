@@ -7,16 +7,16 @@
 	 * @version 2.0
 	 */
 	
-	import flash.geom.ColorTransform;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
-	import flash.utils.Dictionary;
-	
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.textures.TextureData;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.DBDataUtil;
+	
+	import flash.geom.ColorTransform;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
+	import flash.utils.Dictionary;
 	
 	use namespace dragonBones_internal;
 	
@@ -68,7 +68,7 @@
 		 * @param xml The SkeletonData xml to parse.
 		 * @return A SkeletonData instance.
 		 */
-		public static function parseSkeletonData(rawData:XML, ifSkipAnimationData:Boolean = false):SkeletonData
+		public static function parseSkeletonData(rawData:XML, ifSkipAnimationData:Boolean = false, outputAnimationDictionary:Dictionary = null):SkeletonData
 		{
 			if(!rawData)
 			{
@@ -94,13 +94,13 @@
 			data.name = rawData.@[ConstValues.A_NAME];
 			for each(var armatureXML:XML in rawData[ConstValues.ARMATURE])
 			{
-				data.addArmatureData(parseArmatureData(armatureXML, data, frameRate, ifSkipAnimationData));
+				data.addArmatureData(parseArmatureData(armatureXML, data, frameRate, ifSkipAnimationData, outputAnimationDictionary));
 			}
 			
 			return data;
 		}
 		
-		private static function parseArmatureData(armatureXML:XML, data:SkeletonData, frameRate:uint, ifSkipAnimationData:Boolean):ArmatureData
+		private static function parseArmatureData(armatureXML:XML, data:SkeletonData, frameRate:uint, ifSkipAnimationData:Boolean, outputAnimationDictionary:Dictionary):ArmatureData
 		{
 			var armatureData:ArmatureData = new ArmatureData();
 			armatureData.name = armatureXML.@[ConstValues.A_NAME];
@@ -118,12 +118,33 @@
 			DBDataUtil.transformArmatureData(armatureData);
 			armatureData.sortBoneDataList();
 			
-			for each(var animationXML:XML in armatureXML[ConstValues.ANIMATION])
+			var animationXML:XML;
+			if(ifSkipAnimationData)
 			{
-				armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate));
-				if(ifSkipAnimationData)
+				if(outputAnimationDictionary!= null)
 				{
-					break;
+					outputAnimationDictionary[armatureData.name] = new Dictionary();
+				}
+				
+				var index:int = 0;
+				for each(animationXML in armatureXML[ConstValues.ANIMATION])
+				{
+					if(index == 0)
+					{
+						armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate));
+					}
+					else if(outputAnimationDictionary != null)
+					{
+						outputAnimationDictionary[armatureData.name][animationXML.@[ConstValues.A_NAME]] = animationXML;
+					}
+					index++;
+				}
+			}
+			else
+			{
+				for each(animationXML in armatureXML[ConstValues.ANIMATION])
+				{
+					armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate));
 				}
 			}
 			
@@ -232,18 +253,6 @@
 			parseTransform(displayXML[ConstValues.TRANSFORM][0], displayData.transform, displayData.pivot);
 			
 			return displayData;
-		}
-		
-		/** @private */
-		dragonBones_internal static function parseAnimationRawDataDictionary(rawData:XML, outputDictionary:Dictionary):void
-		{
-			for each(var armatureXML:XML in rawData[ConstValues.ARMATURE])
-			{	
-				for each(var animationXML:XML in armatureXML[ConstValues.ANIMATION])
-				{
-					outputDictionary[animationXML.@[ConstValues.A_NAME]] = animationXML;
-				}
-			}
 		}
 		
 		/** @private */
