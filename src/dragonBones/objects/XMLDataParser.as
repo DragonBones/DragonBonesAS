@@ -253,7 +253,7 @@
 			animationData.frameRate = frameRate;
 			animationData.playTimes = int(animationXML.@[ConstValues.A_LOOP]);
 			animationData.fadeTime = Number(animationXML.@[ConstValues.A_FADE_IN_TIME]);
-			animationData.duration = (Number(animationXML.@[ConstValues.A_DURATION]) || 1) / frameRate;
+			animationData.duration = Math.round((Number(animationXML.@[ConstValues.A_DURATION]) || 1) / frameRate * 1000);
 			animationData.scale = getNumber(animationXML, ConstValues.A_SCALE, 1) || 0;
 			//use frame tweenEase, NaN
 			//overwrite frame tweenEase, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
@@ -262,7 +262,7 @@
 			
 			parseTimeline(animationXML, animationData, parseMainFrame, frameRate);
 			
-			var lastFrameDuration:Number = animationData.duration;
+			var lastFrameDuration:int = animationData.duration;
 			for each(var timelineXML:XML in animationXML[ConstValues.TIMELINE])
 			{
 				var timeline:TransformTimeline = parseTransformTimeline(timelineXML, animationData.duration, frameRate);
@@ -286,7 +286,7 @@
 		
 		private static function parseTimeline(timelineXML:XML, timeline:Timeline, frameParser:Function, frameRate:uint):void
 		{
-			var position:Number = 0;
+			var position:int = 0;
 			var frame:Frame;
 			for each(var frameXML:XML in timelineXML[ConstValues.FRAME])
 			{
@@ -301,7 +301,7 @@
 			}
 		}
 		
-		private static function parseTransformTimeline(timelineXML:XML, duration:Number, frameRate:uint):TransformTimeline
+		private static function parseTransformTimeline(timelineXML:XML, duration:int, frameRate:uint):TransformTimeline
 		{
 			var timeline:TransformTimeline = new TransformTimeline();
 			timeline.name = timelineXML.@[ConstValues.A_NAME];
@@ -316,7 +316,7 @@
 		
 		private static function parseFrame(frameXML:XML, frame:Frame, frameRate:uint):void
 		{
-			frame.duration = (Number(frameXML.@[ConstValues.A_DURATION]) || 1) / frameRate;
+			frame.duration = Math.round((Number(frameXML.@[ConstValues.A_DURATION]) || 1) / frameRate * 1000);
 			frame.action = frameXML.@[ConstValues.A_ACTION];
 			frame.event = frameXML.@[ConstValues.A_EVENT];
 			frame.sound = frameXML.@[ConstValues.A_SOUND];

@@ -253,7 +253,7 @@
 			animationData.frameRate = frameRate;
 			animationData.playTimes = int(animationObject[ConstValues.A_LOOP]);
 			animationData.fadeTime = Number(animationObject[ConstValues.A_FADE_IN_TIME]);
-			animationData.duration = (Number(animationObject[ConstValues.A_DURATION]) || 1)/ frameRate;
+			animationData.duration = Math.round((Number(animationObject[ConstValues.A_DURATION]) || 1) / frameRate * 1000);
 			animationData.scale = getNumber(animationObject, ConstValues.A_SCALE, 1) || 0;
 			//use frame tweenEase, NaN
 			//overwrite frame tweenEase, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
@@ -262,7 +262,7 @@
 			
 			parseTimeline(animationObject, animationData, parseMainFrame, frameRate);
 			
-			var lastFrameDuration:Number = animationData.duration;
+			var lastFrameDuration:int = animationData.duration;
 			for each(var timelineObject:Object in animationObject[ConstValues.TIMELINE])
 			{
 				var timeline:TransformTimeline = parseTransformTimeline(timelineObject, animationData.duration, frameRate);
@@ -284,7 +284,7 @@
 		
 		private static function parseTimeline(timelineObject:Object, timeline:Timeline, frameParser:Function, frameRate:uint):void
 		{
-			var position:Number = 0;
+			var position:int = 0;
 			var frame:Frame;
 			for each(var frameObject:Object in timelineObject[ConstValues.FRAME])
 			{
@@ -299,7 +299,7 @@
 			}
 		}
 		
-		private static function parseTransformTimeline(timelineObject:Object, duration:Number, frameRate:uint):TransformTimeline
+		private static function parseTransformTimeline(timelineObject:Object, duration:int, frameRate:uint):TransformTimeline
 		{
 			var timeline:TransformTimeline = new TransformTimeline();
 			timeline.name = timelineObject[ConstValues.A_NAME];
@@ -314,7 +314,7 @@
 		
 		private static function parseFrame(frameObject:Object, frame:Frame, frameRate:uint):void
 		{
-			frame.duration = (Number(frameObject[ConstValues.A_DURATION]) || 1) / frameRate;
+			frame.duration = Math.round((Number(frameObject[ConstValues.A_DURATION]) || 1) / frameRate * 1000);
 			frame.action = frameObject[ConstValues.A_ACTION];
 			frame.event = frameObject[ConstValues.A_EVENT];
 			frame.sound = frameObject[ConstValues.A_SOUND];
