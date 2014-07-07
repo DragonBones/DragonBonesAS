@@ -288,9 +288,9 @@ package dragonBones.factorys
 		 * @param target armature.
 		 * @param frame rate.
 		 */
-		public function addAnimationToArmature(animationRawData:Object, armature:Armature, frameRate:uint):void
+		public function addAnimationToArmature(animationRawData:Object, armature:Armature):void
 		{
-			armature._armatureData.addAnimationData(DataParser.parseAnimationDataByAnimationRawData(animationRawData,armature._armatureData, frameRate));
+			armature._armatureData.addAnimationData(DataParser.parseAnimationDataByAnimationRawData(animationRawData,armature._armatureData));
 		}
 		
 		/**
