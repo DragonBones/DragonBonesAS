@@ -117,15 +117,15 @@
 			return null;
 		}
 		
-		public static function parseData(rawData:Object, ifSkipAnimationData:Boolean = false):SkeletonData
+		public static function parseData(rawData:Object, ifSkipAnimationData:Boolean = false, outputAnimationDictionary:Dictionary = null):SkeletonData
 		{
 			if(rawData is XML)
 			{
-				return XMLDataParser.parseSkeletonData(rawData as XML, ifSkipAnimationData);
+				return XMLDataParser.parseSkeletonData(rawData as XML, ifSkipAnimationData, outputAnimationDictionary);
 			}
 			else
 			{
-				return ObjectDataParser.parseSkeletonData(rawData, ifSkipAnimationData);
+				return ObjectDataParser.parseSkeletonData(rawData, ifSkipAnimationData, outputAnimationDictionary);
 			}
 			return null;
 		}
@@ -134,6 +134,7 @@
 		{
 			var animationData:AnimationData = armatureData.animationDataList[0];
 			
+			
 			if(animationRawData is XML)
 			{
 				return XMLDataParser.parseAnimationData((animationRawData as XML), armatureData, animationData.frameRate);
@@ -141,18 +142,6 @@
 			else
 			{
 				return ObjectDataParser.parseAnimationData(animationRawData, armatureData, animationData.frameRate);
-			}
-		}
-		
-		public static function parseAnimationRawDataDictionary(rawData:Object, outputDictionary:Dictionary):void
-		{
-			if(rawData is XML)
-			{
-				return XMLDataParser.parseAnimationRawDataDictionary((rawData as XML), outputDictionary);
-			}
-			else
-			{
-				return ObjectDataParser.parseAnimationRawDataDictionary(rawData, outputDictionary);
 			}
 		}
 		
