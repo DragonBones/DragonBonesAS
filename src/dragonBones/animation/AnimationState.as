@@ -217,7 +217,7 @@
 			{
 				value = 0;
 			}
-			_currentTime = value * 0.001;
+			_currentTime = value * 1000;
 			_time = _currentTime;
 			return this;
 		}
