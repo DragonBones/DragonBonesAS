@@ -260,7 +260,7 @@ package dragonBones.utils
 			}
 		}
 		
-		private static function getTimelineTransform(timeline:TransformTimeline, position:Number, retult:DBTransform, isGlobal:Boolean):void
+		private static function getTimelineTransform(timeline:TransformTimeline, position:int, retult:DBTransform, isGlobal:Boolean):void
 		{
 			var frameList:Vector.<Frame> = timeline.frameList;
 			var i:int = frameList.length;
@@ -310,7 +310,12 @@ package dragonBones.utils
 				var boneName:String = boneData.name;
 				if(!animationData.getTimeline(boneName))
 				{
-					animationData.hideTimelineNameMap[boneName] = true;
+					if(animationData.hideTimelineNameMap.indexOf(boneName) < 0)
+					{
+						animationData.hideTimelineNameMap.fixed = false;
+						animationData.hideTimelineNameMap.push(boneName);
+						animationData.hideTimelineNameMap.fixed = true;
+					}
 				}
 			}
 		}

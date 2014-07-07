@@ -65,7 +65,7 @@
 			return textureAtlasData;
 		}
 		
-		public static function parseSkeletonData(rawData:Object, ifSkipAnimationData:Boolean=false):SkeletonData
+		public static function parseSkeletonData(rawData:Object, ifSkipAnimationData:Boolean=false, outputAnimationDictionary:Dictionary = null):SkeletonData
 		{
 			if(!rawData)
 			{
@@ -93,13 +93,13 @@
 			
 			for each(var armatureObject:Object in rawData[ConstValues.ARMATURE])
 			{
-				data.addArmatureData(parseArmatureData(armatureObject, data, frameRate, ifSkipAnimationData));
+				data.addArmatureData(parseArmatureData(armatureObject, data, frameRate, ifSkipAnimationData, outputAnimationDictionary));
 			}
 			
 			return data;
 		}
 		
-		private static function parseArmatureData(armatureObject:Object, data:SkeletonData, frameRate:uint, ifSkipAnimationData:Boolean):ArmatureData
+		private static function parseArmatureData(armatureObject:Object, data:SkeletonData, frameRate:uint, ifSkipAnimationData:Boolean, outputAnimationDictionary:Dictionary):ArmatureData
 		{
 			var armatureData:ArmatureData = new ArmatureData();
 			armatureData.name = armatureObject[ConstValues.A_NAME];
@@ -117,9 +117,31 @@
 			DBDataUtil.transformArmatureData(armatureData);
 			armatureData.sortBoneDataList();
 			
-			if(!ifSkipAnimationData)
+			var animationObject:Object;
+			if(ifSkipAnimationData)
 			{
-				for each(var animationObject:Object in armatureObject[ConstValues.ANIMATION])
+				if(outputAnimationDictionary!= null)
+				{
+					outputAnimationDictionary[armatureData.name] = new Dictionary();
+				}
+				
+				var index:int = 0;
+				for each(animationObject in armatureObject[ConstValues.ANIMATION])
+				{
+					if(index == 0)
+					{
+						armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate));
+					}
+					else if(outputAnimationDictionary != null)
+					{
+						outputAnimationDictionary[armatureData.name][animationObject[ConstValues.A_NAME]] = animationObject;
+					}
+					index++;
+				}
+			}
+			else
+			{
+				for each(animationObject in armatureObject[ConstValues.ANIMATION])
 				{
 					armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate));
 				}
@@ -150,14 +172,14 @@
 			parseTransform(boneObject[ConstValues.TRANSFORM], boneData.global);
 			boneData.transform.copy(boneData.global);
 			
-			for each(var rectangleObject:Object in boneData[ConstValues.RECTANGLE])
+			for each(var rectangleObject:Object in boneObject[ConstValues.RECTANGLE])
 			{
-				boneData.addAreaData(parseRectangleData(rectangleObject));
+				boneObject.addAreaData(parseRectangleData(rectangleObject));
 			}
 			
-			for each(var ellipseObject:Object in boneData[ConstValues.ELLIPSE])
+			for each(var ellipseObject:Object in boneObject[ConstValues.ELLIPSE])
 			{
-				boneData.addAreaData(parseEllipseData(ellipseObject));
+				boneObject.addAreaData(parseEllipseData(ellipseObject));
 			}
 			
 			return boneData;
@@ -234,18 +256,6 @@
 		}
 		
 		/** @private */
-		dragonBones_internal static function parseAnimationRawDataDictionary(rawData:Object, outputDictionary:Dictionary):void
-		{
-			for each(var armatureObject:Object in rawData[ConstValues.ARMATURE])
-			{	
-				for each(var animationObject:Object in armatureObject[ConstValues.ANIMATION])
-				{
-					outputDictionary[animationObject[ConstValues.A_NAME]] = animationObject;
-				}
-			}
-		}
-		
-		/** @private */
 		dragonBones_internal static function parseAnimationData(animationObject:Object, armatureData:ArmatureData, frameRate:uint):AnimationData
 		{
 			var animationData:AnimationData = new AnimationData();
@@ -253,7 +263,7 @@
 			animationData.frameRate = frameRate;
 			animationData.playTimes = int(animationObject[ConstValues.A_LOOP]);
 			animationData.fadeTime = Number(animationObject[ConstValues.A_FADE_IN_TIME]);
-			animationData.duration = (Number(animationObject[ConstValues.A_DURATION]) || 1)/ frameRate;
+			animationData.duration = Math.round((Number(animationObject[ConstValues.A_DURATION]) || 1) / frameRate * 1000);
 			animationData.scale = getNumber(animationObject, ConstValues.A_SCALE, 1) || 0;
 			//use frame tweenEase, NaN
 			//overwrite frame tweenEase, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
@@ -262,7 +272,7 @@
 			
 			parseTimeline(animationObject, animationData, parseMainFrame, frameRate);
 			
-			var lastFrameDuration:Number = animationData.duration;
+			var lastFrameDuration:int = animationData.duration;
 			for each(var timelineObject:Object in animationObject[ConstValues.TIMELINE])
 			{
 				var timeline:TransformTimeline = parseTransformTimeline(timelineObject, animationData.duration, frameRate);
@@ -284,7 +294,7 @@
 		
 		private static function parseTimeline(timelineObject:Object, timeline:Timeline, frameParser:Function, frameRate:uint):void
 		{
-			var position:Number = 0;
+			var position:int = 0;
 			var frame:Frame;
 			for each(var frameObject:Object in timelineObject[ConstValues.FRAME])
 			{
@@ -299,7 +309,7 @@
 			}
 		}
 		
-		private static function parseTransformTimeline(timelineObject:Object, duration:Number, frameRate:uint):TransformTimeline
+		private static function parseTransformTimeline(timelineObject:Object, duration:int, frameRate:uint):TransformTimeline
 		{
 			var timeline:TransformTimeline = new TransformTimeline();
 			timeline.name = timelineObject[ConstValues.A_NAME];
@@ -314,7 +324,7 @@
 		
 		private static function parseFrame(frameObject:Object, frame:Frame, frameRate:uint):void
 		{
-			frame.duration = (Number(frameObject[ConstValues.A_DURATION]) || 1) / frameRate;
+			frame.duration = Math.round((Number(frameObject[ConstValues.A_DURATION]) || 1) / frameRate * 1000);
 			frame.action = frameObject[ConstValues.A_ACTION];
 			frame.event = frameObject[ConstValues.A_EVENT];
 			frame.sound = frameObject[ConstValues.A_SOUND];

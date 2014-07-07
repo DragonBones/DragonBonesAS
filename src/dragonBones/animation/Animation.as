@@ -19,7 +19,7 @@
 		public static const SAME_LAYER:String = "sameLayer";
 		public static const SAME_GROUP:String = "sameGroup";
 		public static const SAME_LAYER_AND_GROUP:String = "sameLayerAndGroup";
-		public static const ALL:String = "all";		
+		public static const ALL:String = "all";
 		
 		/**
 		* Unrecommended API. Recommend use animationList.
@@ -238,7 +238,6 @@
 			{
 				return null;
 			}
-			
 			_isPlaying = true;
 			_isFading = true;
 			
@@ -251,13 +250,12 @@
 			}
 			else
 			{
-				durationScale = duration / animationData.duration;
+				durationScale = duration * 0.001 / animationData.duration;
 			}
 			
 			playTimes = isNaN(playTimes)?animationData.playTimes:playTimes;
 			
 			var animationState:AnimationState;
-			var j:int;
 			switch(fadeOutMode)
 			{
 				case NONE:
