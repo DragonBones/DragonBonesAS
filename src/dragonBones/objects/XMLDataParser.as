@@ -118,12 +118,11 @@
 			DBDataUtil.transformArmatureData(armatureData);
 			armatureData.sortBoneDataList();
 			
-			for each(var animationXML:XML in armatureXML[ConstValues.ANIMATION])
+			if(!ifSkipAnimationData)
 			{
-				armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate));
-				if(ifSkipAnimationData)
+				for each(var animationXML:XML in armatureXML[ConstValues.ANIMATION])
 				{
-					break;
+					armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate));
 				}
 			}
 			

@@ -117,12 +117,11 @@
 			DBDataUtil.transformArmatureData(armatureData);
 			armatureData.sortBoneDataList();
 			
-			for each(var animationObject:Object in armatureObject[ConstValues.ANIMATION])
+			if(!ifSkipAnimationData)
 			{
-				armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate));
-				if(ifSkipAnimationData)
+				for each(var animationObject:Object in armatureObject[ConstValues.ANIMATION])
 				{
-					break;
+					armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate));
 				}
 			}
 			
@@ -151,7 +150,6 @@
 			parseTransform(boneObject[ConstValues.TRANSFORM], boneData.global);
 			boneData.transform.copy(boneData.global);
 			
-			/*
 			for each(var rectangleObject:Object in boneData[ConstValues.RECTANGLE])
 			{
 				boneData.addAreaData(parseRectangleData(rectangleObject));
@@ -161,7 +159,7 @@
 			{
 				boneData.addAreaData(parseEllipseData(ellipseObject));
 			}
-			*/
+			
 			return boneData;
 		}
 		
