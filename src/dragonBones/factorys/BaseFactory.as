@@ -198,8 +198,6 @@ package dragonBones.factorys
 			var armatureData:ArmatureData;
 			var animationArmatureData:ArmatureData;
 			var skinData:SkinData;
-			
-			var armatureDataCopy:ArmatureData;
 			var skinDataCopy:SkinData;
 			
 			if(skeletonName)
@@ -421,14 +419,21 @@ package dragonBones.factorys
 				//如果显示对象有name属性并且name属性可以设置的话，将name设置为与slot同名，dragonBones并不依赖这些属性，只是方便开发者
 				for each(var displayObject:Object in helpArray)
 				{
-					if(displayObject && "name" in displayObject)
+					if(displayObject is Armature)
 					{
-						try
+						(displayObject as Armature).display["name"] = slot.name;
+					}
+					else
+					{
+						if(displayObject && "name" in displayObject)
 						{
-							displayObject["name"] = slot.name;
-						}
-						catch(err:Error)
-						{
+							try
+							{
+								displayObject["name"] = slot.name;
+							}
+							catch(err:Error)
+							{
+							}
 						}
 					}
 				}

@@ -252,7 +252,7 @@
 			
 			passedTime *= _animation.timeScale;    //_animation's time scale will impact childArmature
 			
-			var isFading:Boolean = animation._isFading;
+			var isFading:Boolean = _animation._isFading;
 			var i:int = _boneList.length;
 			while(i --)
 			{
@@ -578,7 +578,7 @@
 				var slot:Slot = _slotList[i];
 				if(slot._isShowDisplay)
 				{
-					slot.addDisplayToContainer(display);
+					slot.addDisplayToContainer(_display);
 				}
 			}
 			

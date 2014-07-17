@@ -41,8 +41,8 @@
 				subTextureRegion.height = int(subTextureXML.@[ConstValues.A_HEIGHT]) / scale;
 				var rotated:Boolean = subTextureXML.@[ConstValues.A_ROTATED] == "true";
 				
-				var frameWidth:Number = int(subTextureXML.subTextureXML.@[ConstValues.A_FRAME_WIDTH]) / scale;
-				var frameHeight:Number = int(subTextureXML.subTextureXML.@[ConstValues.A_FRAME_HEIGHT]) / scale;
+				var frameWidth:Number = int(subTextureXML.@[ConstValues.A_FRAME_WIDTH]) / scale;
+				var frameHeight:Number = int(subTextureXML.@[ConstValues.A_FRAME_HEIGHT]) / scale;
 				
 				if(frameWidth > 0 && frameHeight > 0)
 				{
@@ -168,7 +168,7 @@
 			boneData.parent = boneXML.@[ConstValues.A_PARENT];
 			boneData.length = Number(boneXML.@[ConstValues.A_LENGTH]);
 			boneData.inheritRotation = getBoolean(boneXML, ConstValues.A_INHERIT_ROTATION, true);
-			boneData.inheritScale = getBoolean(boneXML, ConstValues.A_SCALE_MODE, false);
+			boneData.inheritScale = getBoolean(boneXML, ConstValues.A_INHERIT_SCALE, false);
 			
 			parseTransform(boneXML[ConstValues.TRANSFORM][0], boneData.global);
 			boneData.transform.copy(boneData.global);

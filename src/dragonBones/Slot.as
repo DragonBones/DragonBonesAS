@@ -54,16 +54,6 @@
 			}
 		}
 		
-		/** @private */
-		override public function set visible(value:Boolean):void
-		{
-			if(this._visible != value)
-			{
-				this._visible = value;
-				updateDisplayVisible(this._visible);
-			}
-		}
-		
 		protected var _blendMode:String;
 		/**
 		 * blendMode
@@ -119,7 +109,7 @@
 			{
 				return;
 			}
-			_displayList[displayIndex] = _childArmature;
+			_displayList[displayIndex] = value;
 			_childArmature = value;
 			if(_childArmature)
 			{
@@ -160,6 +150,16 @@
 				_displayIndex = -1;
 				changeDisplay(displayIndexBackup);
 				updateTransform();
+			}
+		}
+		
+		/** @private */
+		override public function set visible(value:Boolean):void
+		{
+			if(this._visible != value)
+			{
+				this._visible = value;
+				updateDisplayVisible(this._visible);
 			}
 		}
 		

@@ -576,11 +576,9 @@
 				_tween.skewY = transform.skewY * weight;
 				_tween.scaleX = transform.scaleX * weight;
 				_tween.scaleY = transform.scaleY * weight;
-				//_tween.copy(transform);
 				
 				_tweenPivot.x = pivot.x * weight;
 				_tweenPivot.y = pivot.y * weight;
-				//_tweenPivot.copyFrom(pivot);
 			}
 			else if(i > 1)
 			{
