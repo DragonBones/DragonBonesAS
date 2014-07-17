@@ -26,6 +26,7 @@ package dragonBones.factorys
 	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
 	import flash.utils.ByteArray;
+	import flash.utils.Dictionary;
 	
 	use namespace dragonBones_internal;
 	
@@ -284,7 +285,6 @@ package dragonBones.factorys
 		 * Add a new animation to armature.
 		 * @param animationRawData (XML, JSON).
 		 * @param target armature.
-		 * @param frame rate.
 		 */
 		public function addAnimationToArmature(animationRawData:Object, armature:Armature):void
 		{
@@ -507,9 +507,11 @@ package dragonBones.factorys
 		 * </listing>
 		 * @param ByteArray. Represents the raw data for the whole DragonBones system.
 		 * @param String. (optional) The SkeletonData instance name.
+		 * @param Boolean. (optional) flag if delay animation data parsing. Delay animation data parsing can reduce the data paring time to improve loading performance.
+		 * @param Dictionary. (optional) output parameter. If it is not null, and ifSkipAnimationData is true, it will be fulfilled animationData, so that developers can parse it later.
 		 * @return A SkeletonData instance.
 		 */
-		public function parseData(bytes:ByteArray, dataName:String = null, ifSkipAnimationData:Boolean = false):SkeletonData
+		public function parseData(bytes:ByteArray, dataName:String = null, ifSkipAnimationData:Boolean = false, outputAnimationDictionary:Dictionary = null):SkeletonData
 		{
 			if(!bytes)
 			{
@@ -517,7 +519,7 @@ package dragonBones.factorys
 			}
 			var decompressedData:DecompressedData = DataParser.decompressData(bytes);
 			
-			var data:SkeletonData = DataParser.parseData(decompressedData.dragonBonesData, ifSkipAnimationData);
+			var data:SkeletonData = DataParser.parseData(decompressedData.dragonBonesData, ifSkipAnimationData, outputAnimationDictionary);
 			
 			dataName = dataName || data.name;
 			addSkeletonData(data, dataName);
