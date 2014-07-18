@@ -327,8 +327,6 @@
 				}
 			}
 			
-			_lastAnimationState.advanceTime(0);
-			
 			return _lastAnimationState;
 		}
 		
