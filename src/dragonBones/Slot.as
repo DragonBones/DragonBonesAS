@@ -82,14 +82,16 @@
 		}
 		public function set display(value:Object):void
 		{
-			var displayIndex:int = _displayIndex < 0?0:_displayIndex;
-			if(_displayList[displayIndex] == value)
+			if (_displayIndex < 0)
+			{
+				_displayIndex = 0;
+			}
+			if(_displayList[_displayIndex] == value)
 			{
 				return;
 			}
-			_displayList[displayIndex] = value;
-			_childArmature = null;
-			updateSlotDisplay(value);
+			_displayList[_displayIndex] = value;
+			updateSlotDisplay();
 			updateChildArmatureAnimation();
 			updateTransform();
 		}
@@ -104,23 +106,7 @@
 		}
 		public function set childArmature(value:Armature):void
 		{
-			var displayIndex:int = _displayIndex < 0?0:_displayIndex;
-			if(_displayList[displayIndex] == value)
-			{
-				return;
-			}
-			_displayList[displayIndex] = value;
-			_childArmature = value;
-			if(_childArmature)
-			{
-				updateSlotDisplay(_childArmature.display);
-			}
-			else
-			{
-				updateSlotDisplay(null);
-			}
-			updateChildArmatureAnimation();
-			updateTransform();
+			display = value;
 		}
 
 		//
@@ -138,19 +124,19 @@
 			{
 				throw new ArgumentError();
 			}
+			if (_displayIndex < 0)
+			{
+				_displayIndex = 0;
+			}
 			var i:int = _displayList.length = value.length;
 			while(i --)
 			{
 				_displayList[i] = value[i];
 			}
 			
-			if(_displayIndex >= 0)
-			{
-				var displayIndexBackup:int = _displayIndex;
-				_displayIndex = -1;
-				changeDisplay(displayIndexBackup);
-				updateTransform();
-			}
+			var displayIndexBackup:int = _displayIndex;
+			_displayIndex = -1;
+			changeDisplay(displayIndexBackup);
 		}
 		
 		/** @private */
@@ -196,9 +182,9 @@
 			_originZOrder = 0;
 			_tweenZOrder = 0;
 			_offsetZOrder = 0;
-			_displayDataList = null;
 			_isShowDisplay = false;
 			
+			_displayDataList = null;
 			_childArmature = null;
 			_display = null;
 			
@@ -332,7 +318,7 @@
 		/** @private */
 		dragonBones_internal function changeDisplay(displayIndex:int):void
 		{
-			if(displayIndex < 0)
+			if (displayIndex < 0)
 			{
 				if(_isShowDisplay)
 				{
@@ -341,36 +327,20 @@
 					updateChildArmatureAnimation();
 				}
 			}
-			else
+			else if (_displayList.length > 0)
 			{
 				var length:uint = _displayList.length;
 				if(displayIndex >= length)
 				{
 					displayIndex = length - 1;
-					if(displayIndex < 0)
-					{
-						displayIndex = 0;
-					}
 				}
 				
 				if(_displayIndex != displayIndex)
 				{
 					_isShowDisplay = true;
 					_displayIndex = displayIndex;
-					
-					var content:Object = _displayList[_displayIndex];
-					if(content is Armature)
-					{
-						_childArmature = content as Armature;
-						updateSlotDisplay(_childArmature.display);
-					}
-					else
-					{
-						_childArmature = null;
-						updateSlotDisplay(content);
-					}
+					updateSlotDisplay();
 					updateChildArmatureAnimation();
-					
 					if(
 						_displayDataList && 
 						_displayDataList.length > 0 && 
@@ -397,31 +367,52 @@
 		/** @private 
 		 * Updates the display of the slot.
 		 */
-		dragonBones_internal function updateSlotDisplay(value:Object):void
+		dragonBones_internal function updateSlotDisplay():void
 		{
-			var exIndex:int = -1;
+			var currentDisplayIndex:int = -1;
 			if(_display)
 			{
-				exIndex = getDisplayIndex();
+				currentDisplayIndex = getDisplayIndex();
 				removeDisplayFromContainer();
 			}
-			_display = value;
+			var display:Object = _displayList[_displayIndex];
+			if (display)
+			{
+				if(display is Armature)
+				{
+					_childArmature = display as Armature;
+					_display = _childArmature.display;
+				}
+				else
+				{
+					_childArmature = null;
+					_display = display;
+				}
+			}
+			else
+			{
+				_display = null;
+				_childArmature = null;
+			}
 			updateDisplay(_display);
 			if(_display)
 			{
 				if(this._armature && _isShowDisplay)
 				{
-					if(exIndex < 0)
+					if(currentDisplayIndex < 0)
 					{
 						this._armature._slotsZOrderChanged = true;
 						addDisplayToContainer(this._armature.display);
 					}
 					else
 					{
-						addDisplayToContainer(this._armature.display, exIndex);
+						addDisplayToContainer(this._armature.display, currentDisplayIndex);
 					}
 				}
 				updateDisplayBlendMode(_blendMode);
+				//updateDisplayColor(_color);
+				updateDisplayVisible(_visible);
+				//updateDisplayTransform();
 			}
 		}
 		

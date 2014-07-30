@@ -439,6 +439,39 @@
 			}
 		}
 		
+		/** @private */
+		dragonBones_internal function updateColor(
+			aOffset:Number, 
+			rOffset:Number, 
+			gOffset:Number, 
+			bOffset:Number, 
+			aMultiplier:Number, 
+			rMultiplier:Number, 
+			gMultiplier:Number, 
+			bMultiplier:Number,
+			colorChanged:Boolean
+		):void
+		{
+			for each(var slot:Slot in _slotList)
+			{
+				slot.updateDisplayColor(
+					aOffset, rOffset, gOffset, bOffset, 
+					aMultiplier, rMultiplier, gMultiplier, bMultiplier
+				);
+			}
+			
+			_isColorChanged = colorChanged;
+		}
+		
+		/** @private */
+		dragonBones_internal function hideSlots():void
+		{
+			for each(var slot:Slot in _slotList)
+			{
+				slot.changeDisplay(-1);
+			}
+		}
+		
 		/** @private When bone timeline enter a key frame, call this func*/
 		dragonBones_internal function arriveAtFrame(frame:Frame, timelineState:TimelineState, animationState:AnimationState, isCross:Boolean):void
 		{
@@ -450,62 +483,51 @@
 			if(displayControl)
 			{
 				var slot:Slot;
-				
-				if(frame)
+				var tansformFrame:TransformFrame = frame as TransformFrame;
+				var displayIndex:int = tansformFrame.displayIndex;
+				for each(slot in _slotList)
 				{
-					var tansformFrame:TransformFrame = frame as TransformFrame;
-					var displayIndex:int = tansformFrame.displayIndex;
-					for each(slot in _slotList)
+					slot.changeDisplay(displayIndex);
+					slot.updateDisplayVisible(tansformFrame.visible);
+					if(displayIndex >= 0)
 					{
-						slot.changeDisplay(displayIndex);
-						slot.updateDisplayVisible(tansformFrame.visible);
-						if(displayIndex >= 0)
+						if(!isNaN(tansformFrame.zOrder) && tansformFrame.zOrder != slot._tweenZOrder)
 						{
-							if(!isNaN(tansformFrame.zOrder) && tansformFrame.zOrder != slot._tweenZOrder)
-							{
-								slot._tweenZOrder = tansformFrame.zOrder;
-								this._armature._slotsZOrderChanged = true;
-							}
-						}
-					}
-					
-					if(frame.event && this._armature.hasEventListener(FrameEvent.BONE_FRAME_EVENT))
-					{
-						var frameEvent:FrameEvent = new FrameEvent(FrameEvent.BONE_FRAME_EVENT);
-						frameEvent.bone = this;
-						frameEvent.animationState = animationState;
-						frameEvent.frameLabel = frame.event;
-						this._armature._eventList.push(frameEvent);
-					}
-					
-					if(frame.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
-					{
-						var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
-						soundEvent.armature = this._armature;
-						soundEvent.animationState = animationState;
-						soundEvent.sound = frame.sound;
-						_soundManager.dispatchEvent(soundEvent);
-					}
-					
-					//[TODO]currently there is only gotoAndPlay belongs to frame action. In future, there will be more.  
-					//后续会扩展更多的action，目前只有gotoAndPlay的含义
-					if(frame.action) 
-					{
-						for each(slot in _slotList)
-						{
-							var childArmature:Armature = slot.childArmature;
-							if(childArmature)
-							{
-								childArmature.animation.gotoAndPlay(frame.action);
-							}
+							slot._tweenZOrder = tansformFrame.zOrder;
+							this._armature._slotsZOrderChanged = true;
 						}
 					}
 				}
-				else
+				
+				if(frame.event && this._armature.hasEventListener(FrameEvent.BONE_FRAME_EVENT))
+				{
+					var frameEvent:FrameEvent = new FrameEvent(FrameEvent.BONE_FRAME_EVENT);
+					frameEvent.bone = this;
+					frameEvent.animationState = animationState;
+					frameEvent.frameLabel = frame.event;
+					this._armature._eventList.push(frameEvent);
+				}
+				
+				if(frame.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
+				{
+					var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
+					soundEvent.armature = this._armature;
+					soundEvent.animationState = animationState;
+					soundEvent.sound = frame.sound;
+					_soundManager.dispatchEvent(soundEvent);
+				}
+				
+				//[TODO]currently there is only gotoAndPlay belongs to frame action. In future, there will be more.  
+				//后续会扩展更多的action，目前只有gotoAndPlay的含义
+				if(frame.action) 
 				{
 					for each(slot in _slotList)
 					{
-						slot.changeDisplay(-1);
+						var childArmature:Armature = slot.childArmature;
+						if(childArmature)
+						{
+							childArmature.animation.gotoAndPlay(frame.action);
+						}
 					}
 				}
 			}
@@ -531,30 +553,6 @@
 			}
 		}
 		
-		/** @private */
-		dragonBones_internal function updateColor(
-			aOffset:Number, 
-			rOffset:Number, 
-			gOffset:Number, 
-			bOffset:Number, 
-			aMultiplier:Number, 
-			rMultiplier:Number, 
-			gMultiplier:Number, 
-			bMultiplier:Number,
-			colorChanged:Boolean
-		):void
-		{
-			for each(var slot:Slot in _slotList)
-			{
-				slot.updateDisplayColor(
-					aOffset, rOffset, gOffset, bOffset, 
-					aMultiplier, rMultiplier, gMultiplier, bMultiplier
-				);
-			}
-			
-			_isColorChanged = colorChanged;
-		}
-		
 		private function blendingTimeline():void
 		{
 			var timelineState:TimelineState;
@@ -566,7 +564,8 @@
 			if(i == 1)
 			{
 				timelineState = _timelineStateList[0];
-				weight = timelineState.weight;
+				weight = timelineState._animationState.weight * timelineState._animationState.fadeWeight;
+				timelineState._weight = weight;
 				transform = timelineState._transform;
 				pivot = timelineState._pivot;
 				
@@ -593,7 +592,7 @@
 				
 				var weigthLeft:Number = 1;
 				var layerTotalWeight:Number = 0;
-				var exLayer:int = _timelineStateList[i - 1].layer;
+				var prevLayer:int = _timelineStateList[i - 1]._animationState.layer;
 				var currentLayer:int;
 				
 				//Traversal the layer from up to down
@@ -603,11 +602,12 @@
 				{
 					timelineState = _timelineStateList[i];
 					
-					currentLayer = timelineState.layer;
-					if(exLayer != currentLayer)
+					currentLayer = timelineState._animationState.layer;
+					if(prevLayer != currentLayer)
 					{
 						if(layerTotalWeight >= weigthLeft)
 						{
+							timelineState._weight = 0;
 							break;
 						}
 						else
@@ -615,9 +615,10 @@
 							weigthLeft -= layerTotalWeight;
 						}
 					}
-					exLayer = currentLayer;
+					prevLayer = currentLayer;
 					
-					weight = timelineState.weight * weigthLeft;
+					weight = timelineState._animationState.weight * timelineState._animationState.fadeWeight * weigthLeft;
+					timelineState._weight = weight;
 					if(weight && timelineState._blendEnabled)
 					{
 						transform = timelineState._transform;
@@ -649,7 +650,7 @@
 		
 		private function sortState(state1:TimelineState, state2:TimelineState):int
 		{
-			return state1.layer < state2.layer?-1:1;
+			return state1._animationState.layer < state2._animationState.layer?-1:1;
 		}
 	}
 }

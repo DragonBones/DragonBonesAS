@@ -276,7 +276,7 @@ package dragonBones.factorys
 				buildSlots(armature, armatureData, skinData, skinDataCopy);
 			}
 			
-			//
+			// update armature pose
 			armature.advanceTime(0);
 			return armature;
 		}
@@ -371,7 +371,7 @@ package dragonBones.factorys
 			for each(var slotData:SlotData in skinData.slotDataList)
 			{
 				var bone:Bone = armature.getBone(slotData.parent);
-				if(!bone)
+				if(!bone || slotData.displayDataList.length == 0)
 				{
 					continue;
 				}

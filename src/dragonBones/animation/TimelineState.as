@@ -79,6 +79,9 @@ package dragonBones.animation
         }
 		
 		/** @private */
+		dragonBones_internal var _weight:Number;
+		
+		/** @private */
 		dragonBones_internal var _transform:DBTransform;
 		
 		/** @private */
@@ -89,6 +92,9 @@ package dragonBones.animation
 		
 		/** @private */
 		dragonBones_internal var _isComplete:Boolean;
+		
+		/** @private */
+		dragonBones_internal var _animationState:AnimationState;
 		
 		private var _totalTime:int;
 		private var _currentTime:int;
@@ -105,7 +111,6 @@ package dragonBones.animation
 		private var _armature:Armature;
 		private var _animation:Animation;
 		private var _bone:Bone;
-		private var _animationState:AnimationState;
 		private var _timeline:TransformTimeline;
 		private var _originTransform:DBTransform;
 		private var _originPivot:Point;
@@ -114,24 +119,7 @@ package dragonBones.animation
 		private var _durationPivot:Point;
 		private var _durationColor:ColorTransform;
 		
-		private var _name:String;
-		/**
-		 * The name of the animation state.
-		 */
-		public function get name():String
-		{
-			return _name;
-		}
-		
-		public function get layer():int
-		{
-			return _animationState.layer;
-		}
-		
-		public function get weight():Number
-		{
-			return _animationState.fadeWeight * _animationState.weight;
-		}
+		public var name:String;
 		
 		public function TimelineState()
 		{
@@ -154,18 +142,20 @@ package dragonBones.animation
 			_originTransform = _timeline.originTransform;
 			_originPivot = _timeline.originPivot;
 			
-			_name = _timeline.name;
+			name = _timeline.name;
+			
 			_totalTime = _timeline.duration;
 			_rawAnimationScale = _animationState.clip.scale;
 			
-			_currentFrameIndex = -1;
-			_currentTime = -1;
 			_isComplete = false;
 			_blendEnabled = false;
-			_tweenEasing = NaN;
 			_tweenTransform = false;
 			_tweenScale = false;
 			_tweenColor = false;
+			_currentFrameIndex = -1;
+			_currentTime = -1;
+			_tweenEasing = NaN;
+			_weight = 1;
 			
 			_transform.x = 0;
 			_transform.y = 0;
@@ -227,11 +217,6 @@ package dragonBones.animation
 		private function updateMultipleFrame(progress:Number):void
 		{
 			var currentPlayTimes:int = 0;
-			if(_timeline.scale == 0)
-			{
-				//normalizedTime [0, 1)
-				progress = 0.999999;
-			}
 			progress /= _timeline.scale;
 			progress += _timeline.offset;
 			
@@ -291,14 +276,14 @@ package dragonBones.animation
 				var frameList:Vector.<Frame> = _timeline.frameList;
 				var prevFrame:TransformFrame;
 				var currentFrame:TransformFrame;
-				while(true)
+				
+				for (var i:int = 0, l:int = _timeline.frameList.length; i < l; ++i)
 				{
 					if(_currentFrameIndex < 0)
 					{
 						_currentFrameIndex = 0;
-						currentFrame = frameList[_currentFrameIndex] as TransformFrame;
 					}
-					else if(_currentTime >= _currentFramePosition + _currentFrameDuration)
+					else if(_currentTime < _currentFramePosition || _currentTime >= _currentFramePosition + _currentFrameDuration)
 					{
 						_currentFrameIndex ++;
 						if(_currentFrameIndex >= frameList.length)
@@ -313,21 +298,12 @@ package dragonBones.animation
 								_currentFrameIndex = 0;
 							}
 						}
-						currentFrame = frameList[_currentFrameIndex] as TransformFrame;
-					}
-					else if(_currentTime < _currentFramePosition)
-					{
-						_currentFrameIndex --;
-						if(_currentFrameIndex < 0)
-						{
-							_currentFrameIndex = frameList.length - 1;
-						}
-						currentFrame = frameList[_currentFrameIndex] as TransformFrame;
 					}
 					else
 					{
 						break;
 					}
+					currentFrame = frameList[_currentFrameIndex] as TransformFrame;
 					
 					if(prevFrame)
 					{
@@ -822,8 +798,8 @@ package dragonBones.animation
 			if(_bone)
 			{
 				_bone.removeState(this);
+				_bone = null;
 			}
-			_bone = null;
 			_armature = null;
 			_animation = null;
 			_animationState = null;

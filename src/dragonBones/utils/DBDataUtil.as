@@ -171,7 +171,6 @@ package dragonBones.utils
 							frame.transform.skewY = prevFrame.transform.skewY + TransformUtil.formatRadian(frame.transform.skewY - prevFrame.transform.skewY);
 						}
 					}
-					
 					prevFrame = frame;
 				}
 				timeline.transformed = true;

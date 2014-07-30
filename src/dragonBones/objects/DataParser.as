@@ -134,7 +134,6 @@
 		{
 			var animationData:AnimationData = armatureData.animationDataList[0];
 			
-			
 			if(animationRawData is XML)
 			{
 				return XMLDataParser.parseAnimationData((animationRawData as XML), armatureData, animationData.frameRate);

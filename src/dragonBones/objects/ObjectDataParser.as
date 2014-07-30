@@ -261,16 +261,22 @@
 			var animationData:AnimationData = new AnimationData();
 			animationData.name = animationObject[ConstValues.A_NAME];
 			animationData.frameRate = frameRate;
+			animationData.duration = Math.round((Number(animationObject[ConstValues.A_DURATION]) || 1) * 1000 / frameRate);
 			animationData.playTimes = int(animationObject[ConstValues.A_LOOP]);
 			animationData.fadeTime = Number(animationObject[ConstValues.A_FADE_IN_TIME]);
-			animationData.duration = Math.round((Number(animationObject[ConstValues.A_DURATION]) || 1) / frameRate * 1000);
 			animationData.scale = getNumber(animationObject, ConstValues.A_SCALE, 1) || 0;
 			//use frame tweenEase, NaN
 			//overwrite frame tweenEase, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
 			animationData.tweenEasing = getNumber(animationObject, ConstValues.A_TWEEN_EASING, NaN);
 			animationData.autoTween = getBoolean(animationObject, ConstValues.A_AUTO_TWEEN, true);
 			
-			parseTimeline(animationObject, animationData, parseMainFrame, frameRate);
+			for each(var frameObject:Object in animationObject[ConstValues.FRAME])
+			{
+				var frame:Frame = parseTransformFrame(frameObject, frameRate);
+				animationData.addFrame(frame);
+			}
+			
+			parseTimeline(animationObject, animationData);
 			
 			var lastFrameDuration:int = animationData.duration;
 			for each(var timelineObject:Object in animationObject[ConstValues.TIMELINE])
@@ -292,42 +298,23 @@
 			return animationData;
 		}
 		
-		private static function parseTimeline(timelineObject:Object, timeline:Timeline, frameParser:Function, frameRate:uint):void
-		{
-			var position:int = 0;
-			var frame:Frame;
-			for each(var frameObject:Object in timelineObject[ConstValues.FRAME])
-			{
-				frame = frameParser(frameObject, frameRate);
-				frame.position = position;
-				timeline.addFrame(frame);
-				position += frame.duration;
-			}
-			if(frame)
-			{
-				frame.duration = timeline.duration - frame.position;
-			}
-		}
-		
 		private static function parseTransformTimeline(timelineObject:Object, duration:int, frameRate:uint):TransformTimeline
 		{
 			var timeline:TransformTimeline = new TransformTimeline();
 			timeline.name = timelineObject[ConstValues.A_NAME];
-			timeline.duration = duration;
 			timeline.scale = getNumber(timelineObject, ConstValues.A_SCALE, 1) || 0;
 			timeline.offset = getNumber(timelineObject, ConstValues.A_OFFSET, 0) || 0;
+			timeline.duration = duration;
 			
-			parseTimeline(timelineObject, timeline, parseTransformFrame, frameRate);
+			for each(var frameObject:Object in timelineObject[ConstValues.FRAME])
+			{
+				var frame:TransformFrame = parseTransformFrame(frameObject, frameRate);
+				timeline.addFrame(frame);
+			}
+			
+			parseTimeline(timelineObject, timeline);
 			
 			return timeline;
-		}
-		
-		private static function parseFrame(frameObject:Object, frame:Frame, frameRate:uint):void
-		{
-			frame.duration = Math.round((Number(frameObject[ConstValues.A_DURATION]) || 1) / frameRate * 1000);
-			frame.action = frameObject[ConstValues.A_ACTION];
-			frame.event = frameObject[ConstValues.A_EVENT];
-			frame.sound = frameObject[ConstValues.A_SOUND];
 		}
 		
 		private static function parseMainFrame(frameObject:Object, frameRate:uint):Frame
@@ -346,9 +333,9 @@
 			
 			//NaN:no tween, 10:auto tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
 			frame.tweenEasing = getNumber(frameObject, ConstValues.A_TWEEN_EASING, 10);
-			frame.tweenRotate = Number(frameObject[ConstValues.A_TWEEN_ROTATE]);
+			frame.tweenRotate = int(frameObject[ConstValues.A_TWEEN_ROTATE]);
 			frame.tweenScale = getBoolean(frameObject, ConstValues.A_TWEEN_SCALE, true);
-			frame.displayIndex = Number(frameObject[ConstValues.A_DISPLAY_INDEX]);
+			frame.displayIndex = int(frameObject[ConstValues.A_DISPLAY_INDEX]);
 			
 			//如果为NaN，则说明没有改变过zOrder
 			frame.zOrder = getNumber(frameObject, ConstValues.A_Z_ORDER, NaN);
@@ -363,18 +350,33 @@
 			if(colorTransformObject)
 			{
 				frame.color = new ColorTransform();
-				frame.color.alphaOffset = Number(colorTransformObject[ConstValues.A_ALPHA_OFFSET]);
-				frame.color.redOffset = Number(colorTransformObject[ConstValues.A_RED_OFFSET]);
-				frame.color.greenOffset = Number(colorTransformObject[ConstValues.A_GREEN_OFFSET]);
-				frame.color.blueOffset = Number(colorTransformObject[ConstValues.A_BLUE_OFFSET]);
-				
-				frame.color.alphaMultiplier = Number(colorTransformObject[ConstValues.A_ALPHA_MULTIPLIER]) * 0.01;
-				frame.color.redMultiplier = Number(colorTransformObject[ConstValues.A_RED_MULTIPLIER]) * 0.01;
-				frame.color.greenMultiplier = Number(colorTransformObject[ConstValues.A_GREEN_MULTIPLIER]) * 0.01;
-				frame.color.blueMultiplier = Number(colorTransformObject[ConstValues.A_BLUE_MULTIPLIER]) * 0.01;
+				parseColorTransform(colorTransformObject, frame.color);
 			}
 			
 			return frame;
+		}
+		
+		private static function parseTimeline(timelineObject:Object, timeline:Timeline):void
+		{
+			var position:int = 0;
+			var frame:Frame;
+			for each(frame in timeline.frameList)
+			{
+				frame.position = position;
+				position += frame.duration;
+			}
+			if(frame)
+			{
+				frame.duration = timeline.duration - frame.position;
+			}
+		}
+		
+		private static function parseFrame(frameObject:Object, frame:Frame, frameRate:uint):void
+		{
+			frame.duration = Math.round((Number(frameObject[ConstValues.A_DURATION]) || 1) * 1000 / frameRate);
+			frame.action = frameObject[ConstValues.A_ACTION];
+			frame.event = frameObject[ConstValues.A_EVENT];
+			frame.sound = frameObject[ConstValues.A_SOUND];
 		}
 		
 		private static function parseTransform(transformObject:Object, transform:DBTransform, pivot:Point = null):void
@@ -394,6 +396,25 @@
 				{
 					pivot.x = Number(transformObject[ConstValues.A_PIVOT_X]) || 0;
 					pivot.y = Number(transformObject[ConstValues.A_PIVOT_Y]) || 0;
+				}
+			}
+		}
+		
+		private static function parseColorTransform(colorTransformObject:Object, colorTransform:ColorTransform):void
+		{
+			if(colorTransformObject)
+			{
+				if(colorTransform)
+				{
+					colorTransform.alphaOffset = int(colorTransformObject[ConstValues.A_ALPHA_OFFSET]);
+					colorTransform.redOffset = int(colorTransformObject[ConstValues.A_RED_OFFSET]);
+					colorTransform.greenOffset = int(colorTransformObject[ConstValues.A_GREEN_OFFSET]);
+					colorTransform.blueOffset = int(colorTransformObject[ConstValues.A_BLUE_OFFSET]);
+					
+					colorTransform.alphaMultiplier = int(colorTransformObject[ConstValues.A_ALPHA_MULTIPLIER]) * 0.01;
+					colorTransform.redMultiplier = int(colorTransformObject[ConstValues.A_RED_MULTIPLIER]) * 0.01;
+					colorTransform.greenMultiplier = int(colorTransformObject[ConstValues.A_GREEN_MULTIPLIER]) * 0.01;
+					colorTransform.blueMultiplier = int(colorTransformObject[ConstValues.A_BLUE_MULTIPLIER]) * 0.01;
 				}
 			}
 		}
