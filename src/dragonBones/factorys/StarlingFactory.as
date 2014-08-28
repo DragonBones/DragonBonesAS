@@ -23,8 +23,9 @@
 	import starling.textures.SubTexture;
 	import starling.textures.Texture;
 	import starling.textures.TextureAtlas;
+    import starling.textures.TextureSmoothing;
 
-	use namespace dragonBones_internal;
+    use namespace dragonBones_internal;
 	
 	/**
 	 * A object managing the set of armature resources for Starling engine. It parses the raw data, stores the armature resources and creates armature instances.
@@ -60,7 +61,11 @@
 		 * Apply a scale for SWF specific texture. Use 1 for no scale.
 		 */
 		public var scaleForTexture:Number;
-		
+		/**
+		 * Apply a smoothing to generated display. Select from TextureSmoothing class.
+		 */
+		public var displaySmoothing:String = TextureSmoothing.NONE;
+
 		/**
 		 * Creates a new StarlingFactory instance.
 		 */
@@ -145,6 +150,7 @@
 				var image:Image = new Image(subTexture);
 				image.pivotX = pivotX;
 				image.pivotY = pivotY;
+                image.smoothing = displaySmoothing;
 				return image;
 			}
 			return null;
