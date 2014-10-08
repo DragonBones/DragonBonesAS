@@ -42,6 +42,7 @@
 		public static const A_OFFSET:String = "offset";
 		public static const A_LOOP:String = "loop";
 		public static const A_EVENT:String = "event";
+		public static const A_EVENT_PARAMETERS:String = "eventParameters";
 		public static const A_SOUND:String = "sound";
 		public static const A_ACTION:String = "action";
 		public static const A_HIDE:String = "hide";

@@ -371,7 +371,7 @@ package dragonBones.factorys
 			for each(var slotData:SlotData in skinData.slotDataList)
 			{
 				var bone:Bone = armature.getBone(slotData.parent);
-				if(!bone || slotData.displayDataList.length == 0)
+				if(!bone)
 				{
 					continue;
 				}
@@ -401,10 +401,7 @@ package dragonBones.factorys
 							}
 							
 							var childArmature:Armature = buildArmature(displayData.name, displayDataCopy?displayDataCopy.name:null, _currentDataName, _currentTextureAtlasName);
-							if(childArmature)
-							{
-								helpArray[i] = childArmature;
-							}
+							helpArray[i] = childArmature;
 							break;
 						
 						case DisplayData.IMAGE:
