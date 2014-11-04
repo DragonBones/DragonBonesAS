@@ -312,6 +312,7 @@ package dragonBones.animation
 					
 					_currentFrameDuration = currentFrame.duration;
 					_currentFramePosition = currentFrame.position;
+					prevFrame = currentFrame;
 				}
 				
 				if(currentFrame)

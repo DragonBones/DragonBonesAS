@@ -247,11 +247,11 @@
 			
 			var parentMatrix:Matrix = this._parent._globalTransformMatrix;
 			
-			//this._globalTransformMatrix.tx = this._global.x = parentMatrix.a * x + parentMatrix.c * y + parentMatrix.tx;
-			//this._globalTransformMatrix.ty = this._global.y = parentMatrix.d * y + parentMatrix.b * x + parentMatrix.ty;
+			this._globalTransformMatrix.tx = this._global.x = parentMatrix.a * x + parentMatrix.c * y + parentMatrix.tx;
+			this._globalTransformMatrix.ty = this._global.y = parentMatrix.d * y + parentMatrix.b * x + parentMatrix.ty;
 			
-			this._globalTransformMatrix.tx = this._global.x = parentMatrix.a * x * this._parent._global.scaleX + parentMatrix.c * y * this._parent._global.scaleY + parentMatrix.tx;
-			this._globalTransformMatrix.ty = this._global.y = parentMatrix.d * y * this._parent._global.scaleY + parentMatrix.b * x * this._parent._global.scaleX + parentMatrix.ty;
+			//this._globalTransformMatrix.tx = this._global.x = parentMatrix.a * x * this._parent._global.scaleX + parentMatrix.c * y * this._parent._global.scaleY + parentMatrix.tx;
+			//this._globalTransformMatrix.ty = this._global.y = parentMatrix.d * y * this._parent._global.scaleY + parentMatrix.b * x * this._parent._global.scaleX + parentMatrix.ty;
 			
 			if(inheritRotation)
 			{
