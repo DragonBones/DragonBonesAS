@@ -14,7 +14,7 @@ package dragonBones.utils
 		
 		public static function transformPointWithParent(transform:DBTransform, parent:DBTransform):void
 		{
-			transformToMatrix(parent, _helpMatrix);
+			transformToMatrix(parent, _helpMatrix, true);
 			_helpMatrix.invert();
 			
 			var x:Number = transform.x;

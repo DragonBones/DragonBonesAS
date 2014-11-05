@@ -251,7 +251,7 @@ package dragonBones.utils
 							globalTransform.copy(currentTransform);
 						}
 						
-						TransformUtil.transformToMatrix(globalTransform, helpMatrix);
+						TransformUtil.transformToMatrix(globalTransform, helpMatrix, true);
 					}
 					TransformUtil.transformPointWithParent(frame.transform, globalTransform);
 					
