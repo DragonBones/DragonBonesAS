@@ -45,6 +45,14 @@
 		{
 			return _name;
 		}
+        /**
+         * Atlas source BitmapData
+         */
+        public function get bitmapData():BitmapData
+        {
+            return _bitmapData;
+        }
+
 		/**
 		 * Creates a new StarlingTextureAtlas instance.
 		 * @param texture A texture instance.
