@@ -405,8 +405,11 @@ package dragonBones.factorys
 							break;
 						
 						case DisplayData.IMAGE:
-						default:
 							helpArray[i] = generateDisplay(_textureAtlasDic[_currentTextureAtlasName], displayData.name, displayData.pivot.x, displayData.pivot.y);
+							break;
+						
+						default:
+							helpArray[i] = null;
 							break;
 						
 					}
@@ -481,8 +484,6 @@ package dragonBones.factorys
 		{
 			return null;
 		}
-		
-		
 		
 		//==================================================
 		//解析dbswf和dbpng，如果不能序列化amf3格式无法实现解析
