@@ -13,13 +13,11 @@ package dragonBones.display
 	public class NativeSlot extends Slot
 	{
 		private var _nativeDisplay:DisplayObject;
-		private var _colorTransform:ColorTransform;
 		
 		public function NativeSlot()
 		{
 			super(this);
 			_nativeDisplay = null;
-			_colorTransform = null;
 		}
 		
 		override public function dispose():void
@@ -27,7 +25,6 @@ package dragonBones.display
 			super.dispose();
 			
 			_nativeDisplay = null;
-			_colorTransform = null;
 		}
 		
 		
