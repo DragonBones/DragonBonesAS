@@ -1,6 +1,7 @@
 ﻿package dragonBones
 {
 	import flash.errors.IllegalOperationError;
+	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	
 	import dragonBones.core.DBObject;
@@ -33,6 +34,9 @@
 		
 		/** @private */
 		protected var _displayIndex:int;
+		
+		/** @private */
+		protected var _colorTransform:ColorTransform;
 		
 		/**
 		 * zOrder. Support decimal for ensure dynamically added slot work toghther with animation controled slot.  
@@ -183,6 +187,8 @@
 			_tweenZOrder = 0;
 			_offsetZOrder = 0;
 			_isShowDisplay = false;
+			
+			_colorTransform = new ColorTransform();
 			
 			_displayDataList = null;
 			_childArmature = null;
@@ -410,10 +416,46 @@
 					}
 				}
 				updateDisplayBlendMode(_blendMode);
-				//updateDisplayColor(_color);
+				updateDisplayColor(
+					_colorTransform.alphaOffset, _colorTransform.redOffset, _colorTransform.greenOffset, _colorTransform.blueOffset,
+					_colorTransform.alphaMultiplier, _colorTransform.redMultiplier, _colorTransform.greenMultiplier, _colorTransform.blueMultiplier
+				);
 				updateDisplayVisible(_visible);
 				//updateDisplayTransform();
 			}
+		}
+		
+		/**
+		 * @private
+		 * Updates the color of the display object.
+		 * @param a
+		 * @param r
+		 * @param g
+		 * @param b
+		 * @param aM
+		 * @param rM
+		 * @param gM
+		 * @param bM
+		 */
+		dragonBones_internal function updateDisplayColor(
+			aOffset:Number, 
+			rOffset:Number, 
+			gOffset:Number, 
+			bOffset:Number, 
+			aMultiplier:Number, 
+			rMultiplier:Number, 
+			gMultiplier:Number, 
+			bMultiplier:Number
+		):void
+		{
+			_colorTransform.alphaOffset = aOffset;
+			_colorTransform.redOffset = rOffset;
+			_colorTransform.greenOffset = gOffset;
+			_colorTransform.blueOffset = bOffset;
+			_colorTransform.alphaMultiplier = aMultiplier;
+			_colorTransform.redMultiplier = rMultiplier;
+			_colorTransform.greenMultiplier = gMultiplier;
+			_colorTransform.blueMultiplier = bMultiplier;
 		}
 		
 		
@@ -473,32 +515,6 @@
 			 * bone.visible && slot.visible && updateVisible
 			 * this._parent.visible && this._visible && value;
 			 */
-			throw new IllegalOperationError("Abstract method needs to be implemented in subclass!");
-		}
-		
-		/**
-		 * @private
-		 * Updates the color of the display object.
-		 * @param a
-		 * @param r
-		 * @param g
-		 * @param b
-		 * @param aM
-		 * @param rM
-		 * @param gM
-		 * @param bM
-		 */
-		dragonBones_internal function updateDisplayColor(
-			aOffset:Number, 
-			rOffset:Number, 
-			gOffset:Number, 
-			bOffset:Number, 
-			aMultiplier:Number, 
-			rMultiplier:Number, 
-			gMultiplier:Number, 
-			bMultiplier:Number
-		):void
-		{
 			throw new IllegalOperationError("Abstract method needs to be implemented in subclass!");
 		}
 		

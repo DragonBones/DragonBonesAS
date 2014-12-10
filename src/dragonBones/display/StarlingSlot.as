@@ -153,6 +153,7 @@
 		{
 			if(_starlingDisplay)
 			{
+				super.updateDisplayColor(aOffset, rOffset, gOffset, bOffset, aMultiplier, rMultiplier, gMultiplier, bMultiplier);
 				_starlingDisplay.alpha = aMultiplier;
 				if (_starlingDisplay is Quad)
 				{
