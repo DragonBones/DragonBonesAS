@@ -18,8 +18,10 @@ package dragonBones.utils
 	/** @private */
 	public final class DBDataUtil
 	{
+		
 		public static function transformArmatureData(armatureData:ArmatureData):void
 		{
+			/*
 			var boneDataList:Vector.<BoneData> = armatureData.boneDataList;
 			var i:int = boneDataList.length;
 			
@@ -36,6 +38,7 @@ package dragonBones.utils
 					}
 				}
 			}
+			*/
 		}
 		
 		public static function transformArmatureDataAnimations(armatureData:ArmatureData):void

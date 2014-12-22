@@ -21,7 +21,7 @@ package dragonBones.objects
 		public function BoneData()
 		{
 			length = 0;
-			global = new DBTransform();
+			//global = new DBTransform();
 			transform = new DBTransform();
 			inheritRotation = true;
 			inheritScale = false;
@@ -31,7 +31,7 @@ package dragonBones.objects
 		
 		public function dispose():void
 		{
-			global = null;
+			//global = null;
 			transform = null;
 			
 			if(_areaDataList)

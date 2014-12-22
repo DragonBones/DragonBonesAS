@@ -115,7 +115,7 @@
 				armatureData.addSkinData(parseSkinData(skinXML, data));
 			}
 			
-			DBDataUtil.transformArmatureData(armatureData);
+			//DBDataUtil.transformArmatureData(armatureData);
 			armatureData.sortBoneDataList();
 			
 			var animationXML:XML;

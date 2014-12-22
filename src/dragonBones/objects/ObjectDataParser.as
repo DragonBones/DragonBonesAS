@@ -114,7 +114,7 @@
 				armatureData.addSkinData(parseSkinData(skinObject, data));
 			}
 			
-			DBDataUtil.transformArmatureData(armatureData);
+			//DBDataUtil.transformArmatureData(armatureData);
 			armatureData.sortBoneDataList();
 			
 			var animationObject:Object;
@@ -169,8 +169,8 @@
 			boneData.inheritRotation = getBoolean(boneObject, ConstValues.A_INHERIT_ROTATION, true);
 			boneData.inheritScale = getBoolean(boneObject, ConstValues.A_INHERIT_SCALE, false);
 			
-			parseTransform(boneObject[ConstValues.TRANSFORM], boneData.global);
-			boneData.transform.copy(boneData.global);
+			parseTransform(boneObject[ConstValues.TRANSFORM], boneData.transform);
+			//boneData.transform.copy(boneData.global);
 			
 			for each(var rectangleObject:Object in boneObject[ConstValues.RECTANGLE])
 			{
