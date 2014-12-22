@@ -64,7 +64,7 @@
 		/**
 		 * Apply a smoothing to generated display. Select from TextureSmoothing class.
 		 */
-		public var displaySmoothing:String = TextureSmoothing.NONE;
+		public var displaySmoothing:String = TextureSmoothing.BILINEAR;
 
 		/**
 		 * Creates a new StarlingFactory instance.
