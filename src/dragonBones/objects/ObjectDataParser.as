@@ -91,22 +91,24 @@
 			var data:SkeletonData = new SkeletonData();
 			data.name = rawData[ConstValues.A_NAME];
 			
+			var isRelativeData:Boolean = rawData[ConstValues.A_IS_RELATIVE] == "1" ? true : false;
+			
 			for each(var armatureObject:Object in rawData[ConstValues.ARMATURE])
 			{
-				data.addArmatureData(parseArmatureData(armatureObject, data, frameRate, ifSkipAnimationData, outputAnimationDictionary));
+				data.addArmatureData(parseArmatureData(armatureObject, data, frameRate, isRelativeData, ifSkipAnimationData, outputAnimationDictionary));
 			}
 			
 			return data;
 		}
 		
-		private static function parseArmatureData(armatureObject:Object, data:SkeletonData, frameRate:uint, ifSkipAnimationData:Boolean, outputAnimationDictionary:Dictionary):ArmatureData
+		private static function parseArmatureData(armatureObject:Object, data:SkeletonData, frameRate:uint, isRelativeData:Boolean, ifSkipAnimationData:Boolean, outputAnimationDictionary:Dictionary):ArmatureData
 		{
 			var armatureData:ArmatureData = new ArmatureData();
 			armatureData.name = armatureObject[ConstValues.A_NAME];
 			
 			for each(var boneObject:Object in armatureObject[ConstValues.BONE])
 			{
-				armatureData.addBoneData(parseBoneData(boneObject));
+				armatureData.addBoneData(parseBoneData(boneObject, isRelativeData));
 			}
 			
 			for each(var skinObject:Object in armatureObject[ConstValues.SKIN])
@@ -114,7 +116,11 @@
 				armatureData.addSkinData(parseSkinData(skinObject, data));
 			}
 			
-			//DBDataUtil.transformArmatureData(armatureData);
+			if(!isRelativeData)
+			{
+				DBDataUtil.transformArmatureData(armatureData);
+			}
+			
 			armatureData.sortBoneDataList();
 			
 			var animationObject:Object;
@@ -130,7 +136,7 @@
 				{
 					if(index == 0)
 					{
-						armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate));
+						armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate, isRelativeData));
 					}
 					else if(outputAnimationDictionary != null)
 					{
@@ -143,7 +149,7 @@
 			{
 				for each(animationObject in armatureObject[ConstValues.ANIMATION])
 				{
-					armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate));
+					armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate, isRelativeData));
 				}
 			}
 			
@@ -160,7 +166,7 @@
 			return armatureData;
 		}
 		
-		private static function parseBoneData(boneObject:Object):BoneData
+		private static function parseBoneData(boneObject:Object, isRelativeData:Boolean):BoneData
 		{
 			var boneData:BoneData = new BoneData();
 			boneData.name = boneObject[ConstValues.A_NAME];
@@ -170,7 +176,10 @@
 			boneData.inheritScale = getBoolean(boneObject, ConstValues.A_INHERIT_SCALE, false);
 			
 			parseTransform(boneObject[ConstValues.TRANSFORM], boneData.transform);
-			//boneData.transform.copy(boneData.global);
+			if(!isRelativeData)//绝对数据
+			{
+				boneData.global.copy(boneData.transform);
+			}
 			
 			for each(var rectangleObject:Object in boneObject[ConstValues.RECTANGLE])
 			{
@@ -256,7 +265,7 @@
 		}
 		
 		/** @private */
-		dragonBones_internal static function parseAnimationData(animationObject:Object, armatureData:ArmatureData, frameRate:uint):AnimationData
+		dragonBones_internal static function parseAnimationData(animationObject:Object, armatureData:ArmatureData, frameRate:uint, isRelativeData:Boolean):AnimationData
 		{
 			var animationData:AnimationData = new AnimationData();
 			animationData.name = animationObject[ConstValues.A_NAME];
@@ -293,7 +302,7 @@
 			animationData.lastFrameDuration = lastFrameDuration;
 			
 			DBDataUtil.addHideTimeline(animationData, armatureData);
-			DBDataUtil.transformAnimationData(animationData, armatureData);
+			DBDataUtil.transformAnimationData(animationData, armatureData, isRelativeData);
 			
 			return animationData;
 		}
@@ -304,6 +313,8 @@
 			timeline.name = timelineObject[ConstValues.A_NAME];
 			timeline.scale = getNumber(timelineObject, ConstValues.A_SCALE, 1) || 0;
 			timeline.offset = getNumber(timelineObject, ConstValues.A_OFFSET, 0) || 0;
+			timeline.originPivot.x = getNumber(timelineObject[ConstValues.A_ORIGIN_PIVOT], ConstValues.A_X, 0) || 0;
+			timeline.originPivot.y = getNumber(timelineObject[ConstValues.A_ORIGIN_PIVOT], ConstValues.A_Y, 0) || 0;
 			timeline.duration = duration;
 			
 			for each(var frameObject:Object in timelineObject[ConstValues.FRAME])
@@ -340,8 +351,11 @@
 			//如果为NaN，则说明没有改变过zOrder
 			frame.zOrder = getNumber(frameObject, ConstValues.A_Z_ORDER, NaN);
 			
-			parseTransform(frameObject[ConstValues.TRANSFORM], frame.global, frame.pivot);
-			frame.transform.copy(frame.global);
+			parseTransform(frameObject[ConstValues.TRANSFORM], frame.transform, frame.pivot);
+			if(false)//绝对数据
+			{
+				frame.global.copy(frame.transform);
+			}
 			
 			frame.scaleOffset.x = getNumber(frameObject, ConstValues.A_SCALE_X_OFFSET, 0);
 			frame.scaleOffset.y = getNumber(frameObject, ConstValues.A_SCALE_Y_OFFSET, 0);

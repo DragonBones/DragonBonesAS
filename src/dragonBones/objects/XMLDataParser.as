@@ -115,7 +115,7 @@
 				armatureData.addSkinData(parseSkinData(skinXML, data));
 			}
 			
-			//DBDataUtil.transformArmatureData(armatureData);
+			DBDataUtil.transformArmatureData(armatureData);
 			armatureData.sortBoneDataList();
 			
 			var animationXML:XML;
@@ -293,7 +293,7 @@
 			animationData.lastFrameDuration = lastFrameDuration;
 			
 			DBDataUtil.addHideTimeline(animationData, armatureData);
-			DBDataUtil.transformAnimationData(animationData, armatureData);
+			DBDataUtil.transformAnimationData(animationData, armatureData, false);
 			
 			return animationData;
 		}

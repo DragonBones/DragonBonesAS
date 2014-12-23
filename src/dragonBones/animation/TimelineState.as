@@ -745,28 +745,32 @@ package dragonBones.animation
 				 * eachFrame.transform = eachFrame.transform - timeline.originTransform;
 				 * firstFrame.transform == 0;
 				 */
+				
 				if(_animationState.additiveBlending)
 				{
-					//additive blending
-					//singleFrame.transform (0)
-					_transform.x = 
-						_transform.y = 
-						_transform.skewX = 
-						_transform.skewY = 
-						_transform.scaleX = 
-						_transform.scaleY = 0;
+					_transform.x = currentFrame.transform.x;
+					_transform.y = currentFrame.transform.y;
+					_transform.skewX = currentFrame.transform.skewX;
+					_transform.skewY = currentFrame.transform.skewY;
+					_transform.scaleX = currentFrame.transform.scaleX;
+					_transform.scaleY = currentFrame.transform.scaleY;
 					
-					_pivot.x = 0;
-					_pivot.y = 0;
+					_pivot.x = currentFrame.pivot.x;
+					_pivot.y = currentFrame.pivot.y;
 				}
 				else
 				{
-					//normal blending
-					//timeline.originTransform + singleFrame.transform (0)
-					_transform.copy(_originTransform);
-					_pivot.x = _originPivot.x;
-					_pivot.y = _originPivot.y;
+					_transform.x = _originTransform.x + currentFrame.transform.x;
+					_transform.y = _originTransform.y + currentFrame.transform.y;
+					_transform.skewX = _originTransform.skewX + currentFrame.transform.skewX;
+					_transform.skewY = _originTransform.skewY + currentFrame.transform.skewY;
+					_transform.scaleX = _originTransform.scaleX + currentFrame.transform.scaleX;
+					_transform.scaleY = _originTransform.scaleY + currentFrame.transform.scaleY;
+					
+					_pivot.x = _originPivot.x + currentFrame.pivot.x;
+					_pivot.y = _originPivot.y + currentFrame.pivot.y;
 				}
+				
 				
 				_bone.invalidUpdate();
 				

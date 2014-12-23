@@ -23,6 +23,10 @@ package dragonBones.objects
 			_slotTimelineCachedMap = {};
 			
 			originTransform = new DBTransform();
+			
+			//to do 最后改成 1 1
+			originTransform.scaleX = 0;
+			originTransform.scaleY = 0;
 			originPivot = new Point();
 			offset = 0;
 			

@@ -130,7 +130,7 @@
 			return null;
 		}
 		
-		public static function parseAnimationDataByAnimationRawData(animationRawData:Object, armatureData:ArmatureData):AnimationData
+		public static function parseAnimationDataByAnimationRawData(animationRawData:Object, armatureData:ArmatureData, isRelativeData:Boolean = false):AnimationData
 		{
 			var animationData:AnimationData = armatureData.animationDataList[0];
 			
@@ -140,7 +140,7 @@
 			}
 			else
 			{
-				return ObjectDataParser.parseAnimationData(animationRawData, armatureData, animationData.frameRate);
+				return ObjectDataParser.parseAnimationData(animationRawData, armatureData, animationData.frameRate, isRelativeData);
 			}
 		}
 		

@@ -1,8 +1,5 @@
 package dragonBones.utils
 {
-	import flash.geom.Matrix;
-	import flash.geom.Point;
-	
 	import dragonBones.animation.TimelineState;
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.ArmatureData;
@@ -11,9 +8,13 @@ package dragonBones.utils
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.SkinData;
 	import dragonBones.objects.SlotData;
+	import dragonBones.objects.Timeline;
 	import dragonBones.objects.TransformFrame;
 	import dragonBones.objects.TransformTimeline;
 	import dragonBones.utils.TransformUtil;
+	
+	import flash.geom.Matrix;
+	import flash.geom.Point;
 	
 	/** @private */
 	public final class DBDataUtil
@@ -21,7 +22,7 @@ package dragonBones.utils
 		
 		public static function transformArmatureData(armatureData:ArmatureData):void
 		{
-			/*
+			
 			var boneDataList:Vector.<BoneData> = armatureData.boneDataList;
 			var i:int = boneDataList.length;
 			
@@ -38,7 +39,7 @@ package dragonBones.utils
 					}
 				}
 			}
-			*/
+			
 		}
 		
 		public static function transformArmatureDataAnimations(armatureData:ArmatureData):void
@@ -47,12 +48,24 @@ package dragonBones.utils
 			var i:int = animationDataList.length;
 			while(i --)
 			{
-				transformAnimationData(animationDataList[i], armatureData);
+				transformAnimationData(animationDataList[i], armatureData, false);
 			}
 		}
 		
-		public static function transformAnimationData(animationData:AnimationData, armatureData:ArmatureData):void
+		
+		public static function transformRelativeAnimationData(animationData:AnimationData, armatureData:ArmatureData):void
 		{
+			
+		}
+		
+		public static function transformAnimationData(animationData:AnimationData, armatureData:ArmatureData, isRelativeData:Boolean):void
+		{
+			if(isRelativeData)
+			{
+				transformRelativeAnimationData(animationData, armatureData);
+				return;
+			}
+			
 			var skinData:SkinData = armatureData.getSkinData(null);
 			var boneDataList:Vector.<BoneData> = armatureData.boneDataList;
 			var slotDataList:Vector.<SlotData>;
