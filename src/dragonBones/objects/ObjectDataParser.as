@@ -281,7 +281,7 @@
 			
 			for each(var frameObject:Object in animationObject[ConstValues.FRAME])
 			{
-				var frame:Frame = parseTransformFrame(frameObject, frameRate);
+				var frame:Frame = parseTransformFrame(frameObject, frameRate, isRelativeData);
 				animationData.addFrame(frame);
 			}
 			
@@ -290,7 +290,7 @@
 			var lastFrameDuration:int = animationData.duration;
 			for each(var timelineObject:Object in animationObject[ConstValues.TIMELINE])
 			{
-				var timeline:TransformTimeline = parseTransformTimeline(timelineObject, animationData.duration, frameRate);
+				var timeline:TransformTimeline = parseTransformTimeline(timelineObject, animationData.duration, frameRate, isRelativeData);
 				lastFrameDuration = Math.min(lastFrameDuration, timeline.frameList[timeline.frameList.length - 1].duration);
 				animationData.addTimeline(timeline);
 			}
@@ -307,7 +307,7 @@
 			return animationData;
 		}
 		
-		private static function parseTransformTimeline(timelineObject:Object, duration:int, frameRate:uint):TransformTimeline
+		private static function parseTransformTimeline(timelineObject:Object, duration:int, frameRate:uint, isRelativeData:Boolean):TransformTimeline
 		{
 			var timeline:TransformTimeline = new TransformTimeline();
 			timeline.name = timelineObject[ConstValues.A_NAME];
@@ -319,7 +319,7 @@
 			
 			for each(var frameObject:Object in timelineObject[ConstValues.FRAME])
 			{
-				var frame:TransformFrame = parseTransformFrame(frameObject, frameRate);
+				var frame:TransformFrame = parseTransformFrame(frameObject, frameRate, isRelativeData);
 				timeline.addFrame(frame);
 			}
 			
@@ -335,7 +335,7 @@
 			return frame;
 		}
 		
-		private static function parseTransformFrame(frameObject:Object, frameRate:uint):TransformFrame
+		private static function parseTransformFrame(frameObject:Object, frameRate:uint, isRelativeData:Boolean):TransformFrame
 		{
 			var frame:TransformFrame = new TransformFrame();
 			parseFrame(frameObject, frame, frameRate);
@@ -352,7 +352,7 @@
 			frame.zOrder = getNumber(frameObject, ConstValues.A_Z_ORDER, NaN);
 			
 			parseTransform(frameObject[ConstValues.TRANSFORM], frame.transform, frame.pivot);
-			if(false)//绝对数据
+			if(!isRelativeData)//绝对数据
 			{
 				frame.global.copy(frame.transform);
 			}
@@ -458,7 +458,7 @@
 		
 		private static function getNumber(data:Object, key:String, defaultValue:Number):Number
 		{
-			if(key in data)
+			if(data && key in data)
 			{
 				switch(String(data[key]))
 				{
