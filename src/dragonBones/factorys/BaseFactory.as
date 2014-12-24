@@ -350,8 +350,8 @@ package dragonBones.factorys
 				var boneData:BoneData = armatureData.boneDataList[i];
 				var bone:Bone = new Bone();
 				bone.name = boneData.name;
-				bone.inheritRotation = boneData.inheritRotation;
-				bone.inheritScale = boneData.inheritScale;
+				//bone.inheritRotation = boneData.inheritRotation;
+				//bone.inheritScale = boneData.inheritScale;
 				bone.origin.copy(boneData.transform);
 				if(armatureData.getBoneData(boneData.parent))
 				{

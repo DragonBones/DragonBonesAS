@@ -172,8 +172,8 @@
 			boneData.name = boneObject[ConstValues.A_NAME];
 			boneData.parent = boneObject[ConstValues.A_PARENT];
 			boneData.length = Number(boneObject[ConstValues.A_LENGTH]);
-			boneData.inheritRotation = getBoolean(boneObject, ConstValues.A_INHERIT_ROTATION, true);
-			boneData.inheritScale = getBoolean(boneObject, ConstValues.A_INHERIT_SCALE, false);
+			//boneData.inheritRotation = getBoolean(boneObject, ConstValues.A_INHERIT_ROTATION, true);
+			//boneData.inheritScale = getBoolean(boneObject, ConstValues.A_INHERIT_SCALE, false);
 			
 			parseTransform(boneObject[ConstValues.TRANSFORM], boneData.transform);
 			if(!isRelativeData)//绝对数据

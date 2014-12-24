@@ -35,7 +35,8 @@ package dragonBones.utils
 					if(parentBoneData)
 					{
 						boneData.transform.copy(boneData.global);
-						TransformUtil.transformPointWithParent(boneData.transform, parentBoneData.global);
+						//TransformUtil.transformPointWithParent(boneData.transform, parentBoneData.global);
+						TransformUtil.globalToLocal(boneData.transform, parentBoneData.global);
 					}
 				}
 			}

@@ -1,8 +1,5 @@
 ﻿package dragonBones
 {
-	import flash.geom.Matrix;
-	import flash.geom.Point;
-	
 	import dragonBones.animation.AnimationState;
 	import dragonBones.animation.TimelineState;
 	import dragonBones.core.DBObject;
@@ -15,6 +12,10 @@
 	import dragonBones.objects.FrameCached;
 	import dragonBones.objects.TimelineCached;
 	import dragonBones.objects.TransformFrame;
+	import dragonBones.utils.TransformUtil;
+	
+	import flash.geom.Matrix;
+	import flash.geom.Point;
 	
 	use namespace dragonBones_internal;
 	
@@ -104,6 +105,14 @@
 		/** @private */
 		protected var _timelineStateList:Vector.<TimelineState>;
 		
+		private var _tempMatrix:Matrix;
+		dragonBones_internal var _globalTransformMatrixForChild:Matrix;
+		
+		
+		public var applyOffsetTranslationToChild:Boolean = false;
+		public var applyOffsetRotationToChild:Boolean = false;
+		public var applyOffsetScaleToChild:Boolean = false;
+		
 		/** @private */
 		override public function set visible(value:Boolean):void
 		{
@@ -163,7 +172,8 @@
 			_frameCachedDuration = -1;
 			
 			this.inheritRotation = true;
-			this.inheritScale = false;
+			this.inheritScale = true;
+			this.inheritTranslation = true;
 		}
 		
 		/**
@@ -383,6 +393,7 @@
 			
 			blendingTimeline();
 			
+			/*
 			this._global.scaleX = (this._origin.scaleX + _tween.scaleX) * this._offset.scaleX;
 			this._global.scaleY = (this._origin.scaleY + _tween.scaleY) * this._offset.scaleY;
 			
@@ -426,16 +437,92 @@
 			this._globalTransformMatrix.c = -this._global.scaleY * Math.sin(this._global.skewX);
 			this._globalTransformMatrix.d = this._global.scaleY * Math.cos(this._global.skewX);
 			
-			/*
-			this._globalTransformMatrix.a = this._offset.scaleX * Math.cos(this._global.skewY);
-			this._globalTransformMatrix.b = this._offset.scaleX * Math.sin(this._global.skewY);
-			this._globalTransformMatrix.c = -this._offset.scaleY * Math.sin(this._global.skewX);
-			this._globalTransformMatrix.d = this._offset.scaleY * Math.cos(this._global.skewX);
-			*/
-			
 			if(_frameCachedDuration > 0)    // && _frameCachedPosition >= 0
 			{
 				_timelineCached.addFrame(this._global, this._globalTransformMatrix, _frameCachedPosition, _frameCachedDuration);
+			}
+			*/
+			
+		//计算global(相对transform)
+			_global.scaleX = (this._origin.scaleX + _tween.scaleX) * this._offset.scaleX;
+			_global.scaleY = (this._origin.scaleY + _tween.scaleY) * this._offset.scaleY;
+			_global.skewX = this._origin.skewX + _tween.skewX + this._offset.skewX;
+			_global.skewY = this._origin.skewY + _tween.skewY + this._offset.skewY;
+			_global.x = this._origin.x + _tween.x + this._offset.x;
+			_global.y = this._origin.y + _tween.y + this._offset.y;
+			TransformUtil.transformToMatrix(_global, _globalTransformMatrix, true);
+			
+			if(this.parent && (this.inheritTranslation || this.inheritRotation || this.inheritScale))
+			{
+				var parentGlobalTransformMatrix:Matrix;
+				if(this.inheritTranslation && this.inheritRotation && this.inheritScale)
+				{
+					parentGlobalTransformMatrix = this._parent._globalTransformMatrixForChild;
+				}
+				else
+				{
+					if(!this.inheritTranslation)
+					{}
+					if(!this.inheritScale)
+					{}
+					if(!this.inheritRotation)
+					{}
+				}
+				_globalTransformMatrix.concat(parentGlobalTransformMatrix);
+				TransformUtil.matrixToTransform(_globalTransformMatrix, _global, true, true);
+			}
+			
+			
+		//计算globalForChild
+			var ifExistOffset:Boolean = _offset.scaleX != 1 || _offset.scaleY != 1 || 
+				_offset.skewX != 0 || _offset.skewY != 0 ||
+				_offset.x != 0 || _offset.y != 0;
+			
+			if(!ifExistOffset || (applyOffsetTranslationToChild && applyOffsetScaleToChild && applyOffsetRotationToChild))
+			{
+				_globalTransformMatrixForChild = _globalTransformMatrix;
+			}
+			else
+			{
+				if(!_tempMatrix)
+				{
+					_tempMatrix = new Matrix();
+				}
+				_globalTransformMatrixForChild = _tempMatrix;
+				_globalTransformMatrixForChild.copyFrom(parentGlobalTransformMatrix);
+				
+				if(applyOffsetTranslationToChild)
+				{
+					DBObject.helpTransform.x = _global.x;
+					DBObject.helpTransform.y = _global.y;
+				}
+				else
+				{
+					DBObject.helpTransform.x = this._origin.x + _tween.x;
+					DBObject.helpTransform.y = this._origin.y + _tween.y;
+				}
+				
+				if(applyOffsetScaleToChild)
+				{
+					DBObject.helpTransform.scaleX = _global.scaleX;
+					DBObject.helpTransform.scaleY = _global.scaleY;
+				}
+				else
+				{
+					DBObject.helpTransform.scaleX = this._origin.scaleX + _tween.scaleX;
+					DBObject.helpTransform.scaleY = this._origin.scaleY + _tween.scaleY;
+				}
+				
+				if(applyOffsetRotationToChild)
+				{
+					DBObject.helpTransform.skewX = _global.skewX;
+					DBObject.helpTransform.skewY = _global.skewY;
+				}
+				else
+				{
+					DBObject.helpTransform.skewX = this._origin.skewX + _tween.skewX;
+					DBObject.helpTransform.skewY = this._origin.skewY + _tween.skewY;
+				}
 			}
 		}
 		
