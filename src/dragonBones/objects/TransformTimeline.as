@@ -24,9 +24,8 @@ package dragonBones.objects
 			
 			originTransform = new DBTransform();
 			
-			//to do 最后改成 1 1
-			originTransform.scaleX = 0;
-			originTransform.scaleY = 0;
+			originTransform.scaleX = 1;
+			originTransform.scaleY = 1;
 			originPivot = new Point();
 			offset = 0;
 			

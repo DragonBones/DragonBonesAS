@@ -105,12 +105,16 @@
 		/** @private */
 		protected var _timelineStateList:Vector.<TimelineState>;
 		
-		private var _tempMatrix:Matrix;
+		private static var _tempMatrix:Matrix = new Matrix();
+		private static var _tempTransform:DBTransform = new DBTransform();
+		
+		private var _tempGlobalTransformForChild:DBTransform;
+		dragonBones_internal var _globalTransformForChild:DBTransform;
+		private var _tempGlobalTransformMatrixForChild:Matrix;
 		dragonBones_internal var _globalTransformMatrixForChild:Matrix;
 		
-		
-		public var applyOffsetTranslationToChild:Boolean = false;
-		public var applyOffsetRotationToChild:Boolean = false;
+		public var applyOffsetTranslationToChild:Boolean = true;
+		public var applyOffsetRotationToChild:Boolean = true;
 		public var applyOffsetScaleToChild:Boolean = false;
 		
 		/** @private */
@@ -158,7 +162,7 @@
 			
 			_tween = new DBTransform();
 			_tweenPivot = new Point();
-			_tween.scaleX = _tween.scaleY = 0;
+			_tween.scaleX = _tween.scaleY = 1;
 			
 			_boneList = new Vector.<Bone>;
 			_boneList.fixed = true;
@@ -443,85 +447,103 @@
 			}
 			*/
 			
-		//计算global(相对transform)
-			_global.scaleX = (this._origin.scaleX + _tween.scaleX) * this._offset.scaleX;
-			_global.scaleY = (this._origin.scaleY + _tween.scaleY) * this._offset.scaleY;
+		//计算global
+			_global.scaleX = this._origin.scaleX * _tween.scaleX * this._offset.scaleX;
+			_global.scaleY = this._origin.scaleY * _tween.scaleY * this._offset.scaleY;
 			_global.skewX = this._origin.skewX + _tween.skewX + this._offset.skewX;
 			_global.skewY = this._origin.skewY + _tween.skewY + this._offset.skewY;
 			_global.x = this._origin.x + _tween.x + this._offset.x;
 			_global.y = this._origin.y + _tween.y + this._offset.y;
 			TransformUtil.transformToMatrix(_global, _globalTransformMatrix, true);
 			
+			var parentGlobalTransform:DBTransform;
+			var parentGlobalTransformMatrix:Matrix;
 			if(this.parent && (this.inheritTranslation || this.inheritRotation || this.inheritScale))
 			{
-				var parentGlobalTransformMatrix:Matrix;
-				if(this.inheritTranslation && this.inheritRotation && this.inheritScale)
+				parentGlobalTransform = this._parent._globalTransformForChild;
+				parentGlobalTransformMatrix = this._parent._globalTransformMatrixForChild;
+				
+				if(!this.inheritTranslation || !this.inheritRotation || !this.inheritScale)
 				{
-					parentGlobalTransformMatrix = this._parent._globalTransformMatrixForChild;
-				}
-				else
-				{
+					parentGlobalTransform = _tempTransform;
+					parentGlobalTransform.copy(this._parent._globalTransformForChild);
 					if(!this.inheritTranslation)
-					{}
+					{
+						parentGlobalTransform.x = 0;
+						parentGlobalTransform.y = 0;
+					}
 					if(!this.inheritScale)
-					{}
+					{
+						parentGlobalTransform.scaleX = 1;
+						parentGlobalTransform.scaleY = 1;
+					}
 					if(!this.inheritRotation)
-					{}
+					{
+						parentGlobalTransform.skewX = 0;
+						parentGlobalTransform.skewY = 0;
+					}
+					
+					parentGlobalTransformMatrix = _tempMatrix;
+					TransformUtil.transformToMatrix(parentGlobalTransform, parentGlobalTransformMatrix, true);
 				}
 				_globalTransformMatrix.concat(parentGlobalTransformMatrix);
-				TransformUtil.matrixToTransform(_globalTransformMatrix, _global, true, true);
+				TransformUtil.matrixToTransform(_globalTransformMatrix, _global, _global.scaleX * parentGlobalTransform.scaleX >= 0, _global.scaleY * parentGlobalTransform.scaleY >= 0);
 			}
 			
-			
 		//计算globalForChild
-			var ifExistOffset:Boolean = _offset.scaleX != 1 || _offset.scaleY != 1 || 
-				_offset.skewX != 0 || _offset.skewY != 0 ||
-				_offset.x != 0 || _offset.y != 0;
+			var ifExistOffsetTranslation:Boolean = _offset.x != 0 || _offset.y != 0;
+			var ifExistOffsetScale:Boolean = _offset.scaleX != 0 || _offset.scaleY != 0;
+			var ifExistOffsetRotation:Boolean = _offset.skewX != 0 || _offset.skewY != 0;
 			
-			if(!ifExistOffset || (applyOffsetTranslationToChild && applyOffsetScaleToChild && applyOffsetRotationToChild))
+			if(	(!ifExistOffsetTranslation || applyOffsetTranslationToChild) &&
+				(!ifExistOffsetScale || applyOffsetScaleToChild) &&
+				(!ifExistOffsetRotation || applyOffsetRotationToChild))
 			{
+				_globalTransformForChild = _global;
 				_globalTransformMatrixForChild = _globalTransformMatrix;
 			}
 			else
 			{
-				if(!_tempMatrix)
+				if(!_tempGlobalTransformForChild)
 				{
-					_tempMatrix = new Matrix();
+					_tempGlobalTransformForChild = new DBTransform();
 				}
-				_globalTransformMatrixForChild = _tempMatrix;
-				_globalTransformMatrixForChild.copyFrom(parentGlobalTransformMatrix);
+				_globalTransformForChild = _tempGlobalTransformForChild;
+				
+				if(!_tempGlobalTransformMatrixForChild)
+				{
+					_tempGlobalTransformMatrixForChild = new Matrix();
+				}
+				_globalTransformMatrixForChild = _tempGlobalTransformMatrixForChild;
+				
+				_globalTransformForChild.x = this._origin.x + _tween.x;
+				_globalTransformForChild.y = this._origin.y + _tween.y;
+				_globalTransformForChild.scaleX = this._origin.scaleX * _tween.scaleX;
+				_globalTransformForChild.scaleY = this._origin.scaleY * _tween.scaleY;
+				_globalTransformForChild.skewX = this._origin.skewX + _tween.skewX;
+				_globalTransformForChild.skewY = this._origin.skewY + _tween.skewY;
 				
 				if(applyOffsetTranslationToChild)
 				{
-					DBObject.helpTransform.x = _global.x;
-					DBObject.helpTransform.y = _global.y;
+					_globalTransformForChild.x += this._offset.x;
+					_globalTransformForChild.y += this._offset.y;
 				}
-				else
-				{
-					DBObject.helpTransform.x = this._origin.x + _tween.x;
-					DBObject.helpTransform.y = this._origin.y + _tween.y;
-				}
-				
 				if(applyOffsetScaleToChild)
 				{
-					DBObject.helpTransform.scaleX = _global.scaleX;
-					DBObject.helpTransform.scaleY = _global.scaleY;
+					_globalTransformForChild.scaleX *= this._offset.scaleX;
+					_globalTransformForChild.scaleY *= this._offset.scaleY;
 				}
-				else
-				{
-					DBObject.helpTransform.scaleX = this._origin.scaleX + _tween.scaleX;
-					DBObject.helpTransform.scaleY = this._origin.scaleY + _tween.scaleY;
-				}
-				
 				if(applyOffsetRotationToChild)
 				{
-					DBObject.helpTransform.skewX = _global.skewX;
-					DBObject.helpTransform.skewY = _global.skewY;
+					_globalTransformForChild.skewX += this._offset.skewX;
+					_globalTransformForChild.skewY += this._offset.skewY;
 				}
-				else
+				
+				TransformUtil.transformToMatrix(_globalTransformForChild, _globalTransformMatrixForChild, true);
+				if(parentGlobalTransformMatrix)
 				{
-					DBObject.helpTransform.skewX = this._origin.skewX + _tween.skewX;
-					DBObject.helpTransform.skewY = this._origin.skewY + _tween.skewY;
+					_globalTransformMatrixForChild.concat(parentGlobalTransformMatrix);
+					TransformUtil.matrixToTransform(_globalTransformMatrixForChild, _globalTransformForChild, _globalTransformForChild.scaleX * parentGlobalTransform.scaleX >= 0, _globalTransformForChild.scaleY * parentGlobalTransform.scaleY >= 0 );
 				}
 			}
 		}
@@ -660,8 +682,8 @@
 				_tween.y = transform.y * weight;
 				_tween.skewX = transform.skewX * weight;
 				_tween.skewY = transform.skewY * weight;
-				_tween.scaleX = transform.scaleX * weight;
-				_tween.scaleY = transform.scaleY * weight;
+				_tween.scaleX = 1 + (transform.scaleX - 1) * weight;
+				_tween.scaleY = 1 + (transform.scaleY - 1) * weight;
 				
 				_tweenPivot.x = pivot.x * weight;
 				_tweenPivot.y = pivot.y * weight;
@@ -672,8 +694,8 @@
 				var y:Number = 0;
 				var skewX:Number = 0;
 				var skewY:Number = 0;
-				var scaleX:Number = 0;
-				var scaleY:Number = 0;
+				var scaleX:Number = 1;
+				var scaleY:Number = 1;
 				var pivotX:Number = 0;
 				var pivotY:Number = 0;
 				
@@ -715,8 +737,8 @@
 						y += transform.y * weight;
 						skewX += transform.skewX * weight;
 						skewY += transform.skewY * weight;
-						scaleX += transform.scaleX * weight;
-						scaleY += transform.scaleY * weight;
+						scaleX += (transform.scaleX - 1) * weight;
+						scaleY += (transform.scaleY - 1) * weight;
 						pivotX += pivot.x * weight;
 						pivotY += pivot.y * weight;
 						

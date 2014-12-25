@@ -40,7 +40,6 @@ package dragonBones.utils
 					}
 				}
 			}
-			
 		}
 		
 		public static function transformArmatureDataAnimations(armatureData:ArmatureData):void
@@ -52,7 +51,6 @@ package dragonBones.utils
 				transformAnimationData(animationDataList[i], armatureData, false);
 			}
 		}
-		
 		
 		public static function transformRelativeAnimationData(animationData:AnimationData, armatureData:ArmatureData):void
 		{
@@ -111,8 +109,8 @@ package dragonBones.utils
 					frame.transform.y -= boneData.transform.y;
 					frame.transform.skewX -= boneData.transform.skewX;
 					frame.transform.skewY -= boneData.transform.skewY;
-					frame.transform.scaleX -= boneData.transform.scaleX;
-					frame.transform.scaleY -= boneData.transform.scaleY;
+					frame.transform.scaleX /= boneData.transform.scaleX;
+					frame.transform.scaleY /= boneData.transform.scaleY;
 					
 					if(!timeline.transformed)
 					{
@@ -137,8 +135,8 @@ package dragonBones.utils
 					frame.transform.y -= originTransform.y;
 					frame.transform.skewX = TransformUtil.formatRadian(frame.transform.skewX - originTransform.skewX);
 					frame.transform.skewY = TransformUtil.formatRadian(frame.transform.skewY - originTransform.skewY);
-					frame.transform.scaleX -= originTransform.scaleX;
-					frame.transform.scaleY -= originTransform.scaleY;
+					frame.transform.scaleX /= originTransform.scaleX;
+					frame.transform.scaleY /= originTransform.scaleY;
 					
 					if(!timeline.transformed)
 					{
@@ -228,15 +226,41 @@ package dragonBones.utils
 					
 					var i:int = parentTimelineList.length;
 					
-					var helpMatrix:Matrix = new Matrix();
+					//var helpMatrix:Matrix = new Matrix();
 					var globalTransform:DBTransform;
+					var globalTransformMatrix:Matrix = new Matrix();
+					
 					var currentTransform:DBTransform = new DBTransform();
+					var currentTransformMatrix:Matrix = new Matrix();
+					
 					while(i --)
 					{
 						parentTimeline = parentTimelineList[i];
 						parentData = parentDataList[i];
 						getTimelineTransform(parentTimeline, frame.position, currentTransform, !globalTransform);
 						
+						if(!globalTransform)
+						{
+							globalTransform = new DBTransform();
+							globalTransform.copy(currentTransform);	
+						}
+						else
+						{
+							currentTransform.x += parentTimeline.originTransform.x + parentData.transform.x;
+							currentTransform.y += parentTimeline.originTransform.y + parentData.transform.y;
+							
+							currentTransform.skewX += parentTimeline.originTransform.skewX + parentData.transform.skewX;
+							currentTransform.skewY += parentTimeline.originTransform.skewY + parentData.transform.skewY;
+							
+							currentTransform.scaleX *= parentTimeline.originTransform.scaleX * parentData.transform.scaleX;
+							currentTransform.scaleY *= parentTimeline.originTransform.scaleY * parentData.transform.scaleY;
+							
+							TransformUtil.transformToMatrix(currentTransform, currentTransformMatrix, true);
+							currentTransformMatrix.concat(globalTransformMatrix);
+							TransformUtil.matrixToTransform(currentTransformMatrix, globalTransform, currentTransform.scaleX * globalTransform.scaleX >= 0, currentTransform.scaleY * globalTransform.scaleY >= 0);
+						}
+						TransformUtil.transformToMatrix(globalTransform, globalTransformMatrix, true);
+						/*
 						if(globalTransform)
 						{
 							//if(inheritRotation)
@@ -269,9 +293,9 @@ package dragonBones.utils
 						}
 						
 						TransformUtil.transformToMatrix(globalTransform, helpMatrix, true);
+					*/
 					}
 					TransformUtil.transformPointWithParent(frame.transform, globalTransform);
-					
 				}
 			}
 		}

@@ -39,8 +39,6 @@ package dragonBones.core
 		/** @private */
 		dragonBones_internal var _globalTransformMatrix:Matrix;
 		
-		/** @private */
-		dragonBones_internal static var helpTransform:DBTransform = new DBTransform();
 		/**
 		 * This DBObject instance global transform instance.
 		 * @see dragonBones.objects.DBTransform

@@ -159,8 +159,8 @@ package dragonBones.animation
 			
 			_transform.x = 0;
 			_transform.y = 0;
-			_transform.scaleX = 0;
-			_transform.scaleY = 0;
+			_transform.scaleX = 1;
+			_transform.scaleY = 1;
 			_transform.skewX = 0;
 			_transform.skewY = 0;
 			_pivot.x = 0;
@@ -168,8 +168,8 @@ package dragonBones.animation
 			
 			_durationTransform.x = 0;
 			_durationTransform.y = 0;
-			_durationTransform.scaleX = 0;
-			_durationTransform.scaleY = 0;
+			_durationTransform.scaleX = 1;
+			_durationTransform.scaleY = 1;
 			_durationTransform.skewX = 0;
 			_durationTransform.skewY = 0;
 			_durationPivot.x = 0;
@@ -547,8 +547,8 @@ package dragonBones.animation
 						_transform.y = _originTransform.y + currentFrame.transform.y;
 						_transform.skewX = _originTransform.skewX + currentFrame.transform.skewX;
 						_transform.skewY = _originTransform.skewY + currentFrame.transform.skewY;
-						_transform.scaleX = _originTransform.scaleX + currentFrame.transform.scaleX;
-						_transform.scaleY = _originTransform.scaleY + currentFrame.transform.scaleY;
+						_transform.scaleX = _originTransform.scaleX * currentFrame.transform.scaleX;
+						_transform.scaleY = _originTransform.scaleY * currentFrame.transform.scaleY;
 						
 						_pivot.x = _originPivot.x + currentFrame.pivot.x;
 						_pivot.y = _originPivot.y + currentFrame.pivot.y;
@@ -566,8 +566,8 @@ package dragonBones.animation
 				}
 				else
 				{
-					_transform.scaleX = _originTransform.scaleX + currentFrame.transform.scaleX;
-					_transform.scaleY = _originTransform.scaleY + currentFrame.transform.scaleY;
+					_transform.scaleX = _originTransform.scaleX * currentFrame.transform.scaleX;
+					_transform.scaleY = _originTransform.scaleY * currentFrame.transform.scaleY;
 				}
 			}
 			
@@ -635,8 +635,8 @@ package dragonBones.animation
 						_transform.skewY = _originTransform.skewY + currentTransform.skewY + _durationTransform.skewY * progress;
 						if(_tweenScale)
 						{
-							_transform.scaleX = _originTransform.scaleX + currentTransform.scaleX + _durationTransform.scaleX * progress;
-							_transform.scaleY = _originTransform.scaleY + currentTransform.scaleY + _durationTransform.scaleY * progress;
+							_transform.scaleX = _originTransform.scaleX * currentTransform.scaleX + _durationTransform.scaleX * progress;
+							_transform.scaleY = _originTransform.scaleY * currentTransform.scaleY + _durationTransform.scaleY * progress;
 						}
 						
 						_pivot.x = _originPivot.x + currentPivot.x + _durationPivot.x * progress;
@@ -764,8 +764,8 @@ package dragonBones.animation
 					_transform.y = _originTransform.y + currentFrame.transform.y;
 					_transform.skewX = _originTransform.skewX + currentFrame.transform.skewX;
 					_transform.skewY = _originTransform.skewY + currentFrame.transform.skewY;
-					_transform.scaleX = _originTransform.scaleX + currentFrame.transform.scaleX;
-					_transform.scaleY = _originTransform.scaleY + currentFrame.transform.scaleY;
+					_transform.scaleX = _originTransform.scaleX * currentFrame.transform.scaleX;
+					_transform.scaleY = _originTransform.scaleY * currentFrame.transform.scaleY;
 					
 					_pivot.x = _originPivot.x + currentFrame.pivot.x;
 					_pivot.y = _originPivot.y + currentFrame.pivot.y;
