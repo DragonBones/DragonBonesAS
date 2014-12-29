@@ -19,10 +19,8 @@ package dragonBones.utils
 	/** @private */
 	public final class DBDataUtil
 	{
-		
 		public static function transformArmatureData(armatureData:ArmatureData):void
 		{
-			
 			var boneDataList:Vector.<BoneData> = armatureData.boneDataList;
 			var i:int = boneDataList.length;
 			
@@ -295,7 +293,8 @@ package dragonBones.utils
 						TransformUtil.transformToMatrix(globalTransform, helpMatrix, true);
 					*/
 					}
-					TransformUtil.transformPointWithParent(frame.transform, globalTransform);
+					TransformUtil.globalToLocal(frame.transform, globalTransform);
+					//TransformUtil.transformPointWithParent(frame.transform, globalTransform);
 				}
 			}
 		}
