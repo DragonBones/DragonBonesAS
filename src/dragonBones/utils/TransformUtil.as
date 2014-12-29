@@ -10,11 +10,12 @@ package dragonBones.utils
 		private static const HALF_PI:Number = Math.PI * 0.5;
 		private static const DOUBLE_PI:Number = Math.PI * 2;
 		
-		private static const _helpMatrix:Matrix = new Matrix();
+		//private static const _helpMatrix:Matrix = new Matrix();
 		
 		private static const _helpTransformMatrix:Matrix = new Matrix();
 		private static const _helpParentTransformMatrix:Matrix = new Matrix();
 		
+		/*
 		public static function transformPointWithParent(transform:DBTransform, parent:DBTransform):void
 		{
 			transformToMatrix(parent, _helpMatrix, true);
@@ -29,7 +30,7 @@ package dragonBones.utils
 			transform.skewX = formatRadian(transform.skewX - parent.skewX);
 			transform.skewY = formatRadian(transform.skewY - parent.skewY);
 		}
-		
+		*/
 		public static function transformToMatrix(transform:DBTransform, matrix:Matrix, keepScale:Boolean = false):void
 		{
 			if(keepScale)
