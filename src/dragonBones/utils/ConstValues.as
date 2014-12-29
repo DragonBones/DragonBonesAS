@@ -5,6 +5,7 @@
 	final public class ConstValues
 	{
 		public static const ANGLE_TO_RADIAN:Number = Math.PI / 180;
+		public static const RADIAN_TO_ANGLE:Number = 180 / Math.PI;
 		
 		public static const DRAGON_BONES:String = "dragonBones";
 		public static const ARMATURE:String = "armature";
