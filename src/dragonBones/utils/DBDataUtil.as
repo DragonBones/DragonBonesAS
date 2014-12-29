@@ -33,7 +33,6 @@ package dragonBones.utils
 					if(parentBoneData)
 					{
 						boneData.transform.copy(boneData.global);
-						//TransformUtil.transformPointWithParent(boneData.transform, parentBoneData.global);
 						TransformUtil.globalToLocal(boneData.transform, parentBoneData.global);
 					}
 				}
@@ -199,12 +198,6 @@ package dragonBones.utils
 				var parentTimeline:TransformTimeline = animationData.getTimeline(parentData.name);
 				if(parentTimeline)
 				{
-					/*
-					var currentTransform:DBTransform = new DBTransform();
-					getTimelineTransform(parentTimeline, frame.position, currentTransform, true);
-					TransformUtil.transformPointWithParent(frame.transform, currentTransform);
-					*/
-					
 					var parentTimelineList:Vector.<TransformTimeline> = new Vector.<TransformTimeline>;
 					var parentDataList:Vector.<BoneData> = new Vector.<BoneData>;
 					while(parentTimeline)
@@ -258,43 +251,8 @@ package dragonBones.utils
 							TransformUtil.matrixToTransform(currentTransformMatrix, globalTransform, currentTransform.scaleX * globalTransform.scaleX >= 0, currentTransform.scaleY * globalTransform.scaleY >= 0);
 						}
 						TransformUtil.transformToMatrix(globalTransform, globalTransformMatrix, true);
-						/*
-						if(globalTransform)
-						{
-							//if(inheritRotation)
-							//{
-								globalTransform.skewX += currentTransform.skewX + parentTimeline.originTransform.skewX + parentData.transform.skewX;
-								globalTransform.skewY += currentTransform.skewY + parentTimeline.originTransform.skewY + parentData.transform.skewY;
-							//}
-							
-							//if(inheritScale)
-							//{
-							//	globalTransform.scaleX *= currentTransform.scaleX + parentTimeline.originTransform.scaleX;
-							//	globalTransform.scaleY *= currentTransform.scaleY + parentTimeline.originTransform.scaleY;
-							//}
-							//else
-							//{
-								globalTransform.scaleX = currentTransform.scaleX + parentTimeline.originTransform.scaleX + parentData.transform.scaleX;
-								globalTransform.scaleY = currentTransform.scaleY + parentTimeline.originTransform.scaleY + parentData.transform.scaleY;
-							//}
-								
-							var x:Number = currentTransform.x + parentTimeline.originTransform.x + parentData.transform.x;
-							var y:Number = currentTransform.y + parentTimeline.originTransform.y + parentData.transform.y;
-							
-							globalTransform.x = helpMatrix.a * x + helpMatrix.c * y + helpMatrix.tx;
-							globalTransform.y = helpMatrix.d * y + helpMatrix.b * x + helpMatrix.ty;
-						}
-						else
-						{
-							globalTransform = new DBTransform();
-							globalTransform.copy(currentTransform);
-						}
-						
-						TransformUtil.transformToMatrix(globalTransform, helpMatrix, true);
-					*/
 					}
 					TransformUtil.globalToLocal(frame.transform, globalTransform);
-					//TransformUtil.transformPointWithParent(frame.transform, globalTransform);
 				}
 			}
 		}
