@@ -136,7 +136,7 @@
 			
 			if(animationRawData is XML)
 			{
-				return XMLDataParser.parseAnimationData((animationRawData as XML), armatureData, animationData.frameRate);
+				return XMLDataParser.parseAnimationData((animationRawData as XML), armatureData, animationData.frameRate, isRelativeData);
 			}
 			else
 			{

@@ -7,16 +7,16 @@
 	 * @version 2.0
 	 */
 	
-	import flash.geom.ColorTransform;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
-	import flash.utils.Dictionary;
-	
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.textures.TextureData;
 	import dragonBones.utils.ConstValues;
 	import dragonBones.utils.DBDataUtil;
+	
+	import flash.geom.ColorTransform;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
+	import flash.utils.Dictionary;
 	
 	use namespace dragonBones_internal;
 	
@@ -92,22 +92,23 @@
 			
 			var data:SkeletonData = new SkeletonData();
 			data.name = rawData.@[ConstValues.A_NAME];
+			var isRelativeData:Boolean = rawData.@[ConstValues.A_IS_RELATIVE] == "1" ? true : false;
 			for each(var armatureXML:XML in rawData[ConstValues.ARMATURE])
 			{
-				data.addArmatureData(parseArmatureData(armatureXML, data, frameRate, ifSkipAnimationData, outputAnimationDictionary));
+				data.addArmatureData(parseArmatureData(armatureXML, data, frameRate, isRelativeData, ifSkipAnimationData, outputAnimationDictionary));
 			}
 			
 			return data;
 		}
 		
-		private static function parseArmatureData(armatureXML:XML, data:SkeletonData, frameRate:uint, ifSkipAnimationData:Boolean, outputAnimationDictionary:Dictionary):ArmatureData
+		private static function parseArmatureData(armatureXML:XML, data:SkeletonData, frameRate:uint, isRelativeData:Boolean, ifSkipAnimationData:Boolean, outputAnimationDictionary:Dictionary):ArmatureData
 		{
 			var armatureData:ArmatureData = new ArmatureData();
 			armatureData.name = armatureXML.@[ConstValues.A_NAME];
 			
 			for each(var boneXML:XML in armatureXML[ConstValues.BONE])
 			{
-				armatureData.addBoneData(parseBoneData(boneXML));
+				armatureData.addBoneData(parseBoneData(boneXML, isRelativeData));
 			}
 			
 			for each(var skinXML:XML in armatureXML[ConstValues.SKIN])
@@ -115,7 +116,10 @@
 				armatureData.addSkinData(parseSkinData(skinXML, data));
 			}
 			
-			DBDataUtil.transformArmatureData(armatureData);
+			if(!isRelativeData)
+			{
+				DBDataUtil.transformArmatureData(armatureData);
+			}
 			armatureData.sortBoneDataList();
 			
 			var animationXML:XML;
@@ -131,7 +135,7 @@
 				{
 					if(index == 0)
 					{
-						armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate));
+						armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate, isRelativeData));
 					}
 					else if(outputAnimationDictionary != null)
 					{
@@ -144,7 +148,7 @@
 			{
 				for each(animationXML in armatureXML[ConstValues.ANIMATION])
 				{
-					armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate));
+					armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate, isRelativeData));
 				}
 			}
 			
@@ -161,17 +165,20 @@
 			return armatureData;
 		}
 		
-		private static function parseBoneData(boneXML:XML):BoneData
+		private static function parseBoneData(boneXML:XML, isRelativeData:Boolean):BoneData
 		{
 			var boneData:BoneData = new BoneData();
 			boneData.name = boneXML.@[ConstValues.A_NAME];
 			boneData.parent = boneXML.@[ConstValues.A_PARENT];
 			boneData.length = Number(boneXML.@[ConstValues.A_LENGTH]);
 			boneData.inheritRotation = getBoolean(boneXML, ConstValues.A_INHERIT_ROTATION, true);
-			boneData.inheritScale = getBoolean(boneXML, ConstValues.A_INHERIT_SCALE, false);
+			boneData.inheritScale = getBoolean(boneXML, ConstValues.A_INHERIT_SCALE, true);
 			
-			parseTransform(boneXML[ConstValues.TRANSFORM][0], boneData.global);
-			boneData.transform.copy(boneData.global);
+			parseTransform(boneXML[ConstValues.TRANSFORM][0], boneData.transform);
+			if(!isRelativeData)//绝对数据
+			{
+				boneData.global.copy(boneData.transform);
+			}
 			
 			for each(var rectangleXML:XML in boneXML[ConstValues.RECTANGLE])
 			{
@@ -256,7 +263,7 @@
 		}
 		
 		/** @private */
-		dragonBones_internal static function parseAnimationData(animationXML:XML, armatureData:ArmatureData, frameRate:uint):AnimationData
+		dragonBones_internal static function parseAnimationData(animationXML:XML, armatureData:ArmatureData, frameRate:uint, isRelativeData:Boolean):AnimationData
 		{
 			var animationData:AnimationData = new AnimationData();
 			animationData.name = animationXML.@[ConstValues.A_NAME];
@@ -272,7 +279,7 @@
 			
 			for each(var frameXML:XML in animationXML[ConstValues.FRAME])
 			{
-				var frame:Frame = parseTransformFrame(frameXML, frameRate);
+				var frame:Frame = parseTransformFrame(frameXML, frameRate, isRelativeData);
 				animationData.addFrame(frame);
 			}
 			
@@ -281,7 +288,7 @@
 			var lastFrameDuration:int = animationData.duration;
 			for each(var timelineXML:XML in animationXML[ConstValues.TIMELINE])
 			{
-				var timeline:TransformTimeline = parseTransformTimeline(timelineXML, animationData.duration, frameRate);
+				var timeline:TransformTimeline = parseTransformTimeline(timelineXML, animationData.duration, frameRate, isRelativeData);
 				lastFrameDuration = Math.min(lastFrameDuration, timeline.frameList[timeline.frameList.length - 1].duration);
 				animationData.addTimeline(timeline);
 			}
@@ -293,22 +300,24 @@
 			animationData.lastFrameDuration = lastFrameDuration;
 			
 			DBDataUtil.addHideTimeline(animationData, armatureData);
-			DBDataUtil.transformAnimationData(animationData, armatureData, false);
+			DBDataUtil.transformAnimationData(animationData, armatureData, isRelativeData);
 			
 			return animationData;
 		}
 		
-		private static function parseTransformTimeline(timelineXML:XML, duration:int, frameRate:uint):TransformTimeline
+		private static function parseTransformTimeline(timelineXML:XML, duration:int, frameRate:uint, isRelativeData:Boolean):TransformTimeline
 		{
 			var timeline:TransformTimeline = new TransformTimeline();
 			timeline.name = timelineXML.@[ConstValues.A_NAME];
 			timeline.scale = getNumber(timelineXML, ConstValues.A_SCALE, 1) || 0;
 			timeline.offset = getNumber(timelineXML, ConstValues.A_OFFSET, 0) || 0;
+			timeline.originPivot.x = getNumber(timelineXML, ConstValues.A_ORIGIN_PIVOT_X, 0) || 0;
+			timeline.originPivot.y = getNumber(timelineXML, ConstValues.A_ORIGIN_PIVOT_Y, 0) || 0;
 			timeline.duration = duration;
 			
 			for each(var frameXML:XML in timelineXML[ConstValues.FRAME])
 			{
-				var frame:TransformFrame = parseTransformFrame(frameXML, frameRate);
+				var frame:TransformFrame = parseTransformFrame(frameXML, frameRate, isRelativeData);
 				timeline.addFrame(frame);
 			}
 			
@@ -324,7 +333,7 @@
 			return frame;
 		}
 		
-		private static function parseTransformFrame(frameXML:XML, frameRate:uint):TransformFrame
+		private static function parseTransformFrame(frameXML:XML, frameRate:uint, isRelativeData:Boolean):TransformFrame
 		{
 			var frame:TransformFrame = new TransformFrame();
 			parseFrame(frameXML, frame, frameRate);
@@ -340,8 +349,11 @@
 			//如果为NaN，则说明没有改变过zOrder
 			frame.zOrder = getNumber(frameXML, ConstValues.A_Z_ORDER, NaN);
 			
-			parseTransform(frameXML[ConstValues.TRANSFORM][0], frame.global, frame.pivot);
-			frame.transform.copy(frame.global);
+			parseTransform(frameXML[ConstValues.TRANSFORM][0], frame.transform, frame.pivot);
+			if(!isRelativeData)//绝对数据
+			{
+				frame.global.copy(frame.transform);
+			}
 			
 			frame.scaleOffset.x = getNumber(frameXML, ConstValues.A_SCALE_X_OFFSET, 0);
 			frame.scaleOffset.y = getNumber(frameXML, ConstValues.A_SCALE_Y_OFFSET, 0);
@@ -444,7 +456,7 @@
 		
 		private static function getNumber(data:XML, key:String, defaultValue:Number):Number
 		{
-			if(data.@[key].length() > 0)
+			if(data && data.@[key].length() > 0)
 			{
 				switch(String(data.@[key]))
 				{

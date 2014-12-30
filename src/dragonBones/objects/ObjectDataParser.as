@@ -313,8 +313,8 @@
 			timeline.name = timelineObject[ConstValues.A_NAME];
 			timeline.scale = getNumber(timelineObject, ConstValues.A_SCALE, 1) || 0;
 			timeline.offset = getNumber(timelineObject, ConstValues.A_OFFSET, 0) || 0;
-			timeline.originPivot.x = getNumber(timelineObject[ConstValues.A_ORIGIN_PIVOT], ConstValues.A_X, 0) || 0;
-			timeline.originPivot.y = getNumber(timelineObject[ConstValues.A_ORIGIN_PIVOT], ConstValues.A_Y, 0) || 0;
+			timeline.originPivot.x = getNumber(timelineObject, ConstValues.A_ORIGIN_PIVOT_X, 0) || 0;
+			timeline.originPivot.y = getNumber(timelineObject, ConstValues.A_ORIGIN_PIVOT_Y, 0) || 0;
 			timeline.duration = duration;
 			
 			for each(var frameObject:Object in timelineObject[ConstValues.FRAME])
