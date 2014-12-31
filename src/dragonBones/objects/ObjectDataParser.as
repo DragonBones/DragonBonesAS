@@ -236,7 +236,7 @@
 			var slotData:SlotData = new SlotData();
 			slotData.name = slotObject[ConstValues.A_NAME];
 			slotData.parent = slotObject[ConstValues.A_PARENT];
-			slotData.zOrder = Number(slotObject[ConstValues.A_Z_ORDER]);
+			slotData.zOrder = getNumber(slotObject, ConstValues.A_Z_ORDER, 0) || 0;
 			slotData.blendMode = slotObject[ConstValues.A_BLENDMODE];
 			
 			for each(var displayObject:Object in slotObject[ConstValues.DISPLAY])
@@ -271,8 +271,8 @@
 			animationData.name = animationObject[ConstValues.A_NAME];
 			animationData.frameRate = frameRate;
 			animationData.duration = Math.round((Number(animationObject[ConstValues.A_DURATION]) || 1) * 1000 / frameRate);
-			animationData.playTimes = int(animationObject[ConstValues.A_LOOP]);
-			animationData.fadeTime = Number(animationObject[ConstValues.A_FADE_IN_TIME]);
+			animationData.playTimes = int(getNumber(animationObject, ConstValues.A_LOOP, 1));
+			animationData.fadeTime = getNumber(animationObject, ConstValues.A_FADE_IN_TIME, 0) || 0;
 			animationData.scale = getNumber(animationObject, ConstValues.A_SCALE, 1) || 0;
 			//use frame tweenEase, NaN
 			//overwrite frame tweenEase, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
@@ -313,8 +313,8 @@
 			timeline.name = timelineObject[ConstValues.A_NAME];
 			timeline.scale = getNumber(timelineObject, ConstValues.A_SCALE, 1) || 0;
 			timeline.offset = getNumber(timelineObject, ConstValues.A_OFFSET, 0) || 0;
-			timeline.originPivot.x = getNumber(timelineObject, ConstValues.A_ORIGIN_PIVOT_X, 0) || 0;
-			timeline.originPivot.y = getNumber(timelineObject, ConstValues.A_ORIGIN_PIVOT_Y, 0) || 0;
+			timeline.originPivot.x = getNumber(timelineObject, ConstValues.A_PIVOT_X, 0) || 0;
+			timeline.originPivot.y = getNumber(timelineObject, ConstValues.A_PIVOT_Y, 0) || 0;
 			timeline.duration = duration;
 			
 			for each(var frameObject:Object in timelineObject[ConstValues.FRAME])
@@ -344,12 +344,12 @@
 			
 			//NaN:no tween, 10:auto tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
 			frame.tweenEasing = getNumber(frameObject, ConstValues.A_TWEEN_EASING, 10);
-			frame.tweenRotate = int(frameObject[ConstValues.A_TWEEN_ROTATE]);
+			frame.tweenRotate = int(getNumber(frameObject, ConstValues.A_TWEEN_ROTATE, 0));
 			frame.tweenScale = getBoolean(frameObject, ConstValues.A_TWEEN_SCALE, true);
-			frame.displayIndex = int(frameObject[ConstValues.A_DISPLAY_INDEX]);
+			frame.displayIndex = int(getNumber(frameObject, ConstValues.A_DISPLAY_INDEX, 0));
 			
 			//如果为NaN，则说明没有改变过zOrder
-			frame.zOrder = getNumber(frameObject, ConstValues.A_Z_ORDER, NaN);
+			frame.zOrder = getNumber(frameObject, ConstValues.A_Z_ORDER, isRelativeData ? 0 : NaN);
 			
 			parseTransform(frameObject[ConstValues.TRANSFORM], frame.transform, frame.pivot);
 			if(!isRelativeData)//绝对数据
@@ -357,8 +357,8 @@
 				frame.global.copy(frame.transform);
 			}
 			
-			frame.scaleOffset.x = getNumber(frameObject, ConstValues.A_SCALE_X_OFFSET, 0);
-			frame.scaleOffset.y = getNumber(frameObject, ConstValues.A_SCALE_Y_OFFSET, 0);
+			frame.scaleOffset.x = getNumber(frameObject, ConstValues.A_SCALE_X_OFFSET, 0) || 0;
+			frame.scaleOffset.y = getNumber(frameObject, ConstValues.A_SCALE_Y_OFFSET, 0) || 0;
 			
 			var colorTransformObject:Object = frameObject[ConstValues.COLOR_TRANSFORM];
 			if(colorTransformObject)
@@ -399,17 +399,17 @@
 			{
 				if(transform)
 				{
-					transform.x = Number(transformObject[ConstValues.A_X]) || 0;
-					transform.y = Number(transformObject[ConstValues.A_Y]) || 0;
-					transform.skewX = Number(transformObject[ConstValues.A_SKEW_X]) * ConstValues.ANGLE_TO_RADIAN || 0;
-					transform.skewY = Number(transformObject[ConstValues.A_SKEW_Y]) * ConstValues.ANGLE_TO_RADIAN || 0;
+					transform.x = getNumber(transformObject, ConstValues.A_X, 0) || 0;
+					transform.y = getNumber(transformObject, ConstValues.A_Y, 0) || 0;
+					transform.skewX = getNumber(transformObject, ConstValues.A_SKEW_X, 0) * ConstValues.ANGLE_TO_RADIAN || 0;
+					transform.skewY = getNumber(transformObject, ConstValues.A_SKEW_Y, 0) * ConstValues.ANGLE_TO_RADIAN || 0;
 					transform.scaleX = getNumber(transformObject, ConstValues.A_SCALE_X, 1) || 0;
 					transform.scaleY = getNumber(transformObject, ConstValues.A_SCALE_Y, 1) || 0;
 				}
 				if(pivot)
 				{
-					pivot.x = Number(transformObject[ConstValues.A_PIVOT_X]) || 0;
-					pivot.y = Number(transformObject[ConstValues.A_PIVOT_Y]) || 0;
+					pivot.x = getNumber(transformObject, ConstValues.A_PIVOT_X, 0) || 0;
+					pivot.y = getNumber(transformObject, ConstValues.A_PIVOT_Y, 0) || 0;
 				}
 			}
 		}
@@ -435,7 +435,7 @@
 		
 		private static function getBoolean(data:Object, key:String, defaultValue:Boolean):Boolean
 		{
-			if(key in data)
+			if(data && key in data)
 			{
 				switch(String(data[key]))
 				{

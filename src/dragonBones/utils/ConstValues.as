@@ -35,8 +35,6 @@
 		public static const A_FRAME_RATE:String = "frameRate";
 		public static const A_NAME:String = "name";
 		public static const A_IS_RELATIVE:String = "isRelative";
-		public static const A_ORIGIN_PIVOT_X:String = "originPivotX";
-		public static const A_ORIGIN_PIVOT_Y:String = "originPivotY";
 		public static const A_PARENT:String = "parent";
 		public static const A_LENGTH:String = "length";
 		public static const A_TYPE:String = "type";
