@@ -92,23 +92,23 @@
 			
 			var data:SkeletonData = new SkeletonData();
 			data.name = rawData.@[ConstValues.A_NAME];
-			var isRelativeData:Boolean = rawData.@[ConstValues.A_IS_RELATIVE] == "1" ? true : false;
+			var isGlobalData:Boolean = rawData.@[ConstValues.A_IS_GLOBAL] == "1" ? true : false;
 			for each(var armatureXML:XML in rawData[ConstValues.ARMATURE])
 			{
-				data.addArmatureData(parseArmatureData(armatureXML, data, frameRate, isRelativeData, ifSkipAnimationData, outputAnimationDictionary));
+				data.addArmatureData(parseArmatureData(armatureXML, data, frameRate, isGlobalData, ifSkipAnimationData, outputAnimationDictionary));
 			}
 			
 			return data;
 		}
 		
-		private static function parseArmatureData(armatureXML:XML, data:SkeletonData, frameRate:uint, isRelativeData:Boolean, ifSkipAnimationData:Boolean, outputAnimationDictionary:Dictionary):ArmatureData
+		private static function parseArmatureData(armatureXML:XML, data:SkeletonData, frameRate:uint, isGlobalData:Boolean, ifSkipAnimationData:Boolean, outputAnimationDictionary:Dictionary):ArmatureData
 		{
 			var armatureData:ArmatureData = new ArmatureData();
 			armatureData.name = armatureXML.@[ConstValues.A_NAME];
 			
 			for each(var boneXML:XML in armatureXML[ConstValues.BONE])
 			{
-				armatureData.addBoneData(parseBoneData(boneXML, isRelativeData));
+				armatureData.addBoneData(parseBoneData(boneXML, isGlobalData));
 			}
 			
 			for each(var skinXML:XML in armatureXML[ConstValues.SKIN])
@@ -116,7 +116,7 @@
 				armatureData.addSkinData(parseSkinData(skinXML, data));
 			}
 			
-			if(!isRelativeData)
+			if(isGlobalData)
 			{
 				DBDataUtil.transformArmatureData(armatureData);
 			}
@@ -135,7 +135,7 @@
 				{
 					if(index == 0)
 					{
-						armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate, isRelativeData));
+						armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate, isGlobalData));
 					}
 					else if(outputAnimationDictionary != null)
 					{
@@ -148,7 +148,7 @@
 			{
 				for each(animationXML in armatureXML[ConstValues.ANIMATION])
 				{
-					armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate, isRelativeData));
+					armatureData.addAnimationData(parseAnimationData(animationXML, armatureData, frameRate, isGlobalData));
 				}
 			}
 			
@@ -165,7 +165,7 @@
 			return armatureData;
 		}
 		
-		private static function parseBoneData(boneXML:XML, isRelativeData:Boolean):BoneData
+		private static function parseBoneData(boneXML:XML, isGlobalData:Boolean):BoneData
 		{
 			var boneData:BoneData = new BoneData();
 			boneData.name = boneXML.@[ConstValues.A_NAME];
@@ -175,7 +175,7 @@
 			boneData.inheritScale = getBoolean(boneXML, ConstValues.A_INHERIT_SCALE, true);
 			
 			parseTransform(boneXML[ConstValues.TRANSFORM][0], boneData.transform);
-			if(!isRelativeData)//绝对数据
+			if(isGlobalData)//绝对数据
 			{
 				boneData.global.copy(boneData.transform);
 			}
@@ -263,7 +263,7 @@
 		}
 		
 		/** @private */
-		dragonBones_internal static function parseAnimationData(animationXML:XML, armatureData:ArmatureData, frameRate:uint, isRelativeData:Boolean):AnimationData
+		dragonBones_internal static function parseAnimationData(animationXML:XML, armatureData:ArmatureData, frameRate:uint, isGlobalData:Boolean):AnimationData
 		{
 			var animationData:AnimationData = new AnimationData();
 			animationData.name = animationXML.@[ConstValues.A_NAME];
@@ -279,7 +279,7 @@
 			
 			for each(var frameXML:XML in animationXML[ConstValues.FRAME])
 			{
-				var frame:Frame = parseTransformFrame(frameXML, frameRate, isRelativeData);
+				var frame:Frame = parseTransformFrame(frameXML, frameRate, isGlobalData);
 				animationData.addFrame(frame);
 			}
 			
@@ -288,7 +288,7 @@
 			var lastFrameDuration:int = animationData.duration;
 			for each(var timelineXML:XML in animationXML[ConstValues.TIMELINE])
 			{
-				var timeline:TransformTimeline = parseTransformTimeline(timelineXML, animationData.duration, frameRate, isRelativeData);
+				var timeline:TransformTimeline = parseTransformTimeline(timelineXML, animationData.duration, frameRate, isGlobalData);
 				lastFrameDuration = Math.min(lastFrameDuration, timeline.frameList[timeline.frameList.length - 1].duration);
 				animationData.addTimeline(timeline);
 			}
@@ -300,12 +300,12 @@
 			animationData.lastFrameDuration = lastFrameDuration;
 			
 			DBDataUtil.addHideTimeline(animationData, armatureData);
-			DBDataUtil.transformAnimationData(animationData, armatureData, isRelativeData);
+			DBDataUtil.transformAnimationData(animationData, armatureData, isGlobalData);
 			
 			return animationData;
 		}
 		
-		private static function parseTransformTimeline(timelineXML:XML, duration:int, frameRate:uint, isRelativeData:Boolean):TransformTimeline
+		private static function parseTransformTimeline(timelineXML:XML, duration:int, frameRate:uint, isGlobalData:Boolean):TransformTimeline
 		{
 			var timeline:TransformTimeline = new TransformTimeline();
 			timeline.name = timelineXML.@[ConstValues.A_NAME];
@@ -317,7 +317,7 @@
 			
 			for each(var frameXML:XML in timelineXML[ConstValues.FRAME])
 			{
-				var frame:TransformFrame = parseTransformFrame(frameXML, frameRate, isRelativeData);
+				var frame:TransformFrame = parseTransformFrame(frameXML, frameRate, isGlobalData);
 				timeline.addFrame(frame);
 			}
 			
@@ -333,7 +333,7 @@
 			return frame;
 		}
 		
-		private static function parseTransformFrame(frameXML:XML, frameRate:uint, isRelativeData:Boolean):TransformFrame
+		private static function parseTransformFrame(frameXML:XML, frameRate:uint, isGlobalData:Boolean):TransformFrame
 		{
 			var frame:TransformFrame = new TransformFrame();
 			parseFrame(frameXML, frame, frameRate);
@@ -347,10 +347,10 @@
 			frame.displayIndex = int(getNumber(frameXML, ConstValues.A_DISPLAY_INDEX, 0));
 			
 			//如果为NaN，则说明没有改变过zOrder
-			frame.zOrder = getNumber(frameXML, ConstValues.A_Z_ORDER, isRelativeData ? 0 : NaN);
+			frame.zOrder = getNumber(frameXML, ConstValues.A_Z_ORDER, isGlobalData ? NaN : 0);
 			
 			parseTransform(frameXML[ConstValues.TRANSFORM][0], frame.transform, frame.pivot);
-			if(!isRelativeData)//绝对数据
+			if(isGlobalData)//绝对数据
 			{
 				frame.global.copy(frame.transform);
 			}

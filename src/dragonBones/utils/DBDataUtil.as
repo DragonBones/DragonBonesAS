@@ -54,9 +54,9 @@ package dragonBones.utils
 			
 		}
 		
-		public static function transformAnimationData(animationData:AnimationData, armatureData:ArmatureData, isRelativeData:Boolean):void
+		public static function transformAnimationData(animationData:AnimationData, armatureData:ArmatureData, isGlobalData:Boolean):void
 		{
-			if(isRelativeData)
+			if(!isGlobalData)
 			{
 				transformRelativeAnimationData(animationData, armatureData);
 				return;

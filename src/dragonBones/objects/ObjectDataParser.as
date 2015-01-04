@@ -91,24 +91,24 @@
 			var data:SkeletonData = new SkeletonData();
 			data.name = rawData[ConstValues.A_NAME];
 			
-			var isRelativeData:Boolean = rawData[ConstValues.A_IS_RELATIVE] == "1" ? true : false;
+			var isGlobalData:Boolean = rawData[ConstValues.A_IS_GLOBAL] == "0" ? false : true;
 			
 			for each(var armatureObject:Object in rawData[ConstValues.ARMATURE])
 			{
-				data.addArmatureData(parseArmatureData(armatureObject, data, frameRate, isRelativeData, ifSkipAnimationData, outputAnimationDictionary));
+				data.addArmatureData(parseArmatureData(armatureObject, data, frameRate, isGlobalData, ifSkipAnimationData, outputAnimationDictionary));
 			}
 			
 			return data;
 		}
 		
-		private static function parseArmatureData(armatureObject:Object, data:SkeletonData, frameRate:uint, isRelativeData:Boolean, ifSkipAnimationData:Boolean, outputAnimationDictionary:Dictionary):ArmatureData
+		private static function parseArmatureData(armatureObject:Object, data:SkeletonData, frameRate:uint, isGlobalData:Boolean, ifSkipAnimationData:Boolean, outputAnimationDictionary:Dictionary):ArmatureData
 		{
 			var armatureData:ArmatureData = new ArmatureData();
 			armatureData.name = armatureObject[ConstValues.A_NAME];
 			
 			for each(var boneObject:Object in armatureObject[ConstValues.BONE])
 			{
-				armatureData.addBoneData(parseBoneData(boneObject, isRelativeData));
+				armatureData.addBoneData(parseBoneData(boneObject, isGlobalData));
 			}
 			
 			for each(var skinObject:Object in armatureObject[ConstValues.SKIN])
@@ -116,7 +116,7 @@
 				armatureData.addSkinData(parseSkinData(skinObject, data));
 			}
 			
-			if(!isRelativeData)
+			if(isGlobalData)
 			{
 				DBDataUtil.transformArmatureData(armatureData);
 			}
@@ -136,7 +136,7 @@
 				{
 					if(index == 0)
 					{
-						armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate, isRelativeData));
+						armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate, isGlobalData));
 					}
 					else if(outputAnimationDictionary != null)
 					{
@@ -149,7 +149,7 @@
 			{
 				for each(animationObject in armatureObject[ConstValues.ANIMATION])
 				{
-					armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate, isRelativeData));
+					armatureData.addAnimationData(parseAnimationData(animationObject, armatureData, frameRate, isGlobalData));
 				}
 			}
 			
@@ -166,17 +166,17 @@
 			return armatureData;
 		}
 		
-		private static function parseBoneData(boneObject:Object, isRelativeData:Boolean):BoneData
+		private static function parseBoneData(boneObject:Object, isGlobalData:Boolean):BoneData
 		{
 			var boneData:BoneData = new BoneData();
 			boneData.name = boneObject[ConstValues.A_NAME];
 			boneData.parent = boneObject[ConstValues.A_PARENT];
 			boneData.length = Number(boneObject[ConstValues.A_LENGTH]);
-			boneData.inheritRotation = getBoolean(boneObject, ConstValues.A_INHERIT_ROTATION, true);
-			boneData.inheritScale = getBoolean(boneObject, ConstValues.A_INHERIT_SCALE, true);
+			//boneData.inheritRotation = getBoolean(boneObject, ConstValues.A_INHERIT_ROTATION, true);
+			//boneData.inheritScale = getBoolean(boneObject, ConstValues.A_INHERIT_SCALE, true);
 			
 			parseTransform(boneObject[ConstValues.TRANSFORM], boneData.transform);
-			if(!isRelativeData)//绝对数据
+			if(isGlobalData)//绝对数据
 			{
 				boneData.global.copy(boneData.transform);
 			}
@@ -265,7 +265,7 @@
 		}
 		
 		/** @private */
-		dragonBones_internal static function parseAnimationData(animationObject:Object, armatureData:ArmatureData, frameRate:uint, isRelativeData:Boolean):AnimationData
+		dragonBones_internal static function parseAnimationData(animationObject:Object, armatureData:ArmatureData, frameRate:uint, isGlobalData:Boolean):AnimationData
 		{
 			var animationData:AnimationData = new AnimationData();
 			animationData.name = animationObject[ConstValues.A_NAME];
@@ -281,7 +281,7 @@
 			
 			for each(var frameObject:Object in animationObject[ConstValues.FRAME])
 			{
-				var frame:Frame = parseTransformFrame(frameObject, frameRate, isRelativeData);
+				var frame:Frame = parseTransformFrame(frameObject, frameRate, isGlobalData);
 				animationData.addFrame(frame);
 			}
 			
@@ -290,7 +290,7 @@
 			var lastFrameDuration:int = animationData.duration;
 			for each(var timelineObject:Object in animationObject[ConstValues.TIMELINE])
 			{
-				var timeline:TransformTimeline = parseTransformTimeline(timelineObject, animationData.duration, frameRate, isRelativeData);
+				var timeline:TransformTimeline = parseTransformTimeline(timelineObject, animationData.duration, frameRate, isGlobalData);
 				lastFrameDuration = Math.min(lastFrameDuration, timeline.frameList[timeline.frameList.length - 1].duration);
 				animationData.addTimeline(timeline);
 			}
@@ -302,12 +302,12 @@
 			animationData.lastFrameDuration = lastFrameDuration;
 			
 			DBDataUtil.addHideTimeline(animationData, armatureData);
-			DBDataUtil.transformAnimationData(animationData, armatureData, isRelativeData);
+			DBDataUtil.transformAnimationData(animationData, armatureData, isGlobalData);
 			
 			return animationData;
 		}
 		
-		private static function parseTransformTimeline(timelineObject:Object, duration:int, frameRate:uint, isRelativeData:Boolean):TransformTimeline
+		private static function parseTransformTimeline(timelineObject:Object, duration:int, frameRate:uint, isGlobalData:Boolean):TransformTimeline
 		{
 			var timeline:TransformTimeline = new TransformTimeline();
 			timeline.name = timelineObject[ConstValues.A_NAME];
@@ -319,7 +319,7 @@
 			
 			for each(var frameObject:Object in timelineObject[ConstValues.FRAME])
 			{
-				var frame:TransformFrame = parseTransformFrame(frameObject, frameRate, isRelativeData);
+				var frame:TransformFrame = parseTransformFrame(frameObject, frameRate, isGlobalData);
 				timeline.addFrame(frame);
 			}
 			
@@ -335,7 +335,7 @@
 			return frame;
 		}
 		
-		private static function parseTransformFrame(frameObject:Object, frameRate:uint, isRelativeData:Boolean):TransformFrame
+		private static function parseTransformFrame(frameObject:Object, frameRate:uint, isGlobalData:Boolean):TransformFrame
 		{
 			var frame:TransformFrame = new TransformFrame();
 			parseFrame(frameObject, frame, frameRate);
@@ -349,10 +349,10 @@
 			frame.displayIndex = int(getNumber(frameObject, ConstValues.A_DISPLAY_INDEX, 0));
 			
 			//如果为NaN，则说明没有改变过zOrder
-			frame.zOrder = getNumber(frameObject, ConstValues.A_Z_ORDER, isRelativeData ? 0 : NaN);
+			frame.zOrder = getNumber(frameObject, ConstValues.A_Z_ORDER, isGlobalData ? NaN : 0);
 			
 			parseTransform(frameObject[ConstValues.TRANSFORM], frame.transform, frame.pivot);
-			if(!isRelativeData)//绝对数据
+			if(isGlobalData)//绝对数据
 			{
 				frame.global.copy(frame.transform);
 			}

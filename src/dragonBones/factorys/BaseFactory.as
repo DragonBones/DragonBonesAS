@@ -286,9 +286,9 @@ package dragonBones.factorys
 		 * @param animationRawData (XML, JSON).
 		 * @param target armature.
 		 */
-		public function addAnimationToArmature(animationRawData:Object, armature:Armature, isRelativeData:Boolean = false):void
+		public function addAnimationToArmature(animationRawData:Object, armature:Armature, isGlobalData:Boolean = false):void
 		{
-			armature._armatureData.addAnimationData(DataParser.parseAnimationDataByAnimationRawData(animationRawData,armature._armatureData, isRelativeData));
+			armature._armatureData.addAnimationData(DataParser.parseAnimationDataByAnimationRawData(animationRawData,armature._armatureData, isGlobalData));
 		}
 		
 		/**
