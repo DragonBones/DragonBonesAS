@@ -740,10 +740,14 @@ package dragonBones.animation
 			if(_blendEnabled)
 			{
 				/**
+				 * <使用绝对数据>
 				 * 单帧的timeline，第一个关键帧的transform为0
 				 * timeline.originTransform = firstFrame.transform;
 				 * eachFrame.transform = eachFrame.transform - timeline.originTransform;
 				 * firstFrame.transform == 0;
+				 * 
+				 * <使用相对数据>
+				 * 使用相对数据时，timeline.originTransform = 0，第一个关键帧的transform有可能不为 0
 				 */
 				
 				if(_animationState.additiveBlending)

@@ -105,9 +105,6 @@
 		/** @private */
 		protected var _timelineStateList:Vector.<TimelineState>;
 		
-		private static var _tempMatrix:Matrix = new Matrix();
-		private static var _tempTransform:DBTransform = new DBTransform();
-		
 		private var _tempGlobalTransformForChild:DBTransform;
 		dragonBones_internal var _globalTransformForChild:DBTransform;
 		private var _tempGlobalTransformMatrixForChild:Matrix;
@@ -174,10 +171,6 @@
 			_isColorChanged = false;
 			_frameCachedPosition = -1;
 			_frameCachedDuration = -1;
-			
-			this.inheritRotation = true;
-			this.inheritScale = true;
-			this.inheritTranslation = true;
 		}
 		
 		/**
@@ -359,6 +352,16 @@
 			}
 		}
 		
+		override protected function calculateRelativeParentTransform():void
+		{
+			_global.scaleX = this._origin.scaleX * _tween.scaleX * this._offset.scaleX;
+			_global.scaleY = this._origin.scaleY * _tween.scaleY * this._offset.scaleY;
+			_global.skewX = this._origin.skewX + _tween.skewX + this._offset.skewX;
+			_global.skewY = this._origin.skewY + _tween.skewY + this._offset.skewY;
+			_global.x = this._origin.x + _tween.x + this._offset.x;
+			_global.y = this._origin.y + _tween.y + this._offset.y;
+		}
+		
 		/** @private */
 		dragonBones_internal function update(needUpdate:Boolean = false):void
 		{
@@ -397,98 +400,10 @@
 			
 			blendingTimeline();
 			
-			/*
-			this._global.scaleX = (this._origin.scaleX + _tween.scaleX) * this._offset.scaleX;
-			this._global.scaleY = (this._origin.scaleY + _tween.scaleY) * this._offset.scaleY;
-			
-			if(this._parent)
-			{
-				var x:Number = this._origin.x + this._offset.x + _tween.x;
-				var y:Number = this._origin.y + this._offset.y + _tween.y;
-				var parentMatrix:Matrix = this._parent._globalTransformMatrix;
-				
-				this._globalTransformMatrix.tx = this._global.x = parentMatrix.a * x + parentMatrix.c * y + parentMatrix.tx;
-				this._globalTransformMatrix.ty = this._global.y = parentMatrix.d * y + parentMatrix.b * x + parentMatrix.ty;
-				
-				if(this.inheritRotation)
-				{
-					this._global.skewX = this._origin.skewX + this._offset.skewX + _tween.skewX + this._parent._global.skewX;
-					this._global.skewY = this._origin.skewY + this._offset.skewY + _tween.skewY + this._parent._global.skewY;
-				}
-				else
-				{
-					this._global.skewX = this._origin.skewX + this._offset.skewX + _tween.skewX;
-					this._global.skewY = this._origin.skewY + this._offset.skewY + _tween.skewY;
-				}
-				
-				if(this.inheritScale)
-				{
-					this._global.scaleX *= this._parent._global.scaleX;
-					this._global.scaleY *= this._parent._global.scaleY;
-				}
-			}
-			else
-			{
-				this._globalTransformMatrix.tx = this._global.x = this._origin.x + this._offset.x + _tween.x;
-				this._globalTransformMatrix.ty = this._global.y = this._origin.y + this._offset.y + _tween.y;
-				
-				this._global.skewX = this._origin.skewX + this._offset.skewX + _tween.skewX;
-				this._global.skewY = this._origin.skewY + this._offset.skewY + _tween.skewY;
-			}
-			
-			this._globalTransformMatrix.a = this._global.scaleX * Math.cos(this._global.skewY);
-			this._globalTransformMatrix.b = this._global.scaleX * Math.sin(this._global.skewY);
-			this._globalTransformMatrix.c = -this._global.scaleY * Math.sin(this._global.skewX);
-			this._globalTransformMatrix.d = this._global.scaleY * Math.cos(this._global.skewX);
-			
-			if(_frameCachedDuration > 0)    // && _frameCachedPosition >= 0
-			{
-				_timelineCached.addFrame(this._global, this._globalTransformMatrix, _frameCachedPosition, _frameCachedDuration);
-			}
-			*/
-			
 		//计算global
-			_global.scaleX = this._origin.scaleX * _tween.scaleX * this._offset.scaleX;
-			_global.scaleY = this._origin.scaleY * _tween.scaleY * this._offset.scaleY;
-			_global.skewX = this._origin.skewX + _tween.skewX + this._offset.skewX;
-			_global.skewY = this._origin.skewY + _tween.skewY + this._offset.skewY;
-			_global.x = this._origin.x + _tween.x + this._offset.x;
-			_global.y = this._origin.y + _tween.y + this._offset.y;
-			TransformUtil.transformToMatrix(_global, _globalTransformMatrix, true);
-			
-			var parentGlobalTransform:DBTransform;
-			var parentGlobalTransformMatrix:Matrix;
-			if(this.parent && (this.inheritTranslation || this.inheritRotation || this.inheritScale))
-			{
-				parentGlobalTransform = this._parent._globalTransformForChild;
-				parentGlobalTransformMatrix = this._parent._globalTransformMatrixForChild;
-				
-				if(!this.inheritTranslation || !this.inheritRotation || !this.inheritScale)
-				{
-					parentGlobalTransform = _tempTransform;
-					parentGlobalTransform.copy(this._parent._globalTransformForChild);
-					if(!this.inheritTranslation)
-					{
-						parentGlobalTransform.x = 0;
-						parentGlobalTransform.y = 0;
-					}
-					if(!this.inheritScale)
-					{
-						parentGlobalTransform.scaleX = 1;
-						parentGlobalTransform.scaleY = 1;
-					}
-					if(!this.inheritRotation)
-					{
-						parentGlobalTransform.skewX = 0;
-						parentGlobalTransform.skewY = 0;
-					}
-					
-					parentGlobalTransformMatrix = _tempMatrix;
-					TransformUtil.transformToMatrix(parentGlobalTransform, parentGlobalTransformMatrix, true);
-				}
-				_globalTransformMatrix.concat(parentGlobalTransformMatrix);
-				TransformUtil.matrixToTransform(_globalTransformMatrix, _global, _global.scaleX * parentGlobalTransform.scaleX >= 0, _global.scaleY * parentGlobalTransform.scaleY >= 0);
-			}
+			var result:Object = updateGlobal();
+			var parentGlobalTransform:DBTransform = result ? result.parentGlobalTransform : null;
+			var parentGlobalTransformMatrix:Matrix = result ? result.parentGlobalTransformMatrix : null;
 			
 		//计算globalForChild
 			var ifExistOffsetTranslation:Boolean = _offset.x != 0 || _offset.y != 0;
@@ -545,6 +460,11 @@
 					_globalTransformMatrixForChild.concat(parentGlobalTransformMatrix);
 					TransformUtil.matrixToTransform(_globalTransformMatrixForChild, _globalTransformForChild, _globalTransformForChild.scaleX * parentGlobalTransform.scaleX >= 0, _globalTransformForChild.scaleY * parentGlobalTransform.scaleY >= 0 );
 				}
+			}
+			
+			if(_frameCachedDuration > 0)    // && _frameCachedPosition >= 0
+			{
+				_timelineCached.addFrame(this._global, this._globalTransformMatrix, _frameCachedPosition, _frameCachedDuration);
 			}
 		}
 		

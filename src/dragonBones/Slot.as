@@ -1,14 +1,15 @@
 ﻿package dragonBones
 {
-	import flash.errors.IllegalOperationError;
-	import flash.geom.ColorTransform;
-	import flash.geom.Matrix;
-	
 	import dragonBones.core.DBObject;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.FrameCached;
 	import dragonBones.objects.TimelineCached;
+	import dragonBones.utils.TransformUtil;
+	
+	import flash.errors.IllegalOperationError;
+	import flash.geom.ColorTransform;
+	import flash.geom.Matrix;
 	
 	use namespace dragonBones_internal;
 	
@@ -248,50 +249,24 @@
 				return;
 			}
 			
-			var x:Number = this._origin.x + this._offset.x + this._parent._tweenPivot.x;
-			var y:Number = this._origin.y + this._offset.y + this._parent._tweenPivot.y;
-			
-			var parentMatrix:Matrix = this._parent._globalTransformMatrix;
-			
-			this._globalTransformMatrix.tx = this._global.x = parentMatrix.a * x + parentMatrix.c * y + parentMatrix.tx;
-			this._globalTransformMatrix.ty = this._global.y = parentMatrix.d * y + parentMatrix.b * x + parentMatrix.ty;
-			
-			//this._globalTransformMatrix.tx = this._global.x = parentMatrix.a * x * this._parent._global.scaleX + parentMatrix.c * y * this._parent._global.scaleY + parentMatrix.tx;
-			//this._globalTransformMatrix.ty = this._global.y = parentMatrix.d * y * this._parent._global.scaleY + parentMatrix.b * x * this._parent._global.scaleX + parentMatrix.ty;
-			
-			if(inheritRotation)
-			{
-				this._global.skewX = this._origin.skewX + this._offset.skewX + this._parent._global.skewX;
-				this._global.skewY = this._origin.skewY + this._offset.skewY + this._parent._global.skewY;
-			}
-			else
-			{
-				this._global.skewX = this._origin.skewX + this._offset.skewX;
-				this._global.skewY = this._origin.skewY + this._offset.skewY;
-			}
-			
-			if(inheritScale)
-			{
-				this._global.scaleX = this._origin.scaleX * this._offset.scaleX * this._parent._global.scaleX;
-				this._global.scaleY = this._origin.scaleY * this._offset.scaleY * this._parent._global.scaleY;
-			}
-			else
-			{
-				this._global.scaleX = this._origin.scaleX * this._offset.scaleX;
-				this._global.scaleY = this._origin.scaleY * this._offset.scaleY;
-			}
-			
-			this._globalTransformMatrix.a = this._global.scaleX * Math.cos(this._global.skewY);
-			this._globalTransformMatrix.b = this._global.scaleX * Math.sin(this._global.skewY);
-			this._globalTransformMatrix.c = -this._global.scaleY * Math.sin(this._global.skewX);
-			this._globalTransformMatrix.d = this._global.scaleY * Math.cos(this._global.skewX);
-			
+			updateGlobal();
+
 			if(frameCachedDuration > 0)    // && frameCachedPosition >= 0
 			{
 				_timelineCached.addFrame(null, this._globalTransformMatrix, frameCachedPosition, frameCachedDuration);
 			}
 			
 			updateTransform();
+		}
+		
+		override protected function calculateRelativeParentTransform():void
+		{
+			_global.scaleX = this._origin.scaleX * this._offset.scaleX;
+			_global.scaleY = this._origin.scaleY * this._offset.scaleY;
+			_global.skewX = this._origin.skewX + this._offset.skewX;
+			_global.skewY = this._origin.skewY + this._offset.skewY;
+			_global.x = this._origin.x + this._offset.x + this._parent._tweenPivot.x;
+			_global.y = this._origin.y + this._offset.y + this._parent._tweenPivot.y;
 		}
 		
 		private function updateChildArmatureAnimation():void

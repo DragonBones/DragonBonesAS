@@ -4,6 +4,7 @@ package dragonBones.core
 	import dragonBones.Bone;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DBTransform;
+	import dragonBones.utils.TransformUtil;
 	
 	import flash.geom.Matrix;
 	
@@ -38,6 +39,9 @@ package dragonBones.core
 		
 		/** @private */
 		dragonBones_internal var _globalTransformMatrix:Matrix;
+		
+		dragonBones_internal static var _tempParentGlobalTransformMatrix:Matrix = new Matrix();
+		dragonBones_internal static var _tempParentGlobalTransform:DBTransform = new DBTransform();
 		
 		/**
 		 * This DBObject instance global transform instance.
@@ -134,6 +138,10 @@ package dragonBones.core
 			_parent = null;
 			
 			userData = null;
+			
+			this.inheritRotation = true;
+			this.inheritScale = true;
+			this.inheritTranslation = true;
 		}
 		
 		/**
@@ -150,6 +158,61 @@ package dragonBones.core
 			
 			_armature = null;
 			_parent = null;
+		}
+		
+		protected function calculateRelativeParentTransform():void
+		{
+		}
+		
+		protected function calculateParentTransform():Object
+		{
+			
+			if(this.parent && (this.inheritTranslation || this.inheritRotation || this.inheritScale))
+			{
+				var parentGlobalTransform:DBTransform = this._parent._globalTransformForChild;
+				var parentGlobalTransformMatrix:Matrix = this._parent._globalTransformMatrixForChild;
+				
+				if(!this.inheritTranslation || !this.inheritRotation || !this.inheritScale)
+				{
+					parentGlobalTransform = DBObject._tempParentGlobalTransform;
+					parentGlobalTransform.copy(this._parent._globalTransformForChild);
+					if(!this.inheritTranslation)
+					{
+						parentGlobalTransform.x = 0;
+						parentGlobalTransform.y = 0;
+					}
+					if(!this.inheritScale)
+					{
+						parentGlobalTransform.scaleX = 1;
+						parentGlobalTransform.scaleY = 1;
+					}
+					if(!this.inheritRotation)
+					{
+						parentGlobalTransform.skewX = 0;
+						parentGlobalTransform.skewY = 0;
+					}
+					
+					parentGlobalTransformMatrix = DBObject._tempParentGlobalTransformMatrix;
+					TransformUtil.transformToMatrix(parentGlobalTransform, parentGlobalTransformMatrix, true);
+				}
+				
+				return {parentGlobalTransform:parentGlobalTransform, parentGlobalTransformMatrix:parentGlobalTransformMatrix};
+			}
+			return null;
+		}
+		
+		protected function updateGlobal():Object
+		{
+			calculateRelativeParentTransform();
+			TransformUtil.transformToMatrix(_global, _globalTransformMatrix, true);
+			var output:Object = calculateParentTransform();
+			
+			if(output != null)
+			{
+				_globalTransformMatrix.concat(output.parentGlobalTransformMatrix);
+				TransformUtil.matrixToTransform(_globalTransformMatrix, _global, _global.scaleX * output.parentGlobalTransform.scaleX >= 0, _global.scaleY * output.parentGlobalTransform.scaleY >= 0);
+			}
+			return output;
 		}
 	}
 }
