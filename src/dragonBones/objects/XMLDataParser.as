@@ -92,7 +92,7 @@
 			
 			var data:SkeletonData = new SkeletonData();
 			data.name = rawData.@[ConstValues.A_NAME];
-			var isGlobalData:Boolean = rawData.@[ConstValues.A_IS_GLOBAL] == "1" ? true : false;
+			var isGlobalData:Boolean = rawData.@[ConstValues.A_IS_GLOBAL] == "0" ? false : true;
 			for each(var armatureXML:XML in rawData[ConstValues.ARMATURE])
 			{
 				data.addArmatureData(parseArmatureData(armatureXML, data, frameRate, isGlobalData, ifSkipAnimationData, outputAnimationDictionary));
