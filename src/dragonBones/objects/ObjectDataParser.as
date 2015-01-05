@@ -76,6 +76,7 @@
 			switch (version)
 			{
 				case "2.3":
+				case "3.0":
 					//Update2_3To3_0.format(rawData);
 					break;
 				
