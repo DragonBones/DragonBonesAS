@@ -11,7 +11,7 @@ All these features will be hold in community experience version for months befor
 ##### 3.0 data format standard support 
 * Support parent coordinate data format.  
 * Unify the default value parse with 3.0 data format standard.  
-* See 3.0 data format standard details in  [DragonBonesDataFormatSpec_V3.0_cn.xml](https://github.com/DragonBones/DesignPanel/blob/dev/docs/DragonBonesDataFormatSpec_V3.0_en.xml)
+* See 3.0 data format standard details in  [DragonBonesDataFormatSpec_V3.0_en.xml](https://github.com/DragonBones/DesignPanel/blob/dev/docs/DragonBonesDataFormatSpec_V3.0_en.xml)
 
 ##### Add three new properties "applyOffsetTranslationToChild", "applyOffsetRotationToChild", "applyOffsetScaleToChild" in Bone to improve animation flexibility.  
 * These three properties can be used to switch if the Bone.offset impact its child bones.
