@@ -11,6 +11,7 @@
 		public var tweenRotate:int;
 		public var tweenScale:Boolean;
 		public var displayIndex:int;
+		public var blendMode:String = "normal";
 		public var visible:Boolean;
 		public var zOrder:Number;
 		
