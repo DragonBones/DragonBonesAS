@@ -345,7 +345,6 @@
 			frame.tweenRotate = int(getNumber(frameObject, ConstValues.A_TWEEN_ROTATE, 0));
 			frame.tweenScale = getBoolean(frameObject, ConstValues.A_TWEEN_SCALE, true);
 			frame.displayIndex = int(getNumber(frameObject, ConstValues.A_DISPLAY_INDEX, 0));
-			frame.blendMode = frameObject[ConstValues.A_BLENDMODE] || "normal";
 			
 			//如果为NaN，则说明没有改变过zOrder
 			frame.zOrder = getNumber(frameObject, ConstValues.A_Z_ORDER, isGlobalData ? NaN : 0);

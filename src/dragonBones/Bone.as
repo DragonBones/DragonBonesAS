@@ -516,8 +516,6 @@
 				var displayIndex:int = tansformFrame.displayIndex;
 				for each(slot in _slotList)
 				{
-					
-					slot.blendMode = tansformFrame.blendMode;
 					slot.changeDisplay(displayIndex);
 					slot.updateDisplayVisible(tansformFrame.visible);
 					if(displayIndex >= 0)
