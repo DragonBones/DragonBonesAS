@@ -407,7 +407,7 @@
 			
 		//计算globalForChild
 			var ifExistOffsetTranslation:Boolean = _offset.x != 0 || _offset.y != 0;
-			var ifExistOffsetScale:Boolean = _offset.scaleX != 0 || _offset.scaleY != 0;
+			var ifExistOffsetScale:Boolean = _offset.scaleX != 1 || _offset.scaleY != 1;
 			var ifExistOffsetRotation:Boolean = _offset.skewX != 0 || _offset.skewY != 0;
 			
 			if(	(!ifExistOffsetTranslation || applyOffsetTranslationToChild) &&
