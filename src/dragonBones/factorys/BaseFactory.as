@@ -75,6 +75,11 @@ package dragonBones.factorys
 		{
 			return _dataDic[name];
 		}
+
+        public function get currentTextureAtlasName():String
+        {
+            return _currentTextureAtlasName;
+        }
 		
 		/**
 		 * Add a SkeletonData instance to this BaseFactory instance.
