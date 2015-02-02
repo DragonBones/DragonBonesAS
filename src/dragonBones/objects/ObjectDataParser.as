@@ -423,10 +423,10 @@
 					colorTransform.greenOffset = int(colorTransformObject[ConstValues.A_GREEN_OFFSET]);
 					colorTransform.blueOffset = int(colorTransformObject[ConstValues.A_BLUE_OFFSET]);
 					
-					colorTransform.alphaMultiplier = int(colorTransformObject[ConstValues.A_ALPHA_MULTIPLIER]) * 0.01;
-					colorTransform.redMultiplier = int(colorTransformObject[ConstValues.A_RED_MULTIPLIER]) * 0.01;
-					colorTransform.greenMultiplier = int(colorTransformObject[ConstValues.A_GREEN_MULTIPLIER]) * 0.01;
-					colorTransform.blueMultiplier = int(colorTransformObject[ConstValues.A_BLUE_MULTIPLIER]) * 0.01;
+					colorTransform.alphaMultiplier = int(getNumber(colorTransformObject, ConstValues.A_ALPHA_MULTIPLIER,100)||100) * 0.01;
+					colorTransform.redMultiplier = int(getNumber(colorTransformObject,ConstValues.A_RED_MULTIPLIER,100)||100) * 0.01;
+					colorTransform.greenMultiplier = int(getNumber(colorTransformObject,ConstValues.A_GREEN_MULTIPLIER,100)||100) * 0.01;
+					colorTransform.blueMultiplier = int(getNumber(colorTransformObject,ConstValues.A_BLUE_MULTIPLIER,100)||100) * 0.01;
 				}
 			}
 		}

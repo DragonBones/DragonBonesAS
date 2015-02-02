@@ -424,10 +424,10 @@
 					colorTransform.greenOffset = int(colorTransformXML.@[ConstValues.A_GREEN_OFFSET]);
 					colorTransform.blueOffset = int(colorTransformXML.@[ConstValues.A_BLUE_OFFSET]);
 					
-					colorTransform.alphaMultiplier = int(colorTransformXML.@[ConstValues.A_ALPHA_MULTIPLIER]) * 0.01;
-					colorTransform.redMultiplier = int(colorTransformXML.@[ConstValues.A_RED_MULTIPLIER]) * 0.01;
-					colorTransform.greenMultiplier = int(colorTransformXML.@[ConstValues.A_GREEN_MULTIPLIER]) * 0.01;
-					colorTransform.blueMultiplier = int(colorTransformXML.@[ConstValues.A_BLUE_MULTIPLIER]) * 0.01;
+					colorTransform.alphaMultiplier = int(getNumber(colorTransformXML, ConstValues.A_RED_MULTIPLIER, 100) || 100) * 0.01;
+					colorTransform.redMultiplier = int(getNumber(colorTransformXML, ConstValues.A_RED_MULTIPLIER, 100) || 100) * 0.01;
+					colorTransform.greenMultiplier = int(getNumber(colorTransformXML, ConstValues.A_GREEN_MULTIPLIER, 100) || 100) * 0.01;
+					colorTransform.blueMultiplier = int(getNumber(colorTransformXML, ConstValues.A_BLUE_MULTIPLIER, 100) || 100) * 0.01;
 				}
 			}
 		}
