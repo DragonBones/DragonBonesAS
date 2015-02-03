@@ -9,10 +9,6 @@ package dragonBones.objects
         public var blendMode:String;
 		
 		private var _displayDataList:Vector.<DisplayData>;
-		public function get displayDataList():Vector.<DisplayData>
-		{
-			return _displayDataList;
-		}
 		
 		public function SlotData()
 		{
@@ -62,6 +58,11 @@ package dragonBones.objects
 			}
 			
 			return null;
+		}
+		
+		public function get displayDataList():Vector.<DisplayData>
+		{
+			return _displayDataList;
 		}
 	}
 }

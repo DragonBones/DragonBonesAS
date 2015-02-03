@@ -3,13 +3,14 @@
 	import dragonBones.core.DBObject;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DisplayData;
-	import dragonBones.objects.FrameCached;
-	import dragonBones.objects.TimelineCached;
-	import dragonBones.utils.TransformUtil;
+	import dragonBones.objects.SlotData;
 	
 	import flash.errors.IllegalOperationError;
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
+
+	//import dragonBones.objects.FrameCached;
+	//import dragonBones.objects.TimelineCached;
 	
 	use namespace dragonBones_internal;
 	
@@ -17,161 +18,24 @@
 	{
 		/** @private Need to keep the reference of DisplayData. When slot switch displayObject, it need to restore the display obect's origional pivot. */
 		dragonBones_internal var _displayDataList:Vector.<DisplayData>;
-		
 		/** @private */
 		dragonBones_internal var _originZOrder:Number;
-		
 		/** @private */
 		dragonBones_internal var _tweenZOrder:Number;
-		
-		/** @private */
-		dragonBones_internal var _isShowDisplay:Boolean;
-		
-		/** @private */
-		dragonBones_internal var _timelineCached:TimelineCached;
-		
 		/** @private */
 		protected var _offsetZOrder:Number;
 		
-		/** @private */
-		protected var _displayIndex:int;
-		
-		/** @private */
-		protected var _colorTransform:ColorTransform;
-		
-		/**
-		 * zOrder. Support decimal for ensure dynamically added slot work toghther with animation controled slot.  
-		 * @return zOrder.
-		 */
-		public function get zOrder():Number
-		{
-			return _originZOrder + _tweenZOrder + _offsetZOrder;
-		}
-		public function set zOrder(value:Number):void
-		{
-			if(zOrder != value)
-			{
-				_offsetZOrder = value - _originZOrder - _tweenZOrder;
-				if(this._armature)
-				{
-					this._armature._slotsZOrderChanged = true;
-				}
-			}
-		}
-		
-		protected var _blendMode:String;
-		/**
-		 * blendMode
-		 * @return blendMode.
-		 */
-		public function get blendMode():String
-		{
-			return _blendMode;
-		}
-		public function set blendMode(value:String):void
-		{
-			if(_blendMode != value)
-			{
-				_blendMode = value;
-				updateDisplayBlendMode(_blendMode);
-			}
-		}
-		
-		protected var _display:Object;
-		/**
-		 * The DisplayObject belonging to this Slot instance. Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
-		 */
-		public function get display():Object
-		{
-			return _display;
-		}
-		public function set display(value:Object):void
-		{
-			if (_displayIndex < 0)
-			{
-				_displayIndex = 0;
-			}
-			if(_displayList[_displayIndex] == value)
-			{
-				return;
-			}
-			_displayList[_displayIndex] = value;
-			updateSlotDisplay();
-			updateChildArmatureAnimation();
-			updateTransform();
-		}
-		
-		protected var _childArmature:Armature;
-		/**
-		 * The sub-armature of this Slot instance.
-		 */
-		public function get childArmature():Armature
-		{
-			return _childArmature;
-		}
-		public function set childArmature(value:Armature):void
-		{
-			display = value;
-		}
-
-		//
 		protected var _displayList:Array;
-		/**
-		 * The DisplayObject list belonging to this Slot instance (display or armature). Replace it to implement switch texture.
-		 */
-		public function get displayList():Array
-		{
-			return _displayList;
-		}
-		public function set displayList(value:Array):void
-		{
-			if(!value)
-			{
-				throw new ArgumentError();
-			}
-			if (_displayIndex < 0)
-			{
-				_displayIndex = 0;
-			}
-			var i:int = _displayList.length = value.length;
-			while(i --)
-			{
-				_displayList[i] = value[i];
-			}
-			
-			var displayIndexBackup:int = _displayIndex;
-			_displayIndex = -1;
-			changeDisplay(displayIndexBackup);
-		}
+		protected var _currentDisplayIndex:int;
+		protected var _colorTransform:ColorTransform;
+		//TO DO: 以后把这两个属性变成getter
+		//另外还要处理 isShowDisplay 和 visible的矛盾
+		protected var _currentDisplay:Object;
+		dragonBones_internal var _isShowDisplay:Boolean;
 		
-		/** @private */
-		override public function set visible(value:Boolean):void
-		{
-			if(this._visible != value)
-			{
-				this._visible = value;
-				updateDisplayVisible(this._visible);
-			}
-		}
+		//protected var _childArmature:Armature;
+		protected var _blendMode:String;
 		
-		/** @private */
-		override dragonBones_internal function setArmature(value:Armature):void
-		{
-			super.setArmature(value);
-			if(this._armature)
-			{
-				this._armature._slotsZOrderChanged = true;
-				addDisplayToContainer(this._armature.display);
-			}
-			else
-			{
-				removeDisplayFromContainer();
-			}
-		}
-		
-		/**
-		 * Creates a Slot blank instance.
-		 */
 		public function Slot(self:Slot)
 		{
 			super();
@@ -182,21 +46,27 @@
 			}
 			
 			_displayList = [];
-			_displayIndex = -1;
+			_currentDisplayIndex = -1;
 			
 			_originZOrder = 0;
 			_tweenZOrder = 0;
 			_offsetZOrder = 0;
 			_isShowDisplay = false;
-			
 			_colorTransform = new ColorTransform();
-			
 			_displayDataList = null;
-			_childArmature = null;
-			_display = null;
+			//_childArmature = null;
+			_currentDisplay = null;
 			
 			this.inheritRotation = true;
 			this.inheritScale = true;
+		}
+		
+		public function initWithSlotData(slotData:SlotData):void
+		{
+			name = slotData.name;
+			blendMode = slotData.blendMode;
+			_originZOrder = slotData.zOrder;
+			_displayDataList = slotData.displayDataList;
 		}
 		
 		/**
@@ -215,12 +85,36 @@
 			
 			_displayDataList = null;
 			_displayList = null;
-			_display = null;
-			_childArmature = null;
-			
-			_timelineCached = null;
+			_currentDisplay = null;
+			//_childArmature = null;
 		}
 		
+//骨架装配
+		/** @private */
+		override dragonBones_internal function setArmature(value:Armature):void
+		{
+			if(_armature == value)
+			{
+				return;
+			}
+			if(_armature)
+			{
+				_armature.removeSlotFromSlotList(this);
+			}
+			_armature = value;
+			if(_armature)
+			{
+				_armature.addSlotToSlotList(this);
+				_armature._slotsZOrderChanged = true;
+				addDisplayToContainer(this._armature.display);
+			}
+			else
+			{
+				removeDisplayFromContainer();
+			}
+		}
+		
+//动画
 		/** @private */
 		dragonBones_internal function update():void
 		{
@@ -229,33 +123,7 @@
 				return;
 			}
 			
-			var frameCachedPosition:int = this._parent._frameCachedPosition;
-			var frameCachedDuration:int = this._parent._frameCachedDuration;
-			
-			if(frameCachedPosition >= 0 && frameCachedDuration <= 0)
-			{
-				var frameCached:FrameCached = _timelineCached.timeline[frameCachedPosition];
-				
-				var matrix:Matrix = frameCached.matrix;
-				this._globalTransformMatrix.a = matrix.a;
-				this._globalTransformMatrix.b = matrix.b;
-				this._globalTransformMatrix.c = matrix.c;
-				this._globalTransformMatrix.d = matrix.d;
-				this._globalTransformMatrix.tx = matrix.tx;
-				this._globalTransformMatrix.ty = matrix.ty;
-				//this._globalTransformMatrix.copyFrom(_frameCached.matrix);
-				
-				updateTransform();
-				return;
-			}
-			
 			updateGlobal();
-
-			if(frameCachedDuration > 0)    // && frameCachedPosition >= 0
-			{
-				_timelineCached.addFrame(null, this._globalTransformMatrix, frameCachedPosition, frameCachedDuration);
-			}
-			
 			updateTransform();
 		}
 		
@@ -271,27 +139,27 @@
 		
 		private function updateChildArmatureAnimation():void
 		{
-			if(_childArmature)
+			if(childArmature)
 			{
 				if(_isShowDisplay)
 				{
 					if(
 						this._armature &&
 						this._armature.animation.lastAnimationState &&
-						_childArmature.animation.hasAnimation(this._armature.animation.lastAnimationState.name)
+						childArmature.animation.hasAnimation(this._armature.animation.lastAnimationState.name)
 					)
 					{
-						_childArmature.animation.gotoAndPlay(this._armature.animation.lastAnimationState.name);
+						childArmature.animation.gotoAndPlay(this._armature.animation.lastAnimationState.name);
 					}
 					else
 					{
-						_childArmature.animation.play();
+						childArmature.animation.play();
 					}
 				}
 				else
 				{
-					_childArmature.animation.stop();
-					_childArmature.animation._lastAnimationState = null;
+					childArmature.animation.stop();
+					childArmature.animation._lastAnimationState = null;
 				}
 			}
 		}
@@ -316,19 +184,19 @@
 					displayIndex = length - 1;
 				}
 				
-				if(_displayIndex != displayIndex)
+				if(_currentDisplayIndex != displayIndex)
 				{
 					_isShowDisplay = true;
-					_displayIndex = displayIndex;
+					_currentDisplayIndex = displayIndex;
 					updateSlotDisplay();
 					updateChildArmatureAnimation();
 					if(
 						_displayDataList && 
 						_displayDataList.length > 0 && 
-						_displayIndex < _displayDataList.length
+						_currentDisplayIndex < _displayDataList.length
 					)
 					{
-						this._origin.copy(_displayDataList[_displayIndex].transform);
+						this._origin.copy(_displayDataList[_currentDisplayIndex].transform);
 					}
 				}
 				else if(!_isShowDisplay)
@@ -351,32 +219,32 @@
 		dragonBones_internal function updateSlotDisplay():void
 		{
 			var currentDisplayIndex:int = -1;
-			if(_display)
+			if(_currentDisplay)
 			{
 				currentDisplayIndex = getDisplayIndex();
 				removeDisplayFromContainer();
 			}
-			var display:Object = _displayList[_displayIndex];
-			if (display)
+			var displayObj:Object = _displayList[_currentDisplayIndex];
+			if (displayObj)
 			{
-				if(display is Armature)
+				if(displayObj is Armature)
 				{
-					_childArmature = display as Armature;
-					_display = _childArmature.display;
+					//_childArmature = display as Armature;
+					_currentDisplay = (displayObj as Armature).display;
 				}
 				else
 				{
-					_childArmature = null;
-					_display = display;
+					//_childArmature = null;
+					_currentDisplay = displayObj;
 				}
 			}
 			else
 			{
-				_display = null;
-				_childArmature = null;
+				_currentDisplay = null;
+				//_childArmature = null;
 			}
-			updateDisplay(_display);
-			if(_display)
+			updateDisplay(_currentDisplay);
+			if(_currentDisplay)
 			{
 				if(this._armature && _isShowDisplay)
 				{
@@ -391,48 +259,126 @@
 					}
 				}
 				updateDisplayBlendMode(_blendMode);
-				updateDisplayColor(
-					_colorTransform.alphaOffset, _colorTransform.redOffset, _colorTransform.greenOffset, _colorTransform.blueOffset,
-					_colorTransform.alphaMultiplier, _colorTransform.redMultiplier, _colorTransform.greenMultiplier, _colorTransform.blueMultiplier
-				);
+				updateDisplayColor(	_colorTransform.alphaOffset, _colorTransform.redOffset, _colorTransform.greenOffset, _colorTransform.blueOffset,
+									_colorTransform.alphaMultiplier, _colorTransform.redMultiplier, _colorTransform.greenMultiplier, _colorTransform.blueMultiplier);
 				updateDisplayVisible(_visible);
 				//updateDisplayTransform();
 			}
 		}
 		
-		/**
-		 * @private
-		 * Updates the color of the display object.
-		 * @param a
-		 * @param r
-		 * @param g
-		 * @param b
-		 * @param aM
-		 * @param rM
-		 * @param gM
-		 * @param bM
-		 */
-		dragonBones_internal function updateDisplayColor(
-			aOffset:Number, 
-			rOffset:Number, 
-			gOffset:Number, 
-			bOffset:Number, 
-			aMultiplier:Number, 
-			rMultiplier:Number, 
-			gMultiplier:Number, 
-			bMultiplier:Number
-		):void
+		/** @private */
+		override public function set visible(value:Boolean):void
 		{
-			_colorTransform.alphaOffset = aOffset;
-			_colorTransform.redOffset = rOffset;
-			_colorTransform.greenOffset = gOffset;
-			_colorTransform.blueOffset = bOffset;
-			_colorTransform.alphaMultiplier = aMultiplier;
-			_colorTransform.redMultiplier = rMultiplier;
-			_colorTransform.greenMultiplier = gMultiplier;
-			_colorTransform.blueMultiplier = bMultiplier;
+			if(this._visible != value)
+			{
+				this._visible = value;
+				updateDisplayVisible(this._visible);
+			}
 		}
 		
+		/**
+		 * The DisplayObject list belonging to this Slot instance (display or armature). Replace it to implement switch texture.
+		 */
+		public function get displayList():Array
+		{
+			return _displayList;
+		}
+		public function set displayList(value:Array):void
+		{
+			if(!value)
+			{
+				throw new ArgumentError();
+			}
+			
+			//为什么要修改_currentDisplayIndex?
+			if (_currentDisplayIndex < 0)
+			{
+				_currentDisplayIndex = 0;
+			}
+			var i:int = _displayList.length = value.length;
+			while(i --)
+			{
+				_displayList[i] = value[i];
+			}
+			
+			//在index不改变的情况下强制刷新 TO DO需要修改
+			var displayIndexBackup:int = _currentDisplayIndex;
+			_currentDisplayIndex = -1;
+			changeDisplay(displayIndexBackup);
+		}
+		
+		/**
+		 * The DisplayObject belonging to this Slot instance. Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
+		 */
+		public function get display():Object
+		{
+			return _currentDisplay;
+		}
+		public function set display(value:Object):void
+		{
+			if (_currentDisplayIndex < 0)
+			{
+				_currentDisplayIndex = 0;
+			}
+			if(_displayList[_currentDisplayIndex] == value)
+			{
+				return;
+			}
+			_displayList[_currentDisplayIndex] = value;
+			updateSlotDisplay();
+			updateChildArmatureAnimation();
+			updateTransform();//是否可以延迟更新？
+		}
+		
+		/**
+		 * The sub-armature of this Slot instance.
+		 */
+		public function get childArmature():Armature
+		{
+			return _displayList[_currentDisplayIndex] is Armature ? _displayList[_currentDisplayIndex] : null;
+		}
+		public function set childArmature(value:Armature):void
+		{
+			//设计的不好，要修改
+			display = value;
+		}
+		
+		/**
+		 * zOrder. Support decimal for ensure dynamically added slot work toghther with animation controled slot.  
+		 * @return zOrder.
+		 */
+		public function get zOrder():Number
+		{
+			return _originZOrder + _tweenZOrder + _offsetZOrder;
+		}
+		public function set zOrder(value:Number):void
+		{
+			if(zOrder != value)
+			{
+				_offsetZOrder = value - _originZOrder - _tweenZOrder;
+				if(this._armature)
+				{
+					this._armature._slotsZOrderChanged = true;
+				}
+			}
+		}
+		
+		/**
+		 * blendMode
+		 * @return blendMode.
+		 */
+		public function get blendMode():String
+		{
+			return _blendMode;
+		}
+		public function set blendMode(value:String):void
+		{
+			if(_blendMode != value)
+			{
+				_blendMode = value;
+				updateDisplayBlendMode(_blendMode);
+			}
+		}
 		
 		//Abstract method
 		
@@ -495,9 +441,42 @@
 		
 		/**
 		 * @private
-         * Update the blend mode of the display object.
-         * @param value The blend mode to use. 
-         */
+		 * Updates the color of the display object.
+		 * @param a
+		 * @param r
+		 * @param g
+		 * @param b
+		 * @param aM
+		 * @param rM
+		 * @param gM
+		 * @param bM
+		 */
+		dragonBones_internal function updateDisplayColor(
+			aOffset:Number, 
+			rOffset:Number, 
+			gOffset:Number, 
+			bOffset:Number, 
+			aMultiplier:Number, 
+			rMultiplier:Number, 
+			gMultiplier:Number, 
+			bMultiplier:Number
+		):void
+		{
+			_colorTransform.alphaOffset = aOffset;
+			_colorTransform.redOffset = rOffset;
+			_colorTransform.greenOffset = gOffset;
+			_colorTransform.blueOffset = bOffset;
+			_colorTransform.alphaMultiplier = aMultiplier;
+			_colorTransform.redMultiplier = rMultiplier;
+			_colorTransform.greenMultiplier = gMultiplier;
+			_colorTransform.blueMultiplier = bMultiplier;
+		}
+		
+		/**
+		 * @private
+		 * Update the blend mode of the display object.
+		 * @param value The blend mode to use. 
+		 */
 		dragonBones_internal function updateDisplayBlendMode(value:String):void
 		{
 			throw new IllegalOperationError("Abstract method needs to be implemented in subclass!");

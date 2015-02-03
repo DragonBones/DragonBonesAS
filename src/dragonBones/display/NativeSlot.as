@@ -104,6 +104,8 @@ package dragonBones.display
 			if(_nativeDisplay)
 			{
 				super.updateDisplayColor(aOffset, rOffset, gOffset, bOffset, aMultiplier, rMultiplier, gMultiplier, bMultiplier);
+				
+				
 				_nativeDisplay.transform.colorTransform = _colorTransform;
 			}
 		}

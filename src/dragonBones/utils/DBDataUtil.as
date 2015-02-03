@@ -8,7 +8,6 @@ package dragonBones.utils
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.SkinData;
 	import dragonBones.objects.SlotData;
-	import dragonBones.objects.Timeline;
 	import dragonBones.objects.TransformFrame;
 	import dragonBones.objects.TransformTimeline;
 	import dragonBones.utils.TransformUtil;
@@ -84,6 +83,7 @@ package dragonBones.utils
 				{
 					for each(slotData in slotDataList)
 					{
+						//找到属于当前Bone的slot(FLash Pro制作的动画一个Bone只包含一个slot)
 						if(slotData.parent == boneData.name)
 						{
 							break;
@@ -100,8 +100,10 @@ package dragonBones.utils
 				for(var j:int = 0;j < frameListLength;j ++)
 				{
 					var frame:TransformFrame = frameList[j] as TransformFrame;
+					//计算frame的transform信息
 					setFrameTransform(animationData, armatureData, boneData, frame);
 					
+					//转换成相对骨架的transform信息
 					frame.transform.x -= boneData.transform.x;
 					frame.transform.y -= boneData.transform.y;
 					frame.transform.skewX -= boneData.transform.skewX;
@@ -117,6 +119,7 @@ package dragonBones.utils
 						}
 					}
 					
+					//如果originTransform不存在说明当前帧是第一帧，将当前帧的transform保存至timeline的originTransform
 					if(!originTransform)
 					{
 						originTransform = timeline.originTransform;
@@ -189,9 +192,11 @@ package dragonBones.utils
 			}
 		}
 		
+		//计算frame的transoform信息
 		private static function setFrameTransform(animationData:AnimationData, armatureData:ArmatureData, boneData:BoneData, frame:TransformFrame):void
 		{
 			frame.transform.copy(frame.global);
+			//找到当前bone的父亲列表 并将timeline信息存入parentTimelineList 将boneData信息存入parentDataList
 			var parentData:BoneData = armatureData.getBoneData(boneData.parent);
 			if(parentData)
 			{
@@ -217,17 +222,17 @@ package dragonBones.utils
 					
 					var i:int = parentTimelineList.length;
 					
-					//var helpMatrix:Matrix = new Matrix();
 					var globalTransform:DBTransform;
 					var globalTransformMatrix:Matrix = new Matrix();
 					
 					var currentTransform:DBTransform = new DBTransform();
 					var currentTransformMatrix:Matrix = new Matrix();
-					
+					//从根开始遍历
 					while(i --)
 					{
 						parentTimeline = parentTimelineList[i];
 						parentData = parentDataList[i];
+						//一级一级找到当前帧对应的每个父节点的transform(相对transform) 保存到currentTransform，globalTransform保存根节点的transform
 						getTimelineTransform(parentTimeline, frame.position, currentTransform, !globalTransform);
 						
 						if(!globalTransform)
@@ -249,10 +254,12 @@ package dragonBones.utils
 							TransformUtil.transformToMatrix(currentTransform, currentTransformMatrix, true);
 							currentTransformMatrix.concat(globalTransformMatrix);
 							TransformUtil.matrixToTransform(currentTransformMatrix, globalTransform, currentTransform.scaleX * globalTransform.scaleX >= 0, currentTransform.scaleY * globalTransform.scaleY >= 0);
+							
 						}
+						
 						TransformUtil.transformToMatrix(globalTransform, globalTransformMatrix, true);
-					}
-					TransformUtil.globalToLocal(frame.transform, globalTransform);
+						}
+					TransformUtil.globalToLocal(frame.transform, globalTransform);	
 				}
 			}
 		}
@@ -265,8 +272,10 @@ package dragonBones.utils
 			while(i --)
 			{
 				var currentFrame:TransformFrame = frameList[i] as TransformFrame;
+				//找到穿越当前帧的关键帧
 				if(currentFrame.position <= position && currentFrame.position + currentFrame.duration > position)
 				{
+					//是最后一帧或者就是当前帧
 					if(i == frameList.length - 1 || position == currentFrame.position)
 					{
 						retult.copy(isGlobal?currentFrame.global:currentFrame.transform);
@@ -277,7 +286,7 @@ package dragonBones.utils
 						var progress:Number = (position - currentFrame.position) / currentFrame.duration;
 						if(tweenEasing && tweenEasing != 10)
 						{
-							progress = TimelineState.getEaseValue(progress, tweenEasing);
+							progress = MathUtil.getEaseValue(progress, tweenEasing);
 						}
 						var nextFrame:TransformFrame = frameList[i + 1] as TransformFrame;
 						

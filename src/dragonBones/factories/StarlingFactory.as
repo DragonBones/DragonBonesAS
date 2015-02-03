@@ -1,4 +1,4 @@
-﻿package dragonBones.factorys
+﻿package dragonBones.factories
 {
 	/**
 	* Copyright 2012-2013. DragonBones. All Rights Reserved.
@@ -23,9 +23,8 @@
 	import starling.textures.SubTexture;
 	import starling.textures.Texture;
 	import starling.textures.TextureAtlas;
-    import starling.textures.TextureSmoothing;
 
-    use namespace dragonBones_internal;
+	use namespace dragonBones_internal;
 	
 	/**
 	 * A object managing the set of armature resources for Starling engine. It parses the raw data, stores the armature resources and creates armature instances.
@@ -61,11 +60,7 @@
 		 * Apply a scale for SWF specific texture. Use 1 for no scale.
 		 */
 		public var scaleForTexture:Number;
-		/**
-		 * Apply a smoothing to generated display. Select from TextureSmoothing class.
-		 */
-		public var displaySmoothing:String = TextureSmoothing.BILINEAR;
-
+		
 		/**
 		 * Creates a new StarlingFactory instance.
 		 */
@@ -90,10 +85,10 @@
 				var width:int = getNearest2N(content.width) * scaleForTexture;
 				var height:int = getNearest2N(content.height) * scaleForTexture;
 				
-				_helpMatrix.a = 1;
-				_helpMatrix.b = 0;
-				_helpMatrix.c = 0;
-				_helpMatrix.d = 1;
+//				_helpMatrix.a = 1;
+//				_helpMatrix.b = 0;
+//				_helpMatrix.c = 0;
+//				_helpMatrix.d = 1;
 				_helpMatrix.scale(scaleForTexture, scaleForTexture);
 				_helpMatrix.tx = 0;
 				_helpMatrix.ty = 0;				
@@ -150,7 +145,6 @@
 				var image:Image = new Image(subTexture);
 				image.pivotX = pivotX;
 				image.pivotY = pivotY;
-                image.smoothing = displaySmoothing;
 				return image;
 			}
 			return null;

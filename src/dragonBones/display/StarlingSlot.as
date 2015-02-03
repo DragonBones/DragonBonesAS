@@ -100,8 +100,10 @@
 				var pivotX:Number = _starlingDisplay.pivotX;
 				var pivotY:Number = _starlingDisplay.pivotY;
 				
+				
 				if(updateMatrix)
 				{
+					//_starlingDisplay.transformationMatrix setter 比较慢暂时走下面
 					_starlingDisplay.transformationMatrix = _globalTransformMatrix;
 					if(pivotX || pivotY)
 					{

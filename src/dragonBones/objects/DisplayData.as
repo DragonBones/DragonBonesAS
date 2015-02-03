@@ -16,6 +16,7 @@
 		public function DisplayData()
 		{
 			transform = new DBTransform();
+			pivot = new Point();
 		}
 		
 		public function dispose():void

@@ -36,12 +36,12 @@ package dragonBones.core
 		
 		/** @private */
 		dragonBones_internal var _global:DBTransform;
-		
 		/** @private */
 		dragonBones_internal var _globalTransformMatrix:Matrix;
 		
 		dragonBones_internal static var _tempParentGlobalTransformMatrix:Matrix = new Matrix();
 		dragonBones_internal static var _tempParentGlobalTransform:DBTransform = new DBTransform();
+		
 		
 		/**
 		 * This DBObject instance global transform instance.
@@ -55,7 +55,7 @@ package dragonBones.core
 		/** @private */
 		protected var _origin:DBTransform;
 		/**
-		 * This Bone instance origin transform instance.
+		 * This DBObject instance related to parent transform instance.
 		 * @see dragonBones.objects.DBTransform
 		 */
 		public function get origin():DBTransform
@@ -66,7 +66,7 @@ package dragonBones.core
 		/** @private */
 		protected var _offset:DBTransform;
 		/**
-		 * This Bone instance offset transform instance.
+		 * This DBObject instance offset transform instance (For manually control).
 		 * @see dragonBones.objects.DBTransform
 		 */
 		public function get offset():DBTransform
@@ -97,15 +97,7 @@ package dragonBones.core
 		/** @private */
 		dragonBones_internal function setArmature(value:Armature):void
 		{
-			if(_armature)
-			{
-				_armature.removeDBObject(this);
-			}
 			_armature = value;
-			if(_armature)
-			{
-				_armature.addDBObject(this);
-			}
 		}
 		
 		/** @private */
@@ -206,7 +198,7 @@ package dragonBones.core
 			calculateRelativeParentTransform();
 			TransformUtil.transformToMatrix(_global, _globalTransformMatrix, true);
 			var output:Object = calculateParentTransform();
-			
+				
 			if(output != null)
 			{
 				_globalTransformMatrix.concat(output.parentGlobalTransformMatrix);

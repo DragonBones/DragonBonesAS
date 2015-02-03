@@ -1,8 +1,5 @@
 ﻿package dragonBones
 {
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	
 	import dragonBones.animation.Animation;
 	import dragonBones.animation.AnimationState;
 	import dragonBones.animation.IAnimatable;
@@ -11,10 +8,12 @@
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.ArmatureEvent;
 	import dragonBones.events.FrameEvent;
-	import dragonBones.events.SoundEvent;
-	import dragonBones.events.SoundEventManager;
 	import dragonBones.objects.ArmatureData;
+	import dragonBones.objects.DragonBonesData;
 	import dragonBones.objects.Frame;
+	
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
 
 	use namespace dragonBones_internal;
 
@@ -70,10 +69,13 @@
 
 	public class Armature extends EventDispatcher implements IAnimatable
 	{
+		dragonBones_internal var __dragonBonesData:DragonBonesData;
+		
+		
 		/**
 		 * The instance dispatch sound event.
 		 */
-		private static const _soundManager:SoundEventManager = SoundEventManager.getInstance();
+		//private static const _soundManager:SoundEventManager = SoundEventManager.getInstance();
 
 		/**
 		 * The name should be same with ArmatureData's name
@@ -132,22 +134,6 @@
 		{
 			return _animation;
 		}
-		
-		/** @private */
-		protected var _cacheFrameRate:int;
-		public function get cacheFrameRate():int
-		{
-			return _cacheFrameRate;
-		}
-		public function set cacheFrameRate(value:int):void
-		{
-			if(_cacheFrameRate == value)
-			{
-				return;
-			}
-			_cacheFrameRate = value;
-			
-		}
 
 		/**
 		 * Creates a Armature blank instance.
@@ -173,8 +159,6 @@
 			_lockDispose = false;
 			
 			_armatureData = null;
-			
-			_cacheFrameRate = 0;
 		}
 		
 		/**
@@ -336,13 +320,13 @@
 		 * @return A Slot instance or null if no Slot with that DisplayObject exist.
 		 * @see dragonBones.Slot
 		 */
-		public function getSlotByDisplay(display:Object):Slot
+		public function getSlotByDisplay(displayObj:Object):Slot
 		{
-			if(display)
+			if(displayObj)
 			{
 				for each(var slot:Slot in _slotList)
 				{
-					if(slot.display == display)
+					if(slot.display == displayObj)
 					{
 						return slot;
 					}
@@ -362,7 +346,7 @@
 			var bone:Bone = getBone(boneName);
 			if (bone)
 			{
-				bone.addChild(slot);
+				bone.addSlot(slot);
 			}
 			else
 			{
@@ -382,7 +366,7 @@
 				throw new ArgumentError();
 			}
 			
-			slot.parent.removeChild(slot);
+			slot.parent.removeSlot(slot);
 		}
 
 		/**
@@ -447,36 +431,42 @@
 		 * @param (optional) The parent's name of this Bone instance.
 		 * @see dragonBones.Bone
 		 */
-		public function addBone(bone:Bone, parentName:String = null):void
+		public function addBone(bone:Bone, parentName:String = null, updateLater:Boolean = false):void
 		{
+			var parentBone:Bone;
 			if(parentName)
 			{
-				var boneParent:Bone = getBone(parentName);
-				if (boneParent)
-				{
-					boneParent.addChild(bone);
-				}
-				else
+				parentBone = getBone(parentName);
+				if (!parentBone)
 				{
 					throw new ArgumentError();
 				}
+			}
+			
+			if(parentBone)
+			{
+				parentBone.addChildBone(bone, updateLater);
 			}
 			else
 			{
 				if(bone.parent)
 				{
-					bone.parent.removeChild(bone);
+					bone.parent.removeChildBone(bone, updateLater);
 				}
 				bone.setArmature(this);
+				if(!updateLater)
+				{
+					updateAnimationAfterBoneListChanged();
+				}
 			}
 		}
-
+		
 		/**
 		 * Remove a Bone instance from this Armature instance.
 		 * @param The Bone instance to remove.
 		 * @see	dragonBones.Bone
 		 */
-		public function removeBone(bone:Bone):void
+		public function removeBone(bone:Bone, updateLater:Boolean = false):void
 		{
 			if(!bone || bone.armature != this)
 			{
@@ -485,13 +475,16 @@
 			
 			if(bone.parent)
 			{
-				bone.parent.removeChild(bone);
+				bone.parent.removeChildBone(bone, updateLater);
 			}
 			else
 			{
 				bone.setArmature(null);
+				if(!updateLater)
+				{
+					updateAnimationAfterBoneListChanged(false);
+				}
 			}
-			
 		}
 
 		/**
@@ -510,60 +503,51 @@
 		}
 		
 		/** @private */
-		dragonBones_internal function addDBObject(object:DBObject):void
+		dragonBones_internal function addBoneToBoneList(bone:Bone):void
 		{
-			if(object is Slot)
+			if(_boneList.indexOf(bone) < 0)
 			{
-				var slot:Slot = object as Slot;
-				if(_slotList.indexOf(slot) < 0)
-				{
-					_slotList.fixed = false;
-					_slotList[_slotList.length] = slot;
-					_slotList.fixed = true;
-				}
-			}
-			else if(object is Bone)
-			{
-				var bone:Bone = object as Bone;
-				if(_boneList.indexOf(bone) < 0)
-				{
-					_boneList.fixed = false;
-					_boneList[_boneList.length] = bone;
-					sortBoneList();
-					_boneList.fixed = true;
-					_animation.updateAnimationStates();
-				}
+				_boneList.fixed = false;
+				_boneList[_boneList.length] = bone;
+				_boneList.fixed = true;
 			}
 		}
 		
 		/** @private */
-		dragonBones_internal function removeDBObject(object:DBObject):void
+		dragonBones_internal function removeBoneFromBoneList(bone:Bone):void
 		{
-			if(object is Slot)
+			var index:int = _boneList.indexOf(bone);
+			if(index >= 0)
 			{
-				var slot:Slot = object as Slot;
-				var index:int = _slotList.indexOf(slot);
-				if(index >= 0)
-				{
-					_slotList.fixed = false;
-					_slotList.splice(index, 1);
-					_slotList.fixed = true;
-				}
-			}
-			else if(object is Bone)
-			{
-				var bone:Bone = object as Bone;
-				index = _boneList.indexOf(bone);
-				if(index >= 0)
-				{
-					_boneList.fixed = false;
-					_boneList.splice(index, 1);
-					_boneList.fixed = true;
-					_animation.updateAnimationStates();
-				}
+				_boneList.fixed = false;
+				_boneList.splice(index, 1);
+				_boneList.fixed = true;
 			}
 		}
-
+		
+		/** @private */
+		dragonBones_internal function addSlotToSlotList(slot:Slot):void
+		{
+			if(_slotList.indexOf(slot) < 0)
+			{
+				_slotList.fixed = false;
+				_slotList[_slotList.length] = slot;
+				_slotList.fixed = true;
+			}
+		}
+		
+		/** @private */
+		dragonBones_internal function removeSlotFromSlotList(slot:Slot):void
+		{
+			var index:int = _slotList.indexOf(slot);
+			if(index >= 0)
+			{
+				_slotList.fixed = false;
+				_slotList.splice(index, 1);
+				_slotList.fixed = true;
+			}
+		}
+		
 		/**
 		 * Sort all slots based on zOrder
 		 */
@@ -578,6 +562,7 @@
 				var slot:Slot = _slotList[i];
 				if(slot._isShowDisplay)
 				{
+					//_display 实际上是container, 这个方法就是把原来的显示对象放到container中的第一个
 					slot.addDisplayToContainer(_display);
 				}
 			}
@@ -585,6 +570,15 @@
 			_slotsZOrderChanged = false;
 		}
 
+		dragonBones_internal function updateAnimationAfterBoneListChanged(ifNeedSortBoneList:Boolean = true):void
+		{
+			if(ifNeedSortBoneList)
+			{
+				sortBoneList();
+			}
+			_animation.updateAnimationStates();
+		}
+		
 		private function sortBoneList():void
 		{
 			var i:int = _boneList.length;
@@ -609,10 +603,14 @@
 			helpArray.sortOn("0", Array.NUMERIC|Array.DESCENDING);
 			
 			i = helpArray.length;
+			
+			_boneList.fixed = false;
 			while(i --)
 			{
 				_boneList[i] = helpArray[i][1];
 			}
+			_boneList.fixed = true;
+			
 			helpArray.length = 0;
 		}
 
@@ -626,7 +624,7 @@
 				frameEvent.frameLabel = frame.event;
 				_eventList.push(frameEvent);
 			}
-			
+			/*
 			if(frame.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
 			{
 				var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
@@ -635,7 +633,7 @@
 				soundEvent.sound = frame.sound;
 				_soundManager.dispatchEvent(soundEvent);
 			}
-			
+			*/
 			//[TODO]currently there is only gotoAndPlay belongs to frame action. In future, there will be more.  
 			//后续会扩展更多的action，目前只有gotoAndPlay的含义
 			if(frame.action)

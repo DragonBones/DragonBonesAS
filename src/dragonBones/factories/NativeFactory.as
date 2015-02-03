@@ -1,16 +1,17 @@
-﻿package dragonBones.factorys
+﻿package dragonBones.factories
 {
-	import flash.display.MovieClip;
-	import flash.display.Shape;
-	import flash.display.Sprite;
-	import flash.geom.Rectangle;
-	
 	import dragonBones.Armature;
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.display.NativeSlot;
 	import dragonBones.textures.ITextureAtlas;
 	import dragonBones.textures.NativeTextureAtlas;
+	
+	import flash.display.MovieClip;
+	import flash.display.Shape;
+	import flash.display.Sprite;
+	import flash.geom.Matrix;
+	import flash.geom.Rectangle;
 	
 	use namespace dragonBones_internal;
 	
@@ -77,6 +78,7 @@
 					nativeTextureAtlas.movieClipToBitmapData();
 				}
 				
+				//TO DO 问春雷
 				if (!useBitmapDataTexture && movieClip && movieClip.totalFrames >= 3)
 				{
 					movieClip.gotoAndStop(movieClip.totalFrames);
@@ -109,10 +111,10 @@
 						}
 						
 						var displayShape:Shape = new Shape();
-						_helpMatrix.a = 1;
-						_helpMatrix.b = 0;
-						_helpMatrix.c = 0;
-						_helpMatrix.d = 1;
+//						_helpMatrix.a = 1;
+//						_helpMatrix.b = 0;
+//						_helpMatrix.c = 0;
+//						_helpMatrix.d = 1;
 						_helpMatrix.scale(1 / nativeTextureAtlas.scale, 1 / nativeTextureAtlas.scale);
 						_helpMatrix.tx = -pivotX - subTextureRegion.x;
 						_helpMatrix.ty = -pivotY - subTextureRegion.y;
