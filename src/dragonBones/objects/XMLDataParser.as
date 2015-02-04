@@ -112,7 +112,10 @@
 			{
 				outputArmatureData.addBoneData(parseBoneData(boneXML));
 			}
-			
+			for each(var slotXML:XML in armatureXML[ConstValues.SLOT])
+			{
+				outputArmatureData.addSlotData(parseSlotData(slotXML));
+			}
 			for each(var skinXML:XML in armatureXML[ConstValues.SKIN])
 			{
 				outputArmatureData.addSkinData(parseSkinData(skinXML));
@@ -164,10 +167,22 @@
 			
 			for each(var slotXML:XML in skinXML[ConstValues.SLOT])
 			{
-				skinData.addSlotData(parseSlotData(slotXML));
+				skinData.addSlotData(parseSlotDisplayData(slotXML));
 			}
 			
 			return skinData;
+		}
+		
+		private static function parseSlotDisplayData(slotXML:XML):SlotData
+		{
+			var slotData:SlotData = new SlotData();
+			slotData.name = slotXML.@[ConstValues.A_NAME];
+			for each(var displayXML:XML in slotXML[ConstValues.DISPLAY])
+			{
+				slotData.addDisplayData(parseDisplayData(displayXML));
+			}
+			
+			return slotData;
 		}
 		
 		private static function parseSlotData(slotXML:XML):SlotData
@@ -177,10 +192,6 @@
 			slotData.parent = slotXML.@[ConstValues.A_PARENT];
 			slotData.zOrder = getNumber(slotXML,ConstValues.A_Z_ORDER,0)||0;
 			slotData.blendMode = slotXML.@[ConstValues.A_BLENDMODE];
-			for each(var displayXML:XML in slotXML[ConstValues.DISPLAY])
-			{
-				slotData.addDisplayData(parseDisplayData(displayXML));
-			}
 			
 			return slotData;
 		}

@@ -111,10 +111,10 @@
 						}
 						
 						var displayShape:Shape = new Shape();
-//						_helpMatrix.a = 1;
-//						_helpMatrix.b = 0;
-//						_helpMatrix.c = 0;
-//						_helpMatrix.d = 1;
+						_helpMatrix.a = 1;
+						_helpMatrix.b = 0;
+						_helpMatrix.c = 0;
+						_helpMatrix.d = 1;
 						_helpMatrix.scale(1 / nativeTextureAtlas.scale, 1 / nativeTextureAtlas.scale);
 						_helpMatrix.tx = -pivotX - subTextureRegion.x;
 						_helpMatrix.ty = -pivotY - subTextureRegion.y;

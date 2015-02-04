@@ -381,8 +381,9 @@ package dragonBones.factories
 			{
 				return;
 			}
+			armature.armatureData.setSkinData(skinName);
 			var displayList:Array = [];
-			var slotDataList:Vector.<SlotData> = skinData.slotDataList;
+			var slotDataList:Vector.<SlotData> = armature.armatureData.slotDataList;
 			var slotData:SlotData;
 			var slot:Slot;
 			var bone:Bone;
