@@ -79,6 +79,8 @@
 			{
 				case "2.3":
 				case "3.0":
+				throw new Error("Nonsupport version" + version + "!");
+					break;
 				case DragonBones.DATA_VERSION:
 					break;
 				
