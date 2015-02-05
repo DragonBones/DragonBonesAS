@@ -242,6 +242,13 @@
 				animationData.addTimeline(timeline);
 			}
 			
+			for each(var slotTimelineXML:XML in animationXML[ConstValues.SLOT])
+			{
+				var slotTimeline:SlotTimeline = parseSlotTimeline(slotTimelineXML, animationData.duration, frameRate);
+				lastFrameDuration = Math.min(lastFrameDuration, slotTimeline.frameList[slotTimeline.frameList.length - 1].duration);
+				animationData.addSlotTimeline(slotTimeline);
+			}
+			
 			if(animationData.frameList.length > 0)
 			{
 				lastFrameDuration = Math.min(lastFrameDuration, animationData.frameList[animationData.frameList.length - 1].duration);
@@ -272,10 +279,66 @@
 			return timeline;
 		}
 		
+		private static function parseSlotTimeline(timelineXML:XML, duration:int, frameRate:uint):SlotTimeline
+		{
+			var timeline:SlotTimeline = new SlotTimeline();
+			timeline.name = timelineXML.@[ConstValues.A_NAME];
+			timeline.scale = getNumber(timelineXML, ConstValues.A_SCALE, 1) || 0;
+			timeline.offset = getNumber(timelineXML, ConstValues.A_OFFSET, 0) || 0;
+			//timeline.originPivot.x = getNumber(timelineXML, ConstValues.A_PIVOT_X, 0) || 0;
+			//timeline.originPivot.y = getNumber(timelineXML, ConstValues.A_PIVOT_Y, 0) || 0;
+			timeline.duration = duration;
+			
+			for each(var frameXML:XML in timelineXML[ConstValues.FRAME])
+			{
+				var frame:SlotFrame = parseSlotFrame(frameXML, frameRate);
+				timeline.addFrame(frame);
+			}
+			
+			parseTimeline(timelineXML, timeline);
+			
+			return timeline;
+		}
+		
 		private static function parseMainFrame(frameXML:XML, frameRate:uint):Frame
 		{
 			var frame:Frame = new Frame();
 			parseFrame(frameXML, frame, frameRate);
+			return frame;
+		}
+		
+		private static function parseSlotFrame(frameXML:XML, frameRate:uint):SlotFrame
+		{
+			var frame:SlotFrame = new SlotFrame();
+			parseFrame(frameXML, frame, frameRate);
+			
+			frame.visible = !getBoolean(frameXML, ConstValues.A_HIDE, false);
+			
+			//NaN:no tween, 10:auto tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
+			frame.tweenEasing = getNumber(frameXML, ConstValues.A_TWEEN_EASING, 10);
+			frame.tweenRotate = int(getNumber(frameXML,ConstValues.A_TWEEN_ROTATE,0));
+			frame.tweenScale = getBoolean(frameXML, ConstValues.A_TWEEN_SCALE, true);
+			frame.displayIndex = int(getNumber(frameXML,ConstValues.A_DISPLAY_INDEX,0));
+			
+			//如果为NaN，则说明没有改变过zOrder
+			frame.zOrder = getNumber(frameXML, ConstValues.A_Z_ORDER, tempDragonBonesData.isGlobalData ? NaN:0);
+					
+			//parseTransform(frameXML[ConstValues.TRANSFORM][0], frame.transform, frame.pivot);
+			//if(tempDragonBonesData.isGlobalData)//绝对数据
+			//{
+				//frame.global.copy(frame.transform);
+			//}
+			
+			//frame.scaleOffset.x = getNumber(frameXML, ConstValues.A_SCALE_X_OFFSET, 0) || 0;
+			//frame.scaleOffset.y = getNumber(frameXML, ConstValues.A_SCALE_Y_OFFSET, 0) || 0;
+			
+			var colorTransformXML:XML = frameXML[ConstValues.COLOR_TRANSFORM][0];
+			if(colorTransformXML)
+			{
+				frame.color = new ColorTransform();
+				parseColorTransform(colorTransformXML, frame.color);
+			}
+			
 			return frame;
 		}
 		
@@ -303,14 +366,14 @@
 			
 			frame.scaleOffset.x = getNumber(frameXML, ConstValues.A_SCALE_X_OFFSET, 0) || 0;
 			frame.scaleOffset.y = getNumber(frameXML, ConstValues.A_SCALE_Y_OFFSET, 0) || 0;
-			
+			/*
 			var colorTransformXML:XML = frameXML[ConstValues.COLOR_TRANSFORM][0];
 			if(colorTransformXML)
 			{
 				frame.color = new ColorTransform();
 				parseColorTransform(colorTransformXML, frame.color);
 			}
-			
+			*/
 			return frame;
 		}
 		

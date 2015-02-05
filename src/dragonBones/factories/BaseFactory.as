@@ -446,6 +446,81 @@ package dragonBones.factories
 			}
 		}
 		
+		public function changeSkin(armature:Armature, skinName:String, textureAtlasName:String):void
+		{
+			var textureAtlas:Object = textureAtlasDic[textureAtlasName]
+			var skinData:SkinData = armature.armatureData.getSkinData(skinName);
+			if(!skinData || !textureAtlas)
+			{
+				return;
+			}
+			armature.armatureData.setSkinData(skinName);
+			var displayList:Array = [];
+			var slotDataList:Vector.<SlotData> = armature.armatureData.slotDataList;
+			var slotData:SlotData;
+			var slot:Slot;
+			var bone:Bone;
+			for(var i:int = 0; i < slotDataList.length; i++)
+			{
+				slotData = slotDataList[i];
+				bone = armature.getBone(slotData.parent);
+				if(!bone)
+				{
+					continue;
+				}
+				
+				slot = armature.getSlot(slotData.name);
+				//slot = generateSlot();
+				//slot.dispose();
+				slot.initWithSlotData(slotData);
+				//bone.addSlot(slot);
+				
+				var l:int = slotData.displayDataList.length;
+				while(l--)
+				{
+					var displayData:DisplayData = slotData.displayDataList[l];
+					
+					switch(displayData.type)
+					{
+						case DisplayData.ARMATURE:
+							var childArmature:Armature = buildArmatureUsingArmatureDataFromTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlas, skinName);
+							displayList[l] = childArmature;
+							break;
+						
+						case DisplayData.IMAGE:
+						default:
+							displayList[l] = generateDisplay(textureAtlas, displayData.name, displayData.pivot.x, displayData.pivot.y);
+							break;
+						
+					}
+				}
+				//==================================================
+				//如果显示对象有name属性并且name属性可以设置的话，将name设置为与slot同名，dragonBones并不依赖这些属性，只是方便开发者
+				for each(var displayObject:Object in displayList)
+				{
+					if(displayObject is Armature)
+					{
+						displayObject = (displayObject as Armature).display;
+					}
+					
+					if(displayObject.hasOwnProperty("name"))
+					{
+						try
+						{
+							displayObject["name"] = slot.name;
+						}
+						catch(err:Error)
+						{
+						}
+					}
+				}
+				//==================================================
+				
+				slot.displayList = displayList;
+				slot.changeDisplay(0);
+			}
+		}
+		
 		/**
 		 * Parses the raw data and returns a SkeletonData instance.	
 		 * @example 

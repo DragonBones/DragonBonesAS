@@ -2,12 +2,12 @@ package dragonBones.animation
 {
 	import dragonBones.Armature;
 	import dragonBones.Bone;
+	import dragonBones.objects.SlotFrame;
+	import dragonBones.objects.SlotTimeline;
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DBTransform;
 	import dragonBones.objects.Frame;
-	import dragonBones.objects.TransformFrame;
-	import dragonBones.objects.TransformTimeline;
 	import dragonBones.utils.MathUtil;
 	import dragonBones.utils.TransformUtil;
 	
@@ -17,25 +17,25 @@ package dragonBones.animation
 	use namespace dragonBones_internal;
 	
 	/** @private */
-	public final class TimelineState
+	public final class SlotTimelineState
 	{
 		private static const HALF_PI:Number = Math.PI * 0.5;
 		private static const DOUBLE_PI:Number = Math.PI * 2;
 		
-		private static var _pool:Vector.<TimelineState> = new Vector.<TimelineState>;
+		private static var _pool:Vector.<SlotTimelineState> = new Vector.<SlotTimelineState>;
 		
 		/** @private */
-		dragonBones_internal static function borrowObject():TimelineState
+		dragonBones_internal static function borrowObject():SlotTimelineState
 		{
 			if(_pool.length == 0)
 			{
-				return new TimelineState();
+				return new SlotTimelineState();
 			}
 			return _pool.pop();
 		}
 		
 		/** @private */
-		dragonBones_internal static function returnObject(timeline:TimelineState):void
+		dragonBones_internal static function returnObject(timeline:SlotTimelineState):void
 		{
 			if(_pool.indexOf(timeline) < 0)
 			{
@@ -61,11 +61,11 @@ package dragonBones.animation
 		/** @private */
 		dragonBones_internal var _weight:Number;
 		
-		/** @private */
-		dragonBones_internal var _transform:DBTransform;
+		///** @private */
+		//dragonBones_internal var _transform:DBTransform;
 		
-		/** @private */
-		dragonBones_internal var _pivot:Point;
+		///** @private */
+		//dragonBones_internal var _pivot:Point;
 		
 		//TO DO 干什么用的
 		/** @private */
@@ -85,9 +85,9 @@ package dragonBones.animation
 		private var _currentFrameDuration:int;
 		
 		private var _tweenEasing:Number;
-		private var _tweenTransform:Boolean;
-		private var _tweenScale:Boolean;
-		//private var _tweenColor:Boolean;
+		//private var _tweenTransform:Boolean;
+		//private var _tweenScale:Boolean;
+		private var _tweenColor:Boolean;
 		
 		private var _rawAnimationScale:Number;
 		
@@ -96,53 +96,53 @@ package dragonBones.animation
 		
 		private var _armature:Armature;
 		private var _animation:Animation;
-		private var _bone:Bone;
+		private var _slot:Slot;
 		
-		private var _timelineData:TransformTimeline;
-		private var _originTransform:DBTransform;
-		private var _originPivot:Point;
+		private var _timelineData:SlotTimeline;
+		//private var _originTransform:DBTransform;
+		//private var _originPivot:Point;
 		
-		private var _durationTransform:DBTransform;
-		private var _durationPivot:Point;
-		//private var _durationColor:ColorTransform;
+		//private var _durationTransform:DBTransform;
+		//private var _durationPivot:Point;
+		private var _durationColor:ColorTransform;
 		
 		
-		public function TimelineState()
+		public function SlotTimelineState()
 		{
-			_transform = new DBTransform();
-			_pivot = new Point();
+			//_transform = new DBTransform();
+			//_pivot = new Point();
 			
-			_durationTransform = new DBTransform();
-			_durationPivot = new Point();
-			//_durationColor = new ColorTransform();
+			//_durationTransform = new DBTransform();
+			//_durationPivot = new Point();
+			_durationColor = new ColorTransform();
 		}
 		
 		private function clear():void
 		{
-			if(_bone)
+			if(_slot)
 			{
-				_bone.removeState(this);
-				_bone = null;
+				_slot.removeState(this);
+				_slot = null;
 			}
 			_armature = null;
 			_animation = null;
 			_animationState = null;
 			_timelineData = null;
-			_originTransform = null;
-			_originPivot = null;
+			//_originTransform = null;
+			//_originPivot = null;
 		}
 		
 	//动画开始结束
 		/** @private */
-		dragonBones_internal function fadeIn(bone:Bone, animationState:AnimationState, timelineData:TransformTimeline):void
+		dragonBones_internal function fadeIn(slot:Slot, animationState:AnimationState, timelineData:SlotTimeline):void
 		{
-			_bone = bone;
-			_armature = _bone.armature;
+			_slot = slot;
+			_armature = _slot.armature;
 			_animation = _armature.animation;
 			_animationState = animationState;
 			_timelineData = timelineData;
-			_originTransform = _timelineData.originTransform;
-			_originPivot = _timelineData.originPivot;
+			//_originTransform = _timelineData.originTransform;
+			//_originPivot = _timelineData.originPivot;
 			
 			name = timelineData.name;
 			
@@ -151,31 +151,31 @@ package dragonBones.animation
 			
 			_isComplete = false;
 			_blendEnabled = false;
-			_tweenTransform = false;
-			_tweenScale = false;
-			//_tweenColor = false;
+			//_tweenTransform = false;
+			//_tweenScale = false;
+			_tweenColor = false;
 			_currentFrameIndex = -1;
 			_currentTime = -1;
 			_tweenEasing = NaN;
 			_weight = 1;
 			
-			_transform.x = 0;
-			_transform.y = 0;
-			_transform.scaleX = 1;
-			_transform.scaleY = 1;
-			_transform.skewX = 0;
-			_transform.skewY = 0;
-			_pivot.x = 0;
-			_pivot.y = 0;
+			//_transform.x = 0;
+			//_transform.y = 0;
+			//_transform.scaleX = 1;
+			//_transform.scaleY = 1;
+			//_transform.skewX = 0;
+			//_transform.skewY = 0;
+			//_pivot.x = 0;
+			//_pivot.y = 0;
 			
-			_durationTransform.x = 0;
-			_durationTransform.y = 0;
-			_durationTransform.scaleX = 1;
-			_durationTransform.scaleY = 1;
-			_durationTransform.skewX = 0;
-			_durationTransform.skewY = 0;
-			_durationPivot.x = 0;
-			_durationPivot.y = 0;
+			//_durationTransform.x = 0;
+			//_durationTransform.y = 0;
+			//_durationTransform.scaleX = 1;
+			//_durationTransform.scaleY = 1;
+			//_durationTransform.skewX = 0;
+			//_durationTransform.skewY = 0;
+			//_durationPivot.x = 0;
+			//_durationPivot.y = 0;
 			
 			switch(_timelineData.frameList.length)
 			{
@@ -192,14 +192,14 @@ package dragonBones.animation
 					break;
 			}
 			
-			_bone.addState(this);
+			_slot.addState(this);
 		}
 		
 		/** @private */
 		dragonBones_internal function fadeOut():void
 		{
-			_transform.skewX = TransformUtil.formatRadian(_transform.skewX);
-			_transform.skewY = TransformUtil.formatRadian(_transform.skewY);
+			//_transform.skewX = TransformUtil.formatRadian(_transform.skewX);
+			//_transform.skewY = TransformUtil.formatRadian(_transform.skewY);
 		}
 		
 	//动画进行中
@@ -278,8 +278,8 @@ package dragonBones.animation
 				_currentTime = currentTime;
 				
 				var frameList:Vector.<Frame> = _timelineData.frameList;
-				var prevFrame:TransformFrame;
-				var currentFrame:TransformFrame;
+				var prevFrame:SlotFrame;
+				var currentFrame:SlotFrame;
 				
 				for (var i:int = 0, l:int = _timelineData.frameList.length; i < l; ++i)
 				{
@@ -307,11 +307,11 @@ package dragonBones.animation
 					{
 						break;
 					}
-					currentFrame = frameList[_currentFrameIndex] as TransformFrame;
+					currentFrame = frameList[_currentFrameIndex] as SlotFrame;
 					
 					if(prevFrame)
 					{
-						_bone.arriveAtFrame(prevFrame, this, _animationState, true);
+						_slot.arriveAtFrame(prevFrame, this, _animationState, true);
 					}
 					
 					_currentFrameDuration = currentFrame.duration;
@@ -321,7 +321,7 @@ package dragonBones.animation
 				
 				if(currentFrame)
 				{
-					_bone.arriveAtFrame(currentFrame, this, _animationState, false);
+					_slot.arriveAtFrame(currentFrame, this, _animationState, false);
 					
 					_blendEnabled = currentFrame.displayIndex >= 0;
 					if(_blendEnabled)
@@ -331,9 +331,9 @@ package dragonBones.animation
 					else
 					{
 						_tweenEasing = NaN;
-						_tweenTransform = false;
-						_tweenScale = false;
-						//_tweenColor = false;
+						//_tweenTransform = false;
+						//_tweenScale = false;
+						_tweenColor = false;
 					}
 				}
 				
@@ -351,8 +351,8 @@ package dragonBones.animation
 			{
 				nextFrameIndex = 0;
 			}
-			var currentFrame:TransformFrame = _timelineData.frameList[_currentFrameIndex] as TransformFrame;
-			var nextFrame:TransformFrame = _timelineData.frameList[nextFrameIndex] as TransformFrame;
+			var currentFrame:SlotFrame = _timelineData.frameList[_currentFrameIndex] as SlotFrame;
+			var nextFrame:SlotFrame = _timelineData.frameList[nextFrameIndex] as SlotFrame;
 			var tweenEnabled:Boolean = false;
 			if(
 				nextFrameIndex == 0 &&
@@ -417,6 +417,7 @@ package dragonBones.animation
 			
 			if(tweenEnabled)
 			{
+				/*
 				//transform
 				_durationTransform.x = nextFrame.transform.x - currentFrame.transform.x;
 				_durationTransform.y = nextFrame.transform.y - currentFrame.transform.y;
@@ -454,9 +455,8 @@ package dragonBones.animation
 					_tweenTransform = false;
 					_tweenScale = false;
 				}
-				
+				*/
 				//color
-				/*
 				if(currentFrame.color && nextFrame.color)
 				{
 					_durationColor.alphaOffset = nextFrame.color.alphaOffset - currentFrame.color.alphaOffset;
@@ -517,15 +517,14 @@ package dragonBones.animation
 				{
 					_tweenColor = false;
 				}
-				*/
 			}
 			else
 			{
-				_tweenTransform = false;
-				_tweenScale = false;
-				//_tweenColor = false;
+				//_tweenTransform = false;
+				//_tweenScale = false;
+				_tweenColor = false;
 			}
-			
+			/*
 			if(!_tweenTransform)
 			{
 				if(_animationState.additiveBlending)
@@ -568,12 +567,12 @@ package dragonBones.animation
 					_transform.scaleY = _originTransform.scaleY * currentFrame.transform.scaleY;
 				}
 			}
-			/*
+			*/
 			if(!_tweenColor && _animationState.displayControl)
 			{
 				if(currentFrame.color)
 				{
-					_bone.updateColor(
+					_slot.updateDisplayColor(
 						currentFrame.color.alphaOffset, 
 						currentFrame.color.redOffset, 
 						currentFrame.color.greenOffset, 
@@ -585,13 +584,12 @@ package dragonBones.animation
 						true
 					);
 				}
-				else if(_bone._isColorChanged)
+				else if(_slot._isColorChanged)
 				{
-					_bone.updateColor(0, 0, 0, 0, 1, 1, 1, 1, false);
+					_slot.updateDisplayColor(0, 0, 0, 0, 1, 1, 1, 1, false);
 				}
 				
 			}
-			*/
 		}
 		
 		private function updateTween():void
@@ -602,7 +600,8 @@ package dragonBones.animation
 				progress = MathUtil.getEaseValue(progress, _tweenEasing);
 			}
 			
-			var currentFrame:TransformFrame = _timelineData.frameList[_currentFrameIndex] as TransformFrame;
+			var currentFrame:SlotFrame = _timelineData.frameList[_currentFrameIndex] as SlotFrame;
+			/*
 			if(_tweenTransform)
 			{
 				var currentTransform:DBTransform = currentFrame.transform;
@@ -642,12 +641,12 @@ package dragonBones.animation
 				
 				_bone.invalidUpdate();
 			}
-			/*
+			*/
 			if(_tweenColor && _animationState.displayControl)
 			{
 				if(currentFrame.color)
 				{
-					_bone.updateColor(
+					_slot.updateDisplayColor(
 						currentFrame.color.alphaOffset + _durationColor.alphaOffset * progress,
 						currentFrame.color.redOffset + _durationColor.redOffset * progress,
 						currentFrame.color.greenOffset + _durationColor.greenOffset * progress,
@@ -661,7 +660,7 @@ package dragonBones.animation
 				}
 				else
 				{
-					_bone.updateColor(
+					_slot.updateDisplayColor(
 						_durationColor.alphaOffset * progress,
 						_durationColor.redOffset * progress,
 						_durationColor.greenOffset * progress,
@@ -674,18 +673,17 @@ package dragonBones.animation
 					);
 				}
 			}
-			*/
 		}
 		
 		private function updateSingleFrame():void
 		{
-			var currentFrame:TransformFrame = _timelineData.frameList[0] as TransformFrame;
-			_bone.arriveAtFrame(currentFrame, this, _animationState, false);
+			var currentFrame:SlotFrame = _timelineData.frameList[0] as SlotFrame;
+			_slot.arriveAtFrame(currentFrame, this, _animationState, false);
 			_isComplete = true;
 			_tweenEasing = NaN;
-			_tweenTransform = false;
-			_tweenScale = false;
-			//_tweenColor = false;
+			//_tweenTransform = false;
+			//_tweenScale = false;
+			_tweenColor = false;
 			
 			_blendEnabled = currentFrame.displayIndex >= 0;
 			if(_blendEnabled)
@@ -700,6 +698,7 @@ package dragonBones.animation
 				 * <使用相对数据>
 				 * 使用相对数据时，timeline.originTransform = 0，第一个关键帧的transform有可能不为 0
 				 */
+				/*
 				if(_animationState.additiveBlending)
 				{
 					_transform.x = currentFrame.transform.x;
@@ -726,12 +725,12 @@ package dragonBones.animation
 				}
 				
 				_bone.invalidUpdate();
-				/*
+				*/
 				if(_animationState.displayControl)
 				{
 					if(currentFrame.color)
 					{
-						_bone.updateColor(
+						_slot.updateDisplayColor(
 							currentFrame.color.alphaOffset, 
 							currentFrame.color.redOffset, 
 							currentFrame.color.greenOffset, 
@@ -743,12 +742,11 @@ package dragonBones.animation
 							true
 						);
 					}
-					else if(_bone._isColorChanged)
+					else if(_slot._isColorChanged)
 					{
-						_bone.updateColor(0, 0, 0, 0, 1, 1, 1, 1, false);
+						_slot.updateDisplayColor(0, 0, 0, 0, 1, 1, 1, 1, false);
 					}
 				}
-				*/
 			}
 		}
 		

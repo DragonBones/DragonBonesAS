@@ -113,6 +113,11 @@
 				outputArmatureData.addBoneData(parseBoneData(boneObject));
 			}
 			
+			for each(var slotObject:Object in armatureDataToParse[ConstValues.SLOT])
+			{
+				outputArmatureData.addSlotData(parseSlotData(slotObject));
+			}
+			
 			for each(var skinObject:Object in armatureDataToParse[ConstValues.SKIN])
 			{
 				outputArmatureData.addSkinData(parseSkinData(skinObject));
@@ -162,10 +167,22 @@
 			
 			for each(var slotObject:Object in skinObject[ConstValues.SLOT])
 			{
-				skinData.addSlotData(parseSlotData(slotObject));
+				skinData.addSlotData(parseSlotDisplayData(slotObject));
 			}
 			
 			return skinData;
+		}
+		
+		private static function parseSlotDisplayData(slotObject:Object):SlotData
+		{
+			var slotData:SlotData = new SlotData();
+			slotData.name = slotObject[ConstValues.A_NAME];
+			for each(var displayObject:Object in slotObject[ConstValues.DISPLAY])
+			{
+				slotData.addDisplayData(parseDisplayData(displayObject));
+			}
+			
+			return slotData;
 		}
 		
 		private static function parseSlotData(slotObject:Object):SlotData
@@ -176,10 +193,10 @@
 			slotData.zOrder = getNumber(slotObject, ConstValues.A_Z_ORDER, 0) || 0;
 			slotData.blendMode = slotObject[ConstValues.A_BLENDMODE];
 			
-			for each(var displayObject:Object in slotObject[ConstValues.DISPLAY])
-			{
-				slotData.addDisplayData(parseDisplayData(displayObject));
-			}
+			//for each(var displayObject:Object in slotObject[ConstValues.DISPLAY])
+			//{
+				//slotData.addDisplayData(parseDisplayData(displayObject));
+			//}
 			
 			return slotData;
 		}
@@ -230,6 +247,13 @@
 				animationData.addTimeline(timeline);
 			}
 			
+			for each(var slotTimelineObject:Object in animationObject[ConstValues.SLOT])
+			{
+				var slotTimeline:SlotTimeline = parseSlotTimeline(slotTimelineObject, animationData.duration, frameRate);
+				lastFrameDuration = Math.min(lastFrameDuration, slotTimeline.frameList[slotTimeline.frameList.length - 1].duration);
+				animationData.addSlotTimeline(slotTimeline);
+			}
+			
 			if(animationData.frameList.length > 0)
 			{
 				lastFrameDuration = Math.min(lastFrameDuration, animationData.frameList[animationData.frameList.length - 1].duration);
@@ -259,6 +283,27 @@
 			parseTimeline(timelineObject, outputTimeline);
 			
 			return outputTimeline;
+		}
+		
+		private static function parseSlotTimeline(timelineObject:Object, duration:int, frameRate:uint):SlotTimeline
+		{
+			var timeline:SlotTimeline = new SlotTimeline();
+			timeline.name = timelineObject[ConstValues.A_NAME];
+			timeline.scale = getNumber(timelineObject, ConstValues.A_SCALE, 1) || 0;
+			timeline.offset = getNumber(timelineObject, ConstValues.A_OFFSET, 0) || 0;
+			//timeline.originPivot.x = getNumber(timelineXML, ConstValues.A_PIVOT_X, 0) || 0;
+			//timeline.originPivot.y = getNumber(timelineXML, ConstValues.A_PIVOT_Y, 0) || 0;
+			timeline.duration = duration;
+			
+			for each(var frameObject:Object in timelineObject[ConstValues.FRAME])
+			{
+				var frame:SlotFrame = parseSlotFrame(frameObject, frameRate);
+				timeline.addFrame(frame);
+			}
+			
+			parseTimeline(timelineObject, timeline);
+			
+			return timeline;
 		}
 		
 		private static function parseMainFrame(frameObject:Object, frameRate:uint):Frame
@@ -292,15 +337,50 @@
 			
 			outputFrame.scaleOffset.x = getNumber(frameObject, ConstValues.A_SCALE_X_OFFSET, 0) || 0;
 			outputFrame.scaleOffset.y = getNumber(frameObject, ConstValues.A_SCALE_Y_OFFSET, 0) || 0;
-			
+			/*
 			var colorTransformObject:Object = frameObject[ConstValues.COLOR_TRANSFORM];
 			if(colorTransformObject)
 			{
 				outputFrame.color = new ColorTransform();
 				parseColorTransform(colorTransformObject, outputFrame.color);
 			}
-			
+			*/
 			return outputFrame;
+		}
+		
+		private static function parseSlotFrame(frameObject:Object, frameRate:uint):SlotFrame
+		{
+			var frame:SlotFrame = new SlotFrame();
+			parseFrame(frameObject, frame, frameRate);
+			
+			frame.visible = !getBoolean(frameObject, ConstValues.A_HIDE, false);
+			
+			//NaN:no tween, 10:auto tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
+			frame.tweenEasing = getNumber(frameObject, ConstValues.A_TWEEN_EASING, 10);
+			frame.tweenRotate = int(getNumber(frameObject,ConstValues.A_TWEEN_ROTATE,0));
+			frame.tweenScale = getBoolean(frameObject, ConstValues.A_TWEEN_SCALE, true);
+			frame.displayIndex = int(getNumber(frameObject,ConstValues.A_DISPLAY_INDEX,0));
+			
+			//如果为NaN，则说明没有改变过zOrder
+			frame.zOrder = getNumber(frameObject, ConstValues.A_Z_ORDER, tempDragonBonesData.isGlobalData ? NaN:0);
+					
+			//parseTransform(frameXML[ConstValues.TRANSFORM][0], frame.transform, frame.pivot);
+			//if(tempDragonBonesData.isGlobalData)//绝对数据
+			//{
+				//frame.global.copy(frame.transform);
+			//}
+			
+			//frame.scaleOffset.x = getNumber(frameXML, ConstValues.A_SCALE_X_OFFSET, 0) || 0;
+			//frame.scaleOffset.y = getNumber(frameXML, ConstValues.A_SCALE_Y_OFFSET, 0) || 0;
+			
+			var colorTransformObject:Object = frameObject[ConstValues.COLOR_TRANSFORM];
+			if(colorTransformObject)
+			{
+				frame.color = new ColorTransform();
+				parseColorTransform(colorTransformObject, frame.color);
+			}
+			
+			return frame;
 		}
 		
 		private static function parseTimeline(timelineObject:Object, outputTimeline:Timeline):void

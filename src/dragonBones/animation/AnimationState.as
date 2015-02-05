@@ -6,7 +6,9 @@
 	import dragonBones.events.AnimationEvent;
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.Frame;
+	import dragonBones.objects.SlotTimeline;
 	import dragonBones.objects.TransformTimeline;
+	import dragonBones.Slot;
 	
 	use namespace dragonBones_internal;
 	/**
@@ -92,6 +94,7 @@
 		
 		private var _armature:Armature;
 		private var _timelineStateList:Vector.<TimelineState>;
+		private var _slotTimelineStateList:Vector.<SlotTimelineState>;
 		private var _boneMasks:Vector.<String>;
 		
 		private var _isPlaying:Boolean;
@@ -127,6 +130,7 @@
 		public function AnimationState()
 		{ 
 			_timelineStateList = new Vector.<TimelineState>;
+			_slotTimelineStateList = new Vector.<SlotTimelineState>;
 			_boneMasks = new Vector.<String>;
 		}
 		
@@ -138,6 +142,14 @@
 				TimelineState.returnObject(_timelineStateList[i]);
 			}
 			_timelineStateList.length = 0;
+			
+			i = _slotTimelineStateList.length;
+			while(i --)
+			{
+				SlotTimelineState.returnObject(_slotTimelineStateList[i]);
+			}
+			_slotTimelineStateList.length = 0;
+			
 			_boneMasks.length = 0;
 			
 			_armature = null;
@@ -243,6 +255,7 @@
 		dragonBones_internal function updateTimelineStates():void
 		{
 			var timelineState:TimelineState;
+			var slotTimelineState:SlotTimelineState;
 			var i:int = _timelineStateList.length;
 			while(i --)
 			{
@@ -250,6 +263,16 @@
 				if(!_armature.getBone(timelineState.name))
 				{
 					removeTimelineState(timelineState);
+				}
+			}
+			
+			i = _slotTimelineStateList.length;
+			while (i --)
+			{
+				slotTimelineState = _slotTimelineStateList[i];
+				if (!_armature.getSlot(slotTimelineState.name))
+				{
+					removeSlotTimelineState(slotTimelineState);
 				}
 			}
 			
@@ -277,6 +300,11 @@
 					addTimelineState(timeline.name);
 				}
 			}
+			
+			for each(var slotTimeline:SlotTimeline in _clip.slotTimelineList)
+			{
+				addSlotTimelineState(slotTimeline.name);
+			}
 		}
 		
 		private function addTimelineState(timelineName:String):void
@@ -302,6 +330,31 @@
 			var index:int = _timelineStateList.indexOf(timelineState);
 			_timelineStateList.splice(index, 1);
 			TimelineState.returnObject(timelineState);
+		}
+		
+		private function addSlotTimelineState(timelineName:String):void
+		{
+			var slot:Slot = _armature.getSlot(timelineName);
+			if(slot)
+			{
+				for each(var eachState:SlotTimelineState in _slotTimelineStateList)
+				{
+					if(eachState.name == timelineName)
+					{
+						return;
+					}
+				}
+				var timelineState:SlotTimelineState = SlotTimelineState.borrowObject();
+				timelineState.fadeIn(slot, this, _clip.getSlotTimeline(timelineName));
+				_slotTimelineStateList.push(timelineState);
+			}
+		}
+		
+		private function removeSlotTimelineState(timelineState:SlotTimelineState):void
+		{
+			var index:int = _slotTimelineStateList.indexOf(timelineState);
+			_slotTimelineStateList.splice(index, 1);
+			SlotTimelineState.returnObject(timelineState);
 		}
 		
 	//动画
@@ -620,7 +673,12 @@
 				timeline.update(progress);
 				_isComplete = timeline._isComplete && _isComplete;
 			}
-			
+			//update slotTimelie
+			for each(var slotTimeline:SlotTimelineState in _slotTimelineStateList)
+			{
+				slotTimeline.update(progress);
+				_isComplete = slotTimeline._isComplete && _isComplete;
+			}
 			//update main timeline
 			if(_currentTime != currentTime)
 			{

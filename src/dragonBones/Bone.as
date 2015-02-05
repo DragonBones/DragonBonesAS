@@ -61,7 +61,7 @@
 		dragonBones_internal var _needUpdate:int;
 		
 		/** @private */
-		dragonBones_internal var _isColorChanged:Boolean;
+		//dragonBones_internal var _isColorChanged:Boolean;
 		
 		/** @private */
 		dragonBones_internal var _globalTransformForChild:DBTransform;
@@ -86,7 +86,7 @@
 			_timelineStateList = new Vector.<TimelineState>;
 			
 			_needUpdate = 2;
-			_isColorChanged = false;
+			//_isColorChanged = false;
 		}
 		
 		/**
@@ -416,29 +416,29 @@
 			}
 		}
 		
-		/** @private */
-		dragonBones_internal function updateColor(
-			aOffset:Number, 
-			rOffset:Number, 
-			gOffset:Number, 
-			bOffset:Number, 
-			aMultiplier:Number, 
-			rMultiplier:Number, 
-			gMultiplier:Number, 
-			bMultiplier:Number,
-			colorChanged:Boolean
-		):void
-		{
-			for each(var childSlot:Slot in _slotList)
-			{
-				childSlot.updateDisplayColor(
-					aOffset, rOffset, gOffset, bOffset, 
-					aMultiplier, rMultiplier, gMultiplier, bMultiplier
-				);
-			}
-			
-			_isColorChanged = colorChanged;
-		}
+		///** @private */
+		//dragonBones_internal function updateColor(
+			//aOffset:Number, 
+			//rOffset:Number, 
+			//gOffset:Number, 
+			//bOffset:Number, 
+			//aMultiplier:Number, 
+			//rMultiplier:Number, 
+			//gMultiplier:Number, 
+			//bMultiplier:Number,
+			//colorChanged:Boolean
+		//):void
+		//{
+			//for each(var childSlot:Slot in _slotList)
+			//{
+				//childSlot.updateDisplayColor(
+					//aOffset, rOffset, gOffset, bOffset, 
+					//aMultiplier, rMultiplier, gMultiplier, bMultiplier
+				//);
+			//}
+			//
+			//_isColorChanged = colorChanged;
+		//}
 		
 		/** @private */
 		dragonBones_internal function hideSlots():void
@@ -684,7 +684,6 @@
 				}
 			}
 		}
-		
 		
 		
 		public function get slot():Slot

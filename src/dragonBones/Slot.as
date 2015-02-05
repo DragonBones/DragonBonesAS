@@ -1,9 +1,14 @@
 ﻿package dragonBones
 {
+	import dragonBones.animation.AnimationState;
+	import dragonBones.animation.SlotTimelineState;
 	import dragonBones.core.DBObject;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.events.FrameEvent;
 	import dragonBones.objects.DisplayData;
+	import dragonBones.objects.Frame;
 	import dragonBones.objects.SlotData;
+	import dragonBones.objects.SlotFrame;
 	
 	import flash.errors.IllegalOperationError;
 	import flash.geom.ColorTransform;
@@ -36,6 +41,11 @@
 		//protected var _childArmature:Armature;
 		protected var _blendMode:String;
 		
+		/** @private */
+		dragonBones_internal var _isColorChanged:Boolean;
+		/** @private */
+		protected var _timelineStateList:Vector.<SlotTimelineState>;
+		
 		public function Slot(self:Slot)
 		{
 			super();
@@ -52,10 +62,12 @@
 			_tweenZOrder = 0;
 			_offsetZOrder = 0;
 			_isShowDisplay = false;
+			_isColorChanged = false;
 			_colorTransform = new ColorTransform();
 			_displayDataList = null;
 			//_childArmature = null;
 			_currentDisplay = null;
+			_timelineStateList = new Vector.<SlotTimelineState>;
 			
 			this.inheritRotation = true;
 			this.inheritScale = true;
@@ -82,11 +94,39 @@
 			super.dispose();
 			
 			_displayList.length = 0;
+			_timelineStateList.length = 0;
 			
 			_displayDataList = null;
 			_displayList = null;
 			_currentDisplay = null;
 			//_childArmature = null;
+			_timelineStateList = null;
+			
+		}
+		
+		private function sortState(state1:SlotTimelineState, state2:SlotTimelineState):int
+		{
+			return state1._animationState.layer < state2._animationState.layer?-1:1;
+		}
+		
+		/** @private */
+		dragonBones_internal function addState(timelineState:SlotTimelineState):void
+		{
+			if(_timelineStateList.indexOf(timelineState) < 0)
+			{
+				_timelineStateList.push(timelineState);
+				_timelineStateList.sort(sortState);
+			}
+		}
+		
+		/** @private */
+		dragonBones_internal function removeState(timelineState:SlotTimelineState):void
+		{
+			var index:int = _timelineStateList.indexOf(timelineState);
+			if(index >= 0)
+			{
+				_timelineStateList.splice(index, 1);
+			}
 		}
 		
 //骨架装配
@@ -189,6 +229,7 @@
 					_isShowDisplay = true;
 					_currentDisplayIndex = displayIndex;
 					updateSlotDisplay();
+					updateTransform();//解决当时间和bone不统一时会换皮肤时会跳的bug
 					updateChildArmatureAnimation();
 					if(
 						_displayDataList && 
@@ -305,6 +346,7 @@
 			var displayIndexBackup:int = _currentDisplayIndex;
 			_currentDisplayIndex = -1;
 			changeDisplay(displayIndexBackup);
+			updateTransform();
 		}
 		
 		/**
@@ -459,7 +501,8 @@
 			aMultiplier:Number, 
 			rMultiplier:Number, 
 			gMultiplier:Number, 
-			bMultiplier:Number
+			bMultiplier:Number,
+			colorChanged:Boolean = false
 		):void
 		{
 			_colorTransform.alphaOffset = aOffset;
@@ -470,6 +513,8 @@
 			_colorTransform.redMultiplier = rMultiplier;
 			_colorTransform.greenMultiplier = gMultiplier;
 			_colorTransform.blueMultiplier = bMultiplier;
+			
+			_isColorChanged = colorChanged;
 		}
 		
 		/**
@@ -480,6 +525,71 @@
 		dragonBones_internal function updateDisplayBlendMode(value:String):void
 		{
 			throw new IllegalOperationError("Abstract method needs to be implemented in subclass!");
+		}
+		
+		/** @private When slot timeline enter a key frame, call this func*/
+		dragonBones_internal function arriveAtFrame(frame:Frame, timelineState:SlotTimelineState, animationState:AnimationState, isCross:Boolean):void
+		{
+			var displayControl:Boolean = animationState.displayControl
+			
+			if(displayControl)
+			{
+				var slotFrame:SlotFrame = frame as SlotFrame;
+				var displayIndex:int = slotFrame.displayIndex;
+				var childSlot:Slot;
+				changeDisplay(displayIndex);
+				updateDisplayVisible(slotFrame.visible);
+				//for each(childSlot in _slotList)
+				//{
+					//childSlot.changeDisplay(displayIndex);
+					//childSlot.updateDisplayVisible(tansformFrame.visible);
+					//if(displayIndex >= 0)
+					//{
+						//if(!isNaN(tansformFrame.zOrder) && tansformFrame.zOrder != childSlot._tweenZOrder)
+						//{
+							//childSlot._tweenZOrder = tansformFrame.zOrder;
+							//this._armature._slotsZOrderChanged = true;
+						//}
+					//}
+				//}
+				//slot暂时不支持event
+				//if(frame.event && this._armature.hasEventListener(FrameEvent.BONE_FRAME_EVENT))
+				//{
+					//var frameEvent:FrameEvent = new FrameEvent(FrameEvent.BONE_FRAME_EVENT);
+					//frameEvent.bone = this;
+					//frameEvent.animationState = animationState;
+					//frameEvent.frameLabel = frame.event;
+					//this._armature._eventList.push(frameEvent);
+				//}
+				/*
+				if(frame.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
+				{
+					var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
+					soundEvent.armature = this._armature;
+					soundEvent.animationState = animationState;
+					soundEvent.sound = frame.sound;
+					_soundManager.dispatchEvent(soundEvent);
+				}
+				*/
+				//[TODO]currently there is only gotoAndPlay belongs to frame action. In future, there will be more.  
+				//后续会扩展更多的action，目前只有gotoAndPlay的含义
+				if(frame.action) 
+				{
+					if (childArmature)
+					{
+						childArmature.animation.gotoAndPlay(frame.action);
+					}
+					
+					//for each(childSlot in _slotList)
+					//{
+						//var childArmature:Armature = childSlot.childArmature;
+						//if(childArmature)
+						//{
+							//childArmature.animation.gotoAndPlay(frame.action);
+						//}
+					//}
+				}
+			}
 		}
 	}
 }

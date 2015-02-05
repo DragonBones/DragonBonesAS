@@ -27,14 +27,22 @@ package dragonBones.objects
 				_slotDataList[i].dispose();
 			}
 			var skinData:SkinData;
-			for (i = 0, len = _skinDataList.length; i < len; i++)
+			if(!skinName && _skinDataList.length > 0)
 			{
-				if (_skinDataList[i].name == skinName)
+				skinData = _skinDataList[0];
+			}
+			else
+			{
+				for (i = 0, len = _skinDataList.length; i < len; i++)
 				{
-					skinData = _skinDataList[i];
-					break;
+					if (_skinDataList[i].name == skinName)
+					{
+						skinData = _skinDataList[i];
+						break;
+					}
 				}
 			}
+			
 			if (skinData)
 			{
 				var slotData:SlotData;
