@@ -389,6 +389,7 @@ package dragonBones.factories
 			var bone:Bone;
 			for(var i:int = 0; i < slotDataList.length; i++)
 			{
+				displayList.length = 0;
 				slotData = slotDataList[i];
 				bone = armature.getBone(slotData.parent);
 				if(!bone)
@@ -462,6 +463,7 @@ package dragonBones.factories
 			var bone:Bone;
 			for(var i:int = 0; i < slotDataList.length; i++)
 			{
+				displayList.length = 0;
 				slotData = slotDataList[i];
 				bone = armature.getBone(slotData.parent);
 				if(!bone)

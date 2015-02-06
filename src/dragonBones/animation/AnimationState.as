@@ -335,7 +335,7 @@
 		private function addSlotTimelineState(timelineName:String):void
 		{
 			var slot:Slot = _armature.getSlot(timelineName);
-			if(slot)
+			if(slot && slot.displayList.length > 0)
 			{
 				for each(var eachState:SlotTimelineState in _slotTimelineStateList)
 				{

@@ -459,22 +459,22 @@
 			
 			if(displayControl)
 			{
-				var tansformFrame:TransformFrame = frame as TransformFrame;
-				var displayIndex:int = tansformFrame.displayIndex;
+				//var tansformFrame:TransformFrame = frame as TransformFrame;
+				//var displayIndex:int = tansformFrame.displayIndex;
 				var childSlot:Slot;
-				for each(childSlot in _slotList)
-				{
-					childSlot.changeDisplay(displayIndex);
-					childSlot.updateDisplayVisible(tansformFrame.visible);
-					if(displayIndex >= 0)
-					{
-						if(!isNaN(tansformFrame.zOrder) && tansformFrame.zOrder != childSlot._tweenZOrder)
-						{
-							childSlot._tweenZOrder = tansformFrame.zOrder;
-							this._armature._slotsZOrderChanged = true;
-						}
-					}
-				}
+				//for each(childSlot in _slotList)
+				//{
+					////childSlot.changeDisplay(displayIndex);
+					////childSlot.updateDisplayVisible(tansformFrame.visible);
+					//if(displayIndex >= 0)
+					//{
+						//if(!isNaN(tansformFrame.zOrder) && tansformFrame.zOrder != childSlot._tweenZOrder)
+						//{
+							//childSlot._tweenZOrder = tansformFrame.zOrder;
+							//this._armature._slotsZOrderChanged = true;
+						//}
+					//}
+				//}
 				
 				if(frame.event && this._armature.hasEventListener(FrameEvent.BONE_FRAME_EVENT))
 				{

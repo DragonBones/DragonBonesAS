@@ -396,7 +396,7 @@
 		
 		private static function parseFrame(frameXML:XML, frame:Frame, frameRate:uint):void
 		{
-			frame.duration = Math.round((int(frameXML.@[ConstValues.A_DURATION]) || 1) * 1000 / frameRate);
+			frame.duration = Math.round((int(frameXML.@[ConstValues.A_DURATION])) * 1000 / frameRate);
 			frame.action = frameXML.@[ConstValues.A_ACTION];
 			frame.event = frameXML.@[ConstValues.A_EVENT];
 			frame.sound = frameXML.@[ConstValues.A_SOUND];

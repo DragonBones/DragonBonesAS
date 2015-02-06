@@ -229,7 +229,7 @@
 					_isShowDisplay = true;
 					_currentDisplayIndex = displayIndex;
 					updateSlotDisplay();
-					updateTransform();//解决当时间和bone不统一时会换皮肤时会跳的bug
+					//updateTransform();//解决当时间和bone不统一时会换皮肤时会跳的bug
 					updateChildArmatureAnimation();
 					if(
 						_displayDataList && 
@@ -303,7 +303,7 @@
 				updateDisplayColor(	_colorTransform.alphaOffset, _colorTransform.redOffset, _colorTransform.greenOffset, _colorTransform.blueOffset,
 									_colorTransform.alphaMultiplier, _colorTransform.redMultiplier, _colorTransform.greenMultiplier, _colorTransform.blueMultiplier);
 				updateDisplayVisible(_visible);
-				//updateDisplayTransform();
+				updateTransform();
 			}
 		}
 		
@@ -539,6 +539,14 @@
 				var childSlot:Slot;
 				changeDisplay(displayIndex);
 				updateDisplayVisible(slotFrame.visible);
+				if(displayIndex >= 0)
+				{
+					if(!isNaN(slotFrame.zOrder) && slotFrame.zOrder != _tweenZOrder)
+					{
+						_tweenZOrder = slotFrame.zOrder;
+						this._armature._slotsZOrderChanged = true;
+					}
+				}
 				//for each(childSlot in _slotList)
 				//{
 					//childSlot.changeDisplay(displayIndex);

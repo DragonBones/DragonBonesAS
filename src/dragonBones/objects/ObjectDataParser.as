@@ -403,7 +403,7 @@
 		
 		private static function parseFrame(frameObject:Object, outputFrame:Frame, frameRate:uint):void
 		{
-			outputFrame.duration = Math.round((Number(frameObject[ConstValues.A_DURATION]) || 1) * 1000 / frameRate);
+			outputFrame.duration = Math.round((Number(frameObject[ConstValues.A_DURATION])) * 1000 / frameRate);
 			outputFrame.action = frameObject[ConstValues.A_ACTION];
 			outputFrame.event = frameObject[ConstValues.A_EVENT];
 			outputFrame.sound = frameObject[ConstValues.A_SOUND];
