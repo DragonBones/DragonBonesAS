@@ -61,12 +61,6 @@ package dragonBones.animation
 		/** @private */
 		dragonBones_internal var _weight:Number;
 		
-		///** @private */
-		//dragonBones_internal var _transform:DBTransform;
-		
-		///** @private */
-		//dragonBones_internal var _pivot:Point;
-		
 		//TO DO 干什么用的
 		/** @private */
 		dragonBones_internal var _blendEnabled:Boolean;
@@ -85,8 +79,6 @@ package dragonBones.animation
 		private var _currentFrameDuration:int;
 		
 		private var _tweenEasing:Number;
-		//private var _tweenTransform:Boolean;
-		//private var _tweenScale:Boolean;
 		private var _tweenColor:Boolean;
 		
 		private var _rawAnimationScale:Number;
@@ -99,21 +91,11 @@ package dragonBones.animation
 		private var _slot:Slot;
 		
 		private var _timelineData:SlotTimeline;
-		//private var _originTransform:DBTransform;
-		//private var _originPivot:Point;
-		
-		//private var _durationTransform:DBTransform;
-		//private var _durationPivot:Point;
 		private var _durationColor:ColorTransform;
 		
 		
 		public function SlotTimelineState()
 		{
-			//_transform = new DBTransform();
-			//_pivot = new Point();
-			
-			//_durationTransform = new DBTransform();
-			//_durationPivot = new Point();
 			_durationColor = new ColorTransform();
 		}
 		
@@ -128,8 +110,6 @@ package dragonBones.animation
 			_animation = null;
 			_animationState = null;
 			_timelineData = null;
-			//_originTransform = null;
-			//_originPivot = null;
 		}
 		
 	//动画开始结束
@@ -141,8 +121,6 @@ package dragonBones.animation
 			_animation = _armature.animation;
 			_animationState = animationState;
 			_timelineData = timelineData;
-			//_originTransform = _timelineData.originTransform;
-			//_originPivot = _timelineData.originPivot;
 			
 			name = timelineData.name;
 			
@@ -151,31 +129,11 @@ package dragonBones.animation
 			
 			_isComplete = false;
 			_blendEnabled = false;
-			//_tweenTransform = false;
-			//_tweenScale = false;
 			_tweenColor = false;
 			_currentFrameIndex = -1;
 			_currentTime = -1;
 			_tweenEasing = NaN;
 			_weight = 1;
-			
-			//_transform.x = 0;
-			//_transform.y = 0;
-			//_transform.scaleX = 1;
-			//_transform.scaleY = 1;
-			//_transform.skewX = 0;
-			//_transform.skewY = 0;
-			//_pivot.x = 0;
-			//_pivot.y = 0;
-			
-			//_durationTransform.x = 0;
-			//_durationTransform.y = 0;
-			//_durationTransform.scaleX = 1;
-			//_durationTransform.scaleY = 1;
-			//_durationTransform.skewX = 0;
-			//_durationTransform.skewY = 0;
-			//_durationPivot.x = 0;
-			//_durationPivot.y = 0;
 			
 			switch(_timelineData.frameList.length)
 			{
@@ -193,13 +151,6 @@ package dragonBones.animation
 			}
 			
 			_slot.addState(this);
-		}
-		
-		/** @private */
-		dragonBones_internal function fadeOut():void
-		{
-			//_transform.skewX = TransformUtil.formatRadian(_transform.skewX);
-			//_transform.skewY = TransformUtil.formatRadian(_transform.skewY);
 		}
 		
 	//动画进行中
@@ -230,7 +181,6 @@ package dragonBones.animation
 			{
 				_isComplete = false;
 				currentPlayTimes = Math.ceil(Math.abs(currentTime) / _totalTime) || 1;
-				//currentTime -= Math.floor(currentTime / _totalTime) * _totalTime;
 				currentTime -= int(currentTime / _totalTime) * _totalTime;
 				
 				if(currentTime < 0)
@@ -268,7 +218,6 @@ package dragonBones.animation
 				}
 				else
 				{
-					//currentTime -= Math.floor(currentTime / _totalTime) * _totalTime;
 					currentTime -= int(currentTime / _totalTime) * _totalTime;
 				}
 			}
@@ -331,8 +280,6 @@ package dragonBones.animation
 					else
 					{
 						_tweenEasing = NaN;
-						//_tweenTransform = false;
-						//_tweenScale = false;
 						_tweenColor = false;
 					}
 				}
@@ -417,46 +364,6 @@ package dragonBones.animation
 			
 			if(tweenEnabled)
 			{
-				/*
-				//transform
-				_durationTransform.x = nextFrame.transform.x - currentFrame.transform.x;
-				_durationTransform.y = nextFrame.transform.y - currentFrame.transform.y;
-				_durationTransform.skewX = nextFrame.transform.skewX - currentFrame.transform.skewX;
-				_durationTransform.skewY = nextFrame.transform.skewY - currentFrame.transform.skewY;
-				
-				_durationTransform.scaleX = nextFrame.transform.scaleX - currentFrame.transform.scaleX + nextFrame.scaleOffset.x;
-				_durationTransform.scaleY = nextFrame.transform.scaleY - currentFrame.transform.scaleY + nextFrame.scaleOffset.y;
-				
-				if(nextFrameIndex == 0)
-				{
-					_durationTransform.skewX = TransformUtil.formatRadian(_durationTransform.skewX);
-					_durationTransform.skewY = TransformUtil.formatRadian(_durationTransform.skewY);
-				}
-				
-				_durationPivot.x = nextFrame.pivot.x - currentFrame.pivot.x;
-				_durationPivot.y = nextFrame.pivot.y - currentFrame.pivot.y;
-				
-				if(
-					_durationTransform.x ||
-					_durationTransform.y ||
-					_durationTransform.skewX ||
-					_durationTransform.skewY ||
-					_durationTransform.scaleX ||
-					_durationTransform.scaleY ||
-					_durationPivot.x ||
-					_durationPivot.y
-				)
-				{
-					_tweenTransform = true;
-					_tweenScale = currentFrame.tweenScale;
-				}
-				else
-				{
-					_tweenTransform = false;
-					_tweenScale = false;
-				}
-				*/
-				//color
 				if(currentFrame.color && nextFrame.color)
 				{
 					_durationColor.alphaOffset = nextFrame.color.alphaOffset - currentFrame.color.alphaOffset;
@@ -520,54 +427,9 @@ package dragonBones.animation
 			}
 			else
 			{
-				//_tweenTransform = false;
-				//_tweenScale = false;
 				_tweenColor = false;
 			}
-			/*
-			if(!_tweenTransform)
-			{
-				if(_animationState.additiveBlending)
-				{
-					_transform.x = currentFrame.transform.x;
-					_transform.y = currentFrame.transform.y;
-					_transform.skewX = currentFrame.transform.skewX;
-					_transform.skewY = currentFrame.transform.skewY;
-					_transform.scaleX = currentFrame.transform.scaleX;
-					_transform.scaleY = currentFrame.transform.scaleY;
-					
-					_pivot.x = currentFrame.pivot.x;
-					_pivot.y = currentFrame.pivot.y;
-				}
-				else
-				{
-					_transform.x = _originTransform.x + currentFrame.transform.x;
-					_transform.y = _originTransform.y + currentFrame.transform.y;
-					_transform.skewX = _originTransform.skewX + currentFrame.transform.skewX;
-					_transform.skewY = _originTransform.skewY + currentFrame.transform.skewY;
-					_transform.scaleX = _originTransform.scaleX * currentFrame.transform.scaleX;
-					_transform.scaleY = _originTransform.scaleY * currentFrame.transform.scaleY;
-					
-					_pivot.x = _originPivot.x + currentFrame.pivot.x;
-					_pivot.y = _originPivot.y + currentFrame.pivot.y;
-				}
-				
-				_bone.invalidUpdate();
-			}
-			else if(!_tweenScale)
-			{
-				if(_animationState.additiveBlending)
-				{
-					_transform.scaleX = currentFrame.transform.scaleX;
-					_transform.scaleY = currentFrame.transform.scaleY;
-				}
-				else
-				{
-					_transform.scaleX = _originTransform.scaleX * currentFrame.transform.scaleX;
-					_transform.scaleY = _originTransform.scaleY * currentFrame.transform.scaleY;
-				}
-			}
-			*/
+			
 			if(!_tweenColor && _animationState.displayControl)
 			{
 				if(currentFrame.color)
@@ -601,47 +463,7 @@ package dragonBones.animation
 			}
 			
 			var currentFrame:SlotFrame = _timelineData.frameList[_currentFrameIndex] as SlotFrame;
-			/*
-			if(_tweenTransform)
-			{
-				var currentTransform:DBTransform = currentFrame.transform;
-				var currentPivot:Point = currentFrame.pivot;
-				if(_animationState.additiveBlending)
-				{
-					//additive blending
-					_transform.x = currentTransform.x + _durationTransform.x * progress;
-					_transform.y = currentTransform.y + _durationTransform.y * progress;
-					_transform.skewX = currentTransform.skewX + _durationTransform.skewX * progress;
-					_transform.skewY = currentTransform.skewY + _durationTransform.skewY * progress;
-					if(_tweenScale)
-					{
-						_transform.scaleX = currentTransform.scaleX + _durationTransform.scaleX * progress;
-						_transform.scaleY = currentTransform.scaleY + _durationTransform.scaleY * progress;
-					}
-					
-					_pivot.x = currentPivot.x + _durationPivot.x * progress;
-					_pivot.y = currentPivot.y + _durationPivot.y * progress;
-				}
-				else
-				{
-					//normal blending
-					_transform.x = _originTransform.x + currentTransform.x + _durationTransform.x * progress;
-					_transform.y = _originTransform.y + currentTransform.y + _durationTransform.y * progress;
-					_transform.skewX = _originTransform.skewX + currentTransform.skewX + _durationTransform.skewX * progress;
-					_transform.skewY = _originTransform.skewY + currentTransform.skewY + _durationTransform.skewY * progress;
-					if(_tweenScale)
-					{
-						_transform.scaleX = _originTransform.scaleX * currentTransform.scaleX + _durationTransform.scaleX * progress;
-						_transform.scaleY = _originTransform.scaleY * currentTransform.scaleY + _durationTransform.scaleY * progress;
-					}
-					
-					_pivot.x = _originPivot.x + currentPivot.x + _durationPivot.x * progress;
-					_pivot.y = _originPivot.y + currentPivot.y + _durationPivot.y * progress;
-				}
-				
-				_bone.invalidUpdate();
-			}
-			*/
+			
 			if(_tweenColor && _animationState.displayControl)
 			{
 				if(currentFrame.color)
@@ -681,8 +503,6 @@ package dragonBones.animation
 			_slot.arriveAtFrame(currentFrame, this, _animationState, false);
 			_isComplete = true;
 			_tweenEasing = NaN;
-			//_tweenTransform = false;
-			//_tweenScale = false;
 			_tweenColor = false;
 			
 			_blendEnabled = currentFrame.displayIndex >= 0;
@@ -698,34 +518,6 @@ package dragonBones.animation
 				 * <使用相对数据>
 				 * 使用相对数据时，timeline.originTransform = 0，第一个关键帧的transform有可能不为 0
 				 */
-				/*
-				if(_animationState.additiveBlending)
-				{
-					_transform.x = currentFrame.transform.x;
-					_transform.y = currentFrame.transform.y;
-					_transform.skewX = currentFrame.transform.skewX;
-					_transform.skewY = currentFrame.transform.skewY;
-					_transform.scaleX = currentFrame.transform.scaleX;
-					_transform.scaleY = currentFrame.transform.scaleY;
-					
-					_pivot.x = currentFrame.pivot.x;
-					_pivot.y = currentFrame.pivot.y;
-				}
-				else
-				{
-					_transform.x = _originTransform.x + currentFrame.transform.x;
-					_transform.y = _originTransform.y + currentFrame.transform.y;
-					_transform.skewX = _originTransform.skewX + currentFrame.transform.skewX;
-					_transform.skewY = _originTransform.skewY + currentFrame.transform.skewY;
-					_transform.scaleX = _originTransform.scaleX * currentFrame.transform.scaleX;
-					_transform.scaleY = _originTransform.scaleY * currentFrame.transform.scaleY;
-					
-					_pivot.x = _originPivot.x + currentFrame.pivot.x;
-					_pivot.y = _originPivot.y + currentFrame.pivot.y;
-				}
-				
-				_bone.invalidUpdate();
-				*/
 				if(_animationState.displayControl)
 				{
 					if(currentFrame.color)

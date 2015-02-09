@@ -115,7 +115,7 @@ package dragonBones.utils
 					{
 						if(slotData)
 						{
-							frame.zOrder -= slotData.zOrder;
+							//frame.zOrder -= slotData.zOrder;
 						}
 					}
 					

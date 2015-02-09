@@ -12,12 +12,10 @@
 		public var tweenScale:Boolean;
 		public var displayIndex:int;
 		public var visible:Boolean;
-		public var zOrder:Number;
 		
 		public var global:DBTransform;
 		public var transform:DBTransform;
 		public var pivot:Point;
-		public var color:ColorTransform;
 		public var scaleOffset:Point;
 		
 		
@@ -30,7 +28,6 @@
 			tweenScale = true;
 			displayIndex = 0;
 			visible = true;
-			zOrder = NaN;
 			
 			global = new DBTransform();
 			transform = new DBTransform();
@@ -45,7 +42,6 @@
 			transform = null;
 			pivot = null;
 			scaleOffset = null;
-			color = null;
 		}
 	}
 	

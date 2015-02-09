@@ -547,38 +547,7 @@
 						this._armature._slotsZOrderChanged = true;
 					}
 				}
-				//for each(childSlot in _slotList)
-				//{
-					//childSlot.changeDisplay(displayIndex);
-					//childSlot.updateDisplayVisible(tansformFrame.visible);
-					//if(displayIndex >= 0)
-					//{
-						//if(!isNaN(tansformFrame.zOrder) && tansformFrame.zOrder != childSlot._tweenZOrder)
-						//{
-							//childSlot._tweenZOrder = tansformFrame.zOrder;
-							//this._armature._slotsZOrderChanged = true;
-						//}
-					//}
-				//}
-				//slot暂时不支持event
-				//if(frame.event && this._armature.hasEventListener(FrameEvent.BONE_FRAME_EVENT))
-				//{
-					//var frameEvent:FrameEvent = new FrameEvent(FrameEvent.BONE_FRAME_EVENT);
-					//frameEvent.bone = this;
-					//frameEvent.animationState = animationState;
-					//frameEvent.frameLabel = frame.event;
-					//this._armature._eventList.push(frameEvent);
-				//}
-				/*
-				if(frame.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
-				{
-					var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
-					soundEvent.armature = this._armature;
-					soundEvent.animationState = animationState;
-					soundEvent.sound = frame.sound;
-					_soundManager.dispatchEvent(soundEvent);
-				}
-				*/
+				
 				//[TODO]currently there is only gotoAndPlay belongs to frame action. In future, there will be more.  
 				//后续会扩展更多的action，目前只有gotoAndPlay的含义
 				if(frame.action) 
@@ -587,15 +556,6 @@
 					{
 						childArmature.animation.gotoAndPlay(frame.action);
 					}
-					
-					//for each(childSlot in _slotList)
-					//{
-						//var childArmature:Armature = childSlot.childArmature;
-						//if(childArmature)
-						//{
-							//childArmature.animation.gotoAndPlay(frame.action);
-						//}
-					//}
 				}
 			}
 		}

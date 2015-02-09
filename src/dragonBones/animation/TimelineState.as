@@ -87,7 +87,6 @@ package dragonBones.animation
 		private var _tweenEasing:Number;
 		private var _tweenTransform:Boolean;
 		private var _tweenScale:Boolean;
-		//private var _tweenColor:Boolean;
 		
 		private var _rawAnimationScale:Number;
 		
@@ -104,7 +103,6 @@ package dragonBones.animation
 		
 		private var _durationTransform:DBTransform;
 		private var _durationPivot:Point;
-		//private var _durationColor:ColorTransform;
 		
 		
 		public function TimelineState()
@@ -114,7 +112,6 @@ package dragonBones.animation
 			
 			_durationTransform = new DBTransform();
 			_durationPivot = new Point();
-			//_durationColor = new ColorTransform();
 		}
 		
 		private function clear():void
@@ -153,7 +150,6 @@ package dragonBones.animation
 			_blendEnabled = false;
 			_tweenTransform = false;
 			_tweenScale = false;
-			//_tweenColor = false;
 			_currentFrameIndex = -1;
 			_currentTime = -1;
 			_tweenEasing = NaN;
@@ -230,7 +226,6 @@ package dragonBones.animation
 			{
 				_isComplete = false;
 				currentPlayTimes = Math.ceil(Math.abs(currentTime) / _totalTime) || 1;
-				//currentTime -= Math.floor(currentTime / _totalTime) * _totalTime;
 				currentTime -= int(currentTime / _totalTime) * _totalTime;
 				
 				if(currentTime < 0)
@@ -268,7 +263,6 @@ package dragonBones.animation
 				}
 				else
 				{
-					//currentTime -= Math.floor(currentTime / _totalTime) * _totalTime;
 					currentTime -= int(currentTime / _totalTime) * _totalTime;
 				}
 			}
@@ -333,7 +327,6 @@ package dragonBones.animation
 						_tweenEasing = NaN;
 						_tweenTransform = false;
 						_tweenScale = false;
-						//_tweenColor = false;
 					}
 				}
 				
@@ -455,75 +448,11 @@ package dragonBones.animation
 					_tweenScale = false;
 				}
 				
-				//color
-				/*
-				if(currentFrame.color && nextFrame.color)
-				{
-					_durationColor.alphaOffset = nextFrame.color.alphaOffset - currentFrame.color.alphaOffset;
-					_durationColor.redOffset = nextFrame.color.redOffset - currentFrame.color.redOffset;
-					_durationColor.greenOffset = nextFrame.color.greenOffset - currentFrame.color.greenOffset;
-					_durationColor.blueOffset = nextFrame.color.blueOffset - currentFrame.color.blueOffset;
-					
-					_durationColor.alphaMultiplier = nextFrame.color.alphaMultiplier - currentFrame.color.alphaMultiplier;
-					_durationColor.redMultiplier = nextFrame.color.redMultiplier - currentFrame.color.redMultiplier;
-					_durationColor.greenMultiplier = nextFrame.color.greenMultiplier - currentFrame.color.greenMultiplier;
-					_durationColor.blueMultiplier = nextFrame.color.blueMultiplier - currentFrame.color.blueMultiplier;
-					
-					if(
-						_durationColor.alphaOffset ||
-						_durationColor.redOffset ||
-						_durationColor.greenOffset ||
-						_durationColor.blueOffset ||
-						_durationColor.alphaMultiplier ||
-						_durationColor.redMultiplier ||
-						_durationColor.greenMultiplier ||
-						_durationColor.blueMultiplier 
-					)
-					{
-						_tweenColor = true;
-					}
-					else
-					{
-						_tweenColor = false;
-					}
-				}
-				else if(currentFrame.color)
-				{
-					_tweenColor = true;
-					_durationColor.alphaOffset = -currentFrame.color.alphaOffset;
-					_durationColor.redOffset = -currentFrame.color.redOffset;
-					_durationColor.greenOffset = -currentFrame.color.greenOffset;
-					_durationColor.blueOffset = -currentFrame.color.blueOffset;
-					
-					_durationColor.alphaMultiplier = 1 - currentFrame.color.alphaMultiplier;
-					_durationColor.redMultiplier = 1 - currentFrame.color.redMultiplier;
-					_durationColor.greenMultiplier = 1 - currentFrame.color.greenMultiplier;
-					_durationColor.blueMultiplier = 1 - currentFrame.color.blueMultiplier;
-				}
-				else if(nextFrame.color)
-				{
-					_tweenColor = true;
-					_durationColor.alphaOffset = nextFrame.color.alphaOffset;
-					_durationColor.redOffset = nextFrame.color.redOffset;
-					_durationColor.greenOffset = nextFrame.color.greenOffset;
-					_durationColor.blueOffset = nextFrame.color.blueOffset;
-					
-					_durationColor.alphaMultiplier = nextFrame.color.alphaMultiplier - 1;
-					_durationColor.redMultiplier = nextFrame.color.redMultiplier - 1;
-					_durationColor.greenMultiplier = nextFrame.color.greenMultiplier - 1;
-					_durationColor.blueMultiplier = nextFrame.color.blueMultiplier - 1;
-				}
-				else
-				{
-					_tweenColor = false;
-				}
-				*/
 			}
 			else
 			{
 				_tweenTransform = false;
 				_tweenScale = false;
-				//_tweenColor = false;
 			}
 			
 			if(!_tweenTransform)
@@ -568,30 +497,6 @@ package dragonBones.animation
 					_transform.scaleY = _originTransform.scaleY * currentFrame.transform.scaleY;
 				}
 			}
-			/*
-			if(!_tweenColor && _animationState.displayControl)
-			{
-				if(currentFrame.color)
-				{
-					_bone.updateColor(
-						currentFrame.color.alphaOffset, 
-						currentFrame.color.redOffset, 
-						currentFrame.color.greenOffset, 
-						currentFrame.color.blueOffset, 
-						currentFrame.color.alphaMultiplier, 
-						currentFrame.color.redMultiplier, 
-						currentFrame.color.greenMultiplier, 
-						currentFrame.color.blueMultiplier,
-						true
-					);
-				}
-				else if(_bone._isColorChanged)
-				{
-					_bone.updateColor(0, 0, 0, 0, 1, 1, 1, 1, false);
-				}
-				
-			}
-			*/
 		}
 		
 		private function updateTween():void
@@ -642,39 +547,6 @@ package dragonBones.animation
 				
 				_bone.invalidUpdate();
 			}
-			/*
-			if(_tweenColor && _animationState.displayControl)
-			{
-				if(currentFrame.color)
-				{
-					_bone.updateColor(
-						currentFrame.color.alphaOffset + _durationColor.alphaOffset * progress,
-						currentFrame.color.redOffset + _durationColor.redOffset * progress,
-						currentFrame.color.greenOffset + _durationColor.greenOffset * progress,
-						currentFrame.color.blueOffset + _durationColor.blueOffset * progress,
-						currentFrame.color.alphaMultiplier + _durationColor.alphaMultiplier * progress,
-						currentFrame.color.redMultiplier + _durationColor.redMultiplier * progress,
-						currentFrame.color.greenMultiplier + _durationColor.greenMultiplier * progress,
-						currentFrame.color.blueMultiplier + _durationColor.blueMultiplier * progress,
-						true
-					);
-				}
-				else
-				{
-					_bone.updateColor(
-						_durationColor.alphaOffset * progress,
-						_durationColor.redOffset * progress,
-						_durationColor.greenOffset * progress,
-						_durationColor.blueOffset * progress,
-						1 + _durationColor.alphaMultiplier * progress,
-						1 + _durationColor.redMultiplier * progress,
-						1 + _durationColor.greenMultiplier * progress,
-						1 + _durationColor.blueMultiplier * progress,
-						true
-					);
-				}
-			}
-			*/
 		}
 		
 		private function updateSingleFrame():void
@@ -726,29 +598,6 @@ package dragonBones.animation
 				}
 				
 				_bone.invalidUpdate();
-				/*
-				if(_animationState.displayControl)
-				{
-					if(currentFrame.color)
-					{
-						_bone.updateColor(
-							currentFrame.color.alphaOffset, 
-							currentFrame.color.redOffset, 
-							currentFrame.color.greenOffset, 
-							currentFrame.color.blueOffset, 
-							currentFrame.color.alphaMultiplier, 
-							currentFrame.color.redMultiplier, 
-							currentFrame.color.greenMultiplier, 
-							currentFrame.color.blueMultiplier,
-							true
-						);
-					}
-					else if(_bone._isColorChanged)
-					{
-						_bone.updateColor(0, 0, 0, 0, 1, 1, 1, 1, false);
-					}
-				}
-				*/
 			}
 		}
 		

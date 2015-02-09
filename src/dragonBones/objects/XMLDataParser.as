@@ -287,8 +287,6 @@
 			timeline.name = timelineXML.@[ConstValues.A_NAME];
 			timeline.scale = getNumber(timelineXML, ConstValues.A_SCALE, 1) || 0;
 			timeline.offset = getNumber(timelineXML, ConstValues.A_OFFSET, 0) || 0;
-			//timeline.originPivot.x = getNumber(timelineXML, ConstValues.A_PIVOT_X, 0) || 0;
-			//timeline.originPivot.y = getNumber(timelineXML, ConstValues.A_PIVOT_Y, 0) || 0;
 			timeline.duration = duration;
 			
 			for each(var frameXML:XML in timelineXML[ConstValues.FRAME])
@@ -318,22 +316,11 @@
 			
 			//NaN:no tween, 10:auto tween, [-1, 0):ease in, 0:line easing, (0, 1]:ease out, (1, 2]:ease in out
 			frame.tweenEasing = getNumber(frameXML, ConstValues.A_TWEEN_EASING, 10);
-			frame.tweenRotate = int(getNumber(frameXML,ConstValues.A_TWEEN_ROTATE,0));
-			frame.tweenScale = getBoolean(frameXML, ConstValues.A_TWEEN_SCALE, true);
 			frame.displayIndex = int(getNumber(frameXML,ConstValues.A_DISPLAY_INDEX,0));
 			
 			//如果为NaN，则说明没有改变过zOrder
 			frame.zOrder = getNumber(frameXML, ConstValues.A_Z_ORDER, tempDragonBonesData.isGlobalData ? NaN:0);
-					
-			//parseTransform(frameXML[ConstValues.TRANSFORM][0], frame.transform, frame.pivot);
-			//if(tempDragonBonesData.isGlobalData)//绝对数据
-			//{
-				//frame.global.copy(frame.transform);
-			//}
-			
-			//frame.scaleOffset.x = getNumber(frameXML, ConstValues.A_SCALE_X_OFFSET, 0) || 0;
-			//frame.scaleOffset.y = getNumber(frameXML, ConstValues.A_SCALE_Y_OFFSET, 0) || 0;
-			
+				
 			var colorTransformXML:XML = frameXML[ConstValues.COLOR_TRANSFORM][0];
 			if(colorTransformXML)
 			{
@@ -357,8 +344,6 @@
 			frame.tweenScale = getBoolean(frameXML, ConstValues.A_TWEEN_SCALE, true);
 			frame.displayIndex = int(getNumber(frameXML,ConstValues.A_DISPLAY_INDEX,0));
 			
-			//如果为NaN，则说明没有改变过zOrder
-			frame.zOrder = getNumber(frameXML, ConstValues.A_Z_ORDER, tempDragonBonesData.isGlobalData ? NaN:0);
 			
 			parseTransform(frameXML[ConstValues.TRANSFORM][0], frame.transform, frame.pivot);
 			if(tempDragonBonesData.isGlobalData)//绝对数据
@@ -368,14 +353,7 @@
 			
 			frame.scaleOffset.x = getNumber(frameXML, ConstValues.A_SCALE_X_OFFSET, 0) || 0;
 			frame.scaleOffset.y = getNumber(frameXML, ConstValues.A_SCALE_Y_OFFSET, 0) || 0;
-			/*
-			var colorTransformXML:XML = frameXML[ConstValues.COLOR_TRANSFORM][0];
-			if(colorTransformXML)
-			{
-				frame.color = new ColorTransform();
-				parseColorTransform(colorTransformXML, frame.color);
-			}
-			*/
+			
 			return frame;
 		}
 		

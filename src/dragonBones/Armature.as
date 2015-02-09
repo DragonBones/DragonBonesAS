@@ -11,6 +11,8 @@
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.DragonBonesData;
 	import dragonBones.objects.Frame;
+	import dragonBones.objects.SkinData;
+	import dragonBones.objects.SlotData;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -136,6 +138,10 @@
 		}
 
 		/**
+		 * save more skinLists
+		 */
+		dragonBones_internal var _skinLists:Object;
+		/**
 		 * Creates a Armature blank instance.
 		 * @param Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
 		 * @see #display
@@ -154,7 +160,7 @@
 			_boneList = new Vector.<Bone>;
 			_boneList.fixed = true;
 			_eventList = new Vector.<Event>;
-			
+			_skinLists = { };
 			_delayDispose = false;
 			_lockDispose = false;
 			
@@ -649,6 +655,49 @@
 		{
 			return slot1.zOrder < slot2.zOrder?1: -1;
 		}
-
+		
+		public function addSkinList(skinName:String, list:Object):void
+		{
+			if (!skinName)
+			{
+				skinName = "default";
+			}
+			if (!_skinLists[skinName])
+			{
+				_skinLists[skinName] = list;
+			}
+		}
+		
+		public function changeSkin(skinName:String):void
+		{
+			var skinData:SkinData = armatureData.getSkinData(skinName);
+			if(!skinData || !_skinLists[skinName])
+			{
+				return;
+			}
+			armatureData.setSkinData(skinName);
+			var displayList:Array = [];
+			var slotDataList:Vector.<SlotData> = armatureData.slotDataList;
+			var slotData:SlotData;
+			var slot:Slot;
+			var bone:Bone;
+			for(var i:int = 0; i < slotDataList.length; i++)
+			{
+				
+				slotData = slotDataList[i];
+				displayList = _skinLists[skinName][slotData.name];
+				bone = getBone(slotData.parent);
+				if(!bone || !displayList)
+				{
+					continue;
+				}
+				
+				slot = getSlot(slotData.name);
+				slot.initWithSlotData(slotData);
+				
+				slot.displayList = displayList;
+				slot.changeDisplay(0);
+			}
+		}
 	}
 }

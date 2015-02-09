@@ -416,30 +416,6 @@
 			}
 		}
 		
-		///** @private */
-		//dragonBones_internal function updateColor(
-			//aOffset:Number, 
-			//rOffset:Number, 
-			//gOffset:Number, 
-			//bOffset:Number, 
-			//aMultiplier:Number, 
-			//rMultiplier:Number, 
-			//gMultiplier:Number, 
-			//bMultiplier:Number,
-			//colorChanged:Boolean
-		//):void
-		//{
-			//for each(var childSlot:Slot in _slotList)
-			//{
-				//childSlot.updateDisplayColor(
-					//aOffset, rOffset, gOffset, bOffset, 
-					//aMultiplier, rMultiplier, gMultiplier, bMultiplier
-				//);
-			//}
-			//
-			//_isColorChanged = colorChanged;
-		//}
-		
 		/** @private */
 		dragonBones_internal function hideSlots():void
 		{
@@ -459,23 +435,7 @@
 			
 			if(displayControl)
 			{
-				//var tansformFrame:TransformFrame = frame as TransformFrame;
-				//var displayIndex:int = tansformFrame.displayIndex;
 				var childSlot:Slot;
-				//for each(childSlot in _slotList)
-				//{
-					////childSlot.changeDisplay(displayIndex);
-					////childSlot.updateDisplayVisible(tansformFrame.visible);
-					//if(displayIndex >= 0)
-					//{
-						//if(!isNaN(tansformFrame.zOrder) && tansformFrame.zOrder != childSlot._tweenZOrder)
-						//{
-							//childSlot._tweenZOrder = tansformFrame.zOrder;
-							//this._armature._slotsZOrderChanged = true;
-						//}
-					//}
-				//}
-				
 				if(frame.event && this._armature.hasEventListener(FrameEvent.BONE_FRAME_EVENT))
 				{
 					var frameEvent:FrameEvent = new FrameEvent(FrameEvent.BONE_FRAME_EVENT);
@@ -484,16 +444,6 @@
 					frameEvent.frameLabel = frame.event;
 					this._armature._eventList.push(frameEvent);
 				}
-				/*
-				if(frame.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
-				{
-					var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
-					soundEvent.armature = this._armature;
-					soundEvent.animationState = animationState;
-					soundEvent.sound = frame.sound;
-					_soundManager.dispatchEvent(soundEvent);
-				}
-				*/
 				//[TODO]currently there is only gotoAndPlay belongs to frame action. In future, there will be more.  
 				//后续会扩展更多的action，目前只有gotoAndPlay的含义
 				if(frame.action) 

@@ -387,6 +387,7 @@ package dragonBones.factories
 			var slotData:SlotData;
 			var slot:Slot;
 			var bone:Bone;
+			var skinListObject:Object = { };
 			for(var i:int = 0; i < slotDataList.length; i++)
 			{
 				displayList.length = 0;
@@ -441,13 +442,14 @@ package dragonBones.factories
 					}
 				}
 				//==================================================
-				
+				skinListObject[slotData.name] = displayList.concat();
 				slot.displayList = displayList;
 				slot.changeDisplay(0);
 			}
+			armature.addSkinList(skinName, skinListObject);
 		}
 		
-		public function changeSkin(armature:Armature, skinName:String, textureAtlasName:String):void
+		public function addSkinToArmature(armature:Armature, skinName:String, textureAtlasName:String):void
 		{
 			var textureAtlas:Object = textureAtlasDic[textureAtlasName]
 			var skinData:SkinData = armature.armatureData.getSkinData(skinName);
@@ -455,12 +457,14 @@ package dragonBones.factories
 			{
 				return;
 			}
-			armature.armatureData.setSkinData(skinName);
 			var displayList:Array = [];
 			var slotDataList:Vector.<SlotData> = armature.armatureData.slotDataList;
 			var slotData:SlotData;
 			var slot:Slot;
 			var bone:Bone;
+			var skinListData:Object = { };
+			var displayDataList:Vector.<DisplayData>
+			
 			for(var i:int = 0; i < slotDataList.length; i++)
 			{
 				displayList.length = 0;
@@ -471,16 +475,19 @@ package dragonBones.factories
 					continue;
 				}
 				
-				slot = armature.getSlot(slotData.name);
-				//slot = generateSlot();
-				//slot.dispose();
-				slot.initWithSlotData(slotData);
-				//bone.addSlot(slot);
-				
-				var l:int = slotData.displayDataList.length;
+				var l:int = 0;
+				if (i >= skinData.slotDataList.length)
+				{
+					l = 0;
+				}
+				else
+				{
+					displayDataList = skinData.slotDataList[i].displayDataList;
+					l = displayDataList.length;
+				}
 				while(l--)
 				{
-					var displayData:DisplayData = slotData.displayDataList[l];
+					var displayData:DisplayData = displayDataList[l];
 					
 					switch(displayData.type)
 					{
@@ -517,10 +524,9 @@ package dragonBones.factories
 					}
 				}
 				//==================================================
-				
-				slot.displayList = displayList;
-				slot.changeDisplay(0);
+				skinListData[slotData.name] = displayList.concat();
 			}
+			armature.addSkinList(skinName, skinListData);
 		}
 		
 		/**
