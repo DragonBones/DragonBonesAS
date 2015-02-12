@@ -151,11 +151,12 @@
 			aMultiplier:Number, 
 			rMultiplier:Number, 
 			gMultiplier:Number, 
-			bMultiplier:Number):void
+			bMultiplier:Number,
+			colorChanged:Boolean = false):void
 		{
 			if(_starlingDisplay)
 			{
-				super.updateDisplayColor(aOffset, rOffset, gOffset, bOffset, aMultiplier, rMultiplier, gMultiplier, bMultiplier);
+				super.updateDisplayColor(aOffset, rOffset, gOffset, bOffset, aMultiplier, rMultiplier, gMultiplier, bMultiplier,colorChanged);
 				_starlingDisplay.alpha = aMultiplier;
 				if (_starlingDisplay is Quad)
 				{
