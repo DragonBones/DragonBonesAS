@@ -8,6 +8,8 @@ package dragonBones.utils
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.SkinData;
 	import dragonBones.objects.SlotData;
+	import dragonBones.objects.SlotFrame;
+	import dragonBones.objects.SlotTimeline;
 	import dragonBones.objects.TransformFrame;
 	import dragonBones.objects.TransformTimeline;
 	import dragonBones.utils.TransformUtil;
@@ -66,14 +68,15 @@ package dragonBones.utils
 			var slotDataList:Vector.<SlotData>;
 			if(skinData)
 			{
-				slotDataList = skinData.slotDataList;
+				slotDataList = armatureData.slotDataList;
 			}
 			
 			for(var i:int = 0;i < boneDataList.length;i ++)
 			{
 				var boneData:BoneData = boneDataList[i];
 				var timeline:TransformTimeline = animationData.getTimeline(boneData.name);
-				if(!timeline)
+				var slotTimeline:SlotTimeline = animationData.getSlotTimeline(boneData.name);
+				if(!timeline && !slotTimeline)
 				{
 					continue;
 				}
@@ -92,6 +95,10 @@ package dragonBones.utils
 				}
 				
 				var frameList:Vector.<Frame> = timeline.frameList;
+				if (slotTimeline)
+				{
+					var slotFrameList:Vector.<Frame> = slotTimeline.frameList;
+				}
 				
 				var originTransform:DBTransform = null;
 				var originPivot:Point = null;
@@ -111,13 +118,13 @@ package dragonBones.utils
 					frame.transform.scaleX /= boneData.transform.scaleX;
 					frame.transform.scaleY /= boneData.transform.scaleY;
 					
-					if(!timeline.transformed)
-					{
-						if(slotData)
-						{
-							//frame.zOrder -= slotData.zOrder;
-						}
-					}
+					//if(!timeline.transformed)
+					//{
+						//if(slotData)
+						//{
+							////frame.zOrder -= slotData.zOrder;
+						//}
+					//}
 					
 					//如果originTransform不存在说明当前帧是第一帧，将当前帧的transform保存至timeline的originTransform
 					if(!originTransform)
@@ -188,7 +195,27 @@ package dragonBones.utils
 					}
 					prevFrame = frame;
 				}
+				
+				if (slotTimeline && slotFrameList)
+				{
+					frameListLength = slotFrameList.length;
+					for(j = 0;j < frameListLength;j ++)
+					{
+						var slotFrame:SlotFrame = slotFrameList[j] as SlotFrame;
+						
+						if(!slotTimeline.transformed)
+						{
+							if(slotData)
+							{
+								slotFrame.zOrder -= slotData.zOrder;
+							}
+						}
+					}
+					slotTimeline.transformed = true;
+				}
+				
 				timeline.transformed = true;
+				
 			}
 		}
 		
