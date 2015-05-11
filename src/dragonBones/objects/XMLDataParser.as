@@ -237,18 +237,25 @@
 			parseTimeline(animationXML, animationData);
 			
 			var lastFrameDuration:int = animationData.duration;
-			for each(var timelineXML:XML in animationXML[ConstValues.TIMELINE])
+			for each(var timelineXML:XML in animationXML[ConstValues.BONE])
 			{
 				var timeline:TransformTimeline = parseTransformTimeline(timelineXML, animationData.duration, frameRate);
-				lastFrameDuration = Math.min(lastFrameDuration, timeline.frameList[timeline.frameList.length - 1].duration);
-				animationData.addTimeline(timeline);
+				if (timeline.frameList.length > 0)
+				{
+					lastFrameDuration = Math.min(lastFrameDuration, timeline.frameList[timeline.frameList.length - 1].duration);
+					animationData.addTimeline(timeline);
+				}
+				
 			}
 			
 			for each(var slotTimelineXML:XML in animationXML[ConstValues.SLOT])
 			{
 				var slotTimeline:SlotTimeline = parseSlotTimeline(slotTimelineXML, animationData.duration, frameRate);
-				lastFrameDuration = Math.min(lastFrameDuration, slotTimeline.frameList[slotTimeline.frameList.length - 1].duration);
-				animationData.addSlotTimeline(slotTimeline);
+				if (slotTimeline.frameList.length > 0)
+				{
+					lastFrameDuration = Math.min(lastFrameDuration, slotTimeline.frameList[slotTimeline.frameList.length - 1].duration);
+					animationData.addSlotTimeline(slotTimeline);
+				}
 			}
 			
 			if(animationData.frameList.length > 0)
@@ -321,7 +328,7 @@
 			//如果为NaN，则说明没有改变过zOrder
 			frame.zOrder = getNumber(frameXML, ConstValues.A_Z_ORDER, tempDragonBonesData.isGlobalData ? NaN:0);
 				
-			var colorTransformXML:XML = frameXML[ConstValues.COLOR_TRANSFORM][0];
+			var colorTransformXML:XML = frameXML[ConstValues.COLOR][0];
 			if(colorTransformXML)
 			{
 				frame.color = new ColorTransform();
@@ -412,10 +419,10 @@
 					colorTransform.greenOffset = int(colorTransformXML.@[ConstValues.A_GREEN_OFFSET]);
 					colorTransform.blueOffset = int(colorTransformXML.@[ConstValues.A_BLUE_OFFSET]);
 					
-					colorTransform.alphaMultiplier = int(getNumber(colorTransformXML, ConstValues.A_ALPHA_MULTIPLIER, 100) || 100) * 0.01;
-					colorTransform.redMultiplier = int(getNumber(colorTransformXML, ConstValues.A_RED_MULTIPLIER, 100) || 100) * 0.01;
-					colorTransform.greenMultiplier = int(getNumber(colorTransformXML, ConstValues.A_GREEN_MULTIPLIER, 100) || 100) * 0.01;
-					colorTransform.blueMultiplier = int(getNumber(colorTransformXML, ConstValues.A_BLUE_MULTIPLIER, 100) || 100) * 0.01;
+					colorTransform.alphaMultiplier = int(getNumber(colorTransformXML, ConstValues.A_ALPHA_MULTIPLIER, 100) || 0) * 0.01;
+					colorTransform.redMultiplier = int(getNumber(colorTransformXML, ConstValues.A_RED_MULTIPLIER, 100) || 0) * 0.01;
+					colorTransform.greenMultiplier = int(getNumber(colorTransformXML, ConstValues.A_GREEN_MULTIPLIER, 100) || 0) * 0.01;
+					colorTransform.blueMultiplier = int(getNumber(colorTransformXML, ConstValues.A_BLUE_MULTIPLIER, 100) || 0) * 0.01;
 				}
 			}
 		}

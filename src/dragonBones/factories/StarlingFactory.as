@@ -143,8 +143,8 @@
 				}
 				
 				var image:Image = new Image(subTexture);
-				image.pivotX = pivotX;
-				image.pivotY = pivotY;
+				image.pivotX = subTexture.width / 2;//pivotX;
+				image.pivotY = subTexture.height / 2;// pivotY;
 				return image;
 			}
 			return null;

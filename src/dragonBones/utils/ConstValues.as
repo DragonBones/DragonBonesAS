@@ -18,6 +18,7 @@
 		public static const FRAME:String = "frame";
 		public static const TRANSFORM:String = "transform";
 		public static const COLOR_TRANSFORM:String = "colorTransform";
+		public static const COLOR:String = "color";
 		public static const RECTANGLE:String = "rectangle";
 		public static const ELLIPSE:String = "ellipse";
 		

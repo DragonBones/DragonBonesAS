@@ -103,6 +103,8 @@
 					var subTextureRegion:Rectangle = nativeTextureAtlas.getRegion(fullName);
 					if (subTextureRegion)
 					{
+						pivotX = subTextureRegion.width / 2;
+						pivotY = subTextureRegion.height / 2;
 						var subTextureFrame:Rectangle = nativeTextureAtlas.getFrame(fullName);
 						if(subTextureFrame)
 						{
