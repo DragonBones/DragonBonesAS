@@ -136,15 +136,25 @@
 			if (subTexture)
 			{
 				var subTextureFrame:Rectangle = (textureAtlas as TextureAtlas).getFrame(fullName);
-				if(subTextureFrame)
-				{
-					pivotX += subTextureFrame.x;
-					pivotY += subTextureFrame.y;
-				}
+				
 				
 				var image:Image = new Image(subTexture);
-				image.pivotX = subTexture.width / 2;//pivotX;
-				image.pivotY = subTexture.height / 2;// pivotY;
+				if (isNaN(pivotX) || isNaN(pivotY))
+				{
+					image.pivotX = subTexture.width / 2;//pivotX;
+					image.pivotY = subTexture.height / 2;// pivotY;
+				}
+				else
+				{
+					if(subTextureFrame)
+					{
+						pivotX += subTextureFrame.x;
+						pivotY += subTextureFrame.y;
+					}
+					image.pivotX = pivotX;
+					image.pivotY = pivotY;
+				}
+				
 				return image;
 			}
 			return null;

@@ -80,8 +80,9 @@
 			switch (version)
 			{
 				case "2.3":
-				case "3.0":
 					throw new Error("Nonsupport version" + version + "!");
+				case "3.0":
+					return XML3DataParser.parseSkeletonData(rawData);
 					break;
 				case DragonBones.DATA_VERSION:
 					break;
@@ -203,7 +204,11 @@
 			var displayData:DisplayData = new DisplayData();
 			displayData.name = displayXML.@[ConstValues.A_NAME];
 			displayData.type = displayXML.@[ConstValues.A_TYPE];
+			
 			parseTransform(displayXML[ConstValues.TRANSFORM][0], displayData.transform, displayData.pivot);
+			
+			displayData.pivot.x = NaN;
+			displayData.pivot.y = NaN;
 			
 			if(tempDragonBonesData!=null)
 			{
