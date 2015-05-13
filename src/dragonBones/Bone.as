@@ -1,5 +1,8 @@
 ﻿package dragonBones
 {
+	import flash.geom.Matrix;
+	import flash.geom.Point;
+	
 	import dragonBones.animation.AnimationState;
 	import dragonBones.animation.TimelineState;
 	import dragonBones.core.DBObject;
@@ -8,11 +11,7 @@
 	import dragonBones.objects.BoneData;
 	import dragonBones.objects.DBTransform;
 	import dragonBones.objects.Frame;
-	import dragonBones.objects.TransformFrame;
 	import dragonBones.utils.TransformUtil;
-	
-	import flash.geom.Matrix;
-	import flash.geom.Point;
 	
 	use namespace dragonBones_internal;
 	
@@ -407,7 +406,7 @@
 					_globalTransformForChild.skewY += this._offset.skewY;
 				}
 				
-				TransformUtil.transformToMatrix(_globalTransformForChild, _globalTransformMatrixForChild, true);
+				TransformUtil.transformToMatrix(_globalTransformForChild, _globalTransformMatrixForChild);
 				if(parentGlobalTransformMatrix)
 				{
 					_globalTransformMatrixForChild.concat(parentGlobalTransformMatrix);

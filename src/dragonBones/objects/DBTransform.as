@@ -1,5 +1,9 @@
 package dragonBones.objects
 {
+	import flash.geom.Matrix;
+	
+	import dragonBones.utils.TransformUtil;
+
 	/**
 	* Copyright 2012-2013. DragonBones. All Rights Reserved.
 	* @playerversion Flash 10.0
@@ -68,6 +72,26 @@ package dragonBones.objects
 			scaleX = transform.scaleX;
 			scaleY = transform.scaleY;
 		}
+		
+		public function divParent(transform:DBTransform, createNew:Boolean = false):DBTransform
+		{
+			var output:DBTransform = createNew ? new DBTransform() : this;
+			var parentMatrix:Matrix = new Matrix();
+			
+			TransformUtil.transformToMatrix(transform, parentMatrix);
+			var xtx:Number = x - parentMatrix.tx;
+			var yty:Number = y - parentMatrix.ty;
+			var adcb:Number = parentMatrix.a * parentMatrix.d - parentMatrix.c * parentMatrix.b;
+			
+			output.x = (xtx * parentMatrix.d - yty * parentMatrix.c)/adcb;
+			output.y = (yty * parentMatrix.a - xtx * parentMatrix.b)/adcb;
+			output.scaleX = scaleX / transform.scaleX;
+			output.scaleY = scaleY / transform.scaleY;
+			output.skewX = skewX - transform.skewX;
+			output.skewY = skewY - transform.skewY;
+			return output;
+		}
+		
 		/**
 		 * Get a string representing all DBTransform property values.
 		 * @return String All property values in a formatted string.

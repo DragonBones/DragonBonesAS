@@ -1,6 +1,8 @@
 package dragonBones.utils
 {
-	import dragonBones.animation.TimelineState;
+	import flash.geom.Matrix;
+	import flash.geom.Point;
+	
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.BoneData;
@@ -12,10 +14,6 @@ package dragonBones.utils
 	import dragonBones.objects.SlotTimeline;
 	import dragonBones.objects.TransformFrame;
 	import dragonBones.objects.TransformTimeline;
-	import dragonBones.utils.TransformUtil;
-	
-	import flash.geom.Matrix;
-	import flash.geom.Point;
 	
 	/** @private */
 	public final class DBDataUtil
@@ -34,7 +32,8 @@ package dragonBones.utils
 					if(parentBoneData)
 					{
 						boneData.transform.copy(boneData.global);
-						TransformUtil.globalToLocal(boneData.transform, parentBoneData.global);
+						boneData.transform.divParent(parentBoneData.global);
+//						TransformUtil.globalToLocal(boneData.transform, parentBoneData.global);
 					}
 				}
 			}
@@ -74,6 +73,7 @@ package dragonBones.utils
 			for(var i:int = 0;i < boneDataList.length;i ++)
 			{
 				var boneData:BoneData = boneDataList[i];
+				//绝对数据是不可能有slotTimeline的
 				var timeline:TransformTimeline = animationData.getTimeline(boneData.name);
 				var slotTimeline:SlotTimeline = animationData.getSlotTimeline(boneData.name);
 				if(!timeline && !slotTimeline)
@@ -278,15 +278,16 @@ package dragonBones.utils
 							currentTransform.scaleX *= parentTimeline.originTransform.scaleX * parentData.transform.scaleX;
 							currentTransform.scaleY *= parentTimeline.originTransform.scaleY * parentData.transform.scaleY;
 							
-							TransformUtil.transformToMatrix(currentTransform, currentTransformMatrix, true);
+							TransformUtil.transformToMatrix(currentTransform, currentTransformMatrix);
 							currentTransformMatrix.concat(globalTransformMatrix);
 							TransformUtil.matrixToTransform(currentTransformMatrix, globalTransform, currentTransform.scaleX * globalTransform.scaleX >= 0, currentTransform.scaleY * globalTransform.scaleY >= 0);
 							
 						}
 						
-						TransformUtil.transformToMatrix(globalTransform, globalTransformMatrix, true);
-						}
-					TransformUtil.globalToLocal(frame.transform, globalTransform);	
+						TransformUtil.transformToMatrix(globalTransform, globalTransformMatrix);
+					}
+//					TransformUtil.globalToLocal(frame.transform, globalTransform);	
+					frame.transform.divParent(globalTransform);
 				}
 			}
 		}

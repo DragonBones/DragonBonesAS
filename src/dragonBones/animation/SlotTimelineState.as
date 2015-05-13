@@ -1,18 +1,14 @@
 package dragonBones.animation
 {
+	import flash.geom.ColorTransform;
+	
 	import dragonBones.Armature;
-	import dragonBones.Bone;
-	import dragonBones.objects.SlotFrame;
-	import dragonBones.objects.SlotTimeline;
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.objects.DBTransform;
 	import dragonBones.objects.Frame;
+	import dragonBones.objects.SlotFrame;
+	import dragonBones.objects.SlotTimeline;
 	import dragonBones.utils.MathUtil;
-	import dragonBones.utils.TransformUtil;
-	
-	import flash.geom.ColorTransform;
-	import flash.geom.Point;
 	
 	use namespace dragonBones_internal;
 	

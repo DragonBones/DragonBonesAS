@@ -1,12 +1,11 @@
 package dragonBones.core
 {
+	import flash.geom.Matrix;
+	
 	import dragonBones.Armature;
 	import dragonBones.Bone;
-	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DBTransform;
 	import dragonBones.utils.TransformUtil;
-	
-	import flash.geom.Matrix;
 	
 	use namespace dragonBones_internal;
 
@@ -185,7 +184,7 @@ package dragonBones.core
 					}
 					
 					parentGlobalTransformMatrix = DBObject._tempParentGlobalTransformMatrix;
-					TransformUtil.transformToMatrix(parentGlobalTransform, parentGlobalTransformMatrix, true);
+					TransformUtil.transformToMatrix(parentGlobalTransform, parentGlobalTransformMatrix);
 				}
 				
 				return {parentGlobalTransform:parentGlobalTransform, parentGlobalTransformMatrix:parentGlobalTransformMatrix};
@@ -196,7 +195,7 @@ package dragonBones.core
 		protected function updateGlobal():Object
 		{
 			calculateRelativeParentTransform();
-			TransformUtil.transformToMatrix(_global, _globalTransformMatrix, true);
+			TransformUtil.transformToMatrix(_global, _globalTransformMatrix);
 			var output:Object = calculateParentTransform();
 				
 			if(output != null)
