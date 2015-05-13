@@ -78,8 +78,9 @@
 			switch (version)
 			{
 				case "2.3":
+					throw new Error("Nonsupport version" + version + "!");
 				case "3.0":
-				throw new Error("Nonsupport version" + version + "!");
+					return Object3DataParser.parseSkeletonData(rawDataToParse);
 					break;
 				case DragonBones.DATA_VERSION:
 					break;
@@ -158,7 +159,6 @@
 			{
 				boneData.global.copy(boneData.transform);
 			}
-			
 			return boneData;
 		}
 		
@@ -209,7 +209,8 @@
 			displayData.name = displayObject[ConstValues.A_NAME];
 			displayData.type = displayObject[ConstValues.A_TYPE];
 			parseTransform(displayObject[ConstValues.TRANSFORM], displayData.transform, displayData.pivot);
-			
+			displayData.pivot.x = NaN;
+			displayData.pivot.y = NaN;
 			if(tempDragonBonesData!=null)
 			{
 				tempDragonBonesData.addDisplayData(displayData);
