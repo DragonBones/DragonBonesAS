@@ -225,7 +225,7 @@
 			animationData.name = animationXML.@[ConstValues.A_NAME];
 			animationData.frameRate = frameRate;
 			animationData.duration = Math.round((int(animationXML.@[ConstValues.A_DURATION]) || 1) * 1000 / frameRate);
-			animationData.playTimes = int(getNumber(animationXML,ConstValues.A_LOOP,1));
+			animationData.playTimes = int(getNumber(animationXML,ConstValues.A_PLAY_TIMES,1));
 			animationData.fadeTime = getNumber(animationXML,ConstValues.A_FADE_IN_TIME,0)||0;
 			animationData.scale = getNumber(animationXML, ConstValues.A_SCALE, 1) || 0;
 			//use frame tweenEase, NaN

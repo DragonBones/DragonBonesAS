@@ -226,7 +226,7 @@
 			animationData.name = animationObject[ConstValues.A_NAME];
 			animationData.frameRate = frameRate;
 			animationData.duration = Math.round((Number(animationObject[ConstValues.A_DURATION]) || 1) * 1000 / frameRate);
-			animationData.playTimes = int(getNumber(animationObject, ConstValues.A_LOOP, 1));
+			animationData.playTimes = int(getNumber(animationObject, ConstValues.A_PLAY_TIMES, 1));
 			animationData.fadeTime = getNumber(animationObject, ConstValues.A_FADE_IN_TIME, 0) || 0;
 			animationData.scale = getNumber(animationObject, ConstValues.A_SCALE, 1) || 0;
 			//use frame tweenEase, NaN

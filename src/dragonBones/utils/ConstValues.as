@@ -44,6 +44,7 @@
 		public static const A_SCALE:String = "scale";
 		public static const A_OFFSET:String = "offset";
 		public static const A_LOOP:String = "loop";
+		public static const A_PLAY_TIMES:String = "playTimes";
 		public static const A_EVENT:String = "event";
 		public static const A_EVENT_PARAMETERS:String = "eventParameters";
 		public static const A_SOUND:String = "sound";
