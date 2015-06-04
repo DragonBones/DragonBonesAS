@@ -75,12 +75,12 @@ package dragonBones.objects
 				armatureData.addSkinData(parseSkinData(skinObject, data));
 			}
 			
+			armatureData.sortBoneDataList();
+			
 			if(isGlobalData)
 			{
 				DBDataUtil.transformArmatureData(armatureData);
 			}
-			
-			armatureData.sortBoneDataList();
 			
 			var animationObject:Object;
 			if(ifSkipAnimationData)
@@ -131,8 +131,8 @@ package dragonBones.objects
 			boneData.name = boneObject[ConstValues.A_NAME];
 			boneData.parent = boneObject[ConstValues.A_PARENT];
 			boneData.length = Number(boneObject[ConstValues.A_LENGTH]);
-			//boneData.inheritRotation = getBoolean(boneObject, ConstValues.A_INHERIT_ROTATION, true);
-			//boneData.inheritScale = getBoolean(boneObject, ConstValues.A_INHERIT_SCALE, true);
+			boneData.inheritRotation = getBoolean(boneObject, ConstValues.A_INHERIT_ROTATION, true);
+			boneData.inheritScale = getBoolean(boneObject, ConstValues.A_INHERIT_SCALE, true);
 			
 			parseTransform(boneObject[ConstValues.TRANSFORM], boneData.transform);
 			if(isGlobalData)//绝对数据

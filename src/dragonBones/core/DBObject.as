@@ -1,12 +1,11 @@
 package dragonBones.core
 {
+	import flash.geom.Matrix;
+	
 	import dragonBones.Armature;
 	import dragonBones.Bone;
-	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DBTransform;
 	import dragonBones.utils.TransformUtil;
-	
-	import flash.geom.Matrix;
 	
 	use namespace dragonBones_internal;
 
@@ -185,7 +184,7 @@ package dragonBones.core
 					}
 					
 					parentGlobalTransformMatrix = DBObject._tempParentGlobalTransformMatrix;
-					TransformUtil.transformToMatrix(parentGlobalTransform, parentGlobalTransformMatrix, true);
+					TransformUtil.transformToMatrix(parentGlobalTransform, parentGlobalTransformMatrix);
 				}
 				
 				return {parentGlobalTransform:parentGlobalTransform, parentGlobalTransformMatrix:parentGlobalTransformMatrix};
@@ -196,14 +195,32 @@ package dragonBones.core
 		protected function updateGlobal():Object
 		{
 			calculateRelativeParentTransform();
-			TransformUtil.transformToMatrix(_global, _globalTransformMatrix, true);
 			var output:Object = calculateParentTransform();
-				
 			if(output != null)
 			{
-				_globalTransformMatrix.concat(output.parentGlobalTransformMatrix);
-				TransformUtil.matrixToTransform(_globalTransformMatrix, _global, _global.scaleX * output.parentGlobalTransform.scaleX >= 0, _global.scaleY * output.parentGlobalTransform.scaleY >= 0);
+				//计算父骨头绝对坐标
+				var parentMatrix:Matrix = output.parentGlobalTransformMatrix;
+				var parentGlobalTransform:DBTransform = output.parentGlobalTransform;
+				//计算绝对坐标
+				var x:Number = _global.x;
+				var y:Number = _global.y;
+				
+				_global.x = parentMatrix.a * x + parentMatrix.c * y + parentMatrix.tx;
+				_global.y = parentMatrix.d * y + parentMatrix.b * x + parentMatrix.ty;
+				
+				if(this.inheritRotation)
+				{
+					_global.skewX += parentGlobalTransform.skewX;
+					_global.skewY += parentGlobalTransform.skewY;
+				}
+				
+				if(this.inheritScale)
+				{
+					_global.scaleX *= parentGlobalTransform.scaleX;
+					_global.scaleY *= parentGlobalTransform.scaleY;
+				}
 			}
+			TransformUtil.transformToMatrix(_global, _globalTransformMatrix);
 			return output;
 		}
 	}
