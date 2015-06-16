@@ -78,6 +78,7 @@ package dragonBones.animation
 		private var _totalTime:int; //duration
 		
 		private var _currentTime:int;
+		private var _lastTime:int;
 		private var _currentFrameIndex:int;
 		private var _currentFramePosition:int;
 		private var _currentFrameDuration:int;
@@ -267,6 +268,7 @@ package dragonBones.animation
 			
 			if(_currentTime != currentTime)
 			{
+				_lastTime = _currentTime;
 				_currentTime = currentTime;
 				
 				var frameList:Vector.<Frame> = _timelineData.frameList;
@@ -279,9 +281,10 @@ package dragonBones.animation
 					{
 						_currentFrameIndex = 0;
 					}
-					else if(_currentTime < _currentFramePosition || _currentTime >= _currentFramePosition + _currentFrameDuration)
+					else if(_currentTime < _currentFramePosition || _currentTime >= _currentFramePosition + _currentFrameDuration || _currentTime < _lastTime)
 					{
 						_currentFrameIndex ++;
+						_lastTime = _currentTime;
 						if(_currentFrameIndex >= frameList.length)
 						{
 							if(_isComplete)

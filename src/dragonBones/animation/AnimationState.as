@@ -119,6 +119,7 @@
 		private var _currentPlayTimes:int;
 		private var _totalTime:int;
 		private var _currentTime:int;
+		private var _lastTime:int;
 		//-1 beforeFade, 0 fading, 1 fadeComplete
 		private var _fadeState:int;
 		private var _fadeTotalTime:Number;
@@ -169,7 +170,7 @@
 		 */
 		public function addBoneMask(boneName:String, ifInvolveChildBones:Boolean = true):AnimationState
 		{
-			addBoneToBoneMask(currentBone.name);
+			addBoneToBoneMask(boneName);
 			
 			if(ifInvolveChildBones)
 			{
@@ -183,7 +184,7 @@
 						var tempBone:Bone = boneList[i];
 						if(currentBone.contains(tempBone))
 						{
-							addBoneToBoneMask(currentBone.name);
+							addBoneToBoneMask(tempBone.name);
 						}
 					}
 				}
@@ -214,7 +215,7 @@
 						var tempBone:Bone = boneList[i];
 						if(currentBone.contains(tempBone))
 						{
-							removeBoneFromBoneMask(currentBone.name);
+							removeBoneFromBoneMask(tempBone.name);
 						}
 					}
 				}
@@ -700,7 +701,7 @@
 				{
 					completeFlg = true;
 				}
-				
+				_lastTime = _currentTime;
 				_currentTime = currentTime;
 				/*
 				if(isThisComplete)
@@ -760,8 +761,9 @@
 					{
 						_currentFrameIndex = 0;
 					}
-					else if(_currentTime < _currentFramePosition || _currentTime >= _currentFramePosition + _currentFrameDuration)
+					else if(_currentTime < _currentFramePosition || _currentTime >= _currentFramePosition + _currentFrameDuration || _currentTime < _lastTime)
 					{
+						_lastTime = _currentTime;
 						_currentFrameIndex ++;
 						if(_currentFrameIndex >= frameList.length)
 						{

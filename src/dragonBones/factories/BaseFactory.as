@@ -22,8 +22,6 @@ package dragonBones.factories
 	import flash.geom.Matrix;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
-	
-	import starling.textures.TextureAtlas;
 
 	use namespace dragonBones_internal;
 	
