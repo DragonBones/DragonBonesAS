@@ -12,6 +12,8 @@ package dragonBones.objects
 	 */
 	final public class Object3DataParser 
 	{
+		private static var tempDragonBonesData:DragonBonesData;
+		
 		use namespace dragonBones_internal;
 		
 		public function Object3DataParser() 
@@ -41,7 +43,7 @@ package dragonBones.objects
 			
 			var data:DragonBonesData = new DragonBonesData();
 			data.name = rawData[ConstValues.A_NAME];
-			
+			tempDragonBonesData = data;
 			var isGlobalData:Boolean = rawData[ConstValues.A_IS_GLOBAL] == "0" ? false : true;
 			
 			for each(var armatureObject:Object in rawData[ConstValues.ARMATURE])
@@ -230,6 +232,10 @@ package dragonBones.objects
 			
 			parseTransform(displayObject[ConstValues.TRANSFORM], displayData.transform, displayData.pivot);
 			
+			if (tempDragonBonesData)
+			{
+				tempDragonBonesData.addDisplayData(displayData);
+			}
 			return displayData;
 		}
 		

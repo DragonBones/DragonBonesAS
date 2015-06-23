@@ -13,6 +13,7 @@ package dragonBones.objects
 	 */
 	final public class XML3DataParser 
 	{
+		private static var tempDragonBonesData:DragonBonesData;
 		
 		use namespace dragonBones_internal;
 		
@@ -49,6 +50,7 @@ package dragonBones.objects
 			var frameRate:uint = int(rawData.@[ConstValues.A_FRAME_RATE]);
 			
 			var data:DragonBonesData = new DragonBonesData();
+			tempDragonBonesData = data;
 			data.name = rawData.@[ConstValues.A_NAME];
 			var isGlobalData:Boolean = rawData.@[ConstValues.A_IS_GLOBAL] == "0" ? false : true;
 			for each(var armatureXML:XML in rawData[ConstValues.ARMATURE])
@@ -240,6 +242,10 @@ package dragonBones.objects
 			
 			parseTransform(displayXML[ConstValues.TRANSFORM][0], displayData.transform, displayData.pivot);
 			
+			if (tempDragonBonesData)
+			{
+				tempDragonBonesData.addDisplayData(displayData);
+			}
 			return displayData;
 		}
 		
