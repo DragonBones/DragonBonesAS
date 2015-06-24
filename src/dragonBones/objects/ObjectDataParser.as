@@ -193,7 +193,7 @@
 			slotData.parent = slotObject[ConstValues.A_PARENT];
 			slotData.zOrder = getNumber(slotObject, ConstValues.A_Z_ORDER, 0) || 0;
 			slotData.blendMode = slotObject[ConstValues.A_BLENDMODE];
-			
+			slotData.displayIndex = slotObject[ConstValues.A_DISPLAY_INDEX];
 			//for each(var displayObject:Object in slotObject[ConstValues.DISPLAY])
 			//{
 				//slotData.addDisplayData(parseDisplayData(displayObject));

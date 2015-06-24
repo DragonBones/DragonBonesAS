@@ -185,6 +185,7 @@ package dragonBones.objects
 			slotData.parent = slotObject[ConstValues.A_PARENT];
 			slotData.zOrder = getNumber(slotObject,ConstValues.A_Z_ORDER,0)||0;
 			slotData.blendMode = slotObject[ConstValues.A_BLENDMODE];
+			slotData.displayIndex = 0;
 			
 			return slotData;
 		}

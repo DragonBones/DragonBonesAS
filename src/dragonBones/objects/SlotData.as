@@ -7,6 +7,7 @@ package dragonBones.objects
 		public var parent:String;
 		public var zOrder:Number;
         public var blendMode:String;
+		public var displayIndex:int;
 		
 		private var _displayDataList:Vector.<DisplayData>;
 		

@@ -442,7 +442,7 @@ package dragonBones.factories
 				//==================================================
 				skinListObject[slotData.name] = displayList.concat();
 				slot.displayList = displayList;
-				slot.changeDisplay(0);
+				slot.changeDisplay(slotData.displayIndex);
 			}
 			armature.addSkinList(skinName, skinListObject);
 		}

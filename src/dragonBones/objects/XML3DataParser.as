@@ -195,7 +195,7 @@ package dragonBones.objects
 			slotData.parent = slotXML.@[ConstValues.A_PARENT];
 			slotData.zOrder = getNumber(slotXML,ConstValues.A_Z_ORDER,0)||0;
 			slotData.blendMode = slotXML.@[ConstValues.A_BLENDMODE];
-			
+			slotData.displayIndex = 0;
 			return slotData;
 		}
 		
