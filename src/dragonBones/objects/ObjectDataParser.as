@@ -334,7 +334,7 @@
 			outputFrame.tweenEasing = getNumber(frameObject, ConstValues.A_TWEEN_EASING, 10);
 			outputFrame.tweenRotate = int(getNumber(frameObject, ConstValues.A_TWEEN_ROTATE, 0));
 			outputFrame.tweenScale = getBoolean(frameObject, ConstValues.A_TWEEN_SCALE, true);
-			outputFrame.displayIndex = int(getNumber(frameObject, ConstValues.A_DISPLAY_INDEX, 0));
+//			outputFrame.displayIndex = int(getNumber(frameObject, ConstValues.A_DISPLAY_INDEX, 0));
 			
 			parseTransform(frameObject[ConstValues.TRANSFORM], outputFrame.transform, outputFrame.pivot);
 			if(tempDragonBonesData.isGlobalData)//绝对数据

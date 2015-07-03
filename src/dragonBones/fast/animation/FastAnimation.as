@@ -1,8 +1,8 @@
-package dragonBones.animation
+package dragonBones.fast.animation
 {
-	import dragonBones.FastArmature;
-	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.fast.FastArmature;
+	import dragonBones.fast.FastSlot;
 	import dragonBones.objects.AnimationData;
 
 	use namespace dragonBones_internal;
@@ -12,10 +12,13 @@ package dragonBones.animation
 	 */
 	public class FastAnimation
 	{
+		public var animationState:FastAnimationState = new FastAnimationState();
+		
 		private var _armature:FastArmature;
 		private var _animationList:Vector.<String>;
 //		private var _animationStateList:Vector.<AnimationState>;
-		private var animationState:FastAnimationState
+		
+		
 		private var _animationDataList:Vector.<AnimationData>;
 		private var _animationDataObj:Object;
 		private var _isPlaying:Boolean;
@@ -25,6 +28,7 @@ package dragonBones.animation
 			_armature = armature;
 
 			_animationList = new Vector.<String>;
+			_animationDataObj = {};
 //			_animationStateList = new Vector.<AnimationState>;
 
 			_isPlaying = false;
@@ -63,26 +67,63 @@ package dragonBones.animation
 				return;
 			}
 			_isPlaying = true;
+			var durationScale:Number = animationData.scale < 0?1:animationData.scale;
 			playTimes = isNaN(playTimes)?animationData.playTimes:playTimes;
 			
 			//播放新动画
-			var _lastAnimationState:FastAnimationState;
-			_lastAnimationState = FastAnimationState.borrowObject();
-			_lastAnimationState.fadeIn(_armature, animationData, playTimes);
-			
-			addState(_lastAnimationState);
-			
-			//控制子骨架播放同名动画
-			var slotList:Vector.<Slot> = _armature.getSlots(false);
-			i = slotList.length;
-			while(i --)
+			animationState.autoTween = true;
+			animationState.fadeIn(_armature, animationData, playTimes, 1 / durationScale);
+			var i:int;
+			if(!_armature.childArmatureList)
 			{
-				var slot:Slot = slotList[i];
-				if(slot.childArmature)
+				_armature.childArmatureList = new Vector.<FastArmature>();
+				i = _armature.slotList.length;
+				while(i--)
 				{
-					slot.childArmature.animation.gotoAndPlay(animationName);
+					var slot:FastSlot = _armature.slotList[i];
+					if(slot.childArmature)
+					{
+						_armature.childArmatureList.push(slot.childArmature);
+						slot.childArmature.animation.gotoAndPlay(animationName);
+					}
 				}
 			}
+			else
+			{
+				i = _armature.childArmatureList.length;
+				while(i--)
+				{
+					_armature.childArmatureList[i].animation.gotoAndPlay(animationName);
+				}
+			}
+		}
+		
+		/**
+		 * Play the animation from the current position.
+		 */
+		public function play():void
+		{
+			if(!_animationDataList)
+			{
+				return;
+			}
+			if(!animationState)
+			{
+				gotoAndPlay(_animationDataList[0].name);
+			}
+			else if (!_isPlaying)
+			{
+				_isPlaying = true;
+			}
+			else
+			{
+				gotoAndPlay(animationState.name);
+			}
+		}
+		
+		public function stop():void
+		{
+			_isPlaying = false;
 		}
 		
 		/** @private */
@@ -94,6 +135,16 @@ package dragonBones.animation
 			}
 			
 			animationState.advanceTime(passedTime);
+		}
+		
+		/**
+		 * check if contains a AnimationData by name.
+		 * @return Boolean.
+		 * @see dragonBones.animation.AnimationData.
+		 */
+		public function hasAnimation(animationName:String):Boolean
+		{
+			return _animationDataObj[animationName] != null;
 		}
 		
 		/**

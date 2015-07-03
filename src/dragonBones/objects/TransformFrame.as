@@ -1,6 +1,5 @@
 ﻿package dragonBones.objects
 {
-	import flash.geom.ColorTransform;
 	import flash.geom.Point;
 	
 	/** @private */
@@ -10,7 +9,7 @@
 		public var tweenEasing:Number;
 		public var tweenRotate:int;
 		public var tweenScale:Boolean;
-		public var displayIndex:int;
+//		public var displayIndex:int;
 		public var visible:Boolean;
 		
 		public var global:DBTransform;
@@ -26,7 +25,7 @@
 			tweenEasing = 10;
 			tweenRotate = 0;
 			tweenScale = true;
-			displayIndex = 0;
+//			displayIndex = 0;
 			visible = true;
 			
 			global = new DBTransform();

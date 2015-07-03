@@ -1,23 +1,20 @@
-﻿package dragonBones
+package dragonBones.fast
 {
 	import flash.errors.IllegalOperationError;
 	import flash.geom.ColorTransform;
 	
-	import dragonBones.animation.AnimationState;
 	import dragonBones.animation.SlotTimelineState;
-	import dragonBones.core.DBObject;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.fast.animation.FastAnimationState;
+	import dragonBones.fast.animation.FastSlotTimelineState;
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.SlotData;
 	import dragonBones.objects.SlotFrame;
 
-	//import dragonBones.objects.FrameCached;
-	//import dragonBones.objects.TimelineCached;
-	
 	use namespace dragonBones_internal;
 	
-	public class Slot extends DBObject
+	public class FastSlot extends FastDBObject
 	{
 		/** @private Need to keep the reference of DisplayData. When slot switch displayObject, it need to restore the display obect's origional pivot. */
 		dragonBones_internal var _displayDataList:Vector.<DisplayData>;
@@ -31,20 +28,18 @@
 		protected var _displayList:Array;
 		protected var _currentDisplayIndex:int;
 		protected var _colorTransform:ColorTransform;
-		//TO DO: 以后把这两个属性变成getter
-		//另外还要处理 isShowDisplay 和 visible的矛盾
+
 		protected var _currentDisplay:Object;
 		dragonBones_internal var _isShowDisplay:Boolean;
 		
-		//protected var _childArmature:Armature;
 		protected var _blendMode:String;
 		
 		/** @private */
 		dragonBones_internal var _isColorChanged:Boolean;
 		/** @private */
-		protected var _timelineStateList:Vector.<SlotTimelineState>;
+		dragonBones_internal var _timelineState:FastSlotTimelineState;
 		
-		public function Slot(self:Slot)
+		public function FastSlot(self:FastSlot)
 		{
 			super();
 			
@@ -65,7 +60,6 @@
 			_displayDataList = null;
 			//_childArmature = null;
 			_currentDisplay = null;
-			_timelineStateList = new Vector.<SlotTimelineState>;
 			
 			this.inheritRotation = true;
 			this.inheritScale = true;
@@ -78,6 +72,7 @@
 			_originZOrder = slotData.zOrder;
 			_displayDataList = slotData.displayDataList;
 		}
+		
 		
 		/**
 		 * @inheritDoc
@@ -92,13 +87,12 @@
 			super.dispose();
 			
 			_displayList.length = 0;
-			_timelineStateList.length = 0;
 			
 			_displayDataList = null;
 			_displayList = null;
 			_currentDisplay = null;
 			//_childArmature = null;
-			_timelineStateList = null;
+			_timelineState = null;
 			
 		}
 		
@@ -107,52 +101,32 @@
 			return state1._animationState.layer < state2._animationState.layer?-1:1;
 		}
 		
-		/** @private */
-		dragonBones_internal function addState(timelineState:SlotTimelineState):void
-		{
-			if(_timelineStateList.indexOf(timelineState) < 0)
-			{
-				_timelineStateList.push(timelineState);
-				_timelineStateList.sort(sortState);
-			}
-		}
+//		//骨架装配
+//		/** @private */
+//		override dragonBones_internal function setArmature(value:FastArmature):void
+//		{
+//			if(_armature == value)
+//			{
+//				return;
+//			}
+//			if(_armature)
+//			{
+//				_armature.removeSlotFromSlotList(this);
+//			}
+//			_armature = value;
+//			if(_armature)
+//			{
+//				_armature.addSlotToSlotList(this);
+//				_armature._slotsZOrderChanged = true;
+//				addDisplayToContainer(this._armature.display);
+//			}
+//			else
+//			{
+//				removeDisplayFromContainer();
+//			}
+//		}
 		
-		/** @private */
-		dragonBones_internal function removeState(timelineState:SlotTimelineState):void
-		{
-			var index:int = _timelineStateList.indexOf(timelineState);
-			if(index >= 0)
-			{
-				_timelineStateList.splice(index, 1);
-			}
-		}
-		
-//骨架装配
-		/** @private */
-		override dragonBones_internal function setArmature(value:Armature):void
-		{
-			if(_armature == value)
-			{
-				return;
-			}
-			if(_armature)
-			{
-				_armature.removeSlotFromSlotList(this);
-			}
-			_armature = value;
-			if(_armature)
-			{
-				_armature.addSlotToSlotList(this);
-				_armature._slotsZOrderChanged = true;
-				addDisplayToContainer(this._armature.display);
-			}
-			else
-			{
-				removeDisplayFromContainer();
-			}
-		}
-		
-//动画
+		//动画
 		/** @private */
 		dragonBones_internal function update():void
 		{
@@ -181,13 +155,11 @@
 			{
 				if(_isShowDisplay)
 				{
-					if(
-						this._armature &&
-						this._armature.animation.lastAnimationState &&
-						childArmature.animation.hasAnimation(this._armature.animation.lastAnimationState.name)
-					)
+					if(	this._armature &&
+						this._armature.animation.animationState &&
+						childArmature.animation.hasAnimation(this._armature.animation.animationState.name))
 					{
-						childArmature.animation.gotoAndPlay(this._armature.animation.lastAnimationState.name);
+						childArmature.animation.gotoAndPlay(this._armature.animation.animationState.name);
 					}
 					else
 					{
@@ -197,7 +169,7 @@
 				else
 				{
 					childArmature.animation.stop();
-					childArmature.animation._lastAnimationState = null;
+					childArmature.animation.animationState = null;
 				}
 			}
 		}
@@ -266,10 +238,10 @@
 			var displayObj:Object = _displayList[_currentDisplayIndex];
 			if (displayObj)
 			{
-				if(displayObj is Armature)
+				if(displayObj is FastArmature)
 				{
 					//_childArmature = display as Armature;
-					_currentDisplay = (displayObj as Armature).display;
+					_currentDisplay = (displayObj as FastArmature).display;
 				}
 				else
 				{
@@ -299,7 +271,7 @@
 				}
 				updateDisplayBlendMode(_blendMode);
 				updateDisplayColor(	_colorTransform.alphaOffset, _colorTransform.redOffset, _colorTransform.greenOffset, _colorTransform.blueOffset,
-									_colorTransform.alphaMultiplier, _colorTransform.redMultiplier, _colorTransform.greenMultiplier, _colorTransform.blueMultiplier);
+					_colorTransform.alphaMultiplier, _colorTransform.redMultiplier, _colorTransform.greenMultiplier, _colorTransform.blueMultiplier);
 				updateDisplayVisible(_visible);
 				updateTransform();
 			}
@@ -373,11 +345,11 @@
 		/**
 		 * The sub-armature of this Slot instance.
 		 */
-		public function get childArmature():Armature
+		public function get childArmature():FastArmature
 		{
-			return _displayList[_currentDisplayIndex] is Armature ? _displayList[_currentDisplayIndex] : null;
+			return _displayList[_currentDisplayIndex] is FastArmature ? _displayList[_currentDisplayIndex] : null;
 		}
-		public function set childArmature(value:Armature):void
+		public function set childArmature(value:FastArmature):void
 		{
 			//设计的不好，要修改
 			display = value;
@@ -526,34 +498,28 @@
 		}
 		
 		/** @private When slot timeline enter a key frame, call this func*/
-		dragonBones_internal function arriveAtFrame(frame:Frame, timelineState:SlotTimelineState, animationState:AnimationState, isCross:Boolean):void
+		dragonBones_internal function arriveAtFrame(frame:Frame, animationState:FastAnimationState):void
 		{
-			var displayControl:Boolean = animationState.displayControl
-			
-			if(displayControl)
+			var slotFrame:SlotFrame = frame as SlotFrame;
+			var displayIndex:int = slotFrame.displayIndex;
+			changeDisplay(displayIndex);
+			updateDisplayVisible(slotFrame.visible);
+			if(displayIndex >= 0)
 			{
-				var slotFrame:SlotFrame = frame as SlotFrame;
-				var displayIndex:int = slotFrame.displayIndex;
-				var childSlot:Slot;
-				changeDisplay(displayIndex);
-				updateDisplayVisible(slotFrame.visible);
-				if(displayIndex >= 0)
+				if(!isNaN(slotFrame.zOrder) && slotFrame.zOrder != _tweenZOrder)
 				{
-					if(!isNaN(slotFrame.zOrder) && slotFrame.zOrder != _tweenZOrder)
-					{
-						_tweenZOrder = slotFrame.zOrder;
-						this._armature._slotsZOrderChanged = true;
-					}
+					_tweenZOrder = slotFrame.zOrder;
+					this._armature._slotsZOrderChanged = true;
 				}
-				
-				//[TODO]currently there is only gotoAndPlay belongs to frame action. In future, there will be more.  
-				//后续会扩展更多的action，目前只有gotoAndPlay的含义
-				if(frame.action) 
+			}
+			
+			//[TODO]currently there is only gotoAndPlay belongs to frame action. In future, there will be more.  
+			//后续会扩展更多的action，目前只有gotoAndPlay的含义
+			if(frame.action) 
+			{
+				if (childArmature)
 				{
-					if (childArmature)
-					{
-						childArmature.animation.gotoAndPlay(frame.action);
-					}
+					childArmature.animation.gotoAndPlay(frame.action);
 				}
 			}
 		}

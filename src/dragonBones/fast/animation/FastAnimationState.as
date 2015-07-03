@@ -1,0 +1,432 @@
+package dragonBones.fast.animation
+{
+	import dragonBones.animation.AnimationState;
+	import dragonBones.core.dragonBones_internal;
+	import dragonBones.events.AnimationEvent;
+	import dragonBones.fast.FastArmature;
+	import dragonBones.fast.FastBone;
+	import dragonBones.fast.FastSlot;
+	import dragonBones.objects.AnimationData;
+	import dragonBones.objects.Frame;
+	import dragonBones.objects.SlotTimeline;
+	import dragonBones.objects.TransformTimeline;
+
+	use namespace dragonBones_internal;
+	
+	public class FastAnimationState
+	{
+		private static var _pool:Vector.<FastAnimationState> = new Vector.<FastAnimationState>;
+		
+		/** @private */
+		dragonBones_internal static function borrowObject():FastAnimationState
+		{
+			if(_pool.length == 0)
+			{
+				return new FastAnimationState();
+			}
+			return _pool.pop();
+		}
+		
+		/** @private */
+		dragonBones_internal static function returnObject(animationState:FastAnimationState):void
+		{
+			animationState.dispose();
+			
+			if(_pool.indexOf(animationState) < 0)
+			{
+				_pool[_pool.length] = animationState;
+			}
+		}
+		
+		/** @private */
+		dragonBones_internal static function clear():void
+		{
+			var i:int = _pool.length;
+			while(i --)
+			{
+				_pool[i].clear();
+			}
+			_pool.length = 0;
+			
+			FastAnimationState.clear();
+		}
+		
+		/**
+		 * If auto genterate tween between keyframes.
+		 */
+		public var autoTween:Boolean;
+		
+		private var _armature:FastArmature;
+		
+		private var _bonetimelineStateList:Vector.<FastBoneTimelineState>;
+		private var _slotTimelineStateList:Vector.<FastSlotTimelineState>;
+		public var animationData:AnimationData;
+		
+		public var name:String;
+		private var _time:Number;//秒
+		private var _currentFrameIndex:int;
+		private var _currentFramePosition:int;
+		private var _currentFrameDuration:int;
+		
+		private var _currentPlayTimes:int;
+		private var _totalTime:int;//毫秒
+		private var _currentTime:int;
+		private var _lastTime:int;
+		
+		private var _isComplete:Boolean;
+		private var _isPlaying:Boolean;
+		private var _timeScale:Number;
+		private var _playTimes:int;
+		
+		public function FastAnimationState()
+		{
+			_bonetimelineStateList = new Vector.<FastBoneTimelineState>;
+			_slotTimelineStateList = new Vector.<FastSlotTimelineState>;
+		}
+		
+		public function dispose():void
+		{
+			var i:int = _bonetimelineStateList.length;
+			while(i --)
+			{
+				FastBoneTimelineState.returnObject(_bonetimelineStateList[i]);
+			}
+			_bonetimelineStateList.length = 0;
+			
+			i = _slotTimelineStateList.length;
+			while(i --)
+			{
+				FastSlotTimelineState.returnObject(_slotTimelineStateList[i]);
+			}
+			_slotTimelineStateList.length = 0;
+			
+			_armature = null;
+		}
+		
+		/** @private */
+		dragonBones_internal function fadeIn(armature:FastArmature, aniData:AnimationData, playTimes:Number, timeScale:Number):void
+		{
+			_armature = armature;
+			animationData = aniData;
+			
+			name = animationData.name;
+			_totalTime = animationData.duration;
+			autoTween = aniData.autoTween;
+			setTimeScale(timeScale);
+			setPlayTimes(playTimes);
+			
+			//reset
+			_isComplete = false;
+			_currentFrameIndex = -1;
+			_currentPlayTimes = -1;
+			if(Math.round(_totalTime * animationData.frameRate * 0.001) < 2)
+			{
+				//以后改成stop=true;
+				_currentTime = _totalTime;
+			}
+			else
+			{
+				_currentTime = -1;
+			}
+			_time = 0;
+			
+			
+			//default
+			_isPlaying = true;
+			
+			updateTimelineStates();
+			return;
+		}
+		
+		/**
+		 * @private
+		 * Update timeline state based on mixing transforms and clip.
+		 */
+		dragonBones_internal function updateTimelineStates():void
+		{	
+			var timelineName:String;
+			for each(var boneTimeline:TransformTimeline in animationData.timelineList)
+			{
+				timelineName = boneTimeline.name;
+				var bone:FastBone = _armature.getBone(timelineName);
+				if(bone)
+				{
+					var boneTimelineState:FastBoneTimelineState = FastBoneTimelineState.borrowObject();
+					boneTimelineState.fadeIn(bone, this, boneTimeline);
+					_bonetimelineStateList.push(boneTimelineState);
+				}
+			}
+			
+			for each(var slotTimeline:SlotTimeline in animationData.slotTimelineList)
+			{
+				timelineName = slotTimeline.name;
+				var slot:FastSlot = _armature.getSlot(timelineName);
+				if(slot && slot.displayList.length > 0)
+				{
+					var slotTimelineState:FastSlotTimelineState = FastSlotTimelineState.borrowObject();
+					slotTimelineState.fadeIn(slot, this, slotTimeline);
+					_slotTimelineStateList.push(slotTimelineState);
+				}
+			}
+		}
+		
+		/** @private */
+		dragonBones_internal function advanceTime(passedTime:Number):void
+		{
+			advanceTimelinesTime(passedTime * _timeScale);
+		}
+		
+		private function advanceTimelinesTime(passedTime:Number):void
+		{
+			_time += passedTime;
+			
+			
+			//计算是否已经播放完成isThisComplete
+
+			var startFlg:Boolean = false;
+			var completeFlg:Boolean = false;
+			var loopCompleteFlg:Boolean = false;
+			var isThisComplete:Boolean = false;
+			var currentPlayTimes:int = 0;
+			var currentTime:int = _time * 1000;
+			if(_playTimes == 0)//无限循环
+			{
+				isThisComplete = false;
+				currentPlayTimes = Math.ceil(Math.abs(currentTime) / _totalTime) || 1;
+				currentTime -= int(currentTime / _totalTime) * _totalTime;
+				
+				if(currentTime < 0)
+				{
+					currentTime += _totalTime;
+				}
+			}
+			else
+			{
+				var totalTimes:int = _playTimes * _totalTime;
+				if(currentTime >= totalTimes)
+				{
+					currentTime = totalTimes;
+					isThisComplete = true;
+				}
+				else if(currentTime <= -totalTimes)
+				{
+					currentTime = -totalTimes;
+					isThisComplete = true;
+				}
+				else
+				{
+					isThisComplete = false;
+				}
+				
+				if(currentTime < 0)
+				{
+					currentTime += totalTimes;
+				}
+				
+				currentPlayTimes = Math.ceil(currentTime / _totalTime) || 1;
+				
+				currentTime -= int(currentTime / _totalTime) * _totalTime;
+				
+				if(isThisComplete)
+				{
+					currentTime = _totalTime;
+				}
+			}
+			
+			_isComplete = isThisComplete;
+			var progress:Number = _time * 1000 / _totalTime;
+			for each(var timeline:FastBoneTimelineState in _bonetimelineStateList)
+			{
+				timeline.update(progress);
+				_isComplete = timeline._isComplete && _isComplete;
+			}
+			//update slotTimelie
+			for each(var slotTimeline:FastSlotTimelineState in _slotTimelineStateList)
+			{
+				slotTimeline.update(progress);
+				_isComplete = slotTimeline._isComplete && _isComplete;
+			}
+			
+			//update main timeline
+			if(_currentTime != currentTime)
+			{
+				if(_currentPlayTimes != currentPlayTimes)    //check loop complete
+				{
+					if(_currentPlayTimes > 0 && currentPlayTimes > 1)
+					{
+						loopCompleteFlg = true;
+					}
+					_currentPlayTimes = currentPlayTimes;
+				}
+				
+				if(_currentTime < 0)    //check start
+				{
+					startFlg = true;
+				}
+				
+				if(_isComplete)    //check complete
+				{
+					completeFlg = true;
+				}
+				_lastTime = _currentTime;
+				_currentTime = currentTime;
+				updateMainTimeline(isThisComplete);
+			}
+			
+			//抛事件
+			var event:AnimationEvent;
+			if(startFlg)
+			{
+				if(_armature.hasEventListener(AnimationEvent.START))
+				{
+					event = new AnimationEvent(AnimationEvent.START);
+					event.animationState = this;
+					_armature._eventList.push(event);
+				}
+			}
+			if(completeFlg)
+			{
+				if(_armature.hasEventListener(AnimationEvent.COMPLETE))
+				{
+					event = new AnimationEvent(AnimationEvent.COMPLETE);
+					event.animationState = this;
+					_armature._eventList.push(event);
+				}
+			}
+			else if(loopCompleteFlg)
+			{
+				if(_armature.hasEventListener(AnimationEvent.LOOP_COMPLETE))
+				{
+					event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
+					event.animationState = this;
+					_armature._eventList.push(event);
+				}
+			}
+		}
+		
+		private function updateMainTimeline(isThisComplete:Boolean):void
+		{
+			var frameList:Vector.<Frame> = animationData.frameList;
+			if(frameList.length > 0)
+			{
+				var prevFrame:Frame;
+				var currentFrame:Frame;
+				for (var i:int = 0, l:int = animationData.frameList.length; i < l; ++i)
+				{
+					if(_currentFrameIndex < 0)
+					{
+						_currentFrameIndex = 0;
+					}
+					else if(_currentTime < _currentFramePosition || _currentTime >= _currentFramePosition + _currentFrameDuration || _currentTime < _lastTime)
+					{
+						_lastTime = _currentTime;
+						_currentFrameIndex ++;
+						if(_currentFrameIndex >= frameList.length)
+						{
+							if(isThisComplete)
+							{
+								_currentFrameIndex --;
+								break;
+							}
+							else
+							{
+								_currentFrameIndex = 0;
+							}
+						}
+					}
+					else
+					{
+						break;
+					}
+					currentFrame = frameList[_currentFrameIndex];
+					
+					if(prevFrame)
+					{
+						_armature.arriveAtFrame(prevFrame, this);
+					}
+					
+					_currentFrameDuration = currentFrame.duration;
+					_currentFramePosition = currentFrame.position;
+					prevFrame = currentFrame;
+				}
+				
+				if(currentFrame)
+				{
+					_armature.arriveAtFrame(currentFrame, this);
+				}
+			}
+		}
+		
+		private function setTimeScale(value:Number):void
+		{
+			if(isNaN(value) || value == Infinity)
+			{
+				value = 1;
+			}
+			_timeScale = value;
+			return;
+		}
+		
+		private function setPlayTimes(value:int):void
+		{
+			//如果动画只有一帧  播放一次就可以
+			if(Math.round(_totalTime * 0.001 * animationData.frameRate) < 2)
+			{
+				_playTimes = value < 0?-1:1;
+			}
+			else
+			{
+				_playTimes = value < 0?-value:value;
+			}
+			return;
+		}
+		
+		/**
+		 * playTimes Play times(0:loop forever, 1~+∞:play times, -1~-∞:will fade animation after play complete).
+		 */
+		public function get playTimes():int
+		{
+			return _playTimes;
+		}
+		
+		/**
+		 * Current animation played times
+		 */
+		public function get currentPlayTimes():int
+		{
+			return _currentPlayTimes < 0 ? 0 : _currentPlayTimes;
+		}
+		
+		/**
+		 * Is animation complete.
+		 */
+		public function get isComplete():Boolean
+		{
+			return _isComplete; 
+		}
+		
+		/**
+		 * Is animation playing.
+		 */
+		public function get isPlaying():Boolean
+		{
+			return (_isPlaying && !_isComplete);
+		}
+		
+		/**
+		 * The length of the animation clip in seconds.
+		 */
+		public function get totalTime():Number
+		{
+			return _totalTime * 0.001;
+		}
+		
+		/**
+		 * The current time of the animation.
+		 */
+		public function get currentTime():Number
+		{
+			return _currentTime < 0 ? 0 : _currentTime * 0.001;
+		}
+	}
+}
