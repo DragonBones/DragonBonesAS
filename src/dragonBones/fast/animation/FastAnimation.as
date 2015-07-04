@@ -15,9 +15,7 @@ package dragonBones.fast.animation
 		public var animationState:FastAnimationState = new FastAnimationState();
 		
 		private var _armature:FastArmature;
-		private var _animationList:Vector.<String>;
-//		private var _animationStateList:Vector.<AnimationState>;
-		
+		public var animationList:Vector.<String>;
 		
 		private var _animationDataList:Vector.<AnimationData>;
 		private var _animationDataObj:Object;
@@ -27,9 +25,8 @@ package dragonBones.fast.animation
 		{
 			_armature = armature;
 
-			_animationList = new Vector.<String>;
+			animationList = new Vector.<String>;
 			_animationDataObj = {};
-//			_animationStateList = new Vector.<AnimationState>;
 
 			_isPlaying = false;
 		}
@@ -51,7 +48,7 @@ package dragonBones.fast.animation
 			
 			_armature = null;
 			_animationDataList = null;
-			_animationList = null;
+			animationList = null;
 			animationState = null;
 		}
 		
@@ -158,10 +155,10 @@ package dragonBones.fast.animation
 		public function set animationDataList(value:Vector.<AnimationData>):void
 		{
 			_animationDataList = value;
-			_animationList.length = 0;
+			animationList.length = 0;
 			for each(var animationData:AnimationData in _animationDataList)
 			{
-				_animationList.push(animationData.name);
+				animationList.push(animationData.name);
 				_animationDataObj[animationData.name] = animationData;
 			}
 		}

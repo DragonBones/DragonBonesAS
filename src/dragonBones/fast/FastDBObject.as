@@ -63,17 +63,6 @@ package dragonBones.fast
 		}
 		
 		/** @private */
-		protected var _offset:DBTransform;
-		/**
-		 * This DBObject instance offset transform instance (For manually control).
-		 * @see dragonBones.objects.DBTransform
-		 */
-		public function get offset():DBTransform
-		{
-			return _offset;
-		}
-		
-		/** @private */
 		protected var _visible:Boolean;
 		public function get visible():Boolean
 		{
@@ -120,8 +109,6 @@ package dragonBones.fast
 			
 			_global = new DBTransform();
 			_origin = new DBTransform();
-			_offset = new DBTransform();
-			_offset.scaleX = _offset.scaleY = 1;
 			
 			_visible = true;
 			
@@ -145,7 +132,6 @@ package dragonBones.fast
 			_globalTransformMatrix = null;
 			_global = null;
 			_origin = null;
-			_offset = null;
 			
 			_armature = null;
 			_parent = null;

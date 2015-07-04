@@ -160,14 +160,10 @@ package dragonBones.fast
 			if(parentName)
 			{
 				parentBone = getBone(parentName);
-				if (!parentBone)
-				{
-					throw new ArgumentError();
-				}
 			}
 			bone.setArmature(this);
 			bone.setParent(parentBone);
-			boneList.push(bone);
+			boneList.unshift(bone);
 			_boneDic[bone.name] = bone;
 		}
 		

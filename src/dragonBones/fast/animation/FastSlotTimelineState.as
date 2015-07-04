@@ -77,8 +77,6 @@ package dragonBones.fast.animation
 		private var _tweenEasing:Number;
 		private var _tweenColor:Boolean;
 		
-		private var _rawAnimationScale:Number;
-		
 		//-1: frameLength>1, 0:frameLength==0, 1:frameLength==1
 		private var _updateMode:int;
 		
@@ -121,7 +119,6 @@ package dragonBones.fast.animation
 			name = timelineData.name;
 			
 			_totalTime = _timelineData.duration;
-			_rawAnimationScale = _animationState.animationData.scale;
 			
 			_isComplete = false;
 			_blendEnabled = false;

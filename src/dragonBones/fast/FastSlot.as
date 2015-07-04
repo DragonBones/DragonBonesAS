@@ -141,12 +141,12 @@ package dragonBones.fast
 		
 		override protected function calculateRelativeParentTransform():void
 		{
-			_global.scaleX = this._origin.scaleX * this._offset.scaleX;
-			_global.scaleY = this._origin.scaleY * this._offset.scaleY;
-			_global.skewX = this._origin.skewX + this._offset.skewX;
-			_global.skewY = this._origin.skewY + this._offset.skewY;
-			_global.x = this._origin.x + this._offset.x + this._parent._tweenPivot.x;
-			_global.y = this._origin.y + this._offset.y + this._parent._tweenPivot.y;
+			_global.scaleX = this._origin.scaleX;
+			_global.scaleY = this._origin.scaleY;
+			_global.skewX = this._origin.skewX;
+			_global.skewY = this._origin.skewY;
+			_global.x = this._origin.x + this._parent._tweenPivot.x;
+			_global.y = this._origin.y + this._parent._tweenPivot.y;
 		}
 		
 		private function updateChildArmatureAnimation():void

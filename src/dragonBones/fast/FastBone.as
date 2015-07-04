@@ -73,12 +73,17 @@ package dragonBones.fast
 		
 		override protected function calculateRelativeParentTransform():void
 		{
-			_global.scaleX = this._origin.scaleX * _tween.scaleX * this._offset.scaleX;
-			_global.scaleY = this._origin.scaleY * _tween.scaleY * this._offset.scaleY;
-			_global.skewX = this._origin.skewX + _tween.skewX + this._offset.skewX;
-			_global.skewY = this._origin.skewY + _tween.skewY + this._offset.skewY;
-			_global.x = this._origin.x + _tween.x + this._offset.x;
-			_global.y = this._origin.y + _tween.y + this._offset.y;
+			_global.scaleX = this._origin.scaleX * _tween.scaleX;
+			_global.scaleY = this._origin.scaleY * _tween.scaleY;
+			_global.skewX = this._origin.skewX + _tween.skewX;
+			_global.skewY = this._origin.skewY + _tween.skewY;
+			_global.x = this._origin.x + _tween.x;
+			_global.y = this._origin.y + _tween.y;
+			
+			if(name=="outerleg_foot")
+			{
+				trace(_global);
+			}
 		}
 		
 		/** @private */

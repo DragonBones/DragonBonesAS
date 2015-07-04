@@ -313,7 +313,7 @@ package dragonBones.fast.animation
 			var tweenEnabled:Boolean = false;
 			if(	nextFrameIndex == 0 &&( _animationState.playTimes &&
 										_animationState.currentPlayTimes >= _animationState.playTimes && 
-										((_currentFramePosition + _currentFrameDuration) / _totalTime + currentPlayTimes - _timelineData.offset) * _timelineData.scale > 0.999999
+										((_currentFramePosition + _currentFrameDuration) / _totalTime + currentPlayTimes - _timelineData.offset)* _timelineData.scale > 0.999999
 				))
 			{
 				_tweenEasing = NaN;
