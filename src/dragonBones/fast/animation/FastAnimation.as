@@ -64,33 +64,21 @@ package dragonBones.fast.animation
 				return;
 			}
 			_isPlaying = true;
+			fadeInTime = fadeInTime < 0?(animationData.fadeTime < 0?0.3:animationData.fadeTime):fadeInTime;
 			var durationScale:Number = animationData.scale < 0?1:animationData.scale;
 			playTimes = isNaN(playTimes)?animationData.playTimes:playTimes;
 			
 			//播放新动画
 			animationState.autoTween = true;
-			animationState.fadeIn(_armature, animationData, playTimes, 1 / durationScale);
-			var i:int;
-			if(!_armature.childArmatureList)
+			animationState.fadeIn(_armature, animationData, playTimes, 1 / durationScale, fadeInTime);
+			var i:int = _armature.slotHasChildArmatureList.length;
+			while(i--)
 			{
-				_armature.childArmatureList = new Vector.<FastArmature>();
-				i = _armature.slotList.length;
-				while(i--)
+				var slot:FastSlot = _armature.slotHasChildArmatureList[i];
+				var childArmature:FastArmature = slot.childArmature;
+				if(childArmature)
 				{
-					var slot:FastSlot = _armature.slotList[i];
-					if(slot.childArmature)
-					{
-						_armature.childArmatureList.push(slot.childArmature);
-						slot.childArmature.animation.gotoAndPlay(animationName);
-					}
-				}
-			}
-			else
-			{
-				i = _armature.childArmatureList.length;
-				while(i--)
-				{
-					_armature.childArmatureList[i].animation.gotoAndPlay(animationName);
+					childArmature.animation.gotoAndPlay(animationName);
 				}
 			}
 		}

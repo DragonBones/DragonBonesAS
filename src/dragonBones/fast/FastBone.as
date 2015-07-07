@@ -36,17 +36,15 @@ package dragonBones.fast
 		dragonBones_internal var _timelineState:FastBoneTimelineState;
 		
 		/** @private */
-		dragonBones_internal var _tween:DBTransform;
+//		dragonBones_internal var _tween:DBTransform;
 		/** @private */
-		dragonBones_internal var _tweenPivot:Point;
+//		dragonBones_internal var timelinePivot:Point;
 		/** @private */
 		dragonBones_internal var _needUpdate:int;
 		
 		public function FastBone()
 		{
 			super();
-			_tween = new DBTransform();
-			_tweenPivot = new Point();
 			_needUpdate = 2;
 		}
 		
@@ -58,8 +56,8 @@ package dragonBones.fast
 			super.dispose();
 			_timelineState = null;
 			
-			_tween = null;
-			_tweenPivot = null;
+//			_tween = null;
+//			timelinePivot = null;
 		}
 		
 	//动画
@@ -73,16 +71,10 @@ package dragonBones.fast
 		
 		override protected function calculateRelativeParentTransform():void
 		{
-			_global.scaleX = this._origin.scaleX * _tween.scaleX;
-			_global.scaleY = this._origin.scaleY * _tween.scaleY;
-			_global.skewX = this._origin.skewX + _tween.skewX;
-			_global.skewY = this._origin.skewY + _tween.skewY;
-			_global.x = this._origin.x + _tween.x;
-			_global.y = this._origin.y + _tween.y;
-			
-			if(name=="outerleg_foot")
+			_global.copy(this._origin);
+			if(_timelineState)
 			{
-				trace(_global);
+				_global.add(_timelineState._transform);
 			}
 		}
 		
@@ -97,12 +89,6 @@ package dragonBones.fast
 			else
 			{
 				return;
-			}
-
-			if(_timelineState)
-			{
-				_tween = _timelineState._transform;
-				_tweenPivot = _timelineState._pivot;
 			}
 			
 			//计算global

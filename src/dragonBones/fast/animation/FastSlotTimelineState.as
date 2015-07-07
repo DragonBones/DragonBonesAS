@@ -52,6 +52,8 @@ package dragonBones.fast.animation
 			_pool.length = 0;
 		}
 		
+		static public var originalColor:ColorTransform = new ColorTransform();
+		
 		public var name:String;
 		
 		/** @private */
@@ -76,6 +78,7 @@ package dragonBones.fast.animation
 		
 		private var _tweenEasing:Number;
 		private var _tweenColor:Boolean;
+		private var _colorChanged:Boolean;
 		
 		//-1: frameLength>1, 0:frameLength==0, 1:frameLength==1
 		private var _updateMode:int;
@@ -86,6 +89,7 @@ package dragonBones.fast.animation
 		
 		private var _timelineData:SlotTimeline;
 		private var _durationColor:ColorTransform;
+		
 		
 		
 		public function FastSlotTimelineState()
@@ -147,6 +151,11 @@ package dragonBones.fast.animation
 		}
 		
 	//动画进行中
+		
+		/** @private */
+		dragonBones_internal function updateFade(progress:Number):void
+		{
+		}
 		
 		/** @private */
 		dragonBones_internal function update(progress:Number):void
@@ -284,6 +293,8 @@ package dragonBones.fast.animation
 			}
 		}
 		
+		private static var color1:ColorTransform;
+		private static var color2:ColorTransform;
 		private function updateToNextFrame(currentPlayTimes:int):void
 		{
 			var nextFrameIndex:int = _currentFrameIndex + 1;
@@ -351,63 +362,34 @@ package dragonBones.fast.animation
 				}
 			}
 			
+			var color1:ColorTransform;
+			var color2:ColorTransform;
+			
 			if(tweenEnabled)
 			{
-				if(currentFrame.color && nextFrame.color)
+				if(currentFrame.color || nextFrame.color)
 				{
-					_durationColor.alphaOffset = nextFrame.color.alphaOffset - currentFrame.color.alphaOffset;
-					_durationColor.redOffset = nextFrame.color.redOffset - currentFrame.color.redOffset;
-					_durationColor.greenOffset = nextFrame.color.greenOffset - currentFrame.color.greenOffset;
-					_durationColor.blueOffset = nextFrame.color.blueOffset - currentFrame.color.blueOffset;
+					color1 = nextFrame.color || originalColor;
+					color2 = currentFrame.color ||originalColor;
 					
-					_durationColor.alphaMultiplier = nextFrame.color.alphaMultiplier - currentFrame.color.alphaMultiplier;
-					_durationColor.redMultiplier = nextFrame.color.redMultiplier - currentFrame.color.redMultiplier;
-					_durationColor.greenMultiplier = nextFrame.color.greenMultiplier - currentFrame.color.greenMultiplier;
-					_durationColor.blueMultiplier = nextFrame.color.blueMultiplier - currentFrame.color.blueMultiplier;
+					_durationColor.alphaOffset = color1.alphaOffset - color2.alphaOffset;
+					_durationColor.redOffset = color1.redOffset - color2.redOffset;
+					_durationColor.greenOffset = color1.greenOffset - color2.greenOffset;
+					_durationColor.blueOffset = color1.blueOffset - color2.blueOffset;
 					
-					if(
-						_durationColor.alphaOffset ||
-						_durationColor.redOffset ||
-						_durationColor.greenOffset ||
-						_durationColor.blueOffset ||
-						_durationColor.alphaMultiplier ||
-						_durationColor.redMultiplier ||
-						_durationColor.greenMultiplier ||
-						_durationColor.blueMultiplier 
-					)
-					{
-						_tweenColor = true;
-					}
-					else
-					{
-						_tweenColor = false;
-					}
-				}
-				else if(currentFrame.color)
-				{
-					_tweenColor = true;
-					_durationColor.alphaOffset = -currentFrame.color.alphaOffset;
-					_durationColor.redOffset = -currentFrame.color.redOffset;
-					_durationColor.greenOffset = -currentFrame.color.greenOffset;
-					_durationColor.blueOffset = -currentFrame.color.blueOffset;
+					_durationColor.alphaMultiplier = color1.alphaMultiplier - color2.alphaMultiplier;
+					_durationColor.redMultiplier = color1.redMultiplier - color2.redMultiplier;
+					_durationColor.greenMultiplier = color1.greenMultiplier - color2.greenMultiplier;
+					_durationColor.blueMultiplier = color1.blueMultiplier - color2.blueMultiplier;
 					
-					_durationColor.alphaMultiplier = 1 - currentFrame.color.alphaMultiplier;
-					_durationColor.redMultiplier = 1 - currentFrame.color.redMultiplier;
-					_durationColor.greenMultiplier = 1 - currentFrame.color.greenMultiplier;
-					_durationColor.blueMultiplier = 1 - currentFrame.color.blueMultiplier;
-				}
-				else if(nextFrame.color)
-				{
-					_tweenColor = true;
-					_durationColor.alphaOffset = nextFrame.color.alphaOffset;
-					_durationColor.redOffset = nextFrame.color.redOffset;
-					_durationColor.greenOffset = nextFrame.color.greenOffset;
-					_durationColor.blueOffset = nextFrame.color.blueOffset;
-					
-					_durationColor.alphaMultiplier = nextFrame.color.alphaMultiplier - 1;
-					_durationColor.redMultiplier = nextFrame.color.redMultiplier - 1;
-					_durationColor.greenMultiplier = nextFrame.color.greenMultiplier - 1;
-					_durationColor.blueMultiplier = nextFrame.color.blueMultiplier - 1;
+					_tweenColor = 	_durationColor.alphaOffset ||
+									_durationColor.redOffset ||
+									_durationColor.greenOffset ||
+									_durationColor.blueOffset ||
+									_durationColor.alphaMultiplier ||
+									_durationColor.redMultiplier ||
+									_durationColor.greenMultiplier ||
+									_durationColor.blueMultiplier;
 				}
 				else
 				{
@@ -421,25 +403,51 @@ package dragonBones.fast.animation
 			
 			if(!_tweenColor)
 			{
-				if(currentFrame.color)
-				{
-					_slot.updateDisplayColor(
-						currentFrame.color.alphaOffset, 
-						currentFrame.color.redOffset, 
-						currentFrame.color.greenOffset, 
-						currentFrame.color.blueOffset, 
-						currentFrame.color.alphaMultiplier, 
-						currentFrame.color.redMultiplier, 
-						currentFrame.color.greenMultiplier, 
-						currentFrame.color.blueMultiplier,
-						true
-					);
-				}
-				else if(_slot._isColorChanged)
-				{
-					_slot.updateDisplayColor(0, 0, 0, 0, 1, 1, 1, 1, false);
-				}
+				var targetColor:ColorTransform;
+				var colorChanged:Boolean;
 				
+				
+				if(currentFrame.colorChanged)
+				{
+					targetColor = currentFrame.color;
+					colorChanged = true;
+				}
+				else
+				{
+					targetColor = originalColor;
+					colorChanged = false;
+				}
+				if ((_slot._isColorChanged || colorChanged))
+				{
+					color1 = _slot._colorTransform;
+					color2 = targetColor;
+					
+					if(	color1.alphaOffset == color2.alphaOffset &&
+						color1.redOffset == color2.redOffset &&
+						color1.greenOffset == color2.greenOffset &&
+						color1.blueOffset == color2.blueOffset &&
+						color1.alphaMultiplier == color2.alphaMultiplier &&
+						color1.redMultiplier == color2.redMultiplier &&
+						color1.greenMultiplier == color2.greenMultiplier &&
+						color1.blueMultiplier == color2.blueMultiplier)
+					{
+						
+					}
+					else
+					{
+						_slot.updateDisplayColor(
+							targetColor.alphaOffset, 
+							targetColor.redOffset, 
+							targetColor.greenOffset, 
+							targetColor.blueOffset, 
+							targetColor.alphaMultiplier, 
+							targetColor.redMultiplier, 
+							targetColor.greenMultiplier, 
+							targetColor.blueMultiplier,
+							colorChanged
+						);
+					}
+				}
 			}
 		}
 		
@@ -497,37 +505,50 @@ package dragonBones.fast.animation
 			_blendEnabled = currentFrame.displayIndex >= 0;
 			if(_blendEnabled)
 			{
-				/**
-				 * <使用绝对数据>
-				 * 单帧的timeline，第一个关键帧的transform为0
-				 * timeline.originTransform = firstFrame.transform;
-				 * eachFrame.transform = eachFrame.transform - timeline.originTransform;
-				 * firstFrame.transform == 0;
-				 * 
-				 * <使用相对数据>
-				 * 使用相对数据时，timeline.originTransform = 0，第一个关键帧的transform有可能不为 0
-				 */
-				if(currentFrame.color)
+				var targetColor:ColorTransform;
+				var colorChanged:Boolean;
+				if(currentFrame.colorChanged)
 				{
-					_slot.updateDisplayColor(
-						currentFrame.color.alphaOffset, 
-						currentFrame.color.redOffset, 
-						currentFrame.color.greenOffset, 
-						currentFrame.color.blueOffset, 
-						currentFrame.color.alphaMultiplier, 
-						currentFrame.color.redMultiplier, 
-						currentFrame.color.greenMultiplier, 
-						currentFrame.color.blueMultiplier,
-						true
-					);
+					targetColor = currentFrame.color;
+					colorChanged = true;
 				}
-				else if(_slot._isColorChanged)
+				else
 				{
-					_slot.updateDisplayColor(0, 0, 0, 0, 1, 1, 1, 1, false);
+					targetColor = originalColor;
+					colorChanged = false;
+				}
+				if ((_slot._isColorChanged || colorChanged))
+				{
+					var color1:ColorTransform = _slot._colorTransform;
+					
+					if(	color1.alphaOffset == targetColor.alphaOffset &&
+						color1.redOffset == targetColor.redOffset &&
+						color1.greenOffset == targetColor.greenOffset &&
+						color1.blueOffset == targetColor.blueOffset &&
+						color1.alphaMultiplier == targetColor.alphaMultiplier &&
+						color1.redMultiplier == targetColor.redMultiplier &&
+						color1.greenMultiplier == targetColor.greenMultiplier &&
+						color1.blueMultiplier == targetColor.blueMultiplier)
+					{
+						
+					}
+					else
+					{
+						_slot.updateDisplayColor(
+							targetColor.alphaOffset, 
+							targetColor.redOffset, 
+							targetColor.greenOffset, 
+							targetColor.blueOffset, 
+							targetColor.alphaMultiplier, 
+							targetColor.redMultiplier, 
+							targetColor.greenMultiplier, 
+							targetColor.blueMultiplier,
+							colorChanged
+						);
+					}
 				}
 			}
 		}
-		
 		
 	}
 }

@@ -42,7 +42,7 @@ package dragonBones.fast
 		public var slotList:Vector.<FastSlot>;
 		protected var _slotDic:Object;
 		
-		public var childArmatureList:Vector.<FastArmature>;
+		public var slotHasChildArmatureList:Vector.<FastSlot>;
 		
 		dragonBones_internal var __dragonBonesData:DragonBonesData;
 		dragonBones_internal var _armatureData:ArmatureData;
@@ -64,6 +64,7 @@ package dragonBones.fast
 			_boneDic = {};
 			slotList = new Vector.<FastSlot>;
 			_slotDic = {};
+			slotHasChildArmatureList = new Vector.<FastSlot>;
 			
 			_delayDispose = false;
 			_lockDispose = false;
@@ -118,19 +119,26 @@ package dragonBones.fast
 			_lockDispose = true;
 			_animation.advanceTime(passedTime);
 			
+			var bone:FastBone;
+			var slot:FastSlot;
 			var i:int = boneList.length;
 			while(i --)
 			{
-				var bone:FastBone = boneList[i];
-//				bone.update(isFading);
+				bone = boneList[i];
 				bone.update();
 			}
 			
 			i = slotList.length;
 			while(i --)
 			{
-				var slot:FastSlot = slotList[i];
+				slot = slotList[i];
 				slot.update();
+			}
+			
+			i = slotHasChildArmatureList.length;
+			while(i--)
+			{
+				slot = slotList[i];
 				if(slot._isShowDisplay)
 				{
 					var childArmature:FastArmature = slot.childArmature;
@@ -183,6 +191,11 @@ package dragonBones.fast
 				slot.addDisplayToContainer(display);
 				slotList.push(slot);
 				_slotDic[slot.name] = slot;
+				if(slot.hasChildArmature)
+				{
+					slotHasChildArmatureList.push(slot);
+				}
+				
 			}
 			else
 			{

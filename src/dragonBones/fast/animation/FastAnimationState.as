@@ -1,6 +1,5 @@
 package dragonBones.fast.animation
 {
-	import dragonBones.animation.AnimationState;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.AnimationEvent;
 	import dragonBones.fast.FastArmature;
@@ -58,7 +57,7 @@ package dragonBones.fast.animation
 		
 		private var _armature:FastArmature;
 		
-		private var _bonetimelineStateList:Vector.<FastBoneTimelineState>;
+		private var _boneTimelineStateList:Vector.<FastBoneTimelineState>;
 		private var _slotTimelineStateList:Vector.<FastSlotTimelineState>;
 		public var animationData:AnimationData;
 		
@@ -78,20 +77,25 @@ package dragonBones.fast.animation
 		private var _timeScale:Number;
 		private var _playTimes:int;
 		
+		private var _fading:Boolean = false;
+		private var _listenCompleteEvent:Boolean;
+		private var _listenLoopCompleteEvent:Boolean;
+		
+		dragonBones_internal var _fadeTotalTime:Number;
 		public function FastAnimationState()
 		{
-			_bonetimelineStateList = new Vector.<FastBoneTimelineState>;
+			_boneTimelineStateList = new Vector.<FastBoneTimelineState>;
 			_slotTimelineStateList = new Vector.<FastSlotTimelineState>;
 		}
 		
 		public function dispose():void
 		{
-			var i:int = _bonetimelineStateList.length;
+			var i:int = _boneTimelineStateList.length;
 			while(i --)
 			{
-				FastBoneTimelineState.returnObject(_bonetimelineStateList[i]);
+				FastBoneTimelineState.returnObject(_boneTimelineStateList[i]);
 			}
-			_bonetimelineStateList.length = 0;
+			_boneTimelineStateList.length = 0;
 			
 			i = _slotTimelineStateList.length;
 			while(i --)
@@ -104,7 +108,7 @@ package dragonBones.fast.animation
 		}
 		
 		/** @private */
-		dragonBones_internal function fadeIn(armature:FastArmature, aniData:AnimationData, playTimes:Number, timeScale:Number):void
+		dragonBones_internal function fadeIn(armature:FastArmature, aniData:AnimationData, playTimes:Number, timeScale:Number, fadeTotalTime:Number):void
 		{
 			_armature = armature;
 			animationData = aniData;
@@ -121,7 +125,6 @@ package dragonBones.fast.animation
 			_currentPlayTimes = -1;
 			if(Math.round(_totalTime * animationData.frameRate * 0.001) < 2)
 			{
-				//以后改成stop=true;
 				_currentTime = _totalTime;
 			}
 			else
@@ -130,9 +133,12 @@ package dragonBones.fast.animation
 			}
 			_time = 0;
 			
-			
+			_fadeTotalTime = fadeTotalTime * _timeScale;
+			_fading = _fadeTotalTime>0;
 			//default
 			_isPlaying = true;
+			
+			_listenCompleteEvent = _armature.hasEventListener(AnimationEvent.COMPLETE);
 			
 			updateTimelineStates();
 			return;
@@ -153,7 +159,7 @@ package dragonBones.fast.animation
 				{
 					var boneTimelineState:FastBoneTimelineState = FastBoneTimelineState.borrowObject();
 					boneTimelineState.fadeIn(bone, this, boneTimeline);
-					_bonetimelineStateList.push(boneTimelineState);
+					_boneTimelineStateList.push(boneTimelineState);
 				}
 			}
 			
@@ -173,78 +179,108 @@ package dragonBones.fast.animation
 		/** @private */
 		dragonBones_internal function advanceTime(passedTime:Number):void
 		{
-			advanceTimelinesTime(passedTime * _timeScale);
+			passedTime *= _timeScale;
+			if(_fading)
+			{
+				//计算progress
+				_time += passedTime;
+				var progress:Number = _time / _fadeTotalTime;
+				if(progress >= 1)
+				{
+					progress = 1;
+					_time = 0;
+					_fading = false;
+				}
+				//update boneTimelie
+				for each(var timeline:FastBoneTimelineState in _boneTimelineStateList)
+				{
+					timeline.updateFade(progress);
+				}
+				//update slotTimelie
+				for each(var slotTimeline:FastSlotTimelineState in _slotTimelineStateList)
+				{
+					slotTimeline.updateFade(progress);
+				}
+			}
+			else
+			{
+				advanceTimelinesTime(passedTime);
+			}
 		}
 		
 		private function advanceTimelinesTime(passedTime:Number):void
 		{
 			_time += passedTime;
 			
-			
 			//计算是否已经播放完成isThisComplete
 
-			var startFlg:Boolean = false;
-			var completeFlg:Boolean = false;
 			var loopCompleteFlg:Boolean = false;
 			var isThisComplete:Boolean = false;
 			var currentPlayTimes:int = 0;
 			var currentTime:int = _time * 1000;
-			if(_playTimes == 0)//无限循环
+			var progress:Number;
+			if( _playTimes == 0 || //无限循环
+				currentTime < _playTimes * _totalTime) //没有播放完毕
 			{
 				isThisComplete = false;
-				currentPlayTimes = Math.ceil(Math.abs(currentTime) / _totalTime) || 1;
-				currentTime -= int(currentTime / _totalTime) * _totalTime;
 				
-				if(currentTime < 0)
+				progress = currentTime / _totalTime;
+				currentPlayTimes = Math.ceil(progress) || 1;
+				progress -= Math.floor(progress);
+				currentTime %= _totalTime;
+			}
+			else
+			{
+				currentPlayTimes = _playTimes;
+				currentTime = _totalTime;
+				isThisComplete = true;
+				progress = 1;
+			}
+			
+			_isComplete = isThisComplete;
+
+			
+			var i:int = _boneTimelineStateList.length;
+			var boneTimeline:FastBoneTimelineState;
+			var slotTimeline:FastSlotTimelineState;
+			
+			if(_isComplete) // 性能优化
+			{
+				//update boneTimelie
+				while(i--)
 				{
-					currentTime += _totalTime;
+					boneTimeline = _boneTimelineStateList[i];
+					boneTimeline.update(progress);
+					_isComplete = boneTimeline._isComplete && _isComplete;
+				}
+				
+				i = _slotTimelineStateList.length;
+				
+				//update slotTimelie
+				while(i--)
+				{
+					slotTimeline = _slotTimelineStateList[i];
+					slotTimeline.update(progress);
+					_isComplete = slotTimeline._isComplete && _isComplete;
 				}
 			}
 			else
 			{
-				var totalTimes:int = _playTimes * _totalTime;
-				if(currentTime >= totalTimes)
+				//update boneTimelie
+				while(i--)
 				{
-					currentTime = totalTimes;
-					isThisComplete = true;
-				}
-				else if(currentTime <= -totalTimes)
-				{
-					currentTime = -totalTimes;
-					isThisComplete = true;
-				}
-				else
-				{
-					isThisComplete = false;
+					boneTimeline = _boneTimelineStateList[i];
+					boneTimeline.update(progress);
 				}
 				
-				if(currentTime < 0)
+				i = _slotTimelineStateList.length;
+				
+				//update slotTimelie
+				while(i--)
 				{
-					currentTime += totalTimes;
+					slotTimeline = _slotTimelineStateList[i];
+					slotTimeline.update(progress);
 				}
-				
-				currentPlayTimes = Math.ceil(currentTime / _totalTime) || 1;
-				
-				currentTime -= int(currentTime / _totalTime) * _totalTime;
-				
-				if(isThisComplete)
-				{
-					currentTime = _totalTime;
-				}
-			}
-			
-			_isComplete = isThisComplete;
-			var progress:Number = _time * 1000 / _totalTime;
-			for each(var timeline:FastBoneTimelineState in _bonetimelineStateList)
-			{
-				timeline.update(progress);
-				_isComplete = timeline._isComplete && _isComplete;
-			}
-			//update slotTimelie
-			for each(var slotTimeline:FastSlotTimelineState in _slotTimelineStateList)
-			{
-				slotTimeline.update(progress);
-				_isComplete = slotTimeline._isComplete && _isComplete;
 			}
 			
 			//update main timeline
@@ -259,15 +295,6 @@ package dragonBones.fast.animation
 					_currentPlayTimes = currentPlayTimes;
 				}
 				
-				if(_currentTime < 0)    //check start
-				{
-					startFlg = true;
-				}
-				
-				if(_isComplete)    //check complete
-				{
-					completeFlg = true;
-				}
 				_lastTime = _currentTime;
 				_currentTime = currentTime;
 				updateMainTimeline(isThisComplete);
@@ -275,32 +302,17 @@ package dragonBones.fast.animation
 			
 			//抛事件
 			var event:AnimationEvent;
-			if(startFlg)
+			if(_listenCompleteEvent && _isComplete)
 			{
-				if(_armature.hasEventListener(AnimationEvent.START))
-				{
-					event = new AnimationEvent(AnimationEvent.START);
-					event.animationState = this;
-					_armature._eventList.push(event);
-				}
+				event = new AnimationEvent(AnimationEvent.COMPLETE);
+				event.animationState = this;
+				_armature._eventList.push(event);
 			}
-			if(completeFlg)
+			else if(_listenLoopCompleteEvent && loopCompleteFlg)
 			{
-				if(_armature.hasEventListener(AnimationEvent.COMPLETE))
-				{
-					event = new AnimationEvent(AnimationEvent.COMPLETE);
-					event.animationState = this;
-					_armature._eventList.push(event);
-				}
-			}
-			else if(loopCompleteFlg)
-			{
-				if(_armature.hasEventListener(AnimationEvent.LOOP_COMPLETE))
-				{
-					event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
-					event.animationState = this;
-					_armature._eventList.push(event);
-				}
+				event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
+				event.animationState = this;
+				_armature._eventList.push(event);
 			}
 		}
 		

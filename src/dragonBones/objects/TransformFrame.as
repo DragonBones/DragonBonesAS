@@ -24,7 +24,7 @@
 			
 			tweenEasing = 10;
 			tweenRotate = 0;
-			tweenScale = true;
+//			tweenScale = true;
 //			displayIndex = 0;
 			visible = true;
 			

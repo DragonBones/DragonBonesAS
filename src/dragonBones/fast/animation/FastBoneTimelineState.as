@@ -58,28 +58,26 @@ package dragonBones.fast.animation
 		
 		private var _bone:FastBone;
 		private var _timelineData:TransformTimeline;
-		private var _originTransform:DBTransform;
-		private var _originPivot:Point;
 		private var _durationTransform:DBTransform;
-		private var _durationPivot:Point;
 		
 		private var _tweenTransform:Boolean;
-		private var _tweenScale:Boolean;
 		private var _tweenEasing:Number;
 		
 		private var _updateMode:int;
-		
+		private var _transformToFadein:DBTransform;
 		/** @private */
 		dragonBones_internal var _animationState:FastAnimationState;
 		/** @private */
 		dragonBones_internal var _isComplete:Boolean;
 		/** @private */
 		dragonBones_internal var _transform:DBTransform;
-		/** @private */
-		dragonBones_internal var _pivot:Point;
+
 		
 		public function FastBoneTimelineState()
 		{
+			_transform = new DBTransform();
+			_durationTransform = new DBTransform();
+			_transformToFadein = new DBTransform();
 		}
 		
 		private function clear():void
@@ -91,8 +89,6 @@ package dragonBones.fast.animation
 			}
 			_animationState = null;
 			_timelineData = null;
-			_originTransform = null;
-			_originPivot = null;
 		}
 		
 		/** @private */
@@ -101,8 +97,6 @@ package dragonBones.fast.animation
 			_bone = bone;
 			_animationState = animationState;
 			_timelineData = timelineData;
-			_originTransform = _timelineData.originTransform;
-			_originPivot = _timelineData.originPivot;
 			
 			name = timelineData.name;
 			
@@ -111,15 +105,9 @@ package dragonBones.fast.animation
 			_isComplete = false;
 
 			_tweenTransform = false;
-			_tweenScale = false;
 			_currentFrameIndex = -1;
 			_currentTime = -1;
 			_tweenEasing = NaN;
-			
-			_transform = new DBTransform();
-			_durationTransform = new DBTransform();
-			_pivot = new Point();
-			_durationPivot = new Point();
 
 			switch(_timelineData.frameList.length)
 			{
@@ -135,7 +123,41 @@ package dragonBones.fast.animation
 					_updateMode = -1;
 					break;
 			}
+			
+
+			if(animationState._fadeTotalTime>0)
+			{
+				var pivotToFadein:Point;
+				if(_bone._timelineState)
+				{
+					_transformToFadein.copy(_bone._timelineState._transform);
+					
+				}
+				else
+				{
+					_transformToFadein = new DBTransform();
+//					_pivotToFadein = new Point();
+				}
+				var firstFrame:TransformFrame = _timelineData.frameList[0] as TransformFrame;
+				_durationTransform.copy(firstFrame.transform);
+				_durationTransform.minus(this._transformToFadein);
+//				_durationPivot.x = firstFrame.pivot.x - _pivotToFadein.x;
+//				_durationPivot.y = firstFrame.pivot.y - _pivotToFadein.y;
+			}
+			
 			_bone._timelineState = this;
+		}
+		
+		/** @private */
+		dragonBones_internal function updateFade(progress:Number):void
+		{
+			_transform.x = _transformToFadein.x + _durationTransform.x * progress;
+			_transform.y = _transformToFadein.y + _durationTransform.y * progress;
+			_transform.scaleX = _transformToFadein.scaleX * (1 + (_durationTransform.scaleX -1 ) * progress);
+			_transform.scaleY = _transformToFadein.scaleX * (1 + (_durationTransform.scaleY -1 ) * progress);
+			_transform.rotation = _transformToFadein.rotation + _durationTransform.rotation * progress;
+			
+			_bone.invalidUpdate();
 		}
 		
 		/** @private */
@@ -160,32 +182,8 @@ package dragonBones.fast.animation
 			_isComplete = true;
 			_tweenEasing = NaN;
 			_tweenTransform = false;
-			_tweenScale = false;
-			//_tweenColor = false;
-			
-//			if(currentFrame.displayIndex >=0)
-//			{
-//				
-//			}
-			/**
-			 * <使用绝对数据>
-			 * 单帧的timeline，第一个关键帧的transform为0
-			 * timeline.originTransform = firstFrame.transform;
-			 * eachFrame.transform = eachFrame.transform - timeline.originTransform;
-			 * firstFrame.transform == 0;
-			 * 
-			 * <使用相对数据>
-			 * 使用相对数据时，timeline.originTransform = 0，第一个关键帧的transform有可能不为 0
-			 */
-			_transform.x = _originTransform.x + currentFrame.transform.x;
-			_transform.y = _originTransform.y + currentFrame.transform.y;
-			_transform.skewX = _originTransform.skewX + currentFrame.transform.skewX;
-			_transform.skewY = _originTransform.skewY + currentFrame.transform.skewY;
-			_transform.scaleX = _originTransform.scaleX * currentFrame.transform.scaleX;
-			_transform.scaleY = _originTransform.scaleY * currentFrame.transform.scaleY;
-			
-			_pivot.x = _originPivot.x + currentFrame.pivot.x;
-			_pivot.y = _originPivot.y + currentFrame.pivot.y;
+
+			_transform.copy(currentFrame.transform);
 			
 			_bone.invalidUpdate();
 		}
@@ -296,7 +294,12 @@ package dragonBones.fast.animation
 					_bone.arriveAtFrame(currentFrame, _animationState);
 					updateToNextFrame(currentPlayTimes);
 				}
-				updateTween();
+				
+				if(_tweenTransform)
+				{
+					updateTween();
+				}
+				
 			}
 
 		}
@@ -319,11 +322,6 @@ package dragonBones.fast.animation
 				_tweenEasing = NaN;
 				tweenEnabled = false;
 			}
-//			else if(currentFrame.displayIndex < 0 || nextFrame.displayIndex < 0)
-//			{
-//				_tweenEasing = NaN;
-//				tweenEnabled = false;
-//			}
 			else if(_animationState.autoTween)
 			{
 				_tweenEasing = _animationState.animationData.tweenEasing;
@@ -382,64 +380,33 @@ package dragonBones.fast.animation
 					_durationTransform.skewY = TransformUtil.formatRadian(_durationTransform.skewY);
 				}
 				
-				_durationPivot.x = nextFrame.pivot.x - currentFrame.pivot.x;
-				_durationPivot.y = nextFrame.pivot.y - currentFrame.pivot.y;
-				
 				if(
 					_durationTransform.x ||
 					_durationTransform.y ||
 					_durationTransform.skewX ||
 					_durationTransform.skewY ||
-					_durationTransform.scaleX ||
-					_durationTransform.scaleY ||
-					_durationPivot.x ||
-					_durationPivot.y
+					_durationTransform.scaleX != 1 ||
+					_durationTransform.scaleY != 1 //||
 				)
 				{
 					_tweenTransform = true;
-					_tweenScale = currentFrame.tweenScale;
 				}
 				else
 				{
 					_tweenTransform = false;
-					_tweenScale = false;
 				}
 				
 			}
 			else
 			{
 				_tweenTransform = false;
-				_tweenScale = false;
 			}
 			
 			if(!_tweenTransform)
 			{
-				_transform.x = _originTransform.x + currentFrame.transform.x;
-				_transform.y = _originTransform.y + currentFrame.transform.y;
-				_transform.skewX = _originTransform.skewX + currentFrame.transform.skewX;
-				_transform.skewY = _originTransform.skewY + currentFrame.transform.skewY;
-				_transform.scaleX = _originTransform.scaleX * currentFrame.transform.scaleX;
-				_transform.scaleY = _originTransform.scaleY * currentFrame.transform.scaleY;
-				
-				_pivot.x = _originPivot.x + currentFrame.pivot.x;
-				_pivot.y = _originPivot.y + currentFrame.pivot.y;
+				_transform.copy(currentFrame.transform);
 				
 				_bone.invalidUpdate();
-			}
-			else if(!_tweenScale)
-			{
-//				if(_animationState.additiveBlending)
-//				{
-//					_transform.scaleX = currentFrame.transform.scaleX;
-//					_transform.scaleY = currentFrame.transform.scaleY;
-//				}
-//				else
-//				{
-//					_transform.scaleX = _originTransform.scaleX * currentFrame.transform.scaleX;
-//					_transform.scaleY = _originTransform.scaleY * currentFrame.transform.scaleY;
-//				}
-				_transform.scaleX = _originTransform.scaleX * currentFrame.transform.scaleX;
-				_transform.scaleY = _originTransform.scaleY * currentFrame.transform.scaleY;
 			}
 		}
 		
@@ -452,45 +419,18 @@ package dragonBones.fast.animation
 			}
 			
 			var currentFrame:TransformFrame = _timelineData.frameList[_currentFrameIndex] as TransformFrame;
-			if(_tweenTransform)
-			{
-				var currentTransform:DBTransform = currentFrame.transform;
-				var currentPivot:Point = currentFrame.pivot;
-//				if(_animationState.additiveBlending)
-//				{
-//					//additive blending
-//					_transform.x = currentTransform.x + _durationTransform.x * progress;
-//					_transform.y = currentTransform.y + _durationTransform.y * progress;
-//					_transform.skewX = currentTransform.skewX + _durationTransform.skewX * progress;
-//					_transform.skewY = currentTransform.skewY + _durationTransform.skewY * progress;
-//					if(_tweenScale)
-//					{
-//						_transform.scaleX = currentTransform.scaleX + _durationTransform.scaleX * progress;
-//						_transform.scaleY = currentTransform.scaleY + _durationTransform.scaleY * progress;
-//					}
-//					
-//					_pivot.x = currentPivot.x + _durationPivot.x * progress;
-//					_pivot.y = currentPivot.y + _durationPivot.y * progress;
-//				}
-//				else
-//				{
-					//normal blending
-					_transform.x = _originTransform.x + currentTransform.x + _durationTransform.x * progress;
-					_transform.y = _originTransform.y + currentTransform.y + _durationTransform.y * progress;
-					_transform.skewX = _originTransform.skewX + currentTransform.skewX + _durationTransform.skewX * progress;
-					_transform.skewY = _originTransform.skewY + currentTransform.skewY + _durationTransform.skewY * progress;
-					if(_tweenScale)
-					{
-						_transform.scaleX = _originTransform.scaleX * currentTransform.scaleX + _durationTransform.scaleX * progress;
-						_transform.scaleY = _originTransform.scaleY * currentTransform.scaleY + _durationTransform.scaleY * progress;
-					}
-					
-					_pivot.x = _originPivot.x + currentPivot.x + _durationPivot.x * progress;
-					_pivot.y = _originPivot.y + currentPivot.y + _durationPivot.y * progress;
-//				}
-				
-				_bone.invalidUpdate();
-			}
+			
+			var currentTransform:DBTransform = currentFrame.transform;
+			var currentPivot:Point = currentFrame.pivot;
+			//normal blending
+			_transform.x = currentTransform.x + _durationTransform.x * progress;
+			_transform.y = currentTransform.y + _durationTransform.y * progress;
+			_transform.skewX = currentTransform.skewX + _durationTransform.skewX * progress;
+			_transform.skewY = currentTransform.skewY + _durationTransform.skewY * progress;
+			_transform.scaleX = currentTransform.scaleX + _durationTransform.scaleX * progress;
+			_transform.scaleY = currentTransform.scaleY + _durationTransform.scaleY * progress;
+
+			_bone.invalidUpdate();
 		}
 	}
 }

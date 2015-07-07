@@ -137,6 +137,7 @@ package dragonBones.fast
 			_parent = null;
 		}
 		
+		static private var tempOutputObj:Object = {};
 		protected function calculateParentTransform():Object
 		{
 			if(this.parent && (this.inheritTranslation || this.inheritRotation || this.inheritScale))
@@ -169,7 +170,9 @@ package dragonBones.fast
 					parentGlobalTransformMatrix = DBObject._tempParentGlobalTransformMatrix;
 					TransformUtil.transformToMatrix(parentGlobalTransform, parentGlobalTransformMatrix);
 				}
-				return {parentGlobalTransform:parentGlobalTransform, parentGlobalTransformMatrix:parentGlobalTransformMatrix};
+				tempOutputObj.parentGlobalTransform = parentGlobalTransform;
+				tempOutputObj.parentGlobalTransformMatrix = parentGlobalTransformMatrix;
+				return tempOutputObj;
 			}
 			return null;
 		}

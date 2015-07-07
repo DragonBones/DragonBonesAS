@@ -27,18 +27,17 @@ package dragonBones.fast
 		
 		protected var _displayList:Array;
 		protected var _currentDisplayIndex:int;
-		protected var _colorTransform:ColorTransform;
-
+		dragonBones_internal var _colorTransform:ColorTransform;
+		dragonBones_internal var _isColorChanged:Boolean;
 		protected var _currentDisplay:Object;
 		dragonBones_internal var _isShowDisplay:Boolean;
 		
 		protected var _blendMode:String;
 		
 		/** @private */
-		dragonBones_internal var _isColorChanged:Boolean;
-		/** @private */
 		dragonBones_internal var _timelineState:FastSlotTimelineState;
 		
+		public var hasChildArmature:Boolean;
 		public function FastSlot(self:FastSlot)
 		{
 			super();
@@ -47,7 +46,7 @@ package dragonBones.fast
 			{
 				throw new IllegalOperationError("Abstract class can not be instantiated!");
 			}
-			
+			hasChildArmature = false;
 			_displayList = [];
 			_currentDisplayIndex = -1;
 			
@@ -55,10 +54,9 @@ package dragonBones.fast
 			_tweenZOrder = 0;
 			_offsetZOrder = 0;
 			_isShowDisplay = false;
-			_isColorChanged = false;
 			_colorTransform = new ColorTransform();
+			_isColorChanged = false;
 			_displayDataList = null;
-			//_childArmature = null;
 			_currentDisplay = null;
 			
 			this.inheritRotation = true;
@@ -141,35 +139,31 @@ package dragonBones.fast
 		
 		override protected function calculateRelativeParentTransform():void
 		{
-			_global.scaleX = this._origin.scaleX;
-			_global.scaleY = this._origin.scaleY;
-			_global.skewX = this._origin.skewX;
-			_global.skewY = this._origin.skewY;
-			_global.x = this._origin.x + this._parent._tweenPivot.x;
-			_global.y = this._origin.y + this._parent._tweenPivot.y;
+			_global.copy(this._origin);
 		}
 		
 		private function updateChildArmatureAnimation():void
 		{
-			if(childArmature)
+			var targetArmature:FastArmature = childArmature;
+			if(targetArmature)
 			{
 				if(_isShowDisplay)
 				{
 					if(	this._armature &&
 						this._armature.animation.animationState &&
-						childArmature.animation.hasAnimation(this._armature.animation.animationState.name))
+						targetArmature.animation.hasAnimation(this._armature.animation.animationState.name))
 					{
-						childArmature.animation.gotoAndPlay(this._armature.animation.animationState.name);
+						targetArmature.animation.gotoAndPlay(this._armature.animation.animationState.name);
 					}
 					else
 					{
-						childArmature.animation.play();
+						targetArmature.animation.play();
 					}
 				}
 				else
 				{
-					childArmature.animation.stop();
-					childArmature.animation.animationState = null;
+					targetArmature.animation.stop();
+					targetArmature.animation.animationState = null;
 				}
 			}
 		}
@@ -270,8 +264,15 @@ package dragonBones.fast
 					}
 				}
 				updateDisplayBlendMode(_blendMode);
-				updateDisplayColor(	_colorTransform.alphaOffset, _colorTransform.redOffset, _colorTransform.greenOffset, _colorTransform.blueOffset,
-					_colorTransform.alphaMultiplier, _colorTransform.redMultiplier, _colorTransform.greenMultiplier, _colorTransform.blueMultiplier);
+				updateDisplayColor(	_colorTransform.alphaOffset, 
+									_colorTransform.redOffset, 
+									_colorTransform.greenOffset, 
+									_colorTransform.blueOffset,
+									_colorTransform.alphaMultiplier, 
+									_colorTransform.redMultiplier, 
+									_colorTransform.greenMultiplier, 
+									_colorTransform.blueMultiplier,
+									_isColorChanged);
 				updateDisplayVisible(_visible);
 				updateTransform();
 			}
@@ -307,9 +308,15 @@ package dragonBones.fast
 				_currentDisplayIndex = 0;
 			}
 			var i:int = _displayList.length = value.length;
+			var item:Object;
 			while(i --)
 			{
-				_displayList[i] = value[i];
+				item = value[i];
+				_displayList[i] = item;
+				if(item is FastArmature)
+				{
+					this.hasChildArmature = true;
+				}
 			}
 			
 			//在index不改变的情况下强制刷新 TO DO需要修改
@@ -483,7 +490,6 @@ package dragonBones.fast
 			_colorTransform.redMultiplier = rMultiplier;
 			_colorTransform.greenMultiplier = gMultiplier;
 			_colorTransform.blueMultiplier = bMultiplier;
-			
 			_isColorChanged = colorChanged;
 		}
 		
@@ -517,9 +523,10 @@ package dragonBones.fast
 			//后续会扩展更多的action，目前只有gotoAndPlay的含义
 			if(frame.action) 
 			{
-				if (childArmature)
+				var targetArmature:FastArmature = childArmature;
+				if (targetArmature)
 				{
-					childArmature.animation.gotoAndPlay(frame.action);
+					targetArmature.animation.gotoAndPlay(frame.action);
 				}
 			}
 		}
