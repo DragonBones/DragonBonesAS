@@ -12,7 +12,7 @@ package dragonBones.cache
 		{
 		}
 		
-		//浅拷贝
+		//浅拷贝提高效率
 		public function copy(frameCache:FrameCache):void
 		{
 			globalTransform = frameCache.globalTransform;

@@ -15,7 +15,7 @@ package dragonBones.cache
 		public var armatureData:ArmatureData;
 		public var frameRate:Number;
 		public var animationCacheDic:Object = {};
-		public var boneFrameCacheDic:Object = {};
+//		public var boneFrameCacheDic:Object = {};
 		public var slotFrameCacheDic:Object = {};
 		public function AnimationCacheManager()
 		{
@@ -68,10 +68,10 @@ package dragonBones.cache
 			armature.animation.animationCacheManager = this;
 			
 			var cacheUser:ICacheUser;
-			for each(cacheUser in armature._boneDic)
-			{
-				cacheUser.frameCache = boneFrameCacheDic[cacheUser.name];
-			}
+//			for each(cacheUser in armature._boneDic)
+//			{
+//				cacheUser.frameCache = boneFrameCacheDic[cacheUser.name];
+//			}
 			for each(cacheUser in armature._slotDic)
 			{
 				cacheUser.frameCache = slotFrameCacheDic[cacheUser.name];
@@ -83,10 +83,10 @@ package dragonBones.cache
 			cacheGeneratorArmature = armature;
 			
 			var cacheUser:ICacheUser;
-			for each(cacheUser in armature._boneDic)
-			{
-				boneFrameCacheDic[cacheUser.name] = new FrameCache();
-			}
+//			for each(cacheUser in armature._boneDic)
+//			{
+//				boneFrameCacheDic[cacheUser.name] = new FrameCache();
+//			}
 			for each(cacheUser in armature._slotDic)
 			{
 				slotFrameCacheDic[cacheUser.name] = new FrameCache();
@@ -94,7 +94,7 @@ package dragonBones.cache
 			
 			for each(var animationCache:AnimationCache in animationCacheDic)
 			{
-				animationCache.initBoneTimelineCacheDic(armature._boneDic, boneFrameCacheDic);
+//				animationCache.initBoneTimelineCacheDic(armature._boneDic, boneFrameCacheDic);
 				animationCache.initSlotTimelineCacheDic(armature._slotDic, slotFrameCacheDic);
 			}
 		}

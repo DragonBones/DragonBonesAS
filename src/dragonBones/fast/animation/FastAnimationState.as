@@ -57,8 +57,8 @@ package dragonBones.fast.animation
 		 * If auto genterate tween between keyframes.
 		 */
 		public var autoTween:Boolean;
-		
-		private var _armature:FastArmature;
+		public var progress:Number;
+		dragonBones_internal var _armature:FastArmature;
 		
 		private var _boneTimelineStateList:Vector.<FastBoneTimelineState>;
 		private var _slotTimelineStateList:Vector.<FastSlotTimelineState>;
@@ -89,8 +89,6 @@ package dragonBones.fast.animation
 		
 		public function FastAnimationState()
 		{
-			_boneTimelineStateList = new Vector.<FastBoneTimelineState>;
-			_slotTimelineStateList = new Vector.<FastSlotTimelineState>;
 		}
 		
 		public function dispose():void
@@ -113,9 +111,8 @@ package dragonBones.fast.animation
 		}
 		
 		/** @private */
-		dragonBones_internal function fadeIn(armature:FastArmature, aniData:AnimationData, playTimes:Number, timeScale:Number, fadeTotalTime:Number):void
+		dragonBones_internal function fadeIn(aniData:AnimationData, playTimes:Number, timeScale:Number, fadeTotalTime:Number):void
 		{
-			_armature = armature;
 			animationData = aniData;
 			
 			name = animationData.name;
@@ -136,14 +133,21 @@ package dragonBones.fast.animation
 			{
 				_currentTime = -1;
 			}
-			_time = 0;
-			
+
 			_fadeTotalTime = fadeTotalTime * _timeScale;
 			_fading = _fadeTotalTime>0;
 			//default
 			_isPlaying = true;
 			
 			_listenCompleteEvent = _armature.hasEventListener(AnimationEvent.COMPLETE);
+			
+			if(this._armature.enableCache && animationCache && _fading && _boneTimelineStateList)
+			{
+				updateTransformTimeline(progress);
+			}
+			
+			_time = 0;
+			progress = 0;
 			
 			updateTimelineStates();
 			return;
@@ -155,6 +159,8 @@ package dragonBones.fast.animation
 		 */
 		dragonBones_internal function updateTimelineStates():void
 		{	
+			_boneTimelineStateList = new Vector.<FastBoneTimelineState>;
+			_slotTimelineStateList = new Vector.<FastSlotTimelineState>;
 			var timelineName:String;
 			for each(var boneTimeline:TransformTimeline in animationData.timelineList)
 			{
@@ -189,13 +195,17 @@ package dragonBones.fast.animation
 			{
 				//计算progress
 				_time += passedTime;
-				var progress:Number = _time / _fadeTotalTime;
+				progress = _time / _fadeTotalTime;
 				if(progress >= 1)
 				{
-					progress = 1;
+					progress = 0;
 					_time = 0;
 					_fading = false;
 				}
+			}
+			
+			if(_fading)
+			{
 				//update boneTimelie
 				for each(var timeline:FastBoneTimelineState in _boneTimelineStateList)
 				{
@@ -223,7 +233,6 @@ package dragonBones.fast.animation
 			var isThisComplete:Boolean = false;
 			var currentPlayTimes:int = 0;
 			var currentTime:int = _time * 1000;
-			var progress:Number;
 			if( _playTimes == 0 || //无限循环
 				currentTime < _playTimes * _totalTime) //没有播放完毕
 			{
@@ -244,7 +253,7 @@ package dragonBones.fast.animation
 			
 			_isComplete = isThisComplete;
 
-			if(this._armature.enableCache && animationCache)
+			if(this.isUseCache())
 			{
 				animationCache.update(progress);
 			}
@@ -455,6 +464,12 @@ package dragonBones.fast.animation
 		public function get currentTime():Number
 		{
 			return _currentTime < 0 ? 0 : _currentTime * 0.001;
+		}
+		
+		
+		public function isUseCache():Boolean
+		{
+			return _armature.enableCache && animationCache && !_fading;
 		}
 	}
 }

@@ -25,7 +25,7 @@ package dragonBones.fast.animation
 		public function FastAnimation(armature:FastArmature)
 		{
 			_armature = armature;
-
+			animationState._armature = armature;
 			animationList = new Vector.<String>;
 			_animationDataObj = {};
 
@@ -71,13 +71,14 @@ package dragonBones.fast.animation
 			
 			//播放新动画
 			
+			
+			animationState.autoTween = true;
+			animationState.fadeIn(animationData, playTimes, 1 / durationScale, fadeInTime);
+			
 			if(_armature.enableCache && animationCacheManager)
 			{
 				animationState.animationCache = animationCacheManager.getAnimationCache(animationName);
-				animationState.autoTween = true;
 			}
-			
-			animationState.fadeIn(_armature, animationData, playTimes, 1 / durationScale, fadeInTime);
 			
 			var i:int = _armature.slotHasChildArmatureList.length;
 			while(i--)
@@ -158,5 +159,6 @@ package dragonBones.fast.animation
 				_animationDataObj[animationData.name] = animationData;
 			}
 		}
+		
 	}
 }

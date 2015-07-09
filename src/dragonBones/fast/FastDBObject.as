@@ -40,7 +40,11 @@ package dragonBones.fast
 		/** @private */
 		dragonBones_internal var _globalTransformMatrix:Matrix;
 		
-		dragonBones_internal static var _tempParentGlobalTransformMatrix:Matrix = new Matrix();
+		/** @private */
+		dragonBones_internal var _globalBackup:DBTransform;
+		/** @private */
+		dragonBones_internal var _globalTransformMatrixBackup:Matrix;
+		
 		dragonBones_internal static var _tempParentGlobalTransform:DBTransform = new DBTransform();
 		
 		dragonBones_internal var _frameCache:FrameCache;
@@ -48,9 +52,20 @@ package dragonBones.fast
 		/** @private */
 		dragonBones_internal function updateByCache():void
 		{
-			//todo 以后改成开关是否拷贝
 			_global = _frameCache.globalTransform;
 			_globalTransformMatrix = _frameCache.globalTransformMatrix;
+		}
+		
+		/** @private */
+		dragonBones_internal function switchTransformToBackup():void
+		{
+			if(!_globalBackup)
+			{
+				_globalBackup = new DBTransform();
+				_globalTransformMatrixBackup = new Matrix();
+			}
+			_global = _globalBackup;
+			_globalTransformMatrix = _globalTransformMatrixBackup;
 		}
 		
 		/**

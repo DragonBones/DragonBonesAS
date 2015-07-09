@@ -30,6 +30,12 @@ package dragonBones.fast
 		
 		
 		public var enableCache:Boolean;
+		
+		/**
+		 * 开启后有助于性能提高
+		 */
+		public var isCacheManagerExclusive:Boolean = false;
+		
 		/** @private */
 		protected var _animation:FastAnimation;
 		
@@ -116,6 +122,7 @@ package dragonBones.fast
 		 * Update the animation using this method typically in an ENTERFRAME Event or with a Timer.
 		 * @param The amount of second to move the playhead ahead.
 		 */
+		private var useCache:Boolean = true;
 		public function advanceTime(passedTime:Number):void
 		{
 			_lockDispose = true;
@@ -124,8 +131,12 @@ package dragonBones.fast
 			var bone:FastBone;
 			var slot:FastSlot;
 			var i:int;
-			if(enableCache)
+			if(_animation.animationState.isUseCache())
 			{
+				if(!useCache)
+				{
+					useCache = true;
+				}
 				i = slotList.length;
 				while(i --)
 				{
@@ -135,6 +146,17 @@ package dragonBones.fast
 			}
 			else
 			{
+				if(useCache)
+				{
+					useCache = false;
+					i = slotList.length;
+					while(i --)
+					{
+						slot = slotList[i];
+						slot.switchTransformToBackup();
+					}
+				}
+				
 				i = boneList.length;
 				while(i --)
 				{
@@ -171,6 +193,18 @@ package dragonBones.fast
 			}
 		}
 
+		dragonBones_internal function _updateBonesByCache():void
+		{
+			var i:int = boneList.length;
+			var bone:FastBone;
+			while(i --)
+			{
+				bone = boneList[i];
+				bone.update();
+			}
+		}
+		
+		
 		/**
 		 * Add a Bone instance to this Armature instance.
 		 * @param A Bone instance.
