@@ -126,6 +126,13 @@ package dragonBones.fast
 		
 		//动画
 		/** @private */
+		override dragonBones_internal function updateByCache():void
+		{
+			super.updateByCache();
+			updateTransform();
+		}
+		
+		/** @private */
 		dragonBones_internal function update():void
 		{
 			if(this._parent._needUpdate <= 0)
@@ -149,11 +156,11 @@ package dragonBones.fast
 			{
 				if(_isShowDisplay)
 				{
-					if(	this._armature &&
-						this._armature.animation.animationState &&
-						targetArmature.animation.hasAnimation(this._armature.animation.animationState.name))
+					if(	this.armature &&
+						this.armature.animation.animationState &&
+						targetArmature.animation.hasAnimation(this.armature.animation.animationState.name))
 					{
-						targetArmature.animation.gotoAndPlay(this._armature.animation.animationState.name);
+						targetArmature.animation.gotoAndPlay(this.armature.animation.animationState.name);
 					}
 					else
 					{
@@ -207,10 +214,10 @@ package dragonBones.fast
 				else if(!_isShowDisplay)
 				{
 					_isShowDisplay = true;
-					if(this._armature)
+					if(this.armature)
 					{
-						this._armature._slotsZOrderChanged = true;
-						addDisplayToContainer(this._armature.display);
+						this.armature._slotsZOrderChanged = true;
+						addDisplayToContainer(this.armature.display);
 					}
 					updateChildArmatureAnimation();
 				}
@@ -251,16 +258,16 @@ package dragonBones.fast
 			updateDisplay(_currentDisplay);
 			if(_currentDisplay)
 			{
-				if(this._armature && _isShowDisplay)
+				if(this.armature && _isShowDisplay)
 				{
 					if(currentDisplayIndex < 0)
 					{
-						this._armature._slotsZOrderChanged = true;
-						addDisplayToContainer(this._armature.display);
+						this.armature._slotsZOrderChanged = true;
+						addDisplayToContainer(this.armature.display);
 					}
 					else
 					{
-						addDisplayToContainer(this._armature.display, currentDisplayIndex);
+						addDisplayToContainer(this.armature.display, currentDisplayIndex);
 					}
 				}
 				updateDisplayBlendMode(_blendMode);
@@ -375,9 +382,9 @@ package dragonBones.fast
 			if(zOrder != value)
 			{
 				_offsetZOrder = value - _originZOrder - _tweenZOrder;
-				if(this._armature)
+				if(this.armature)
 				{
-					this._armature._slotsZOrderChanged = true;
+					this.armature._slotsZOrderChanged = true;
 				}
 			}
 		}
@@ -515,7 +522,7 @@ package dragonBones.fast
 				if(!isNaN(slotFrame.zOrder) && slotFrame.zOrder != _tweenZOrder)
 				{
 					_tweenZOrder = slotFrame.zOrder;
-					this._armature._slotsZOrderChanged = true;
+					this.armature._slotsZOrderChanged = true;
 				}
 			}
 			

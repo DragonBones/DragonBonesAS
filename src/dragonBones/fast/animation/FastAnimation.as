@@ -1,5 +1,6 @@
 package dragonBones.fast.animation
 {
+	import dragonBones.cache.AnimationCacheManager;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.fast.FastArmature;
 	import dragonBones.fast.FastSlot;
@@ -12,11 +13,11 @@ package dragonBones.fast.animation
 	 */
 	public class FastAnimation
 	{
+		public var animationList:Vector.<String>;
 		public var animationState:FastAnimationState = new FastAnimationState();
+		public var animationCacheManager:AnimationCacheManager;
 		
 		private var _armature:FastArmature;
-		public var animationList:Vector.<String>;
-		
 		private var _animationDataList:Vector.<AnimationData>;
 		private var _animationDataObj:Object;
 		private var _isPlaying:Boolean;
@@ -69,8 +70,15 @@ package dragonBones.fast.animation
 			playTimes = isNaN(playTimes)?animationData.playTimes:playTimes;
 			
 			//播放新动画
-			animationState.autoTween = true;
+			
+			if(_armature.enableCache && animationCacheManager)
+			{
+				animationState.animationCache = animationCacheManager.getAnimationCache(animationName);
+				animationState.autoTween = true;
+			}
+			
 			animationState.fadeIn(_armature, animationData, playTimes, 1 / durationScale, fadeInTime);
+			
 			var i:int = _armature.slotHasChildArmatureList.length;
 			while(i--)
 			{

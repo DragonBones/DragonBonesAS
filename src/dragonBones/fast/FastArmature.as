@@ -28,6 +28,8 @@ package dragonBones.fast
 		 */
 		public var userData:Object;
 		
+		
+		public var enableCache:Boolean;
 		/** @private */
 		protected var _animation:FastAnimation;
 		
@@ -36,11 +38,11 @@ package dragonBones.fast
 		
 		/** @private Store bones based on bones' hierarchy (From root to leaf)*/
 		public var boneList:Vector.<FastBone>;
-		protected var _boneDic:Object;
+		dragonBones_internal var _boneDic:Object;
 		
 		/** @private Store slots based on slots' zOrder*/
 		public var slotList:Vector.<FastSlot>;
-		protected var _slotDic:Object;
+		dragonBones_internal var _slotDic:Object;
 		
 		public var slotHasChildArmatureList:Vector.<FastSlot>;
 		
@@ -121,18 +123,31 @@ package dragonBones.fast
 			
 			var bone:FastBone;
 			var slot:FastSlot;
-			var i:int = boneList.length;
-			while(i --)
+			var i:int;
+			if(enableCache)
 			{
-				bone = boneList[i];
-				bone.update();
+				i = slotList.length;
+				while(i --)
+				{
+					slot = slotList[i];
+					slot.updateByCache();
+				}
 			}
-			
-			i = slotList.length;
-			while(i --)
+			else
 			{
-				slot = slotList[i];
-				slot.update();
+				i = boneList.length;
+				while(i --)
+				{
+					bone = boneList[i];
+					bone.update();
+				}
+				
+				i = slotList.length;
+				while(i --)
+				{
+					slot = slotList[i];
+					slot.update();
+				}
 			}
 			
 			i = slotHasChildArmatureList.length;
@@ -169,7 +184,7 @@ package dragonBones.fast
 			{
 				parentBone = getBone(parentName);
 			}
-			bone.setArmature(this);
+			bone.armature = this;
 			bone.setParent(parentBone);
 			boneList.unshift(bone);
 			_boneDic[bone.name] = bone;
@@ -186,7 +201,7 @@ package dragonBones.fast
 			var bone:FastBone = getBone(parentBoneName);
 			if(bone)
 			{
-				slot.setArmature(this);
+				slot.armature = this;
 				slot.setParent(bone);
 				slot.addDisplayToContainer(display);
 				slotList.push(slot);

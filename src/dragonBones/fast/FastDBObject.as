@@ -2,16 +2,18 @@ package dragonBones.fast
 {
 	import flash.geom.Matrix;
 	
+	import dragonBones.cache.FrameCache;
 	import dragonBones.core.DBObject;
+	import dragonBones.core.ICacheUser;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DBTransform;
 	import dragonBones.utils.TransformUtil;
 	
 	use namespace dragonBones_internal;
 
-	public class FastDBObject
+	public class FastDBObject implements ICacheUser
 	{
-		public var name:String;
+		private var _name:String;
 		
 		/**
 		 * An object that can contain any user extra data.
@@ -41,62 +43,30 @@ package dragonBones.fast
 		dragonBones_internal static var _tempParentGlobalTransformMatrix:Matrix = new Matrix();
 		dragonBones_internal static var _tempParentGlobalTransform:DBTransform = new DBTransform();
 		
-		
-		/**
-		 * This DBObject instance global transform instance.
-		 * @see dragonBones.objects.DBTransform
-		 */
-		public function get global():DBTransform
-		{
-			return _global;
-		}
+		dragonBones_internal var _frameCache:FrameCache;
 		
 		/** @private */
-		protected var _origin:DBTransform;
-		/**
-		 * This DBObject instance related to parent transform instance.
-		 * @see dragonBones.objects.DBTransform
-		 */
-		public function get origin():DBTransform
+		dragonBones_internal function updateByCache():void
 		{
-			return _origin;
+			//todo 以后改成开关是否拷贝
+			_global = _frameCache.globalTransform;
+			_globalTransformMatrix = _frameCache.globalTransformMatrix;
 		}
 		
-		/** @private */
-		protected var _visible:Boolean;
-		public function get visible():Boolean
-		{
-			return _visible;
-		}
-		public function set visible(value:Boolean):void
-		{
-			_visible = value;
-		}
-		
-		/** @private */
-		protected var _armature:FastArmature;
 		/**
 		 * The armature this DBObject instance belongs to.
 		 */
-		public function get armature():FastArmature
-		{
-			return _armature;
-		}
+		public var armature:FastArmature;
+		
 		/** @private */
-		dragonBones_internal function setArmature(value:FastArmature):void
-		{
-			_armature = value;
-		}
+		protected var _origin:DBTransform;
+		
+		/** @private */
+		protected var _visible:Boolean;
 		
 		/** @private */
 		dragonBones_internal var _parent:FastBone;
-		/**
-		 * Indicates the Bone instance that directly contains this DBObject instance if any.
-		 */
-		public function get parent():FastBone
-		{
-			return _parent;
-		}
+		
 		/** @private */
 		dragonBones_internal function setParent(value:FastBone):void
 		{
@@ -112,7 +82,7 @@ package dragonBones.fast
 			
 			_visible = true;
 			
-			_armature = null;
+			armature = null;
 			_parent = null;
 			
 			userData = null;
@@ -133,7 +103,7 @@ package dragonBones.fast
 			_global = null;
 			_origin = null;
 			
-			_armature = null;
+			armature = null;
 			_parent = null;
 		}
 		
@@ -213,5 +183,59 @@ package dragonBones.fast
 		{
 		}
 		
+		public function get name():String
+		{
+			return _name;
+		}
+		public function set name(value:String):void
+		{
+			_name = value;
+		}
+		
+		/**
+		 * This DBObject instance global transform instance.
+		 * @see dragonBones.objects.DBTransform
+		 */
+		public function get global():DBTransform
+		{
+			return _global;
+		}
+		
+		
+		public function get globalTransformMatrix():Matrix
+		{
+			return _globalTransformMatrix;
+		}
+		
+		/**
+		 * This DBObject instance related to parent transform instance.
+		 * @see dragonBones.objects.DBTransform
+		 */
+		public function get origin():DBTransform
+		{
+			return _origin;
+		}
+		
+		/**
+		 * Indicates the Bone instance that directly contains this DBObject instance if any.
+		 */
+		public function get parent():FastBone
+		{
+			return _parent;
+		}
+		
+		public function get visible():Boolean
+		{
+			return _visible;
+		}
+		public function set visible(value:Boolean):void
+		{
+			_visible = value;
+		}
+		
+		public function set frameCache(cache:FrameCache):void
+		{
+			_frameCache = cache;
+		}
 	}
 }

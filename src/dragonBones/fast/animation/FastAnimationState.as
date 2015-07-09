@@ -1,5 +1,6 @@
 package dragonBones.fast.animation
 {
+	import dragonBones.cache.AnimationCache;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.AnimationEvent;
 	import dragonBones.fast.FastArmature;
@@ -50,6 +51,8 @@ package dragonBones.fast.animation
 			FastAnimationState.clear();
 		}
 		
+		
+		public var animationCache:AnimationCache;
 		/**
 		 * If auto genterate tween between keyframes.
 		 */
@@ -82,6 +85,8 @@ package dragonBones.fast.animation
 		private var _listenLoopCompleteEvent:Boolean;
 		
 		dragonBones_internal var _fadeTotalTime:Number;
+		
+		
 		public function FastAnimationState()
 		{
 			_boneTimelineStateList = new Vector.<FastBoneTimelineState>;
@@ -239,7 +244,50 @@ package dragonBones.fast.animation
 			
 			_isComplete = isThisComplete;
 
+			if(this._armature.enableCache && animationCache)
+			{
+				animationCache.update(progress);
+			}
+			else
+			{
+				updateTransformTimeline(progress);
+			}
 			
+			//update main timeline
+			if(_currentTime != currentTime)
+			{
+				if(_currentPlayTimes != currentPlayTimes)    //check loop complete
+				{
+					if(_currentPlayTimes > 0 && currentPlayTimes > 1)
+					{
+						loopCompleteFlg = true;
+					}
+					_currentPlayTimes = currentPlayTimes;
+				}
+				
+				_lastTime = _currentTime;
+				_currentTime = currentTime;
+				updateMainTimeline(isThisComplete);
+			}
+			
+			//抛事件
+			var event:AnimationEvent;
+			if(_listenCompleteEvent && _isComplete)
+			{
+				event = new AnimationEvent(AnimationEvent.COMPLETE);
+				event.animationState = this;
+				_armature._eventList.push(event);
+			}
+			else if(_listenLoopCompleteEvent && loopCompleteFlg)
+			{
+				event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
+				event.animationState = this;
+				_armature._eventList.push(event);
+			}
+		}
+		
+		private function updateTransformTimeline(progress:Number):void
+		{
 			var i:int = _boneTimelineStateList.length;
 			var boneTimeline:FastBoneTimelineState;
 			var slotTimeline:FastSlotTimelineState;
@@ -281,38 +329,6 @@ package dragonBones.fast.animation
 					slotTimeline = _slotTimelineStateList[i];
 					slotTimeline.update(progress);
 				}
-			}
-			
-			//update main timeline
-			if(_currentTime != currentTime)
-			{
-				if(_currentPlayTimes != currentPlayTimes)    //check loop complete
-				{
-					if(_currentPlayTimes > 0 && currentPlayTimes > 1)
-					{
-						loopCompleteFlg = true;
-					}
-					_currentPlayTimes = currentPlayTimes;
-				}
-				
-				_lastTime = _currentTime;
-				_currentTime = currentTime;
-				updateMainTimeline(isThisComplete);
-			}
-			
-			//抛事件
-			var event:AnimationEvent;
-			if(_listenCompleteEvent && _isComplete)
-			{
-				event = new AnimationEvent(AnimationEvent.COMPLETE);
-				event.animationState = this;
-				_armature._eventList.push(event);
-			}
-			else if(_listenLoopCompleteEvent && loopCompleteFlg)
-			{
-				event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
-				event.animationState = this;
-				_armature._eventList.push(event);
 			}
 		}
 		
