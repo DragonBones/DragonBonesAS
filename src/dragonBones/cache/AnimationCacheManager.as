@@ -128,6 +128,14 @@ package dragonBones.cache
 			cacheGeneratorArmature.enableCache = temp;
 		}
 		
+		/**
+		 * 将缓存生成器骨架重置，生成动画缓存后调用。
+		 */
+		public function resetCacheGeneratorArmature():void
+		{
+			cacheGeneratorArmature.resetAnimation();
+		}
+		
 		public function getAnimationCache(animationName:String):AnimationCache
 		{
 			return animationCacheDic[animationName];

@@ -3,6 +3,7 @@ package dragonBones.fast
 	import flash.events.EventDispatcher;
 	
 	import dragonBones.animation.IAnimatable;
+	import dragonBones.cache.AnimationCacheManager;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.AnimationEvent;
 	import dragonBones.events.FrameEvent;
@@ -76,7 +77,7 @@ package dragonBones.fast
 		
 		private var _delayDispose:Boolean;
 		private var _lockDispose:Boolean;
-		
+		private var useCache:Boolean = true;
 		public function FastArmature(display:Object)
 		{
 			super(this);
@@ -140,7 +141,7 @@ package dragonBones.fast
 		 * Update the animation using this method typically in an ENTERFRAME Event or with a Timer.
 		 * @param The amount of second to move the playhead ahead.
 		 */
-		private var useCache:Boolean = true;
+		
 		public function advanceTime(passedTime:Number):void
 		{
 			_lockDispose = true;
@@ -218,6 +219,28 @@ package dragonBones.fast
 			}
 		}
 
+		public function enableAnimationCache(frameRate:int, animationList:Array = null):AnimationCacheManager
+		{
+			var animationCacheManager:AnimationCacheManager = AnimationCacheManager.initWithArmatureData(armatureData,frameRate);
+			if(animationList)
+			{
+				for each(var animationName:String in animationList)
+				{
+					animationCacheManager.initAnimationCache(animationName);
+				}
+			}
+			else
+			{
+				animationCacheManager.initAllAnimationCache();
+			}
+			animationCacheManager.setCacheGeneratorArmature(this);
+			animationCacheManager.generateAllAnimationCache();
+			
+			animationCacheManager.bindCacheUserArmature(this);
+			enableCache = true;
+			return animationCacheManager;
+		}
+		
 		dragonBones_internal function _updateBonesByCache():void
 		{
 			var i:int = boneList.length;
@@ -236,7 +259,7 @@ package dragonBones.fast
 		 * @param (optional) The parent's name of this Bone instance.
 		 * @see dragonBones.Bone
 		 */
-		public function addBone(bone:FastBone, parentName:String = null):void
+		dragonBones_internal function addBone(bone:FastBone, parentName:String = null):void
 		{
 			var parentBone:FastBone;
 			if(parentName)
@@ -255,7 +278,7 @@ package dragonBones.fast
 		 * @param boneName bone name
 		 * @see dragonBones.core.DBObject
 		 */
-		public function addSlot(slot:FastSlot, parentBoneName:String):void
+		dragonBones_internal function addSlot(slot:FastSlot, parentBoneName:String):void
 		{
 			var bone:FastBone = getBone(parentBoneName);
 			if(bone)
@@ -280,7 +303,7 @@ package dragonBones.fast
 		/**
 		 * Sort all slots based on zOrder
 		 */
-		public function updateSlotsZOrder():void
+		dragonBones_internal function updateSlotsZOrder():void
 		{
 			slotList.fixed = false;
 			slotList.sort(sortSlot);
@@ -344,6 +367,19 @@ package dragonBones.fast
 			if(frame.action)
 			{
 				animation.gotoAndPlay(frame.action);
+			}
+		}
+		
+		dragonBones_internal function resetAnimation():void
+		{
+			animation.animationState.resetTimelineStateList();
+			for each(var boneItem:FastBone in boneList)
+			{
+				boneItem._timelineState = null;
+			}
+			for each(var slotItem:FastSlot in slotList)
+			{
+				slotItem._timelineState = null;
 			}
 		}
 		

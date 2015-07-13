@@ -79,8 +79,6 @@ package dragonBones.fast.animation
 			
 			//播放新动画
 			
-			
-			animationState.autoTween = true;
 			animationState.fadeIn(animationData, playTimes, 1 / durationScale, fadeInTime);
 			
 			if(_armature.enableCache && animationCacheManager)

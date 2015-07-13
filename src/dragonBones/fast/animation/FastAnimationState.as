@@ -1,5 +1,7 @@
 package dragonBones.fast.animation
 {
+	import dragonBones.animation.AnimationState;
+	import dragonBones.animation.TimelineState;
 	import dragonBones.cache.AnimationCache;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.AnimationEvent;
@@ -60,8 +62,8 @@ package dragonBones.fast.animation
 		public var progress:Number;
 		dragonBones_internal var _armature:FastArmature;
 		
-		private var _boneTimelineStateList:Vector.<FastBoneTimelineState>;
-		private var _slotTimelineStateList:Vector.<FastSlotTimelineState>;
+		private var _boneTimelineStateList:Vector.<FastBoneTimelineState> = new Vector.<FastBoneTimelineState>;
+		private var _slotTimelineStateList:Vector.<FastSlotTimelineState> = new Vector.<FastSlotTimelineState>;
 		public var animationData:AnimationData;
 		
 		public var name:String;
@@ -93,6 +95,12 @@ package dragonBones.fast.animation
 		
 		public function dispose():void
 		{
+			resetTimelineStateList();
+			_armature = null;
+		}
+		
+		dragonBones_internal function resetTimelineStateList():void
+		{
 			var i:int = _boneTimelineStateList.length;
 			while(i --)
 			{
@@ -106,8 +114,6 @@ package dragonBones.fast.animation
 				FastSlotTimelineState.returnObject(_slotTimelineStateList[i]);
 			}
 			_slotTimelineStateList.length = 0;
-			
-			_armature = null;
 		}
 		
 		/** @private */
@@ -149,7 +155,7 @@ package dragonBones.fast.animation
 			_time = 0;
 			progress = 0;
 			
-			updateTimelineStates();
+			updateTimelineStateList();
 			return;
 		}
 		
@@ -157,10 +163,9 @@ package dragonBones.fast.animation
 		 * @private
 		 * Update timeline state based on mixing transforms and clip.
 		 */
-		dragonBones_internal function updateTimelineStates():void
+		dragonBones_internal function updateTimelineStateList():void
 		{	
-			_boneTimelineStateList = new Vector.<FastBoneTimelineState>;
-			_slotTimelineStateList = new Vector.<FastSlotTimelineState>;
+			resetTimelineStateList();
 			var timelineName:String;
 			for each(var boneTimeline:TransformTimeline in animationData.timelineList)
 			{
