@@ -104,6 +104,7 @@ package dragonBones.fast
 		{
 			super.updateByCache();
 			updateTransform();
+		//颜色
 			var cacheColor:ColorTransform = (this._frameCache as SlotFrameCache).colorTransform;
 			var cacheColorChanged:Boolean = cacheColor != null;
 			if(	this.colorChanged != cacheColorChanged ||
@@ -120,6 +121,9 @@ package dragonBones.fast
 									cacheColor.blueMultiplier,
 									cacheColorChanged);
 			}
+			
+		//displayIndex
+			changeDisplayIndex((this._frameCache as SlotFrameCache).displayIndex);
 		}
 		
 		/** @private */

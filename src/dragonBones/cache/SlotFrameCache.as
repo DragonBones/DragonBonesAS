@@ -11,5 +11,13 @@ package dragonBones.cache
 		{
 			super();
 		}
+		
+		//浅拷贝提高效率
+		override public function copy(frameCache:FrameCache):void
+		{
+			super.copy(frameCache);
+			colorTransform = (frameCache as SlotFrameCache).colorTransform;
+			displayIndex = (frameCache as SlotFrameCache).displayIndex;
+		}
 	}
 }
