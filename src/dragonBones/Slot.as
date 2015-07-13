@@ -101,10 +101,10 @@
 			
 		}
 		
-		private function sortState(state1:SlotTimelineState, state2:SlotTimelineState):int
-		{
-			return state1._animationState.layer < state2._animationState.layer?-1:1;
-		}
+//		private function sortState(state1:SlotTimelineState, state2:SlotTimelineState):int
+//		{
+//			return state1._animationState.layer < state2._animationState.layer?-1:1;
+//		}
 		
 		/** @private */
 //		dragonBones_internal function addState(timelineState:SlotTimelineState):void

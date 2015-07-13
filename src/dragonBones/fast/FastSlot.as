@@ -3,8 +3,6 @@ package dragonBones.fast
 	import flash.errors.IllegalOperationError;
 	import flash.geom.ColorTransform;
 	
-	import dragonBones.animation.SlotTimelineState;
-	import dragonBones.cache.FrameCache;
 	import dragonBones.cache.SlotFrameCache;
 	import dragonBones.core.ISlotCacheGenerator;
 	import dragonBones.core.dragonBones_internal;
@@ -35,7 +33,6 @@ package dragonBones.fast
 		dragonBones_internal var _colorTransform:ColorTransform;
 		dragonBones_internal var _isColorChanged:Boolean;
 		protected var _currentDisplay:Object;
-//		dragonBones_internal var _isShowDisplay:Boolean;
 		
 		protected var _blendMode:String;
 		
@@ -57,7 +54,6 @@ package dragonBones.fast
 			_originZOrder = 0;
 			_tweenZOrder = 0;
 			_offsetZOrder = 0;
-//			_isShowDisplay = false;
 			_colorTransform = new ColorTransform();
 			_isColorChanged = false;
 			_displayDataList = null;
@@ -90,11 +86,6 @@ package dragonBones.fast
 			_displayDataList = null;
 			_displayList = null;
 			_currentDisplay = null;
-		}
-		
-		private function sortState(state1:SlotTimelineState, state2:SlotTimelineState):int
-		{
-			return state1._animationState.layer < state2._animationState.layer?-1:1;
 		}
 		
 		//动画
@@ -141,24 +132,6 @@ package dragonBones.fast
 		{
 			_global.copy(this._origin);
 		}
-		
-//		private function updateChildArmatureAnimation():void
-//		{
-//			var targetArmature:FastArmature = childArmature;
-//			if(targetArmature)
-//			{
-//				if(	this.armature &&
-//					this.armature.animation.animationState &&
-//					targetArmature.animation.hasAnimation(this.armature.animation.animationState.name))
-//				{
-//					targetArmature.animation.gotoAndPlay(this.armature.animation.animationState.name);
-//				}
-//				else
-//				{
-//					targetArmature.animation.play();
-//				}
-//			}
-//		}
 		
 		dragonBones_internal function initDisplayList(newDisplayList:Array):void
 		{
@@ -388,7 +361,6 @@ package dragonBones.fast
 		{
 			return _colorTransform;
 		}
-		//Abstract method
 		
 		public function get dispalyIndex():int
 		{
@@ -399,6 +371,8 @@ package dragonBones.fast
 		{
 			return _isColorChanged;
 		}
+		
+	//Abstract method
 		/**
 		 * @private
 		 */
