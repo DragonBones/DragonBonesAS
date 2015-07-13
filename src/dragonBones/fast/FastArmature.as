@@ -1,10 +1,10 @@
 package dragonBones.fast
 {
-	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
 	import dragonBones.animation.IAnimatable;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.events.AnimationEvent;
 	import dragonBones.events.FrameEvent;
 	import dragonBones.fast.animation.FastAnimation;
 	import dragonBones.fast.animation.FastAnimationState;
@@ -15,8 +15,25 @@ package dragonBones.fast
 	use namespace dragonBones_internal;
 	
 	/**
-	 * 无法换肤
+	 * Dispatched when an animation state play complete (if playtimes equals to 0 means loop forever. Then this Event will not be triggered)
 	 */
+	[Event(name="complete", type="dragonBones.events.AnimationEvent")]
+	
+	/**
+	 * Dispatched when an animation state complete a loop.
+	 */
+	[Event(name="loopComplete", type="dragonBones.events.AnimationEvent")]
+	
+	/**
+	 * Dispatched when an animation state enter a frame with animation frame event.
+	 */
+	[Event(name="animationFrameEvent", type="dragonBones.events.FrameEvent")]
+	
+	/**
+	 * Dispatched when an bone enter a frame with animation frame event.
+	 */
+	[Event(name="boneFrameEvent", type="dragonBones.events.FrameEvent")]
+	
 	public class FastArmature extends EventDispatcher implements IAnimatable
 	{
 		/**
@@ -32,7 +49,7 @@ package dragonBones.fast
 		public var enableCache:Boolean;
 		
 		/**
-		 * 开启后有助于性能提高
+		 * 保证CacheManager是独占的前提下可以开启，开启后有助于性能提高
 		 */
 		public var isCacheManagerExclusive:Boolean = false;
 		
@@ -55,7 +72,7 @@ package dragonBones.fast
 		dragonBones_internal var __dragonBonesData:DragonBonesData;
 		dragonBones_internal var _armatureData:ArmatureData;
 		dragonBones_internal var _slotsZOrderChanged:Boolean;
-		dragonBones_internal var _eventList:Vector.<Event>;
+		dragonBones_internal var _eventList:Array;
 		
 		private var _delayDispose:Boolean;
 		private var _lockDispose:Boolean;
@@ -73,6 +90,8 @@ package dragonBones.fast
 			slotList = new Vector.<FastSlot>;
 			_slotDic = {};
 			slotHasChildArmatureList = new Vector.<FastSlot>;
+			
+			_eventList = [];
 			
 			_delayDispose = false;
 			_lockDispose = false;
@@ -108,7 +127,6 @@ package dragonBones.fast
 			slotList.length = 0;
 			boneList.fixed = false;
 			boneList.length = 0;
-			_eventList.length = 0;
 			
 			_armatureData = null;
 			_animation = null;
@@ -181,6 +199,16 @@ package dragonBones.fast
 				{
 					childArmature.advanceTime(passedTime);
 				}
+			}
+			
+			if(_slotsZOrderChanged)
+			{
+				updateSlotsZOrder();
+			}
+			
+			while(_eventList.length > 0)
+			{
+				this.dispatchEvent(_eventList.shift());
 			}
 			
 			_lockDispose = false;
@@ -292,7 +320,7 @@ package dragonBones.fast
 			
 			i = helpArray.length;
 			
-			slotList.fixed = false;
+			boneList.fixed = false;
 			while(i --)
 			{
 				boneList[i] = helpArray[i][1];
@@ -305,8 +333,6 @@ package dragonBones.fast
 		/** @private When AnimationState enter a key frame, call this func*/
 		dragonBones_internal function arriveAtFrame(frame:Frame, animationState:FastAnimationState):void
 		{
-			
-			
 			if(frame.event && this.hasEventListener(FrameEvent.ANIMATION_FRAME_EVENT))
 			{
 				var frameEvent:FrameEvent = new FrameEvent(FrameEvent.ANIMATION_FRAME_EVENT);

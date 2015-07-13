@@ -2,7 +2,6 @@ package dragonBones.cache
 {
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.SlotTimeline;
-	import dragonBones.objects.TransformTimeline;
 
 	public class AnimationCache
 	{
