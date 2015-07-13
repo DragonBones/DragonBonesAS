@@ -137,10 +137,10 @@ package dragonBones.display
 		/** @private */
 		override dragonBones_internal function updateDisplayVisible(value:Boolean):void
 		{
-			if(_starlingDisplay && this._parent)
-			{
-				_starlingDisplay.visible = this._parent.visible && this._visible && value;
-			}
+//			if(_starlingDisplay && this._parent)
+//			{
+//				_starlingDisplay.visible = this._parent.visible && this._visible && value;
+//			}
 		}
 		
 		/** @private */

@@ -8,6 +8,7 @@ package dragonBones.fast.animation
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.SlotFrame;
 	import dragonBones.objects.SlotTimeline;
+	import dragonBones.utils.ColorTransformUtil;
 	import dragonBones.utils.MathUtil;
 	
 	use namespace dragonBones_internal;
@@ -52,7 +53,7 @@ package dragonBones.fast.animation
 			_pool.length = 0;
 		}
 		
-		static public var originalColor:ColorTransform = new ColorTransform();
+		
 		
 		public var name:String;
 		
@@ -292,9 +293,7 @@ package dragonBones.fast.animation
 				}
 			}
 		}
-		
-		private static var color1:ColorTransform;
-		private static var color2:ColorTransform;
+
 		private function updateToNextFrame(currentPlayTimes:int):void
 		{
 			var nextFrameIndex:int = _currentFrameIndex + 1;
@@ -362,26 +361,11 @@ package dragonBones.fast.animation
 				}
 			}
 			
-			var color1:ColorTransform;
-			var color2:ColorTransform;
-			
 			if(tweenEnabled)
 			{
 				if(currentFrame.color || nextFrame.color)
 				{
-					color1 = nextFrame.color || originalColor;
-					color2 = currentFrame.color ||originalColor;
-					
-					_durationColor.alphaOffset = color1.alphaOffset - color2.alphaOffset;
-					_durationColor.redOffset = color1.redOffset - color2.redOffset;
-					_durationColor.greenOffset = color1.greenOffset - color2.greenOffset;
-					_durationColor.blueOffset = color1.blueOffset - color2.blueOffset;
-					
-					_durationColor.alphaMultiplier = color1.alphaMultiplier - color2.alphaMultiplier;
-					_durationColor.redMultiplier = color1.redMultiplier - color2.redMultiplier;
-					_durationColor.greenMultiplier = color1.greenMultiplier - color2.greenMultiplier;
-					_durationColor.blueMultiplier = color1.blueMultiplier - color2.blueMultiplier;
-					
+					ColorTransformUtil.minus(nextFrame.color || ColorTransformUtil.originalColor, currentFrame.color ||ColorTransformUtil.originalColor, _durationColor);
 					_tweenColor = 	_durationColor.alphaOffset ||
 									_durationColor.redOffset ||
 									_durationColor.greenOffset ||
@@ -406,7 +390,6 @@ package dragonBones.fast.animation
 				var targetColor:ColorTransform;
 				var colorChanged:Boolean;
 				
-				
 				if(currentFrame.colorChanged)
 				{
 					targetColor = currentFrame.color;
@@ -414,26 +397,12 @@ package dragonBones.fast.animation
 				}
 				else
 				{
-					targetColor = originalColor;
+					targetColor = ColorTransformUtil.originalColor;
 					colorChanged = false;
 				}
 				if ((_slot._isColorChanged || colorChanged))
 				{
-					color1 = _slot._colorTransform;
-					color2 = targetColor;
-					
-					if(	color1.alphaOffset == color2.alphaOffset &&
-						color1.redOffset == color2.redOffset &&
-						color1.greenOffset == color2.greenOffset &&
-						color1.blueOffset == color2.blueOffset &&
-						color1.alphaMultiplier == color2.alphaMultiplier &&
-						color1.redMultiplier == color2.redMultiplier &&
-						color1.greenMultiplier == color2.greenMultiplier &&
-						color1.blueMultiplier == color2.blueMultiplier)
-					{
-						
-					}
-					else
+					if(	!ColorTransformUtil.isEqual(_slot._colorTransform, targetColor))
 					{
 						_slot.updateDisplayColor(
 							targetColor.alphaOffset, 
@@ -466,28 +435,28 @@ package dragonBones.fast.animation
 				if(currentFrame.color)
 				{
 					_slot.updateDisplayColor(
-						currentFrame.color.alphaOffset + _durationColor.alphaOffset * progress,
-						currentFrame.color.redOffset + _durationColor.redOffset * progress,
-						currentFrame.color.greenOffset + _durationColor.greenOffset * progress,
-						currentFrame.color.blueOffset + _durationColor.blueOffset * progress,
-						currentFrame.color.alphaMultiplier + _durationColor.alphaMultiplier * progress,
-						currentFrame.color.redMultiplier + _durationColor.redMultiplier * progress,
-						currentFrame.color.greenMultiplier + _durationColor.greenMultiplier * progress,
-						currentFrame.color.blueMultiplier + _durationColor.blueMultiplier * progress,
+						currentFrame.color.alphaOffset 		+ _durationColor.alphaOffset 		* progress,
+						currentFrame.color.redOffset 		+ _durationColor.redOffset 			* progress,
+						currentFrame.color.greenOffset 		+ _durationColor.greenOffset 		* progress,
+						currentFrame.color.blueOffset 		+ _durationColor.blueOffset 		* progress,
+						currentFrame.color.alphaMultiplier 	+ _durationColor.alphaMultiplier 	* progress,
+						currentFrame.color.redMultiplier 	+ _durationColor.redMultiplier 		* progress,
+						currentFrame.color.greenMultiplier 	+ _durationColor.greenMultiplier 	* progress,
+						currentFrame.color.blueMultiplier	+ _durationColor.blueMultiplier 	* progress,
 						true
 					);
 				}
 				else
 				{
 					_slot.updateDisplayColor(
-						_durationColor.alphaOffset * progress,
-						_durationColor.redOffset * progress,
-						_durationColor.greenOffset * progress,
-						_durationColor.blueOffset * progress,
-						1 + _durationColor.alphaMultiplier * progress,
-						1 + _durationColor.redMultiplier * progress,
-						1 + _durationColor.greenMultiplier * progress,
-						1 + _durationColor.blueMultiplier * progress,
+						_durationColor.alphaOffset 		* progress,
+						_durationColor.redOffset 		* progress,
+						_durationColor.greenOffset 		* progress,
+						_durationColor.blueOffset 		* progress,
+						_durationColor.alphaMultiplier 	* progress + 1,
+						_durationColor.redMultiplier 	* progress + 1,
+						_durationColor.greenMultiplier 	* progress + 1,
+						_durationColor.blueMultiplier 	* progress + 1,
 						true
 					);
 				}
@@ -514,25 +483,12 @@ package dragonBones.fast.animation
 				}
 				else
 				{
-					targetColor = originalColor;
+					targetColor = ColorTransformUtil.originalColor;
 					colorChanged = false;
 				}
 				if ((_slot._isColorChanged || colorChanged))
 				{
-					var color1:ColorTransform = _slot._colorTransform;
-					
-					if(	color1.alphaOffset == targetColor.alphaOffset &&
-						color1.redOffset == targetColor.redOffset &&
-						color1.greenOffset == targetColor.greenOffset &&
-						color1.blueOffset == targetColor.blueOffset &&
-						color1.alphaMultiplier == targetColor.alphaMultiplier &&
-						color1.redMultiplier == targetColor.redMultiplier &&
-						color1.greenMultiplier == targetColor.greenMultiplier &&
-						color1.blueMultiplier == targetColor.blueMultiplier)
-					{
-						
-					}
-					else
+					if(	!ColorTransformUtil.isEqual(_slot._colorTransform, targetColor))
 					{
 						_slot.updateDisplayColor(
 							targetColor.alphaOffset, 

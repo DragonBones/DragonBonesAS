@@ -1,5 +1,6 @@
 package dragonBones.core
 {
+	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	
 	import dragonBones.cache.FrameCache;
@@ -9,7 +10,6 @@ package dragonBones.core
 	{
 		function get name():String;
 		function set frameCache(cache:FrameCache):void;
-		function get global():DBTransform;
-		function get globalTransformMatrix():Matrix;
+		
 	}
 }

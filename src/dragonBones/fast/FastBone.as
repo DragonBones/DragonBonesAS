@@ -61,7 +61,13 @@ package dragonBones.fast
 			}
 		}
 		
-		
+		/** @private */
+		override dragonBones_internal function updateByCache():void
+		{
+			super.updateByCache();
+			_global = _frameCache.globalTransform;
+			_globalTransformMatrix = _frameCache.globalTransformMatrix;
+		}
 		
 		/** @private */
 		dragonBones_internal function update(needUpdate:Boolean = false):void

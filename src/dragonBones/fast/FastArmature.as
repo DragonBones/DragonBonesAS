@@ -176,13 +176,10 @@ package dragonBones.fast
 			while(i--)
 			{
 				slot = slotList[i];
-				if(slot._isShowDisplay)
+				var childArmature:FastArmature = slot.childArmature;
+				if(childArmature)
 				{
-					var childArmature:FastArmature = slot.childArmature;
-					if(childArmature)
-					{
-						childArmature.advanceTime(passedTime);
-					}
+					childArmature.advanceTime(passedTime);
 				}
 			}
 			
@@ -264,11 +261,7 @@ package dragonBones.fast
 			while(i --)
 			{
 				var slot:FastSlot = slotList[i];
-				if(slot._isShowDisplay)
-				{
-					//_display 实际上是container, 这个方法就是把原来的显示对象放到container中的第一个
-					slot.addDisplayToContainer(_display);
-				}
+				slot.addDisplayToContainer(_display);
 			}
 			
 			_slotsZOrderChanged = false;

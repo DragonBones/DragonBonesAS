@@ -4,17 +4,22 @@ package dragonBones.fast
 	import flash.geom.ColorTransform;
 	
 	import dragonBones.animation.SlotTimelineState;
+	import dragonBones.cache.FrameCache;
+	import dragonBones.cache.SlotFrameCache;
+	import dragonBones.core.ISlotCacheGenerator;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.fast.animation.FastAnimation;
 	import dragonBones.fast.animation.FastAnimationState;
 	import dragonBones.fast.animation.FastSlotTimelineState;
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.SlotData;
 	import dragonBones.objects.SlotFrame;
+	import dragonBones.utils.ColorTransformUtil;
 
 	use namespace dragonBones_internal;
-	
-	public class FastSlot extends FastDBObject
+
+	public class FastSlot extends FastDBObject implements ISlotCacheGenerator
 	{
 		/** @private Need to keep the reference of DisplayData. When slot switch displayObject, it need to restore the display obect's origional pivot. */
 		dragonBones_internal var _displayDataList:Vector.<DisplayData>;
@@ -30,7 +35,7 @@ package dragonBones.fast
 		dragonBones_internal var _colorTransform:ColorTransform;
 		dragonBones_internal var _isColorChanged:Boolean;
 		protected var _currentDisplay:Object;
-		dragonBones_internal var _isShowDisplay:Boolean;
+//		dragonBones_internal var _isShowDisplay:Boolean;
 		
 		protected var _blendMode:String;
 		
@@ -47,13 +52,12 @@ package dragonBones.fast
 				throw new IllegalOperationError("Abstract class can not be instantiated!");
 			}
 			hasChildArmature = false;
-			_displayList = [];
 			_currentDisplayIndex = -1;
 			
 			_originZOrder = 0;
 			_tweenZOrder = 0;
 			_offsetZOrder = 0;
-			_isShowDisplay = false;
+//			_isShowDisplay = false;
 			_colorTransform = new ColorTransform();
 			_isColorChanged = false;
 			_displayDataList = null;
@@ -71,7 +75,6 @@ package dragonBones.fast
 			_displayDataList = slotData.displayDataList;
 		}
 		
-		
 		/**
 		 * @inheritDoc
 		 */
@@ -84,14 +87,10 @@ package dragonBones.fast
 			
 			super.dispose();
 			
-			_displayList.length = 0;
-			
 			_displayDataList = null;
 			_displayList = null;
 			_currentDisplay = null;
-			//_childArmature = null;
 			_timelineState = null;
-			
 		}
 		
 		private function sortState(state1:SlotTimelineState, state2:SlotTimelineState):int
@@ -99,37 +98,28 @@ package dragonBones.fast
 			return state1._animationState.layer < state2._animationState.layer?-1:1;
 		}
 		
-//		//骨架装配
-//		/** @private */
-//		override dragonBones_internal function setArmature(value:FastArmature):void
-//		{
-//			if(_armature == value)
-//			{
-//				return;
-//			}
-//			if(_armature)
-//			{
-//				_armature.removeSlotFromSlotList(this);
-//			}
-//			_armature = value;
-//			if(_armature)
-//			{
-//				_armature.addSlotToSlotList(this);
-//				_armature._slotsZOrderChanged = true;
-//				addDisplayToContainer(this._armature.display);
-//			}
-//			else
-//			{
-//				removeDisplayFromContainer();
-//			}
-//		}
-		
 		//动画
 		/** @private */
 		override dragonBones_internal function updateByCache():void
 		{
 			super.updateByCache();
 			updateTransform();
+			var cacheColor:ColorTransform = (this._frameCache as SlotFrameCache).colorTransform;
+			var cacheColorChanged:Boolean = cacheColor != null;
+			if(	this.colorChanged != cacheColorChanged ||
+				(this.colorChanged && cacheColorChanged && !ColorTransformUtil.isEqual(_colorTransform, cacheColor)))
+			{
+				cacheColor = cacheColor || ColorTransformUtil.originalColor;
+				updateDisplayColor(	cacheColor.alphaOffset, 
+									cacheColor.redOffset, 
+									cacheColor.greenOffset, 
+									cacheColor.blueOffset,
+									cacheColor.alphaMultiplier, 
+									cacheColor.redMultiplier, 
+									cacheColor.greenMultiplier, 
+									cacheColor.blueMultiplier,
+									cacheColorChanged);
+			}
 		}
 		
 		/** @private */
@@ -149,13 +139,138 @@ package dragonBones.fast
 			_global.copy(this._origin);
 		}
 		
-		private function updateChildArmatureAnimation():void
+//		private function updateChildArmatureAnimation():void
+//		{
+//			var targetArmature:FastArmature = childArmature;
+//			if(targetArmature)
+//			{
+//				if(	this.armature &&
+//					this.armature.animation.animationState &&
+//					targetArmature.animation.hasAnimation(this.armature.animation.animationState.name))
+//				{
+//					targetArmature.animation.gotoAndPlay(this.armature.animation.animationState.name);
+//				}
+//				else
+//				{
+//					targetArmature.animation.play();
+//				}
+//			}
+//		}
+		
+		dragonBones_internal function initDisplayList(newDisplayList:Array):void
 		{
-			var targetArmature:FastArmature = childArmature;
-			if(targetArmature)
+			this._displayList = newDisplayList;
+		}
+		
+		private function clearCurrentDisplay():int
+		{
+			if(hasChildArmature)
 			{
-				if(_isShowDisplay)
+				var targetArmature:FastArmature = this.childArmature;
+				if(targetArmature)
 				{
+					var animation:FastAnimation = targetArmature.animation;
+					var animationState:FastAnimationState = animation.animationState;
+					animation.stop();
+					if(animationState)
+					{
+						FastAnimationState.returnObject(animationState);
+						animation.animationState = null;
+					}
+					
+				}
+			}
+			
+			var slotIndex:int = getDisplayIndex();
+			removeDisplayFromContainer();
+			return slotIndex;
+		}
+		
+		/** @private */
+		dragonBones_internal function changeDisplayIndex(displayIndex:int):void
+		{
+			if(_currentDisplayIndex == displayIndex)
+			{
+				return;
+			}
+			
+			var slotIndex:int = -1;
+			if(_currentDisplayIndex >=0)
+			{
+				slotIndex = clearCurrentDisplay();
+			}
+			
+			_currentDisplayIndex = displayIndex;
+			
+			if(_currentDisplayIndex >=0)
+			{
+				this._origin.copy(_displayDataList[_currentDisplayIndex].transform);
+				this.initCurrentDisplay(slotIndex);
+			}
+		}
+		
+		//currentDisplayIndex不变，改变内容，必须currentDisplayIndex >=0
+		private function changeSlotDisplay(value:Object):void
+		{
+			var slotIndex:int = clearCurrentDisplay();
+			_displayList[_currentDisplayIndex] = value;
+			this.initCurrentDisplay(slotIndex);
+		}
+		
+		private function initCurrentDisplay(slotIndex:int):void
+		{
+			var display:Object = _displayList[_currentDisplayIndex];
+			if (display)
+			{
+				if(display is FastArmature)
+				{
+					_currentDisplay = (display as FastArmature).display;
+				}
+				else
+				{
+					_currentDisplay = display;
+				}
+			}
+			else
+			{
+				_currentDisplay = null;
+			}
+			
+			updateDisplay(_currentDisplay);
+			if(_currentDisplay)
+			{
+				if(slotIndex != -1)
+				{
+					addDisplayToContainer(this.armature.display, slotIndex);
+				}
+				else
+				{
+					this.armature._slotsZOrderChanged = true;
+					addDisplayToContainer(this.armature.display);
+				}
+				
+				if(_blendMode)
+				{
+					updateDisplayBlendMode(_blendMode);
+				}
+				if(_isColorChanged)
+				{
+					updateDisplayColor(	_colorTransform.alphaOffset, 
+						_colorTransform.redOffset, 
+						_colorTransform.greenOffset, 
+						_colorTransform.blueOffset,
+						_colorTransform.alphaMultiplier, 
+						_colorTransform.redMultiplier, 
+						_colorTransform.greenMultiplier, 
+						_colorTransform.blueMultiplier,
+						true);
+				}
+				updateTransform();
+				
+				if(_currentDisplay is FastArmature)
+				{
+					var targetArmature:FastArmature = _currentDisplay as FastArmature;
+					
 					if(	this.armature &&
 						this.armature.animation.animationState &&
 						targetArmature.animation.hasAnimation(this.armature.animation.animationState.name))
@@ -167,131 +282,6 @@ package dragonBones.fast
 						targetArmature.animation.play();
 					}
 				}
-				else
-				{
-					targetArmature.animation.stop();
-					targetArmature.animation.animationState = null;
-				}
-			}
-		}
-		
-		/** @private */
-		dragonBones_internal function changeDisplay(displayIndex:int):void
-		{
-			if (displayIndex < 0)
-			{
-				if(_isShowDisplay)
-				{
-					_isShowDisplay = false;
-					removeDisplayFromContainer();
-					updateChildArmatureAnimation();
-				}
-			}
-			else if (_displayList.length > 0)
-			{
-				var length:uint = _displayList.length;
-				if(displayIndex >= length)
-				{
-					displayIndex = length - 1;
-				}
-				
-				if(_currentDisplayIndex != displayIndex)
-				{
-					_isShowDisplay = true;
-					_currentDisplayIndex = displayIndex;
-					updateSlotDisplay();
-					//updateTransform();//解决当时间和bone不统一时会换皮肤时会跳的bug
-					updateChildArmatureAnimation();
-					if(
-						_displayDataList && 
-						_displayDataList.length > 0 && 
-						_currentDisplayIndex < _displayDataList.length
-					)
-					{
-						this._origin.copy(_displayDataList[_currentDisplayIndex].transform);
-					}
-				}
-				else if(!_isShowDisplay)
-				{
-					_isShowDisplay = true;
-					if(this.armature)
-					{
-						this.armature._slotsZOrderChanged = true;
-						addDisplayToContainer(this.armature.display);
-					}
-					updateChildArmatureAnimation();
-				}
-				
-			}
-		}
-		
-		/** @private 
-		 * Updates the display of the slot.
-		 */
-		dragonBones_internal function updateSlotDisplay():void
-		{
-			var currentDisplayIndex:int = -1;
-			if(_currentDisplay)
-			{
-				currentDisplayIndex = getDisplayIndex();
-				removeDisplayFromContainer();
-			}
-			var displayObj:Object = _displayList[_currentDisplayIndex];
-			if (displayObj)
-			{
-				if(displayObj is FastArmature)
-				{
-					//_childArmature = display as Armature;
-					_currentDisplay = (displayObj as FastArmature).display;
-				}
-				else
-				{
-					//_childArmature = null;
-					_currentDisplay = displayObj;
-				}
-			}
-			else
-			{
-				_currentDisplay = null;
-				//_childArmature = null;
-			}
-			updateDisplay(_currentDisplay);
-			if(_currentDisplay)
-			{
-				if(this.armature && _isShowDisplay)
-				{
-					if(currentDisplayIndex < 0)
-					{
-						this.armature._slotsZOrderChanged = true;
-						addDisplayToContainer(this.armature.display);
-					}
-					else
-					{
-						addDisplayToContainer(this.armature.display, currentDisplayIndex);
-					}
-				}
-				updateDisplayBlendMode(_blendMode);
-				updateDisplayColor(	_colorTransform.alphaOffset, 
-									_colorTransform.redOffset, 
-									_colorTransform.greenOffset, 
-									_colorTransform.blueOffset,
-									_colorTransform.alphaMultiplier, 
-									_colorTransform.redMultiplier, 
-									_colorTransform.greenMultiplier, 
-									_colorTransform.blueMultiplier,
-									_isColorChanged);
-				updateDisplayVisible(_visible);
-				updateTransform();
-			}
-		}
-		
-		/** @private */
-		override public function set visible(value:Boolean):void
-		{
-			if(this._visible != value)
-			{
-				this._visible = value;
-				updateDisplayVisible(this._visible);
 			}
 		}
 		
@@ -304,33 +294,21 @@ package dragonBones.fast
 		}
 		public function set displayList(value:Array):void
 		{
+			//todo: 考虑子骨架变化的各种情况
 			if(!value)
 			{
 				throw new ArgumentError();
 			}
 			
-			//为什么要修改_currentDisplayIndex?
-			if (_currentDisplayIndex < 0)
-			{
-				_currentDisplayIndex = 0;
-			}
-			var i:int = _displayList.length = value.length;
-			var item:Object;
-			while(i --)
-			{
-				item = value[i];
-				_displayList[i] = item;
-				if(item is FastArmature)
-				{
-					this.hasChildArmature = true;
-				}
-			}
+			var newDisplay:Object = value[_currentDisplayIndex];
+			var displayChanged:Boolean = _currentDisplayIndex >= 0 && _displayList[_currentDisplayIndex] != newDisplay;
 			
-			//在index不改变的情况下强制刷新 TO DO需要修改
-			var displayIndexBackup:int = _currentDisplayIndex;
-			_currentDisplayIndex = -1;
-			changeDisplay(displayIndexBackup);
-			updateTransform();
+			_displayList = value;
+			
+			if(displayChanged)
+			{
+				changeSlotDisplay(newDisplay);
+			}
 		}
 		
 		/**
@@ -342,18 +320,17 @@ package dragonBones.fast
 		}
 		public function set display(value:Object):void
 		{
+			//todo: 考虑子骨架变化的各种情况
 			if (_currentDisplayIndex < 0)
 			{
-				_currentDisplayIndex = 0;
+				return;
 			}
 			if(_displayList[_currentDisplayIndex] == value)
 			{
 				return;
 			}
-			_displayList[_currentDisplayIndex] = value;
-			updateSlotDisplay();
-			updateChildArmatureAnimation();
-			updateTransform();//是否可以延迟更新？
+			
+			changeSlotDisplay(value);
 		}
 		
 		/**
@@ -362,11 +339,6 @@ package dragonBones.fast
 		public function get childArmature():FastArmature
 		{
 			return _displayList[_currentDisplayIndex] is FastArmature ? _displayList[_currentDisplayIndex] : null;
-		}
-		public function set childArmature(value:FastArmature):void
-		{
-			//设计的不好，要修改
-			display = value;
 		}
 		
 		/**
@@ -406,8 +378,24 @@ package dragonBones.fast
 			}
 		}
 		
+		/**
+		 * Indicates the Bone instance that directly contains this DBObject instance if any.
+		 */
+		public function get colorTransform():ColorTransform
+		{
+			return _colorTransform;
+		}
 		//Abstract method
 		
+		public function get dispalyIndex():int
+		{
+			return _currentDisplayIndex
+		}
+		
+		public function get colorChanged():Boolean
+		{
+			return _isColorChanged;
+		}
 		/**
 		 * @private
 		 */
@@ -515,7 +503,7 @@ package dragonBones.fast
 		{
 			var slotFrame:SlotFrame = frame as SlotFrame;
 			var displayIndex:int = slotFrame.displayIndex;
-			changeDisplay(displayIndex);
+			changeDisplayIndex(displayIndex);
 			updateDisplayVisible(slotFrame.visible);
 			if(displayIndex >= 0)
 			{

@@ -89,7 +89,7 @@ package dragonBones.cache
 //			}
 			for each(cacheUser in armature._slotDic)
 			{
-				slotFrameCacheDic[cacheUser.name] = new FrameCache();
+				slotFrameCacheDic[cacheUser.name] = new SlotFrameCache();
 			}
 			
 			for each(var animationCache:AnimationCache in animationCacheDic)
