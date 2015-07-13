@@ -90,7 +90,6 @@ package dragonBones.fast
 			_displayDataList = null;
 			_displayList = null;
 			_currentDisplay = null;
-			_timelineState = null;
 		}
 		
 		private function sortState(state1:SlotTimelineState, state2:SlotTimelineState):int

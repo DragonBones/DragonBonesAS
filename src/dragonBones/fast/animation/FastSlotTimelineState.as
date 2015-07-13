@@ -100,11 +100,7 @@ package dragonBones.fast.animation
 		
 		private function clear():void
 		{
-			if(_slot)
-			{
-				_slot._timelineState = null;
-				_slot = null;
-			}
+			_slot = null;
 			_armature = null;
 			_animation = null;
 			_animationState = null;
@@ -147,8 +143,6 @@ package dragonBones.fast.animation
 					_updateMode = -1;
 					break;
 			}
-			
-			_slot._timelineState = this;
 		}
 		
 	//动画进行中

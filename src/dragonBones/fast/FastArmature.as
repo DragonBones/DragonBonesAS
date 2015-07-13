@@ -377,10 +377,6 @@ package dragonBones.fast
 			{
 				boneItem._timelineState = null;
 			}
-			for each(var slotItem:FastSlot in slotList)
-			{
-				slotItem._timelineState = null;
-			}
 		}
 		
 		private function sortSlot(slot1:FastSlot, slot2:FastSlot):int

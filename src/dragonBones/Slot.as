@@ -42,7 +42,7 @@
 		/** @private */
 		dragonBones_internal var _isColorChanged:Boolean;
 		/** @private */
-		protected var _timelineStateList:Vector.<SlotTimelineState>;
+//		protected var _timelineStateList:Vector.<SlotTimelineState>;
 		
 		public function Slot(self:Slot)
 		{
@@ -65,7 +65,7 @@
 			_displayDataList = null;
 			//_childArmature = null;
 			_currentDisplay = null;
-			_timelineStateList = new Vector.<SlotTimelineState>;
+//			_timelineStateList = new Vector.<SlotTimelineState>;
 			
 			this.inheritRotation = true;
 			this.inheritScale = true;
@@ -92,13 +92,12 @@
 			super.dispose();
 			
 			_displayList.length = 0;
-			_timelineStateList.length = 0;
+//			_timelineStateList.length = 0;
 			
 			_displayDataList = null;
 			_displayList = null;
 			_currentDisplay = null;
-			//_childArmature = null;
-			_timelineStateList = null;
+//			_timelineStateList = null;
 			
 		}
 		
@@ -108,24 +107,24 @@
 		}
 		
 		/** @private */
-		dragonBones_internal function addState(timelineState:SlotTimelineState):void
-		{
-			if(_timelineStateList.indexOf(timelineState) < 0)
-			{
-				_timelineStateList.push(timelineState);
-				_timelineStateList.sort(sortState);
-			}
-		}
+//		dragonBones_internal function addState(timelineState:SlotTimelineState):void
+//		{
+//			if(_timelineStateList.indexOf(timelineState) < 0)
+//			{
+//				_timelineStateList.push(timelineState);
+//				_timelineStateList.sort(sortState);
+//			}
+//		}
 		
 		/** @private */
-		dragonBones_internal function removeState(timelineState:SlotTimelineState):void
-		{
-			var index:int = _timelineStateList.indexOf(timelineState);
-			if(index >= 0)
-			{
-				_timelineStateList.splice(index, 1);
-			}
-		}
+//		dragonBones_internal function removeState(timelineState:SlotTimelineState):void
+//		{
+//			var index:int = _timelineStateList.indexOf(timelineState);
+//			if(index >= 0)
+//			{
+//				_timelineStateList.splice(index, 1);
+//			}
+//		}
 		
 //骨架装配
 		/** @private */

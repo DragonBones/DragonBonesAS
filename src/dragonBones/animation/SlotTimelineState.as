@@ -97,11 +97,12 @@ package dragonBones.animation
 		
 		private function clear():void
 		{
-			if(_slot)
-			{
-				_slot.removeState(this);
-				_slot = null;
-			}
+//			if(_slot)
+//			{
+//				_slot.removeState(this);
+//				_slot = null;
+//			}
+			_slot = null;
 			_armature = null;
 			_animation = null;
 			_animationState = null;
@@ -146,7 +147,7 @@ package dragonBones.animation
 					break;
 			}
 			
-			_slot.addState(this);
+//			_slot.addState(this);
 		}
 		
 	//动画进行中
