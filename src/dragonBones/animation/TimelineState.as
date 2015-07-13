@@ -318,17 +318,18 @@ package dragonBones.animation
 				{
 					_bone.arriveAtFrame(currentFrame, this, _animationState, false);
 					
-					_blendEnabled = currentFrame.displayIndex >= 0;
-					if(_blendEnabled)
-					{
-						updateToNextFrame(currentPlayTimes);
-					}
-					else
-					{
-						_tweenEasing = NaN;
-						_tweenTransform = false;
-						_tweenScale = false;
-					}
+					_blendEnabled = true;
+					updateToNextFrame(currentPlayTimes);
+//					if(_blendEnabled)
+//					{
+//						
+//					}
+//					else
+//					{
+//						_tweenEasing = NaN;
+//						_tweenTransform = false;
+//						_tweenScale = false;
+//					}
 				}
 				
 				if(_blendEnabled)
@@ -363,11 +364,11 @@ package dragonBones.animation
 				_tweenEasing = NaN;
 				tweenEnabled = false;
 			}
-			else if(currentFrame.displayIndex < 0 || nextFrame.displayIndex < 0)
-			{
-				_tweenEasing = NaN;
-				tweenEnabled = false;
-			}
+//			else if(currentFrame.displayIndex < 0 || nextFrame.displayIndex < 0)
+//			{
+//				_tweenEasing = NaN;
+//				tweenEnabled = false;
+//			}
 			else if(_animationState.autoTween)
 			{
 				_tweenEasing = _animationState.clip.tweenEasing;
@@ -560,46 +561,43 @@ package dragonBones.animation
 			_tweenScale = false;
 			//_tweenColor = false;
 			
-			_blendEnabled = currentFrame.displayIndex >= 0;
-			if(_blendEnabled)
+			_blendEnabled = true;
+			/**
+			 * <使用绝对数据>
+			 * 单帧的timeline，第一个关键帧的transform为0
+			 * timeline.originTransform = firstFrame.transform;
+			 * eachFrame.transform = eachFrame.transform - timeline.originTransform;
+			 * firstFrame.transform == 0;
+			 * 
+			 * <使用相对数据>
+			 * 使用相对数据时，timeline.originTransform = 0，第一个关键帧的transform有可能不为 0
+			 */
+			if(_animationState.additiveBlending)
 			{
-				/**
-				 * <使用绝对数据>
-				 * 单帧的timeline，第一个关键帧的transform为0
-				 * timeline.originTransform = firstFrame.transform;
-				 * eachFrame.transform = eachFrame.transform - timeline.originTransform;
-				 * firstFrame.transform == 0;
-				 * 
-				 * <使用相对数据>
-				 * 使用相对数据时，timeline.originTransform = 0，第一个关键帧的transform有可能不为 0
-				 */
-				if(_animationState.additiveBlending)
-				{
-					_transform.x = currentFrame.transform.x;
-					_transform.y = currentFrame.transform.y;
-					_transform.skewX = currentFrame.transform.skewX;
-					_transform.skewY = currentFrame.transform.skewY;
-					_transform.scaleX = currentFrame.transform.scaleX;
-					_transform.scaleY = currentFrame.transform.scaleY;
-					
-					_pivot.x = currentFrame.pivot.x;
-					_pivot.y = currentFrame.pivot.y;
-				}
-				else
-				{
-					_transform.x = _originTransform.x + currentFrame.transform.x;
-					_transform.y = _originTransform.y + currentFrame.transform.y;
-					_transform.skewX = _originTransform.skewX + currentFrame.transform.skewX;
-					_transform.skewY = _originTransform.skewY + currentFrame.transform.skewY;
-					_transform.scaleX = _originTransform.scaleX * currentFrame.transform.scaleX;
-					_transform.scaleY = _originTransform.scaleY * currentFrame.transform.scaleY;
-					
-					_pivot.x = _originPivot.x + currentFrame.pivot.x;
-					_pivot.y = _originPivot.y + currentFrame.pivot.y;
-				}
+				_transform.x = currentFrame.transform.x;
+				_transform.y = currentFrame.transform.y;
+				_transform.skewX = currentFrame.transform.skewX;
+				_transform.skewY = currentFrame.transform.skewY;
+				_transform.scaleX = currentFrame.transform.scaleX;
+				_transform.scaleY = currentFrame.transform.scaleY;
 				
-				_bone.invalidUpdate();
+				_pivot.x = currentFrame.pivot.x;
+				_pivot.y = currentFrame.pivot.y;
 			}
+			else
+			{
+				_transform.x = _originTransform.x + currentFrame.transform.x;
+				_transform.y = _originTransform.y + currentFrame.transform.y;
+				_transform.skewX = _originTransform.skewX + currentFrame.transform.skewX;
+				_transform.skewY = _originTransform.skewY + currentFrame.transform.skewY;
+				_transform.scaleX = _originTransform.scaleX * currentFrame.transform.scaleX;
+				_transform.scaleY = _originTransform.scaleY * currentFrame.transform.scaleY;
+				
+				_pivot.x = _originPivot.x + currentFrame.pivot.x;
+				_pivot.y = _originPivot.y + currentFrame.pivot.y;
+			}
+			
+			_bone.invalidUpdate();
 		}
 		
 		

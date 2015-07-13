@@ -13,7 +13,10 @@
 	import dragonBones.Armature;
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.display.StarlingFastSlot;
 	import dragonBones.display.StarlingSlot;
+	import dragonBones.fast.FastArmature;
+	import dragonBones.fast.FastSlot;
 	import dragonBones.textures.ITextureAtlas;
 	import dragonBones.textures.StarlingTextureAtlas;
 	
@@ -123,9 +126,27 @@
 		}
 		
 		/** @private */
+		override protected function generateFastArmature():FastArmature
+		{
+			var armature:FastArmature = new FastArmature(new Sprite());
+			return armature;
+		}
+		
+		/** @private */
 		override protected function generateSlot():Slot
 		{
 			var slot:Slot = new StarlingSlot();
+			return slot;
+		}
+		
+		/**
+		 * @private
+		 * Generates an Slot instance.
+		 * @return Slot An Slot instance.
+		 */
+		override protected function generateFastSlot():FastSlot
+		{
+			var slot:FastSlot = new StarlingFastSlot();
 			return slot;
 		}
 		

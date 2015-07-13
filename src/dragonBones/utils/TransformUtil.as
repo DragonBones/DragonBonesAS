@@ -91,6 +91,5 @@ package dragonBones.utils
 				transform.skewY = skewYArray[1];
 			}
 		}
-		
 	}
 }

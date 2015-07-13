@@ -157,7 +157,6 @@ package dragonBones.core
 		
 		protected function calculateParentTransform():Object
 		{
-			
 			if(this.parent && (this.inheritTranslation || this.inheritRotation || this.inheritScale))
 			{
 				var parentGlobalTransform:DBTransform = this._parent._globalTransformForChild;

@@ -1,37 +1,38 @@
-package dragonBones.animation
+package dragonBones.fast.animation
 {
 	import flash.geom.ColorTransform;
 	
-	import dragonBones.Armature;
-	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.fast.FastArmature;
+	import dragonBones.fast.FastSlot;
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.SlotFrame;
 	import dragonBones.objects.SlotTimeline;
+	import dragonBones.utils.ColorTransformUtil;
 	import dragonBones.utils.MathUtil;
 	
 	use namespace dragonBones_internal;
 	
 	/** @private */
-	public final class SlotTimelineState
+	public final class FastSlotTimelineState
 	{
 		private static const HALF_PI:Number = Math.PI * 0.5;
 		private static const DOUBLE_PI:Number = Math.PI * 2;
 		
-		private static var _pool:Vector.<SlotTimelineState> = new Vector.<SlotTimelineState>;
+		private static var _pool:Vector.<FastSlotTimelineState> = new Vector.<FastSlotTimelineState>;
 		
 		/** @private */
-		dragonBones_internal static function borrowObject():SlotTimelineState
+		dragonBones_internal static function borrowObject():FastSlotTimelineState
 		{
 			if(_pool.length == 0)
 			{
-				return new SlotTimelineState();
+				return new FastSlotTimelineState();
 			}
 			return _pool.pop();
 		}
 		
 		/** @private */
-		dragonBones_internal static function returnObject(timeline:SlotTimelineState):void
+		dragonBones_internal static function returnObject(timeline:FastSlotTimelineState):void
 		{
 			if(_pool.indexOf(timeline) < 0)
 			{
@@ -52,6 +53,8 @@ package dragonBones.animation
 			_pool.length = 0;
 		}
 		
+		
+		
 		public var name:String;
 		
 		/** @private */
@@ -65,7 +68,7 @@ package dragonBones.animation
 		dragonBones_internal var _isComplete:Boolean;
 		
 		/** @private */
-		dragonBones_internal var _animationState:AnimationState;
+		dragonBones_internal var _animationState:FastAnimationState;
 		
 		private var _totalTime:int; //duration
 		
@@ -76,32 +79,27 @@ package dragonBones.animation
 		
 		private var _tweenEasing:Number;
 		private var _tweenColor:Boolean;
-		
-		private var _rawAnimationScale:Number;
+		private var _colorChanged:Boolean;
 		
 		//-1: frameLength>1, 0:frameLength==0, 1:frameLength==1
 		private var _updateMode:int;
 		
-		private var _armature:Armature;
-		private var _animation:Animation;
-		private var _slot:Slot;
+		private var _armature:FastArmature;
+		private var _animation:FastAnimation;
+		private var _slot:FastSlot;
 		
 		private var _timelineData:SlotTimeline;
 		private var _durationColor:ColorTransform;
 		
 		
-		public function SlotTimelineState()
+		
+		public function FastSlotTimelineState()
 		{
 			_durationColor = new ColorTransform();
 		}
 		
 		private function clear():void
 		{
-//			if(_slot)
-//			{
-//				_slot.removeState(this);
-//				_slot = null;
-//			}
 			_slot = null;
 			_armature = null;
 			_animation = null;
@@ -111,7 +109,7 @@ package dragonBones.animation
 		
 	//动画开始结束
 		/** @private */
-		dragonBones_internal function fadeIn(slot:Slot, animationState:AnimationState, timelineData:SlotTimeline):void
+		dragonBones_internal function fadeIn(slot:FastSlot, animationState:FastAnimationState, timelineData:SlotTimeline):void
 		{
 			_slot = slot;
 			_armature = _slot.armature;
@@ -122,7 +120,6 @@ package dragonBones.animation
 			name = timelineData.name;
 			
 			_totalTime = _timelineData.duration;
-			_rawAnimationScale = _animationState.clip.scale;
 			
 			_isComplete = false;
 			_blendEnabled = false;
@@ -146,11 +143,14 @@ package dragonBones.animation
 					_updateMode = -1;
 					break;
 			}
-			
-//			_slot.addState(this);
 		}
 		
 	//动画进行中
+		
+		/** @private */
+		dragonBones_internal function updateFade(progress:Number):void
+		{
+		}
 		
 		/** @private */
 		dragonBones_internal function update(progress:Number):void
@@ -257,7 +257,7 @@ package dragonBones.animation
 					
 					if(prevFrame)
 					{
-						_slot.arriveAtFrame(prevFrame, this, _animationState, true);
+						_slot.arriveAtFrame(prevFrame, _animationState);
 					}
 					
 					_currentFrameDuration = currentFrame.duration;
@@ -267,7 +267,7 @@ package dragonBones.animation
 				
 				if(currentFrame)
 				{
-					_slot.arriveAtFrame(currentFrame, this, _animationState, false);
+					_slot.arriveAtFrame(currentFrame, _animationState);
 					
 					_blendEnabled = currentFrame.displayIndex >= 0;
 					if(_blendEnabled)
@@ -287,7 +287,7 @@ package dragonBones.animation
 				}
 			}
 		}
-		
+
 		private function updateToNextFrame(currentPlayTimes:int):void
 		{
 			var nextFrameIndex:int = _currentFrameIndex + 1;
@@ -298,15 +298,11 @@ package dragonBones.animation
 			var currentFrame:SlotFrame = _timelineData.frameList[_currentFrameIndex] as SlotFrame;
 			var nextFrame:SlotFrame = _timelineData.frameList[nextFrameIndex] as SlotFrame;
 			var tweenEnabled:Boolean = false;
-			if(
-				nextFrameIndex == 0 &&
+			if(nextFrameIndex == 0 &&
 				(
-					!_animationState.lastFrameAutoTween ||
-					(
-						_animationState.playTimes &&
-						_animationState.currentPlayTimes >= _animationState.playTimes && 
-						((_currentFramePosition + _currentFrameDuration) / _totalTime + currentPlayTimes - _timelineData.offset) * _timelineData.scale > 0.999999
-					)
+					_animationState.playTimes &&
+					_animationState.currentPlayTimes >= _animationState.playTimes && 
+					((_currentFramePosition + _currentFrameDuration) / _totalTime + currentPlayTimes - _timelineData.offset) * _timelineData.scale > 0.999999
 				)
 			)
 			{
@@ -320,7 +316,7 @@ package dragonBones.animation
 			}
 			else if(_animationState.autoTween)
 			{
-				_tweenEasing = _animationState.clip.tweenEasing;
+				_tweenEasing = _animationState.animationData.tweenEasing;
 				if(isNaN(_tweenEasing))
 				{
 					_tweenEasing = currentFrame.tweenEasing;
@@ -361,61 +357,17 @@ package dragonBones.animation
 			
 			if(tweenEnabled)
 			{
-				if(currentFrame.color && nextFrame.color)
+				if(currentFrame.color || nextFrame.color)
 				{
-					_durationColor.alphaOffset = nextFrame.color.alphaOffset - currentFrame.color.alphaOffset;
-					_durationColor.redOffset = nextFrame.color.redOffset - currentFrame.color.redOffset;
-					_durationColor.greenOffset = nextFrame.color.greenOffset - currentFrame.color.greenOffset;
-					_durationColor.blueOffset = nextFrame.color.blueOffset - currentFrame.color.blueOffset;
-					
-					_durationColor.alphaMultiplier = nextFrame.color.alphaMultiplier - currentFrame.color.alphaMultiplier;
-					_durationColor.redMultiplier = nextFrame.color.redMultiplier - currentFrame.color.redMultiplier;
-					_durationColor.greenMultiplier = nextFrame.color.greenMultiplier - currentFrame.color.greenMultiplier;
-					_durationColor.blueMultiplier = nextFrame.color.blueMultiplier - currentFrame.color.blueMultiplier;
-					
-					if(
-						_durationColor.alphaOffset ||
-						_durationColor.redOffset ||
-						_durationColor.greenOffset ||
-						_durationColor.blueOffset ||
-						_durationColor.alphaMultiplier ||
-						_durationColor.redMultiplier ||
-						_durationColor.greenMultiplier ||
-						_durationColor.blueMultiplier 
-					)
-					{
-						_tweenColor = true;
-					}
-					else
-					{
-						_tweenColor = false;
-					}
-				}
-				else if(currentFrame.color)
-				{
-					_tweenColor = true;
-					_durationColor.alphaOffset = -currentFrame.color.alphaOffset;
-					_durationColor.redOffset = -currentFrame.color.redOffset;
-					_durationColor.greenOffset = -currentFrame.color.greenOffset;
-					_durationColor.blueOffset = -currentFrame.color.blueOffset;
-					
-					_durationColor.alphaMultiplier = 1 - currentFrame.color.alphaMultiplier;
-					_durationColor.redMultiplier = 1 - currentFrame.color.redMultiplier;
-					_durationColor.greenMultiplier = 1 - currentFrame.color.greenMultiplier;
-					_durationColor.blueMultiplier = 1 - currentFrame.color.blueMultiplier;
-				}
-				else if(nextFrame.color)
-				{
-					_tweenColor = true;
-					_durationColor.alphaOffset = nextFrame.color.alphaOffset;
-					_durationColor.redOffset = nextFrame.color.redOffset;
-					_durationColor.greenOffset = nextFrame.color.greenOffset;
-					_durationColor.blueOffset = nextFrame.color.blueOffset;
-					
-					_durationColor.alphaMultiplier = nextFrame.color.alphaMultiplier - 1;
-					_durationColor.redMultiplier = nextFrame.color.redMultiplier - 1;
-					_durationColor.greenMultiplier = nextFrame.color.greenMultiplier - 1;
-					_durationColor.blueMultiplier = nextFrame.color.blueMultiplier - 1;
+					ColorTransformUtil.minus(nextFrame.color || ColorTransformUtil.originalColor, currentFrame.color ||ColorTransformUtil.originalColor, _durationColor);
+					_tweenColor = 	_durationColor.alphaOffset ||
+									_durationColor.redOffset ||
+									_durationColor.greenOffset ||
+									_durationColor.blueOffset ||
+									_durationColor.alphaMultiplier ||
+									_durationColor.redMultiplier ||
+									_durationColor.greenMultiplier ||
+									_durationColor.blueMultiplier;
 				}
 				else
 				{
@@ -427,27 +379,38 @@ package dragonBones.animation
 				_tweenColor = false;
 			}
 			
-			if(!_tweenColor && _animationState.displayControl)
+			if(!_tweenColor)
 			{
-				if(currentFrame.color)
-				{
-					_slot.updateDisplayColor(
-						currentFrame.color.alphaOffset, 
-						currentFrame.color.redOffset, 
-						currentFrame.color.greenOffset, 
-						currentFrame.color.blueOffset, 
-						currentFrame.color.alphaMultiplier, 
-						currentFrame.color.redMultiplier, 
-						currentFrame.color.greenMultiplier, 
-						currentFrame.color.blueMultiplier,
-						true
-					);
-				}
-				else if(_slot._isColorChanged)
-				{
-					_slot.updateDisplayColor(0, 0, 0, 0, 1, 1, 1, 1, false);
-				}
+				var targetColor:ColorTransform;
+				var colorChanged:Boolean;
 				
+				if(currentFrame.colorChanged)
+				{
+					targetColor = currentFrame.color;
+					colorChanged = true;
+				}
+				else
+				{
+					targetColor = ColorTransformUtil.originalColor;
+					colorChanged = false;
+				}
+				if ((_slot._isColorChanged || colorChanged))
+				{
+					if(	!ColorTransformUtil.isEqual(_slot._colorTransform, targetColor))
+					{
+						_slot.updateDisplayColor(
+							targetColor.alphaOffset, 
+							targetColor.redOffset, 
+							targetColor.greenOffset, 
+							targetColor.blueOffset, 
+							targetColor.alphaMultiplier, 
+							targetColor.redMultiplier, 
+							targetColor.greenMultiplier, 
+							targetColor.blueMultiplier,
+							colorChanged
+						);
+					}
+				}
 			}
 		}
 		
@@ -461,33 +424,33 @@ package dragonBones.animation
 			
 			var currentFrame:SlotFrame = _timelineData.frameList[_currentFrameIndex] as SlotFrame;
 			
-			if(_tweenColor && _animationState.displayControl)
+			if(_tweenColor)
 			{
 				if(currentFrame.color)
 				{
 					_slot.updateDisplayColor(
-						currentFrame.color.alphaOffset + _durationColor.alphaOffset * progress,
-						currentFrame.color.redOffset + _durationColor.redOffset * progress,
-						currentFrame.color.greenOffset + _durationColor.greenOffset * progress,
-						currentFrame.color.blueOffset + _durationColor.blueOffset * progress,
-						currentFrame.color.alphaMultiplier + _durationColor.alphaMultiplier * progress,
-						currentFrame.color.redMultiplier + _durationColor.redMultiplier * progress,
-						currentFrame.color.greenMultiplier + _durationColor.greenMultiplier * progress,
-						currentFrame.color.blueMultiplier + _durationColor.blueMultiplier * progress,
+						currentFrame.color.alphaOffset 		+ _durationColor.alphaOffset 		* progress,
+						currentFrame.color.redOffset 		+ _durationColor.redOffset 			* progress,
+						currentFrame.color.greenOffset 		+ _durationColor.greenOffset 		* progress,
+						currentFrame.color.blueOffset 		+ _durationColor.blueOffset 		* progress,
+						currentFrame.color.alphaMultiplier 	+ _durationColor.alphaMultiplier 	* progress,
+						currentFrame.color.redMultiplier 	+ _durationColor.redMultiplier 		* progress,
+						currentFrame.color.greenMultiplier 	+ _durationColor.greenMultiplier 	* progress,
+						currentFrame.color.blueMultiplier	+ _durationColor.blueMultiplier 	* progress,
 						true
 					);
 				}
 				else
 				{
 					_slot.updateDisplayColor(
-						_durationColor.alphaOffset * progress,
-						_durationColor.redOffset * progress,
-						_durationColor.greenOffset * progress,
-						_durationColor.blueOffset * progress,
-						1 + _durationColor.alphaMultiplier * progress,
-						1 + _durationColor.redMultiplier * progress,
-						1 + _durationColor.greenMultiplier * progress,
-						1 + _durationColor.blueMultiplier * progress,
+						_durationColor.alphaOffset 		* progress,
+						_durationColor.redOffset 		* progress,
+						_durationColor.greenOffset 		* progress,
+						_durationColor.blueOffset 		* progress,
+						_durationColor.alphaMultiplier 	* progress + 1,
+						_durationColor.redMultiplier 	* progress + 1,
+						_durationColor.greenMultiplier 	* progress + 1,
+						_durationColor.blueMultiplier 	* progress + 1,
 						true
 					);
 				}
@@ -497,7 +460,7 @@ package dragonBones.animation
 		private function updateSingleFrame():void
 		{
 			var currentFrame:SlotFrame = _timelineData.frameList[0] as SlotFrame;
-			_slot.arriveAtFrame(currentFrame, this, _animationState, false);
+			_slot.arriveAtFrame(currentFrame, _animationState);
 			_isComplete = true;
 			_tweenEasing = NaN;
 			_tweenColor = false;
@@ -505,40 +468,37 @@ package dragonBones.animation
 			_blendEnabled = currentFrame.displayIndex >= 0;
 			if(_blendEnabled)
 			{
-				/**
-				 * <使用绝对数据>
-				 * 单帧的timeline，第一个关键帧的transform为0
-				 * timeline.originTransform = firstFrame.transform;
-				 * eachFrame.transform = eachFrame.transform - timeline.originTransform;
-				 * firstFrame.transform == 0;
-				 * 
-				 * <使用相对数据>
-				 * 使用相对数据时，timeline.originTransform = 0，第一个关键帧的transform有可能不为 0
-				 */
-				if(_animationState.displayControl)
+				var targetColor:ColorTransform;
+				var colorChanged:Boolean;
+				if(currentFrame.colorChanged)
 				{
-					if(currentFrame.color)
+					targetColor = currentFrame.color;
+					colorChanged = true;
+				}
+				else
+				{
+					targetColor = ColorTransformUtil.originalColor;
+					colorChanged = false;
+				}
+				if ((_slot._isColorChanged || colorChanged))
+				{
+					if(	!ColorTransformUtil.isEqual(_slot._colorTransform, targetColor))
 					{
 						_slot.updateDisplayColor(
-							currentFrame.color.alphaOffset, 
-							currentFrame.color.redOffset, 
-							currentFrame.color.greenOffset, 
-							currentFrame.color.blueOffset, 
-							currentFrame.color.alphaMultiplier, 
-							currentFrame.color.redMultiplier, 
-							currentFrame.color.greenMultiplier, 
-							currentFrame.color.blueMultiplier,
-							true
+							targetColor.alphaOffset, 
+							targetColor.redOffset, 
+							targetColor.greenOffset, 
+							targetColor.blueOffset, 
+							targetColor.alphaMultiplier, 
+							targetColor.redMultiplier, 
+							targetColor.greenMultiplier, 
+							targetColor.blueMultiplier,
+							colorChanged
 						);
-					}
-					else if(_slot._isColorChanged)
-					{
-						_slot.updateDisplayColor(0, 0, 0, 0, 1, 1, 1, 1, false);
 					}
 				}
 			}
 		}
-		
 		
 	}
 }

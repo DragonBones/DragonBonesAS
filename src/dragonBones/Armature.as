@@ -1,10 +1,12 @@
 ﻿package dragonBones
 {
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
+	
 	import dragonBones.animation.Animation;
 	import dragonBones.animation.AnimationState;
 	import dragonBones.animation.IAnimatable;
 	import dragonBones.animation.TimelineState;
-	import dragonBones.core.DBObject;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.ArmatureEvent;
 	import dragonBones.events.FrameEvent;
@@ -13,9 +15,6 @@
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.SkinData;
 	import dragonBones.objects.SlotData;
-	
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
 
 	use namespace dragonBones_internal;
 

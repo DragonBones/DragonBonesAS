@@ -354,7 +354,7 @@
 			frame.tweenEasing = getNumber(frameXML, ConstValues.A_TWEEN_EASING, 10);
 			frame.tweenRotate = int(getNumber(frameXML,ConstValues.A_TWEEN_ROTATE,0));
 			frame.tweenScale = getBoolean(frameXML, ConstValues.A_TWEEN_SCALE, true);
-			frame.displayIndex = int(getNumber(frameXML,ConstValues.A_DISPLAY_INDEX,0));
+//			frame.displayIndex = int(getNumber(frameXML,ConstValues.A_DISPLAY_INDEX,0));
 			
 			
 			parseTransform(frameXML[ConstValues.TRANSFORM][0], frame.transform, frame.pivot);

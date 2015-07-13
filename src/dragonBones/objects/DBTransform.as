@@ -1,7 +1,6 @@
 package dragonBones.objects
 {
 	import flash.geom.Matrix;
-	
 	import dragonBones.utils.TransformUtil;
 
 	/**
@@ -71,6 +70,26 @@ package dragonBones.objects
 			skewY = transform.skewY;
 			scaleX = transform.scaleX;
 			scaleY = transform.scaleY;
+		}
+		
+		public function add(transform:DBTransform):void
+		{
+			x += transform.x;
+			y += transform.y;
+			skewX += transform.skewX;
+			skewY += transform.skewY;
+			scaleX *= transform.scaleX;
+			scaleY *= transform.scaleY;
+		}
+		
+		public function minus(transform:DBTransform):void
+		{
+			x -= transform.x;
+			y -= transform.y;
+			skewX -= transform.skewX;
+			skewY -= transform.skewY;
+			scaleX /= transform.scaleX;
+			scaleY /= transform.scaleY;
 		}
 		
 		public function divParent(transform:DBTransform, createNew:Boolean = false):DBTransform
