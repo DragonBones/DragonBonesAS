@@ -53,7 +53,7 @@ package dragonBones.fast.animation
 			animationState = null;
 		}
 		
-		public function gotoAndPlay( animationName:String, fadeInTime:Number = -1, playTimes:Number = NaN):void
+		public function gotoAndPlay( animationName:String, fadeInTime:Number = -1, duration:Number = -1, playTimes:Number = NaN):void
 		{
 			if (!_animationDataList)
 			{
@@ -66,7 +66,15 @@ package dragonBones.fast.animation
 			}
 			_isPlaying = true;
 			fadeInTime = fadeInTime < 0?(animationData.fadeTime < 0?0.3:animationData.fadeTime):fadeInTime;
-			var durationScale:Number = animationData.scale < 0?1:animationData.scale;
+			var durationScale:Number;
+			if(duration < 0)
+			{
+				durationScale = animationData.scale < 0?1:animationData.scale;
+			}
+			else
+			{
+				durationScale = duration * 1000 / animationData.duration;
+			}
 			playTimes = isNaN(playTimes)?animationData.playTimes:playTimes;
 			
 			//播放新动画
