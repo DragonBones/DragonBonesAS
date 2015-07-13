@@ -263,6 +263,8 @@ package dragonBones.objects
 			
 			parseTimeline(animationObject, animationData);
 			
+			var displayIndexChangeSlotTimelines:Vector.<SlotTimeline> = new Vector.<SlotTimeline>();
+			var displayIndexChangeTimelines:Vector.<TransformTimeline> = new Vector.<TransformTimeline>();
 			var lastFrameDuration:int = animationData.duration;
 			for each(var timelineObject:Object in animationObject[ConstValues.TIMELINE])
 			{
@@ -275,9 +277,60 @@ package dragonBones.objects
 				{
 					lastFrameDuration = Math.min(lastFrameDuration, slotTimeline.frameList[slotTimeline.frameList.length - 1].duration);
 					animationData.addSlotTimeline(slotTimeline);
+					if (animationData.autoTween)
+					{
+						var displayIndexChange:Boolean;
+						var slotFrame:SlotFrame;
+						for (var i:int = 0, len:int = slotTimeline.frameList.length; i < len; i++)
+						{
+							slotFrame = slotTimeline.frameList[i] as SlotFrame;
+							if (slotFrame && slotFrame.displayIndex < 0)
+							{
+								displayIndexChange = true;
+								break;
+							}
+						}
+						if (displayIndexChange)
+						{
+							displayIndexChangeSlotTimelines.push(slotTimeline);
+							displayIndexChangeTimelines.push(timeline);
+						}
+					}
+					
 				}
 			}
-			
+			len = displayIndexChangeSlotTimelines.length;
+			var animationTween:Number = animationData.tweenEasing;
+			if (len > 0)
+			{
+				for (i = 0; i < len; i++)
+				{
+					slotTimeline = displayIndexChangeSlotTimelines[i];
+					timeline = displayIndexChangeTimelines[i];
+					var curFrame:TransformFrame;
+					var curSlotFrame:SlotFrame;
+					var nextSlotFrame:SlotFrame;
+					for (var j:int = 0, jlen:int = slotTimeline.frameList.length; j < jlen; j++)
+					{
+						curSlotFrame = slotTimeline.frameList[j] as SlotFrame;
+						curFrame = timeline.frameList[j] as TransformFrame;
+						nextSlotFrame = (j == jlen - 1) ? slotTimeline.frameList[0] as SlotFrame : slotTimeline.frameList[j + 1] as SlotFrame;
+						if (curSlotFrame.displayIndex < 0 || nextSlotFrame.displayIndex < 0)
+						{
+							curFrame.tweenEasing = curSlotFrame.tweenEasing = NaN;
+						}
+						else if (animationTween == 10)
+						{
+							curFrame.tweenEasing = curSlotFrame.tweenEasing = 0;
+						}
+						else if (!isNaN(animationTween))
+						{
+							curFrame.tweenEasing = curSlotFrame.tweenEasing = animationTween;
+						}
+					}
+				}
+				animationData.autoTween = false;
+			}
 			if(animationData.frameList.length > 0)
 			{
 				lastFrameDuration = Math.min(lastFrameDuration, animationData.frameList[animationData.frameList.length - 1].duration);
