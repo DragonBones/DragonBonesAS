@@ -145,15 +145,7 @@ package dragonBones.fast
 				var targetArmature:FastArmature = this.childArmature;
 				if(targetArmature)
 				{
-					var animation:FastAnimation = targetArmature.animation;
-					var animationState:FastAnimationState = animation.animationState;
-					animation.stop();
-					if(animationState)
-					{
-						FastAnimationState.returnObject(animationState);
-						animation.animationState = null;
-					}
-					
+					targetArmature.resetAnimation()
 				}
 			}
 			

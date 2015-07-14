@@ -42,11 +42,6 @@ package dragonBones.fast.animation
 				return;
 			}
 			
-			if(animationState)
-			{
-				FastAnimationState.returnObject(animationState);
-			}
-			
 			_armature = null;
 			_animationDataList = null;
 			animationList = null;
