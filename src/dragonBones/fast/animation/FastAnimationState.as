@@ -17,41 +17,39 @@ package dragonBones.fast.animation
 	
 	public class FastAnimationState
 	{
-		private static var _pool:Vector.<FastAnimationState> = new Vector.<FastAnimationState>;
-		
-		/** @private */
-		dragonBones_internal static function borrowObject():FastAnimationState
-		{
-			if(_pool.length == 0)
-			{
-				return new FastAnimationState();
-			}
-			return _pool.pop();
-		}
-		
-		/** @private */
-		dragonBones_internal static function returnObject(animationState:FastAnimationState):void
-		{
-			animationState.dispose();
-			
-			if(_pool.indexOf(animationState) < 0)
-			{
-				_pool[_pool.length] = animationState;
-			}
-		}
-		
-		/** @private */
-		dragonBones_internal static function clear():void
-		{
-			var i:int = _pool.length;
-			while(i --)
-			{
-				_pool[i].clear();
-			}
-			_pool.length = 0;
-			
-			FastAnimationState.clear();
-		}
+//		private static var _pool:Vector.<FastAnimationState> = new Vector.<FastAnimationState>;
+//		
+//		/** @private */
+//		dragonBones_internal static function borrowObject():FastAnimationState
+//		{
+//			if(_pool.length == 0)
+//			{
+//				return new FastAnimationState();
+//			}
+//			return _pool.pop();
+//		}
+//		
+//		/** @private */
+//		dragonBones_internal static function returnObject(animationState:FastAnimationState):void
+//		{
+//			animationState.dispose();
+//			
+//			if(_pool.indexOf(animationState) < 0)
+//			{
+//				_pool[_pool.length] = animationState;
+//			}
+//		}
+//		
+//		/** @private */
+//		dragonBones_internal static function clear():void
+//		{
+//			var i:int = _pool.length;
+//			while(i --)
+//			{
+//				_pool[i].clear();
+//			}
+//			_pool.length = 0;
+//		}
 		
 		
 		public var animationCache:AnimationCache;
