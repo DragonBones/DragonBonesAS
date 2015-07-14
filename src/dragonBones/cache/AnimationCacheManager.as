@@ -125,6 +125,7 @@ package dragonBones.cache
 				animationCache.addFrame();
 				
 			}while(!animationState.isComplete);
+			resetCacheGeneratorArmature();
 			cacheGeneratorArmature.enableCache = temp;
 		}
 		
