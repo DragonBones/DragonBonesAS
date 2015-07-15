@@ -488,7 +488,7 @@ package dragonBones.factories
 					}
 				}
 				//==================================================
-				slot.initDisplayList(displayList);
+				slot.initDisplayList(displayList.concat());
 				slot.changeDisplayIndex(slotData.displayIndex);
 			}
 		}

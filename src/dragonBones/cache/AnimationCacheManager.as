@@ -45,13 +45,13 @@ package dragonBones.cache
 		{
 			for each(var animationData:AnimationData in armatureData.animationDataList)
 			{
-				animationCacheDic[animationData.name] = AnimationCache.initWithAnimationData(animationData);
+				animationCacheDic[animationData.name] = AnimationCache.initWithAnimationData(animationData,armatureData);
 			}
 		}
 		
 		public function initAnimationCache(animationName:String):void
 		{
-			animationCacheDic[animationName] = AnimationCache.initWithAnimationData(armatureData.getAnimationData(animationName));
+			animationCacheDic[animationName] = AnimationCache.initWithAnimationData(armatureData.getAnimationData(animationName),armatureData);
 		}
 		
 		public function bindCacheUserArmatures(armatures:Array):void
@@ -116,15 +116,18 @@ package dragonBones.cache
 			{
 				return;
 			}
-			cacheGeneratorArmature.animation.gotoAndPlay(animationName,0,1);
+			cacheGeneratorArmature.animation.gotoAndPlay(animationName,0,-1,1);
 			var animationState:FastAnimationState = cacheGeneratorArmature.animation.animationState;
-			var passTime:Number = 1/frameRate;
+			var passTime:Number = 1 / frameRate;
+			cacheGeneratorArmature._disableEventDispatch = true;
 			do
 			{
 				cacheGeneratorArmature.advanceTime(passTime);
 				animationCache.addFrame();
 				
-			}while(!animationState.isComplete);
+			}while (!animationState.isComplete);
+			cacheGeneratorArmature._disableEventDispatch = false;
+			cacheGeneratorArmature._eventList.length = 0;
 			cacheGeneratorArmature.enableCache = temp;
 		}
 		

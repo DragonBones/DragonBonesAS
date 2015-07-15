@@ -154,6 +154,7 @@ package dragonBones.fast.animation
 			progress = 0;
 			
 			updateTimelineStateList();
+			hideBones();
 			return;
 		}
 		
@@ -473,6 +474,20 @@ package dragonBones.fast.animation
 		public function isUseCache():Boolean
 		{
 			return _armature.enableCache && animationCache && !_fading;
+		}
+		
+		private function hideBones():void
+		{
+			for each(var timelineName:String in animationData.hideTimelineNameMap)
+			{
+				
+				var slot:FastSlot = _armature.getSlot(timelineName);
+				trace("hide:", timelineName, slot);
+				if(slot)
+				{
+					slot.hideSlots();
+				}
+			}
 		}
 	}
 }

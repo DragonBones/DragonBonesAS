@@ -163,6 +163,7 @@ package dragonBones.fast
 			}
 			
 			var slotIndex:int = -1;
+
 			if(_currentDisplayIndex >=0)
 			{
 				slotIndex = clearCurrentDisplay();
@@ -482,7 +483,6 @@ package dragonBones.fast
 					this.armature._slotsZOrderChanged = true;
 				}
 			}
-			
 			//[TODO]currently there is only gotoAndPlay belongs to frame action. In future, there will be more.  
 			//后续会扩展更多的action，目前只有gotoAndPlay的含义
 			if(frame.action) 
@@ -492,6 +492,17 @@ package dragonBones.fast
 				{
 					targetArmature.animation.gotoAndPlay(frame.action);
 				}
+			}
+		}
+		
+				/** @private */
+		dragonBones_internal function hideSlots():void
+		{
+			changeDisplayIndex( -1);
+			removeDisplayFromContainer();
+			if (_frameCache)
+			{
+				this._frameCache.clear();
 			}
 		}
 	}

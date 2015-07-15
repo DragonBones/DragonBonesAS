@@ -1,7 +1,11 @@
 package dragonBones.cache
 {
 	import dragonBones.objects.AnimationData;
+	import dragonBones.objects.ArmatureData;
+	import dragonBones.objects.BoneData;
+	import dragonBones.objects.SlotData;
 	import dragonBones.objects.SlotTimeline;
+	import dragonBones.objects.TransformTimeline;
 
 	public class AnimationCache
 	{
@@ -15,35 +19,38 @@ package dragonBones.cache
 		{
 		}
 		
-		public static function initWithAnimationData(animationData:AnimationData):AnimationCache
+		public static function initWithAnimationData(animationData:AnimationData,armatureData:ArmatureData):AnimationCache
 		{
 			var output:AnimationCache = new AnimationCache();
 			output.name = animationData.name;
 			
-//			var boneTimelineList:Vector.<TransformTimeline> = animationData.timelineList;
-//			var boneTimelineCache:BoneTimelineCache;
-			var name:String;
-			
-//			for(var i:int = 0, length:int = boneTimelineList.length; i < length; i++)
-//			{
-//				name = boneTimelineList[i].name;
-//				boneTimelineCache = new BoneTimelineCache();
-//				boneTimelineCache.name = name;
-//				output.boneTimelineCacheList[i] = boneTimelineCache;
-//				output.boneTimelineCacheDic[name] = boneTimelineCache;
-//			}
-			
-			var slotTimelineList:Vector.<SlotTimeline> = animationData.slotTimelineList;
+			var boneTimelineList:Vector.<TransformTimeline> = animationData.timelineList;
+			var boneName:String;
+			var boneData:BoneData;
+			var slotData:SlotData;
 			var slotTimelineCache:SlotTimelineCache;
-			for(var i:int = 0, length:int = slotTimelineList.length; i < length; i++)
-			{
-				name = slotTimelineList[i].name;
-				slotTimelineCache = new SlotTimelineCache();
-				slotTimelineCache.name = name;
-				output.slotTimelineCacheList[i] = slotTimelineCache;
-				output.slotTimelineCacheDic[name] = slotTimelineCache;
-			}
+			var slotName:String;
 			
+			for(var i:int = 0, length:int = boneTimelineList.length; i < length; i++)
+			{
+				boneName = boneTimelineList[i].name;
+				for (var j:int = 0, jlen:int = armatureData.slotDataList.length; j < jlen; j++)
+				{
+					slotData = armatureData.slotDataList[j];
+					slotName = slotData.name;
+					if (slotData.parent == boneName)
+					{
+						if (output.slotTimelineCacheDic[slotName] == null)
+						{
+							slotTimelineCache = new SlotTimelineCache();
+							slotTimelineCache.name = slotName;
+							output.slotTimelineCacheList.push(slotTimelineCache);
+							output.slotTimelineCacheDic[slotName] = slotTimelineCache;
+						}
+						
+					}
+				}
+			}
 			return output;
 		}
 		

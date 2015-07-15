@@ -1,5 +1,6 @@
 package dragonBones.fast
 {
+	import dragonBones.cache.SlotFrameCache;
 	import flash.events.EventDispatcher;
 	
 	import dragonBones.animation.IAnimatable;
@@ -74,6 +75,7 @@ package dragonBones.fast
 		dragonBones_internal var _armatureData:ArmatureData;
 		dragonBones_internal var _slotsZOrderChanged:Boolean;
 		dragonBones_internal var _eventList:Array;
+		dragonBones_internal var _disableEventDispatch:Boolean;
 		
 		private var _delayDispose:Boolean;
 		private var _lockDispose:Boolean;
@@ -207,7 +209,7 @@ package dragonBones.fast
 				updateSlotsZOrder();
 			}
 			
-			while(_eventList.length > 0)
+			while(_eventList.length > 0 && !_disableEventDispatch)
 			{
 				this.dispatchEvent(_eventList.shift());
 			}
@@ -312,7 +314,10 @@ package dragonBones.fast
 			while(i --)
 			{
 				var slot:FastSlot = slotList[i];
-				slot.addDisplayToContainer(_display);
+				if (slot._frameCache && (slot._frameCache as SlotFrameCache).displayIndex >= 0)
+				{
+					slot.addDisplayToContainer(_display);
+				}
 			}
 			
 			_slotsZOrderChanged = false;
@@ -377,6 +382,7 @@ package dragonBones.fast
 			{
 				boneItem._timelineState = null;
 			}
+			animation.stop();
 		}
 		
 		private function sortSlot(slot1:FastSlot, slot2:FastSlot):int

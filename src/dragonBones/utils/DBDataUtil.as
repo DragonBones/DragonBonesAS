@@ -127,29 +127,29 @@ package dragonBones.utils
 					//}
 					
 					//如果originTransform不存在说明当前帧是第一帧，将当前帧的transform保存至timeline的originTransform
-					if(!originTransform)
-					{
-						originTransform = timeline.originTransform;
-						originTransform.copy(frame.transform);
-						originTransform.skewX = TransformUtil.formatRadian(originTransform.skewX);
-						originTransform.skewY = TransformUtil.formatRadian(originTransform.skewY);
-						originPivot = timeline.originPivot;
-						originPivot.x = frame.pivot.x;
-						originPivot.y = frame.pivot.y;
-					}
-					
-					frame.transform.x -= originTransform.x;
-					frame.transform.y -= originTransform.y;
-					frame.transform.skewX = TransformUtil.formatRadian(frame.transform.skewX - originTransform.skewX);
-					frame.transform.skewY = TransformUtil.formatRadian(frame.transform.skewY - originTransform.skewY);
-					frame.transform.scaleX /= originTransform.scaleX;
-					frame.transform.scaleY /= originTransform.scaleY;
-					
-					if(!timeline.transformed)
-					{
-						frame.pivot.x -= originPivot.x;
-						frame.pivot.y -= originPivot.y;
-					}
+					//if(!originTransform)
+					//{
+						//originTransform = timeline.originTransform;
+						//originTransform.copy(frame.transform);
+						//originTransform.skewX = TransformUtil.formatRadian(originTransform.skewX);
+						//originTransform.skewY = TransformUtil.formatRadian(originTransform.skewY);
+						//originPivot = timeline.originPivot;
+						//originPivot.x = frame.pivot.x;
+						//originPivot.y = frame.pivot.y;
+					//}
+					//
+					//frame.transform.x -= originTransform.x;
+					//frame.transform.y -= originTransform.y;
+					//frame.transform.skewX = TransformUtil.formatRadian(frame.transform.skewX - originTransform.skewX);
+					//frame.transform.skewY = TransformUtil.formatRadian(frame.transform.skewY - originTransform.skewY);
+					//frame.transform.scaleX /= originTransform.scaleX;
+					//frame.transform.scaleY /= originTransform.scaleY;
+					//
+					//if(!timeline.transformed)
+					//{
+						//frame.pivot.x -= originPivot.x;
+						//frame.pivot.y -= originPivot.y;
+					//}
 					
 					if(prevFrame)
 					{

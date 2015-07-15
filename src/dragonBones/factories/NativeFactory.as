@@ -1,6 +1,9 @@
 ﻿package dragonBones.factories
 {
 	import dragonBones.Armature;
+	import dragonBones.display.NativeFastSlot;
+	import dragonBones.fast.FastArmature;
+	import dragonBones.fast.FastSlot;
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.display.NativeSlot;
@@ -52,6 +55,18 @@
 			var display:Sprite = new Sprite();
 			var armature:Armature = new Armature(display);
 			return armature;
+		}
+		
+		override protected function generateFastArmature():FastArmature
+		{
+			var armature:FastArmature = new FastArmature(new Sprite());
+			return armature;
+		}
+		
+		override protected function generateFastSlot():FastSlot
+		{
+			var slot:FastSlot = new NativeFastSlot();
+			return slot;
 		}
 		
 		/** @private */
