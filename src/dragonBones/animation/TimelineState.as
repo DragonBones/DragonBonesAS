@@ -1,5 +1,6 @@
 package dragonBones.animation
 {
+	import dragonBones.objects.CurveData;
 	import flash.geom.Point;
 	
 	import dragonBones.Armature;
@@ -84,6 +85,7 @@ package dragonBones.animation
 		private var _currentFrameDuration:int;
 		
 		private var _tweenEasing:Number;
+		private var _tweenCurve:CurveData;
 		private var _tweenTransform:Boolean;
 		private var _tweenScale:Boolean;
 		
@@ -375,6 +377,7 @@ package dragonBones.animation
 				if(isNaN(_tweenEasing))
 				{
 					_tweenEasing = currentFrame.tweenEasing;
+					_tweenCurve = currentFrame.curve;
 					if(isNaN(_tweenEasing))    //frame no tween
 					{
 						tweenEnabled = false;
@@ -398,6 +401,7 @@ package dragonBones.animation
 			else
 			{
 				_tweenEasing = currentFrame.tweenEasing;
+				_tweenCurve = currentFrame.curve;
 				if(isNaN(_tweenEasing) || _tweenEasing == 10)    //frame no tween
 				{
 					_tweenEasing = NaN;
@@ -503,15 +507,19 @@ package dragonBones.animation
 		
 		private function updateTween():void
 		{
-			var progress:Number = (_currentTime - _currentFramePosition) / _currentFrameDuration;
-			if(_tweenEasing)
-			{
-				progress = MathUtil.getEaseValue(progress, _tweenEasing);
-			}
-			
 			var currentFrame:TransformFrame = _timelineData.frameList[_currentFrameIndex] as TransformFrame;
 			if(_tweenTransform)
 			{
+				var progress:Number = (_currentTime - _currentFramePosition) / _currentFrameDuration;
+				if (_tweenCurve != null)
+				{
+					progress = _tweenCurve.getValueByProgress(progress);
+				}
+				if(_tweenEasing)
+				{
+					progress = MathUtil.getEaseValue(progress, _tweenEasing);
+				}
+			
 				var currentTransform:DBTransform = currentFrame.transform;
 				var currentPivot:Point = currentFrame.pivot;
 				if(_animationState.additiveBlending)

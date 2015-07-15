@@ -77,6 +77,7 @@
 		public static const A_RED_MULTIPLIER:String = "rM";
 		public static const A_GREEN_MULTIPLIER:String = "gM";
 		public static const A_BLUE_MULTIPLIER:String = "bM";
+		public static const A_CURVE:String = "curve";
 		
 		public static const A_SCALE_X_OFFSET:String = "scXOffset";
 		public static const A_SCALE_Y_OFFSET:String = "scYOffset";

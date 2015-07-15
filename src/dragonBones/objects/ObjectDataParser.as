@@ -393,6 +393,14 @@
 			outputFrame.action = frameObject[ConstValues.A_ACTION];
 			outputFrame.event = frameObject[ConstValues.A_EVENT];
 			outputFrame.sound = frameObject[ConstValues.A_SOUND];
+			if (frameObject[ConstValues.A_CURVE] != null && frameObject[ConstValues.A_CURVE].length == 4)
+			{
+				outputFrame.curve = new CurveData();
+				outputFrame.curve.pointList = [new Point(frameObject[ConstValues.A_CURVE][0],
+														 frameObject[ConstValues.A_CURVE][1]),
+											   new Point(frameObject[ConstValues.A_CURVE][2],
+														 frameObject[ConstValues.A_CURVE][3])];
+			}
 		}
 		
 		private static function parseTransform(transformObject:Object, transform:DBTransform, pivot:Point = null):void

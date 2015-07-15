@@ -1,5 +1,6 @@
 package dragonBones.fast.animation
 {
+	import dragonBones.objects.CurveData;
 	import flash.geom.Point;
 	
 	import dragonBones.core.dragonBones_internal;
@@ -62,6 +63,7 @@ package dragonBones.fast.animation
 		
 		private var _tweenTransform:Boolean;
 		private var _tweenEasing:Number;
+		private var _tweenCurve:CurveData;
 		
 		private var _updateMode:int;
 		private var _transformToFadein:DBTransform;
@@ -328,6 +330,7 @@ package dragonBones.fast.animation
 				if(isNaN(_tweenEasing))
 				{
 					_tweenEasing = currentFrame.tweenEasing;
+					_tweenCurve = currentFrame.curve;
 					if(isNaN(_tweenEasing))    //frame no tween
 					{
 						tweenEnabled = false;
@@ -351,6 +354,7 @@ package dragonBones.fast.animation
 			else
 			{
 				_tweenEasing = currentFrame.tweenEasing;
+				_tweenCurve = currentFrame.curve;
 				if(isNaN(_tweenEasing) || _tweenEasing == 10)    //frame no tween
 				{
 					_tweenEasing = NaN;
@@ -413,6 +417,10 @@ package dragonBones.fast.animation
 		private function updateTween():void
 		{
 			var progress:Number = (_currentTime - _currentFramePosition) / _currentFrameDuration;
+			if (_tweenCurve)
+			{
+				progress = _tweenCurve.getValueByProgress(progress);
+			}
 			if(_tweenEasing)
 			{
 				progress = MathUtil.getEaseValue(progress, _tweenEasing);
