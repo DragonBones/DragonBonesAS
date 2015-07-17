@@ -99,15 +99,15 @@ package dragonBones.cache
 			}
 		}
 		
-		public function generateAllAnimationCache():void
+		public function generateAllAnimationCache(loop:Boolean):void
 		{
 			for each(var animationCache:AnimationCache in animationCacheDic)
 			{
-				generateAnimationCache(animationCache.name);
+				generateAnimationCache(animationCache.name, loop);
 			}
 		}
 		
-		public function generateAnimationCache(animationName:String):void
+		public function generateAnimationCache(animationName:String, loop:Boolean):void
 		{
 			var temp:Boolean = cacheGeneratorArmature.enableCache;
 			cacheGeneratorArmature.enableCache = false;
@@ -120,13 +120,14 @@ package dragonBones.cache
 			var animationState:FastAnimationState = cacheGeneratorArmature.animation.animationState;
 			var passTime:Number = 1 / frameRate;
 			cacheGeneratorArmature._disableEventDispatch = true;
+			cacheGeneratorArmature._cacheLoop = loop;
 			do
 			{
 				cacheGeneratorArmature.advanceTime(passTime);
 				animationCache.addFrame();
 				
 			}while (!animationState.isComplete);
-			
+			cacheGeneratorArmature._cacheLoop = false;
 			cacheGeneratorArmature._disableEventDispatch = false;
 			cacheGeneratorArmature._eventList.length = 0;
 			resetCacheGeneratorArmature();

@@ -162,20 +162,19 @@
 				var image:Image = new Image(subTexture);
 				if (isNaN(pivotX) || isNaN(pivotY))
 				{
-					image.pivotX = subTexture.width / 2;//pivotX;
-					image.pivotY = subTexture.height / 2;// pivotY;
-				}
-				else
-				{
 					if(subTextureFrame)
 					{
-						pivotX += subTextureFrame.x;
-						pivotY += subTextureFrame.y;
+						pivotX = subTextureFrame.width / 2;//pivotX;
+						pivotY = subTextureFrame.height / 2;// pivotY;
 					}
-					image.pivotX = pivotX;
-					image.pivotY = pivotY;
+					else
+					{
+						pivotX = subTexture.width / 2;//pivotX;
+						pivotY = subTexture.height / 2;// pivotY;
+					}
 				}
-				
+				image.pivotX = pivotX;
+				image.pivotY = pivotY;
 				return image;
 			}
 			return null;

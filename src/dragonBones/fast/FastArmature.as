@@ -76,6 +76,7 @@ package dragonBones.fast
 		dragonBones_internal var _slotsZOrderChanged:Boolean;
 		dragonBones_internal var _eventList:Array;
 		dragonBones_internal var _disableEventDispatch:Boolean;
+		dragonBones_internal var _cacheLoop:Boolean;
 		
 		private var _delayDispose:Boolean;
 		private var _lockDispose:Boolean;
@@ -147,7 +148,7 @@ package dragonBones.fast
 		public function advanceTime(passedTime:Number):void
 		{
 			_lockDispose = true;
-			_animation.advanceTime(passedTime);
+			_animation.advanceTime(passedTime, _cacheLoop);
 			
 			var bone:FastBone;
 			var slot:FastSlot;
@@ -221,7 +222,7 @@ package dragonBones.fast
 			}
 		}
 
-		public function enableAnimationCache(frameRate:int, animationList:Array = null):AnimationCacheManager
+		public function enableAnimationCache(frameRate:int, animationList:Array = null, loop:Boolean = true):AnimationCacheManager
 		{
 			var animationCacheManager:AnimationCacheManager = AnimationCacheManager.initWithArmatureData(armatureData,frameRate);
 			if(animationList)
@@ -236,7 +237,7 @@ package dragonBones.fast
 				animationCacheManager.initAllAnimationCache();
 			}
 			animationCacheManager.setCacheGeneratorArmature(this);
-			animationCacheManager.generateAllAnimationCache();
+			animationCacheManager.generateAllAnimationCache(loop);
 			
 			animationCacheManager.bindCacheUserArmature(this);
 			enableCache = true;

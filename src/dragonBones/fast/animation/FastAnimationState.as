@@ -147,7 +147,7 @@ package dragonBones.fast.animation
 			
 			if(this._armature.enableCache && animationCache && _fading && _boneTimelineStateList)
 			{
-				updateTransformTimeline(progress);
+				updateTransformTimeline(progress, false);
 			}
 			
 			_time = 0;
@@ -192,7 +192,7 @@ package dragonBones.fast.animation
 		}
 		
 		/** @private */
-		dragonBones_internal function advanceTime(passedTime:Number):void
+		dragonBones_internal function advanceTime(passedTime:Number, loop:Boolean):void
 		{
 			passedTime *= _timeScale;
 			if(_fading)
@@ -223,11 +223,11 @@ package dragonBones.fast.animation
 			}
 			else
 			{
-				advanceTimelinesTime(passedTime);
+				advanceTimelinesTime(passedTime, loop);
 			}
 		}
 		
-		private function advanceTimelinesTime(passedTime:Number):void
+		private function advanceTimelinesTime(passedTime:Number, loop:Boolean):void
 		{
 			_time += passedTime;
 			
@@ -263,7 +263,7 @@ package dragonBones.fast.animation
 			}
 			else
 			{
-				updateTransformTimeline(progress);
+				updateTransformTimeline(progress, loop);
 			}
 			
 			//update main timeline
@@ -299,7 +299,7 @@ package dragonBones.fast.animation
 			}
 		}
 		
-		private function updateTransformTimeline(progress:Number):void
+		private function updateTransformTimeline(progress:Number, loop:Boolean):void
 		{
 			var i:int = _boneTimelineStateList.length;
 			var boneTimeline:FastBoneTimelineState;
@@ -311,7 +311,7 @@ package dragonBones.fast.animation
 				while(i--)
 				{
 					boneTimeline = _boneTimelineStateList[i];
-					boneTimeline.update(progress);
+					boneTimeline.update(progress, loop);
 					_isComplete = boneTimeline._isComplete && _isComplete;
 				}
 				
@@ -321,7 +321,7 @@ package dragonBones.fast.animation
 				while(i--)
 				{
 					slotTimeline = _slotTimelineStateList[i];
-					slotTimeline.update(progress);
+					slotTimeline.update(progress, loop);
 					_isComplete = slotTimeline._isComplete && _isComplete;
 				}
 			}
@@ -331,7 +331,7 @@ package dragonBones.fast.animation
 				while(i--)
 				{
 					boneTimeline = _boneTimelineStateList[i];
-					boneTimeline.update(progress);
+					boneTimeline.update(progress, loop);
 				}
 				
 				i = _slotTimelineStateList.length;
@@ -340,7 +340,7 @@ package dragonBones.fast.animation
 				while(i--)
 				{
 					slotTimeline = _slotTimelineStateList[i];
-					slotTimeline.update(progress);
+					slotTimeline.update(progress, loop);
 				}
 			}
 		}
