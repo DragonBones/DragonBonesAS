@@ -320,18 +320,18 @@ package dragonBones.animation
 				{
 					_bone.arriveAtFrame(currentFrame, this, _animationState, false);
 					
-					_blendEnabled = true;
-					updateToNextFrame(currentPlayTimes);
-//					if(_blendEnabled)
-//					{
-//						
-//					}
-//					else
-//					{
-//						_tweenEasing = NaN;
-//						_tweenTransform = false;
-//						_tweenScale = false;
-//					}
+					_blendEnabled = !isNaN(currentFrame.tweenEasing);
+					
+					if(_blendEnabled)
+					{
+						updateToNextFrame(currentPlayTimes);
+					}
+					else
+					{
+						_tweenEasing = NaN;
+						_tweenTransform = false;
+						_tweenScale = false;
+					}
 				}
 				
 				if(_blendEnabled)
