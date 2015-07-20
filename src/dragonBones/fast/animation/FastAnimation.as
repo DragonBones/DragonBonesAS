@@ -122,14 +122,14 @@ package dragonBones.fast.animation
 		}
 		
 		/** @private */
-		dragonBones_internal function advanceTime(passedTime:Number):void
+		dragonBones_internal function advanceTime(passedTime:Number, loop:Boolean = false):void
 		{
 			if(!_isPlaying)
 			{
 				return;
 			}
 			
-			animationState.advanceTime(passedTime);
+			animationState.advanceTime(passedTime, loop);
 		}
 		
 		/**

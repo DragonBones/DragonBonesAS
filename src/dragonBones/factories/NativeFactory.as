@@ -118,17 +118,29 @@
 					var subTextureRegion:Rectangle = nativeTextureAtlas.getRegion(fullName);
 					if (subTextureRegion)
 					{
+						var subTextureFrame:Rectangle = nativeTextureAtlas.getFrame(fullName);
+						
 						if (isNaN(pivotX) || isNaN(pivotX))
 						{
-							pivotX = subTextureRegion.width / 2;
-							pivotY = subTextureRegion.height / 2;
+							if (subTextureFrame)
+							{
+								pivotX = subTextureFrame.width / 2 + subTextureFrame.x;
+								pivotY = subTextureFrame.height / 2 + subTextureFrame.y;
+							}
+							else
+							{
+								pivotX = subTextureRegion.width / 2;
+								pivotY = subTextureRegion.height / 2;
+							}
+							
 						}
-						
-						var subTextureFrame:Rectangle = nativeTextureAtlas.getFrame(fullName);
-						if(subTextureFrame)
+						else
 						{
-							pivotX += subTextureFrame.x;
-							pivotY += subTextureFrame.y;
+							if(subTextureFrame)
+							{
+								pivotX += subTextureFrame.x;
+								pivotY += subTextureFrame.y;
+							}
 						}
 						
 						var displayShape:Shape = new Shape();
