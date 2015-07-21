@@ -327,6 +327,10 @@ package dragonBones.objects
 						{
 							curFrame.tweenEasing = curSlotFrame.tweenEasing = animationTween;
 						}
+						else if (curFrame.tweenEasing == 10)
+						{
+							curFrame.tweenEasing = 0;
+						}
 					}
 				}
 				animationData.autoTween = false;
