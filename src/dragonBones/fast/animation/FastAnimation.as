@@ -48,16 +48,16 @@ package dragonBones.fast.animation
 			animationState = null;
 		}
 		
-		public function gotoAndPlay( animationName:String, fadeInTime:Number = -1, duration:Number = -1, playTimes:Number = NaN):void
+		public function gotoAndPlay( animationName:String, fadeInTime:Number = -1, duration:Number = -1, playTimes:Number = NaN):FastAnimationState
 		{
 			if (!_animationDataList)
 			{
-				return;
+				return null;
 			}
 			var animationData:AnimationData = _animationDataObj[animationName];
 			if (!animationData)
 			{
-				return;
+				return null;
 			}
 			_isPlaying = true;
 			fadeInTime = fadeInTime < 0?(animationData.fadeTime < 0?0.3:animationData.fadeTime):fadeInTime;
@@ -91,6 +91,47 @@ package dragonBones.fast.animation
 					childArmature.animation.gotoAndPlay(animationName);
 				}
 			}
+			return animationState;
+		}
+		
+		/**
+		 * Control the animation to stop with a specified time. If related animationState haven't been created, then create a new animationState.
+		 * @param animationName The name of the animationState.
+		 * @param time 
+		 * @param normalizedTime 
+		 * @param fadeInTime A fade time to apply (>= 0), -1 means use xml data's fadeInTime. 
+		 * @param duration The duration of that Animation. -1 means use xml data's duration.
+		 * @param layer The layer of the animation.
+		 * @param group The group of the animation.
+		 * @param fadeOutMode Fade out mode (none, sameLayer, sameGroup, sameLayerAndGroup, all).
+		 * @return AnimationState.
+		 * @see dragonBones.objects.AnimationData.
+		 * @see dragonBones.animation.AnimationState.
+		 */
+		public function gotoAndStop(
+			animationName:String, 
+			time:Number, 
+			normalizedTime:Number = -1,
+			fadeInTime:Number = 0, 
+			duration:Number = -1
+		):FastAnimationState
+		{
+			if(!animationState.name != animationName)
+			{
+				gotoAndPlay(animationName, fadeInTime, duration);
+			}
+			
+			if(normalizedTime >= 0)
+			{
+				animationState.setCurrentTime(animationState.totalTime * normalizedTime);
+			}
+			else
+			{
+				animationState.setCurrentTime(time);
+			}
+			
+			animationState.stop();
+			return animationState;
 		}
 		
 		/**
@@ -161,5 +202,39 @@ package dragonBones.fast.animation
 			}
 		}
 		
+		/**
+		 * Is the animation playing.
+		 * @see dragonBones.animation.AnimationState.
+		 */
+		public function get isPlaying():Boolean
+		{
+			return _isPlaying && !isComplete;
+		}
+		
+		/**
+		 * Is animation complete.
+		 * @see dragonBones.animation.AnimationState.
+		 */
+		public function get isComplete():Boolean
+		{
+			return animationState.isComplete;
+		}
+		
+		/**
+		 * The last AnimationState this Animation played.
+		 * @see dragonBones.objects.AnimationData.
+		 */
+		public function get lastAnimationState():FastAnimationState
+		{
+			return animationState;
+		}
+		/**
+		 * The name of the last AnimationData played.
+		 * @see dragonBones.objects.AnimationData.
+		 */
+		public function get lastAnimationName():String
+		{
+			return animationState?animationState.name:null;
+		}
 	}
 }
