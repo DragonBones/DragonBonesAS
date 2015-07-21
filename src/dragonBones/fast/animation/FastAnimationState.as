@@ -1,7 +1,7 @@
 package dragonBones.fast.animation
 {
+
 	import dragonBones.animation.AnimationState;
-	import dragonBones.animation.TimelineState;
 	import dragonBones.cache.AnimationCache;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.AnimationEvent;
@@ -17,40 +17,6 @@ package dragonBones.fast.animation
 	
 	public class FastAnimationState
 	{
-//		private static var _pool:Vector.<FastAnimationState> = new Vector.<FastAnimationState>;
-//		
-//		/** @private */
-//		dragonBones_internal static function borrowObject():FastAnimationState
-//		{
-//			if(_pool.length == 0)
-//			{
-//				return new FastAnimationState();
-//			}
-//			return _pool.pop();
-//		}
-//		
-//		/** @private */
-//		dragonBones_internal static function returnObject(animationState:FastAnimationState):void
-//		{
-//			animationState.dispose();
-//			
-//			if(_pool.indexOf(animationState) < 0)
-//			{
-//				_pool[_pool.length] = animationState;
-//			}
-//		}
-//		
-//		/** @private */
-//		dragonBones_internal static function clear():void
-//		{
-//			var i:int = _pool.length;
-//			while(i --)
-//			{
-//				_pool[i].clear();
-//			}
-//			_pool.length = 0;
-//		}
-		
 		
 		public var animationCache:AnimationCache;
 		/**
@@ -95,6 +61,35 @@ package dragonBones.fast.animation
 		{
 			resetTimelineStateList();
 			_armature = null;
+		}
+		
+		/**
+		 * Play the current animation. 如果动画已经播放完毕, 将不会继续播放.
+		 */
+		public function play():FastAnimationState
+		{
+			_isPlaying = true;
+			return this;
+		}
+		
+		/**
+		 * Stop playing current animation.
+		 */
+		public function stop():FastAnimationState
+		{
+			_isPlaying = false;
+			return this;
+		}
+		
+		public function setCurrentTime(value:Number):FastAnimationState
+		{
+			if(value < 0 || isNaN(value))
+			{
+				value = 0;
+			}
+			_time = value;
+			_currentTime = _time * 1000;
+			return this;
 		}
 		
 		dragonBones_internal function resetTimelineStateList():void
@@ -398,28 +393,28 @@ package dragonBones.fast.animation
 			}
 		}
 		
-		private function setTimeScale(value:Number):void
+		public function setTimeScale(value:Number):FastAnimationState
 		{
 			if(isNaN(value) || value == Infinity)
 			{
 				value = 1;
 			}
 			_timeScale = value;
-			return;
+			return this;
 		}
 		
-		private function setPlayTimes(value:int):void
+		public function setPlayTimes(value:int):FastAnimationState
 		{
 			//如果动画只有一帧  播放一次就可以
 			if(Math.round(_totalTime * 0.001 * animationData.frameRate) < 2)
 			{
-				_playTimes = value < 0?-1:1;
+				_playTimes = 1;
 			}
 			else
 			{
-				_playTimes = value < 0?-value:value;
+				_playTimes = value;
 			}
-			return;
+			return this;
 		}
 		
 		/**
