@@ -9,7 +9,7 @@ package dragonBones.fast.animation
 	use namespace dragonBones_internal;
 	
 	/**
-	 * 不支持动画融合，不支持offset,在开启缓存的情况下不支持
+	 * 不支持动画融合，在开启缓存的情况下，不支持无极的平滑补间
 	 */
 	public class FastAnimation
 	{
