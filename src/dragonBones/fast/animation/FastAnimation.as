@@ -9,7 +9,7 @@ package dragonBones.fast.animation
 	use namespace dragonBones_internal;
 	
 	/**
-	 * 不支持动画融合，不支持自动补间，不支持时间缩放和offset
+	 * 不支持动画融合，不支持offset,在开启缓存的情况下不支持
 	 */
 	public class FastAnimation
 	{
@@ -21,6 +21,7 @@ package dragonBones.fast.animation
 		private var _animationDataList:Vector.<AnimationData>;
 		private var _animationDataObj:Object;
 		private var _isPlaying:Boolean;
+		private var _timeScale:Number;
 		
 		public function FastAnimation(armature:FastArmature)
 		{
@@ -30,6 +31,7 @@ package dragonBones.fast.animation
 			_animationDataObj = {};
 
 			_isPlaying = false;
+			_timeScale = 1;
 		}
 		
 		/**
@@ -170,7 +172,7 @@ package dragonBones.fast.animation
 				return;
 			}
 			
-			animationState.advanceTime(passedTime, loop);
+			animationState.advanceTime(passedTime * _timeScale, loop);
 		}
 		
 		/**
@@ -181,6 +183,22 @@ package dragonBones.fast.animation
 		public function hasAnimation(animationName:String):Boolean
 		{
 			return _animationDataObj[animationName] != null;
+		}
+		
+		/**
+		 * The amount by which passed time should be scaled. Used to slow down or speed up animations. Defaults to 1.
+		 */
+		public function get timeScale():Number
+		{
+			return _timeScale;
+		}
+		public function set timeScale(value:Number):void
+		{
+			if(isNaN(value) || value < 0)
+			{
+				value = 1;
+			}
+			_timeScale = value;
 		}
 		
 		/**
@@ -200,6 +218,22 @@ package dragonBones.fast.animation
 				animationList.push(animationData.name);
 				_animationDataObj[animationData.name] = animationData;
 			}
+		}
+		
+		/**
+		 * Unrecommended API. Recommend use animationList.
+		 */
+		public function get movementList():Vector.<String>
+		{
+			return animationList;
+		}
+		
+		/**
+		 * Unrecommended API. Recommend use lastAnimationName.
+		 */
+		public function get movementID():String
+		{
+			return lastAnimationName;
 		}
 		
 		/**

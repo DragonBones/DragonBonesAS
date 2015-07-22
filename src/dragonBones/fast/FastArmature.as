@@ -1,10 +1,12 @@
 package dragonBones.fast
 {
-	import dragonBones.cache.SlotFrameCache;
 	import flash.events.EventDispatcher;
 	
+	import dragonBones.Bone;
+	import dragonBones.Slot;
 	import dragonBones.animation.IAnimatable;
 	import dragonBones.cache.AnimationCacheManager;
+	import dragonBones.cache.SlotFrameCache;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.AnimationEvent;
 	import dragonBones.events.FrameEvent;
@@ -425,6 +427,73 @@ package dragonBones.fast
 		public function getSlot(slotName:String):FastSlot
 		{
 			return _slotDic[slotName];
+		}
+		
+		/**
+		 * Gets the Bone associated with this DisplayObject.
+		 * @param Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
+		 * @return A Bone instance or null if no Bone with that DisplayObject exist..
+		 * @see dragonBones.Bone
+		 */
+		public function getBoneByDisplay(display:Object):Bone
+		{
+			var slot:Slot = getSlotByDisplay(display);
+			return slot?slot.parent:null;
+		}
+		
+		/**
+		 * Gets the Slot associated with this DisplayObject.
+		 * @param Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
+		 * @return A Slot instance or null if no Slot with that DisplayObject exist.
+		 * @see dragonBones.Slot
+		 */
+		public function getSlotByDisplay(displayObj:Object):Slot
+		{
+			if(displayObj)
+			{
+				for each(var slot:Slot in slotList)
+				{
+					if(slot.display == displayObj)
+					{
+						return slot;
+					}
+				}
+			}
+			return null;
+		}
+		
+		/**
+		 * Get all Slot instance associated with this armature.
+		 * @param if return Vector copy
+		 * @return A Vector.&lt;Slot&gt; instance.
+		 * @see dragonBones.Slot
+		 */
+		public function getSlots(returnCopy:Boolean = true):Vector.<FastSlot>
+		{
+			return returnCopy?slotList.concat():slotList;
+		}
+		
+		/**
+		 * Force update bones and slots. (When bone's animation play complete, it will not update) 
+		 */
+		public function invalidUpdate(boneName:String = null):void
+		{
+			if(boneName)
+			{
+				var bone:FastBone = getBone(boneName);
+				if(bone)
+				{
+					bone.invalidUpdate();
+				}
+			}
+			else
+			{
+				var i:int = boneList.length;
+				while(i --)
+				{
+					boneList[i].invalidUpdate();
+				}
+			}
 		}
 	}
 }
