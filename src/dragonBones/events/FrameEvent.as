@@ -9,8 +9,6 @@ package dragonBones.events
 	import flash.events.Event;
 	
 	import dragonBones.Armature;
-	import dragonBones.Bone;
-	import dragonBones.animation.AnimationState;
 	
 	/**
 	 * The FrameEvent class provides and defines all events dispatched by an Animation or Bone instance entering a new frame.
