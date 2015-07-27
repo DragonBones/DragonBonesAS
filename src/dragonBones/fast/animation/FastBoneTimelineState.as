@@ -163,7 +163,7 @@ package dragonBones.fast.animation
 		}
 		
 		/** @private */
-		dragonBones_internal function update(progress:Number, loop:Boolean):void
+		dragonBones_internal function update(progress:Number):void
 		{
 			if(_updateMode == 1)
 			{
@@ -173,7 +173,7 @@ package dragonBones.fast.animation
 			}
 			else if(_updateMode == -1)
 			{
-				updateMultipleFrame(progress, loop);
+				updateMultipleFrame(progress);
 			}
 		}
 		
@@ -190,7 +190,7 @@ package dragonBones.fast.animation
 			_bone.invalidUpdate();
 		}
 		
-		private function updateMultipleFrame(progress:Number, loop:Boolean):void
+		private function updateMultipleFrame(progress:Number):void
 		{
 			var currentPlayTimes:int = 0;
 			progress /= _timelineData.scale;
@@ -294,7 +294,7 @@ package dragonBones.fast.animation
 				if(currentFrame)
 				{
 					_bone.arriveAtFrame(currentFrame, _animationState);
-					updateToNextFrame(currentPlayTimes, loop);
+					updateToNextFrame(currentPlayTimes);
 				}
 				
 				if(_tweenTransform)
@@ -306,7 +306,7 @@ package dragonBones.fast.animation
 
 		}
 		
-		private function updateToNextFrame(currentPlayTimes:int, loop:Boolean):void
+		private function updateToNextFrame(currentPlayTimes:int):void
 		{
 			var nextFrameIndex:int = _currentFrameIndex + 1;
 			if(nextFrameIndex >= _timelineData.frameList.length)
@@ -316,7 +316,7 @@ package dragonBones.fast.animation
 			var currentFrame:TransformFrame = _timelineData.frameList[_currentFrameIndex] as TransformFrame;
 			var nextFrame:TransformFrame = _timelineData.frameList[nextFrameIndex] as TransformFrame;
 			var tweenEnabled:Boolean = false;
-			if(	!loop && nextFrameIndex == 0 &&( _animationState.playTimes &&
+			if(nextFrameIndex == 0 &&( _animationState.playTimes &&
 										_animationState.currentPlayTimes >= _animationState.playTimes && 
 										((_currentFramePosition + _currentFrameDuration) / _totalTime + currentPlayTimes - _timelineData.offset)* _timelineData.scale > 0.999999
 				))

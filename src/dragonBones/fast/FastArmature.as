@@ -1,5 +1,6 @@
 package dragonBones.fast
 {
+	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
 	import dragonBones.Bone;
@@ -56,7 +57,6 @@ package dragonBones.fast
 		
 		private var _enableCache:Boolean;
 		
-		
 		/**
 		 * 保证CacheManager是独占的前提下可以开启，开启后有助于性能提高
 		 */
@@ -78,13 +78,13 @@ package dragonBones.fast
 		
 		public var slotHasChildArmatureList:Vector.<FastSlot>;
 		
+		public var enableEventDispatch:Boolean = true;
+		
 		dragonBones_internal var __dragonBonesData:DragonBonesData;
 		dragonBones_internal var _armatureData:ArmatureData;
 		dragonBones_internal var _slotsZOrderChanged:Boolean;
-		dragonBones_internal var _eventList:Array;
-		dragonBones_internal var _disableEventDispatch:Boolean;
-		dragonBones_internal var _cacheLoop:Boolean;
 		
+		private var _eventList:Array;
 		private var _delayDispose:Boolean;
 		private var _lockDispose:Boolean;
 		private var useCache:Boolean = true;
@@ -155,7 +155,7 @@ package dragonBones.fast
 		public function advanceTime(passedTime:Number):void
 		{
 			_lockDispose = true;
-			_animation.advanceTime(passedTime, _cacheLoop);
+			_animation.advanceTime(passedTime);
 			
 			var bone:FastBone;
 			var slot:FastSlot;
@@ -217,7 +217,7 @@ package dragonBones.fast
 				updateSlotsZOrder();
 			}
 			
-			while(_eventList.length > 0 && !_disableEventDispatch)
+			while(_eventList.length > 0)
 			{
 				this.dispatchEvent(_eventList.shift());
 			}
@@ -433,7 +433,7 @@ package dragonBones.fast
 				var frameEvent:FrameEvent = new FrameEvent(FrameEvent.ANIMATION_FRAME_EVENT);
 				frameEvent.animationState = animationState;
 				frameEvent.frameLabel = frame.event;
-				_eventList.push(frameEvent);
+				addEvent(frameEvent);
 			}
 
 			if(frame.action)
@@ -513,6 +513,14 @@ package dragonBones.fast
 		public function set enableCache(value:Boolean):void
 		{
 			_enableCache = value;
+		}
+		
+		dragonBones_internal function addEvent(event:Event):void
+		{
+			if (enableEventDispatch)
+			{
+				_eventList.push(event);
+			}			
 		}
 	}
 }

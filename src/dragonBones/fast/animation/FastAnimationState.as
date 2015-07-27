@@ -140,7 +140,7 @@ package dragonBones.fast.animation
 			
 			if(this._armature.enableCache && animationCache && _fading && _boneTimelineStateList)
 			{
-				updateTransformTimeline(progress, false);
+				updateTransformTimeline(progress);
 			}
 			
 			_time = 0;
@@ -185,7 +185,7 @@ package dragonBones.fast.animation
 		}
 		
 		/** @private */
-		dragonBones_internal function advanceTime(passedTime:Number, loop:Boolean):void
+		dragonBones_internal function advanceTime(passedTime:Number):void
 		{
 			passedTime *= _timeScale;
 			if(_fading)
@@ -216,17 +216,18 @@ package dragonBones.fast.animation
 			}
 			else
 			{
-				advanceTimelinesTime(passedTime, loop);
+				advanceTimelinesTime(passedTime);
 			}
 		}
 		
-		private function advanceTimelinesTime(passedTime:Number, loop:Boolean):void
+		private function advanceTimelinesTime(passedTime:Number):void
 		{
 			_time += passedTime;
 			
 			//计算是否已经播放完成isThisComplete
 
 			var loopCompleteFlg:Boolean = false;
+			var completeFlg:Boolean = false;
 			var isThisComplete:Boolean = false;
 			var currentPlayTimes:int = 0;
 			var currentTime:int = _time * 1000;
@@ -256,7 +257,7 @@ package dragonBones.fast.animation
 			}
 			else
 			{
-				updateTransformTimeline(progress, loop);
+				updateTransformTimeline(progress);
 			}
 			
 			//update main timeline
@@ -270,7 +271,10 @@ package dragonBones.fast.animation
 					}
 					_currentPlayTimes = currentPlayTimes;
 				}
-				
+				if (_isComplete)
+				{
+					completeFlg = true;
+				}
 				_lastTime = _currentTime;
 				_currentTime = currentTime;
 				updateMainTimeline(isThisComplete);
@@ -278,21 +282,21 @@ package dragonBones.fast.animation
 			
 			//抛事件
 			var event:AnimationEvent;
-			if(_listenCompleteEvent && _isComplete)
+			if(_listenCompleteEvent && completeFlg)
 			{
 				event = new AnimationEvent(AnimationEvent.COMPLETE);
 				event.animationState = this;
-				_armature._eventList.push(event);
+				_armature.addEvent(event);
 			}
 			else if(_listenLoopCompleteEvent && loopCompleteFlg)
 			{
 				event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
 				event.animationState = this;
-				_armature._eventList.push(event);
+				_armature.addEvent(event);
 			}
 		}
 		
-		private function updateTransformTimeline(progress:Number, loop:Boolean):void
+		private function updateTransformTimeline(progress:Number):void
 		{
 			var i:int = _boneTimelineStateList.length;
 			var boneTimeline:FastBoneTimelineState;
@@ -304,7 +308,7 @@ package dragonBones.fast.animation
 				while(i--)
 				{
 					boneTimeline = _boneTimelineStateList[i];
-					boneTimeline.update(progress, loop);
+					boneTimeline.update(progress);
 					_isComplete = boneTimeline._isComplete && _isComplete;
 				}
 				
@@ -314,7 +318,7 @@ package dragonBones.fast.animation
 				while(i--)
 				{
 					slotTimeline = _slotTimelineStateList[i];
-					slotTimeline.update(progress, loop);
+					slotTimeline.update(progress);
 					_isComplete = slotTimeline._isComplete && _isComplete;
 				}
 			}
@@ -324,7 +328,7 @@ package dragonBones.fast.animation
 				while(i--)
 				{
 					boneTimeline = _boneTimelineStateList[i];
-					boneTimeline.update(progress, loop);
+					boneTimeline.update(progress);
 				}
 				
 				i = _slotTimelineStateList.length;
@@ -333,7 +337,7 @@ package dragonBones.fast.animation
 				while(i--)
 				{
 					slotTimeline = _slotTimelineStateList[i];
-					slotTimeline.update(progress, loop);
+					slotTimeline.update(progress);
 				}
 			}
 		}

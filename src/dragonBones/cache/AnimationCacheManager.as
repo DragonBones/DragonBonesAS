@@ -3,7 +3,6 @@ package dragonBones.cache
 	import dragonBones.core.ICacheUser;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.fast.FastArmature;
-	import dragonBones.fast.animation.FastAnimation;
 	import dragonBones.fast.animation.FastAnimationState;
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.ArmatureData;
@@ -117,21 +116,31 @@ package dragonBones.cache
 			{
 				return;
 			}
-			var animation:FastAnimation = cacheGeneratorArmature.animation;
-			animation.gotoAndPlay(animationName,0,-1,1);
-			var animationState:FastAnimationState = animation.animationState;
+			
+			var animationState:FastAnimationState = cacheGeneratorArmature.animation.animationState;
 			var passTime:Number = 1 / frameRate;
-			cacheGeneratorArmature._disableEventDispatch = true;
-			cacheGeneratorArmature._cacheLoop = loop;
+				
+			if (loop)
+			{
+				cacheGeneratorArmature.animation.gotoAndPlay(animationName,0,-1,0);
+			}
+			else
+			{
+				cacheGeneratorArmature.animation.gotoAndPlay(animationName,0,-1,1);
+			}
+			
+			var tempEnableEventDispatch:Boolean = cacheGeneratorArmature.enableEventDispatch;
+			cacheGeneratorArmature.enableEventDispatch = false;
+			var lastProgress:Number;
 			do
 			{
+				lastProgress = animationState.progress;
 				cacheGeneratorArmature.advanceTime(passTime);
 				animationCache.addFrame();
-				
-			}while (!animation.isComplete);
-			cacheGeneratorArmature._cacheLoop = false;
-			cacheGeneratorArmature._disableEventDispatch = false;
-			cacheGeneratorArmature._eventList.length = 0;
+			}
+			while (animationState.progress >= lastProgress && animationState.progress < 1);
+			
+			cacheGeneratorArmature.enableEventDispatch = tempEnableEventDispatch;
 			resetCacheGeneratorArmature();
 			cacheGeneratorArmature.enableCache = temp;
 		}

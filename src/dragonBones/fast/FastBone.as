@@ -124,7 +124,7 @@ package dragonBones.fast
 				frameEvent.bone = this;
 				frameEvent.animationState = animationState;
 				frameEvent.frameLabel = frame.event;
-				this.armature._eventList.push(frameEvent);
+				this.armature.addEvent(frameEvent);
 			}
 		}	
 		

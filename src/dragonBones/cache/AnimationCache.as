@@ -113,7 +113,7 @@ package dragonBones.cache
 		
 		public function update(progress:Number):void
 		{
-			var frameIndex:int = progress * frameNum;
+			var frameIndex:int = progress * (frameNum-1);
 			
 //			var boneTimelineCache:BoneTimelineCache;
 //			for(var i:int = 0, length:int = boneTimelineCacheList.length; i < length; i++)
