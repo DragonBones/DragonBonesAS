@@ -38,6 +38,9 @@ package dragonBones.fast
 	 */
 	[Event(name="boneFrameEvent", type="dragonBones.events.FrameEvent")]
 	
+	/**
+	 * 不支持动态添加Bone和Slot，换装请通过更换Slot的dispaly或子骨架childArmature来实现
+	 */
 	public class FastArmature extends EventDispatcher implements IAnimatable
 	{
 		/**
@@ -270,6 +273,7 @@ package dragonBones.fast
 			if(parentName)
 			{
 				parentBone = getBone(parentName);
+				parentBone.boneList.push(bone);
 			}
 			bone.armature = this;
 			bone.setParent(parentBone);
@@ -290,6 +294,7 @@ package dragonBones.fast
 			{
 				slot.armature = this;
 				slot.setParent(bone);
+				bone.slotList.push(slot);
 				slot.addDisplayToContainer(display);
 				slotList.push(slot);
 				_slotDic[slot.name] = slot;

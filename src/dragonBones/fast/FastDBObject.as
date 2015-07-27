@@ -10,6 +10,7 @@ package dragonBones.fast
 	
 	use namespace dragonBones_internal;
 
+	
 	public class FastDBObject
 	{
 		private var _name:String;
@@ -33,6 +34,8 @@ package dragonBones.fast
 		 * 
 		 */
 		public var inheritTranslation:Boolean;
+		
+		
 		
 		/** @private */
 		dragonBones_internal var _global:DBTransform;
@@ -76,7 +79,7 @@ package dragonBones.fast
 		protected var _origin:DBTransform;
 		
 		/** @private */
-//		protected var _visible:Boolean;
+		protected var _visible:Boolean;
 		
 		/** @private */
 		dragonBones_internal var _parent:FastBone;
@@ -94,7 +97,7 @@ package dragonBones.fast
 			_global = new DBTransform();
 			_origin = new DBTransform();
 			
-//			_visible = true;
+			_visible = true;
 			
 			armature = null;
 			_parent = null;
@@ -238,14 +241,16 @@ package dragonBones.fast
 			return _parent;
 		}
 		
-//		public function get visible():Boolean
-//		{
-//			return _visible;
-//		}
-//		public function set visible(value:Boolean):void
-//		{
-//			_visible = value;
-//		}
+		/** @private */
+		
+		public function get visible():Boolean
+		{
+			return _visible;
+		}
+		public function set visible(value:Boolean):void
+		{
+			_visible = value;
+		}
 		
 		public function set frameCache(cache:FrameCache):void
 		{

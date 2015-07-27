@@ -8,6 +8,11 @@ package dragonBones.fast
 	import dragonBones.objects.Frame;
 
 	use namespace dragonBones_internal;
+	
+	/**
+	 * 不保存子骨骼列表和子插槽列表
+	 * 不能动态添加子骨骼和子插槽
+	 */
 	public class FastBone extends FastDBObject
 	{
 		public static function initWithBoneData(boneData:BoneData):FastBone
@@ -22,6 +27,8 @@ package dragonBones.fast
 			return outputBone;
 		}
 		
+		public var slotList:Vector.<FastSlot> = new Vector.<FastSlot>();
+		public var boneList:Vector.<FastBone> = new Vector.<FastBone>();
 		/** @private */
 		dragonBones_internal var _timelineState:FastBoneTimelineState;
 		
@@ -32,6 +39,26 @@ package dragonBones.fast
 		{
 			super();
 			_needUpdate = 2;
+		}
+		
+		/**
+		 * Get all Bone instance associated with this bone.
+		 * @return A Vector.&lt;Slot&gt; instance.
+		 * @see dragonBones.Slot
+		 */
+		public function getBones(returnCopy:Boolean = true):Vector.<FastBone>
+		{
+			return returnCopy?boneList.concat():boneList;
+		}
+		
+		/**
+		 * Get all Slot instance associated with this bone.
+		 * @return A Vector.&lt;Slot&gt; instance.
+		 * @see dragonBones.Slot
+		 */
+		public function getSlots(returnCopy:Boolean = true):Vector.<FastSlot>
+		{
+			return returnCopy?slotList.concat():slotList;
 		}
 		
 		/**
@@ -98,6 +125,61 @@ package dragonBones.fast
 				frameEvent.frameLabel = frame.event;
 				this.armature._eventList.push(frameEvent);
 			}
+		}	
+		
+		/**
+		 * Unrecommended API. Recommend use slot.childArmature.
+		 */
+		public function get childArmature():FastArmature
+		{
+			var s:FastSlot = slot;
+			if(s)
+			{
+				return s.childArmature;
+			}
+			return null;
+		}
+		
+		/**
+		 * Unrecommended API. Recommend use slot.display.
+		 */
+		public function get display():Object
+		{
+			var s:FastSlot = slot;
+			if(s)
+			{
+				return s.display;
+			}
+			return null;
+		}
+		public function set display(value:Object):void
+		{
+			var s:FastSlot = slot;
+			if(s)
+			{
+				s.display = value;
+			}
+		}
+		
+		/** @private */
+		override public function set visible(value:Boolean):void
+		{
+			if(this._visible != value)
+			{
+				this._visible = value;
+				for each(var childSlot:FastSlot in armature.slotList)
+				{
+					if(childSlot.parent == this)
+					{
+						childSlot.updateDisplayVisible(this._visible);
+					}
+				}
+			}
+		}
+		
+		public function get slot():FastSlot
+		{
+			return slotList.length > 0? slotList[0]:null;
 		}
 	}
 }

@@ -6,7 +6,6 @@ package dragonBones.fast
 	import dragonBones.cache.SlotFrameCache;
 	import dragonBones.core.ISlotCacheGenerator;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.fast.animation.FastAnimation;
 	import dragonBones.fast.animation.FastAnimationState;
 	import dragonBones.fast.animation.FastSlotTimelineState;
 	import dragonBones.objects.DisplayData;
@@ -254,6 +253,16 @@ package dragonBones.fast
 			}
 		}
 		
+		/** @private */
+		override public function set visible(value:Boolean):void
+		{
+			if(this._visible != value)
+			{
+				this._visible = value;
+				updateDisplayVisible(this._visible);
+			}
+		}
+		
 		/**
 		 * The DisplayObject list belonging to this Slot instance (display or armature). Replace it to implement switch texture.
 		 */
@@ -289,10 +298,10 @@ package dragonBones.fast
 		}
 		public function set display(value:Object):void
 		{
-			//todo: 考虑子骨架变化的各种情况
+			//todo: 考虑子骨架变化的各种情况进行进一步测试
 			if (_currentDisplayIndex < 0)
 			{
-				return;
+				_currentDisplayIndex = 0;
 			}
 			if(_displayList[_currentDisplayIndex] == value)
 			{
@@ -310,6 +319,10 @@ package dragonBones.fast
 			return _displayList[_currentDisplayIndex] is FastArmature ? _displayList[_currentDisplayIndex] : null;
 		}
 		
+		public function set childArmature(value:FastArmature):void
+		{
+			display = value;
+		}
 		/**
 		 * zOrder. Support decimal for ensure dynamically added slot work toghther with animation controled slot.  
 		 * @return zOrder.
