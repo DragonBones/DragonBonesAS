@@ -3,6 +3,8 @@
 	import dragonBones.Armature;
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.fast.animation.FastBoneTimelineState;
+	import dragonBones.fast.animation.FastSlotTimelineState;
 	import dragonBones.objects.AnimationData;
 	
 	use namespace dragonBones_internal;
@@ -67,13 +69,10 @@
 			{
 				return;
 			}
-			var i:int = _animationStateList.length;
-			while(i --)
-			{
-				AnimationState.returnObject(_animationStateList[i]);
-			}
+			
+			resetAnimationStateList();
+			
 			_animationList.length = 0;
-			_animationStateList.length = 0;
 			
 			_armature = null;
 			_animationDataList = null;
@@ -81,6 +80,18 @@
 			_animationStateList = null;
 		}
 		
+		dragonBones_internal function resetAnimationStateList():void
+		{
+			var i:int = _animationStateList.length;
+			var animationState:AnimationState;
+			while(i --)
+			{
+				animationState = _animationStateList[i];
+				animationState.resetTimelineStateList();
+				AnimationState.returnObject(animationState);
+			}
+			_animationStateList.length = 0;
+		}
 		
 		/**
 		 * Fades the animation with name animation in over a period of time seconds and fades other animations out.

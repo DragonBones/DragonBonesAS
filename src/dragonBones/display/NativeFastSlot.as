@@ -1,13 +1,11 @@
 package dragonBones.display
 {
-	import dragonBones.fast.FastSlot;
 	import flash.display.BlendMode;
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
-	import flash.geom.ColorTransform;
 	
-	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.fast.FastSlot;
 	
 	use namespace dragonBones_internal;
 	

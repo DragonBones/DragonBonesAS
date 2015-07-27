@@ -10,6 +10,7 @@
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.ArmatureEvent;
 	import dragonBones.events.FrameEvent;
+	import dragonBones.fast.FastBone;
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.DragonBonesData;
 	import dragonBones.objects.Frame;
@@ -290,6 +291,17 @@
 			}
 		}
 
+		dragonBones_internal function resetAnimation():void
+		{
+			animation.stop();
+			animation.resetAnimationStateList();
+			
+			for each(var boneItem:Bone in _boneList)
+			{
+				boneItem.removeAllStates();
+			}
+		}
+		
 		/**
 		 * Get all Slot instance associated with this armature.
 		 * @param if return Vector copy

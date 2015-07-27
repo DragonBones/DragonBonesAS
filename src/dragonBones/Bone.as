@@ -479,6 +479,12 @@
 			}
 		}
 		
+		/** @private */
+		dragonBones_internal function removeAllStates():void
+		{
+			_timelineStateList.length = 0;
+		}
+		
 		private function blendingTimeline():void
 		{
 			var timelineState:TimelineState;

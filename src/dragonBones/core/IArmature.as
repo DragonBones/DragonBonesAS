@@ -1,9 +1,11 @@
 package dragonBones.core
 {
-	public class IArmature
+	import dragonBones.animation.IAnimatable;
+
+	public interface IArmature extends IAnimatable
 	{
-		public function IArmature()
-		{
-		}
+		function get animation():Object;
+		function resetAnimation():void
+		
 	}
 }

@@ -4,6 +4,7 @@ package dragonBones.fast
 	import flash.geom.ColorTransform;
 	
 	import dragonBones.cache.SlotFrameCache;
+	import dragonBones.core.IArmature;
 	import dragonBones.core.ISlotCacheGenerator;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.fast.animation.FastAnimationState;
@@ -34,9 +35,6 @@ package dragonBones.fast
 		protected var _currentDisplay:Object;
 		
 		protected var _blendMode:String;
-		
-		/** @private */
-		dragonBones_internal var _timelineState:FastSlotTimelineState;
 		
 		public var hasChildArmature:Boolean;
 		public function FastSlot(self:FastSlot)
@@ -141,7 +139,7 @@ package dragonBones.fast
 		{
 			if(hasChildArmature)
 			{
-				var targetArmature:FastArmature = this.childArmature;
+				var targetArmature:IArmature = this.childArmature;
 				if(targetArmature)
 				{
 					targetArmature.resetAnimation()
@@ -314,12 +312,12 @@ package dragonBones.fast
 		/**
 		 * The sub-armature of this Slot instance.
 		 */
-		public function get childArmature():FastArmature
+		public function get childArmature():IArmature
 		{
 			return _displayList[_currentDisplayIndex] is FastArmature ? _displayList[_currentDisplayIndex] : null;
 		}
 		
-		public function set childArmature(value:FastArmature):void
+		public function set childArmature(value:IArmature):void
 		{
 			display = value;
 		}
@@ -500,7 +498,7 @@ package dragonBones.fast
 			//后续会扩展更多的action，目前只有gotoAndPlay的含义
 			if(frame.action) 
 			{
-				var targetArmature:FastArmature = childArmature;
+				var targetArmature:IArmature = childArmature;
 				if (targetArmature)
 				{
 					targetArmature.animation.gotoAndPlay(frame.action);

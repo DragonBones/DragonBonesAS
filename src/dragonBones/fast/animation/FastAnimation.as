@@ -1,6 +1,7 @@
 package dragonBones.fast.animation
 {
 	import dragonBones.cache.AnimationCacheManager;
+	import dragonBones.core.IArmature;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.fast.FastArmature;
 	import dragonBones.fast.FastSlot;
@@ -87,7 +88,7 @@ package dragonBones.fast.animation
 			while(i--)
 			{
 				var slot:FastSlot = _armature.slotHasChildArmatureList[i];
-				var childArmature:FastArmature = slot.childArmature;
+				var childArmature:IArmature = slot.childArmature;
 				if(childArmature)
 				{
 					childArmature.animation.gotoAndPlay(animationName);

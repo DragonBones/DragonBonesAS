@@ -7,6 +7,7 @@ package dragonBones.fast
 	import dragonBones.animation.IAnimatable;
 	import dragonBones.cache.AnimationCacheManager;
 	import dragonBones.cache.SlotFrameCache;
+	import dragonBones.core.IArmature;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.AnimationEvent;
 	import dragonBones.events.FrameEvent;
@@ -53,7 +54,8 @@ package dragonBones.fast
 		public var userData:Object;
 		
 		
-		public var enableCache:Boolean;
+		private var _enableCache:Boolean;
+		
 		
 		/**
 		 * 保证CacheManager是独占的前提下可以开启，开启后有助于性能提高
@@ -203,7 +205,7 @@ package dragonBones.fast
 			while(i--)
 			{
 				slot = slotList[i];
-				var childArmature:FastArmature = slot.childArmature;
+				var childArmature:IArmature = slot.childArmature;
 				if(childArmature)
 				{
 					childArmature.advanceTime(passedTime);
@@ -247,6 +249,59 @@ package dragonBones.fast
 			animationCacheManager.bindCacheUserArmature(this);
 			enableCache = true;
 			return animationCacheManager;
+		}
+		
+		public function getBone(boneName:String):FastBone
+		{
+			return _boneDic[boneName];
+		}
+		public function getSlot(slotName:String):FastSlot
+		{
+			return _slotDic[slotName];
+		}
+		
+		/**
+		 * Gets the Bone associated with this DisplayObject.
+		 * @param Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
+		 * @return A Bone instance or null if no Bone with that DisplayObject exist..
+		 * @see dragonBones.Bone
+		 */
+		public function getBoneByDisplay(display:Object):Bone
+		{
+			var slot:Slot = getSlotByDisplay(display);
+			return slot?slot.parent:null;
+		}
+		
+		/**
+		 * Gets the Slot associated with this DisplayObject.
+		 * @param Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
+		 * @return A Slot instance or null if no Slot with that DisplayObject exist.
+		 * @see dragonBones.Slot
+		 */
+		public function getSlotByDisplay(displayObj:Object):Slot
+		{
+			if(displayObj)
+			{
+				for each(var slot:Slot in slotList)
+				{
+					if(slot.display == displayObj)
+					{
+						return slot;
+					}
+				}
+			}
+			return null;
+		}
+		
+		/**
+		 * Get all Slot instance associated with this armature.
+		 * @param if return Vector copy
+		 * @return A Vector.&lt;Slot&gt; instance.
+		 * @see dragonBones.Slot
+		 */
+		public function getSlots(returnCopy:Boolean = true):Vector.<FastSlot>
+		{
+			return returnCopy?slotList.concat():slotList;
 		}
 		
 		dragonBones_internal function _updateBonesByCache():void
@@ -366,6 +421,10 @@ package dragonBones.fast
 			helpArray.length = 0;
 		}
 		
+		
+		
+		
+		
 		/** @private When AnimationState enter a key frame, call this func*/
 		dragonBones_internal function arriveAtFrame(frame:Frame, animationState:FastAnimationState):void
 		{
@@ -380,6 +439,29 @@ package dragonBones.fast
 			if(frame.action)
 			{
 				animation.gotoAndPlay(frame.action);
+			}
+		}
+		
+		/**
+		 * Force update bones and slots. (When bone's animation play complete, it will not update) 
+		 */
+		public function invalidUpdate(boneName:String = null):void
+		{
+			if(boneName)
+			{
+				var bone:FastBone = getBone(boneName);
+				if(bone)
+				{
+					bone.invalidUpdate();
+				}
+			}
+			else
+			{
+				var i:int = boneList.length;
+				while(i --)
+				{
+					boneList[i].invalidUpdate();
+				}
 			}
 		}
 		
@@ -424,81 +506,13 @@ package dragonBones.fast
 			return _display;
 		}
 		
-		
-		public function getBone(boneName:String):FastBone
+		public function get enableCache():Boolean
 		{
-			return _boneDic[boneName];
+			return _enableCache;
 		}
-		public function getSlot(slotName:String):FastSlot
+		public function set enableCache(value:Boolean):void
 		{
-			return _slotDic[slotName];
-		}
-		
-		/**
-		 * Gets the Bone associated with this DisplayObject.
-		 * @param Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
-		 * @return A Bone instance or null if no Bone with that DisplayObject exist..
-		 * @see dragonBones.Bone
-		 */
-		public function getBoneByDisplay(display:Object):Bone
-		{
-			var slot:Slot = getSlotByDisplay(display);
-			return slot?slot.parent:null;
-		}
-		
-		/**
-		 * Gets the Slot associated with this DisplayObject.
-		 * @param Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
-		 * @return A Slot instance or null if no Slot with that DisplayObject exist.
-		 * @see dragonBones.Slot
-		 */
-		public function getSlotByDisplay(displayObj:Object):Slot
-		{
-			if(displayObj)
-			{
-				for each(var slot:Slot in slotList)
-				{
-					if(slot.display == displayObj)
-					{
-						return slot;
-					}
-				}
-			}
-			return null;
-		}
-		
-		/**
-		 * Get all Slot instance associated with this armature.
-		 * @param if return Vector copy
-		 * @return A Vector.&lt;Slot&gt; instance.
-		 * @see dragonBones.Slot
-		 */
-		public function getSlots(returnCopy:Boolean = true):Vector.<FastSlot>
-		{
-			return returnCopy?slotList.concat():slotList;
-		}
-		
-		/**
-		 * Force update bones and slots. (When bone's animation play complete, it will not update) 
-		 */
-		public function invalidUpdate(boneName:String = null):void
-		{
-			if(boneName)
-			{
-				var bone:FastBone = getBone(boneName);
-				if(bone)
-				{
-					bone.invalidUpdate();
-				}
-			}
-			else
-			{
-				var i:int = boneList.length;
-				while(i --)
-				{
-					boneList[i].invalidUpdate();
-				}
-			}
+			_enableCache = value;
 		}
 	}
 }

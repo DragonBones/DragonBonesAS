@@ -2,13 +2,13 @@
 {
 	import dragonBones.Armature;
 	import dragonBones.Bone;
+	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.AnimationEvent;
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.SlotTimeline;
 	import dragonBones.objects.TransformTimeline;
-	import dragonBones.Slot;
 	
 	use namespace dragonBones_internal;
 	/**
@@ -137,6 +137,16 @@
 		
 		private function clear():void
 		{
+			resetTimelineStateList();
+			
+			_boneMasks.length = 0;
+			
+			_armature = null;
+			_clip = null;
+		}
+		
+		dragonBones_internal function resetTimelineStateList():void
+		{
 			var i:int = _timelineStateList.length;
 			while(i --)
 			{
@@ -150,11 +160,6 @@
 				SlotTimelineState.returnObject(_slotTimelineStateList[i]);
 			}
 			_slotTimelineStateList.length = 0;
-			
-			_boneMasks.length = 0;
-			
-			_armature = null;
-			_clip = null;
 		}
 		
 //骨架装配

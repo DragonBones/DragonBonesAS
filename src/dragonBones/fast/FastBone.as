@@ -1,5 +1,6 @@
 package dragonBones.fast
 {
+	import dragonBones.core.IArmature;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.FrameEvent;
 	import dragonBones.fast.animation.FastAnimationState;
@@ -130,7 +131,7 @@ package dragonBones.fast
 		/**
 		 * Unrecommended API. Recommend use slot.childArmature.
 		 */
-		public function get childArmature():FastArmature
+		public function get childArmature():IArmature
 		{
 			var s:FastSlot = slot;
 			if(s)

@@ -3,6 +3,7 @@ package dragonBones.cache
 	import dragonBones.core.ICacheUser;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.fast.FastArmature;
+	import dragonBones.fast.animation.FastAnimation;
 	import dragonBones.fast.animation.FastAnimationState;
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.ArmatureData;
@@ -116,8 +117,9 @@ package dragonBones.cache
 			{
 				return;
 			}
-			cacheGeneratorArmature.animation.gotoAndPlay(animationName,0,-1,1);
-			var animationState:FastAnimationState = cacheGeneratorArmature.animation.animationState;
+			var animation:FastAnimation = cacheGeneratorArmature.animation;
+			animation.gotoAndPlay(animationName,0,-1,1);
+			var animationState:FastAnimationState = animation.animationState;
 			var passTime:Number = 1 / frameRate;
 			cacheGeneratorArmature._disableEventDispatch = true;
 			cacheGeneratorArmature._cacheLoop = loop;
@@ -126,7 +128,7 @@ package dragonBones.cache
 				cacheGeneratorArmature.advanceTime(passTime);
 				animationCache.addFrame();
 				
-			}while (!animationState.isComplete);
+			}while (!animation.isComplete);
 			cacheGeneratorArmature._cacheLoop = false;
 			cacheGeneratorArmature._disableEventDispatch = false;
 			cacheGeneratorArmature._eventList.length = 0;
