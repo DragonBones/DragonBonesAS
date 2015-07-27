@@ -377,7 +377,7 @@ package dragonBones.fast.animation
 				
 				_durationTransform.scaleX = nextFrame.transform.scaleX - currentFrame.transform.scaleX + nextFrame.scaleOffset.x;
 				_durationTransform.scaleY = nextFrame.transform.scaleY - currentFrame.transform.scaleY + nextFrame.scaleOffset.y;
-				
+				_durationTransform.normalizeRotation();
 				if(nextFrameIndex == 0)
 				{
 					_durationTransform.skewX = TransformUtil.formatRadian(_durationTransform.skewX);

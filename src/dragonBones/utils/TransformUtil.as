@@ -91,5 +91,12 @@ package dragonBones.utils
 				transform.skewY = skewYArray[1];
 			}
 		}
+		//确保角度在-180到180之间
+		public static function normalizeRotation(rotation:Number):Number
+		{
+			rotation = (rotation + Math.PI)%(2*Math.PI);
+			rotation = rotation > 0 ? rotation : 2*Math.PI + rotation;
+			return rotation - Math.PI;
+		}
 	}
 }

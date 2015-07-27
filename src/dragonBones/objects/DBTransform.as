@@ -111,6 +111,12 @@ package dragonBones.objects
 			return output;
 		}
 		
+		public function normalizeRotation():void
+		{
+			skewX = TransformUtil.normalizeRotation(skewX);	
+			skewY = TransformUtil.normalizeRotation(skewY);	
+		}
+		
 		/**
 		 * Get a string representing all DBTransform property values.
 		 * @return String All property values in a formatted string.
