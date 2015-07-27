@@ -91,7 +91,7 @@ package dragonBones.fast.animation
 				var childArmature:IArmature = slot.childArmature;
 				if(childArmature)
 				{
-					childArmature.animation.gotoAndPlay(animationName);
+					childArmature.getAnimation().gotoAndPlay(animationName);
 				}
 			}
 			return animationState;

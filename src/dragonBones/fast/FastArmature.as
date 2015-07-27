@@ -5,10 +5,10 @@ package dragonBones.fast
 	
 	import dragonBones.Bone;
 	import dragonBones.Slot;
-	import dragonBones.animation.IAnimatable;
 	import dragonBones.cache.AnimationCacheManager;
 	import dragonBones.cache.SlotFrameCache;
 	import dragonBones.core.IArmature;
+	import dragonBones.core.ICacheableArmature;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.AnimationEvent;
 	import dragonBones.events.FrameEvent;
@@ -43,7 +43,7 @@ package dragonBones.fast
 	/**
 	 * 不支持动态添加Bone和Slot，换装请通过更换Slot的dispaly或子骨架childArmature来实现
 	 */
-	public class FastArmature extends EventDispatcher implements IAnimatable
+	public class FastArmature extends EventDispatcher implements ICacheableArmature
 	{
 		/**
 		 * The name should be same with ArmatureData's name
@@ -78,7 +78,7 @@ package dragonBones.fast
 		
 		public var slotHasChildArmatureList:Vector.<FastSlot>;
 		
-		public var enableEventDispatch:Boolean = true;
+		protected var _enableEventDispatch:Boolean = true;
 		
 		dragonBones_internal var __dragonBonesData:DragonBonesData;
 		dragonBones_internal var _armatureData:ArmatureData;
@@ -465,7 +465,7 @@ package dragonBones.fast
 			}
 		}
 		
-		dragonBones_internal function resetAnimation():void
+		public function resetAnimation():void
 		{
 			animation.animationState.resetTimelineStateList();
 			for each(var boneItem:FastBone in boneList)
@@ -478,6 +478,11 @@ package dragonBones.fast
 		private function sortSlot(slot1:FastSlot, slot2:FastSlot):int
 		{
 			return slot1.zOrder < slot2.zOrder?1: -1;
+		}
+		
+		public function getAnimation():Object
+		{
+			return _animation;
 		}
 		
 		/**
@@ -515,9 +520,18 @@ package dragonBones.fast
 			_enableCache = value;
 		}
 		
+		public function get enableEventDispatch():Boolean
+		{
+			return _enableEventDispatch;
+		}
+		public function set enableEventDispatch(value:Boolean):void
+		{
+			_enableEventDispatch = value;
+		}
+		
 		dragonBones_internal function addEvent(event:Event):void
 		{
-			if (enableEventDispatch)
+			if (_enableEventDispatch)
 			{
 				_eventList.push(event);
 			}			

@@ -5,12 +5,11 @@
 	
 	import dragonBones.animation.Animation;
 	import dragonBones.animation.AnimationState;
-	import dragonBones.animation.IAnimatable;
 	import dragonBones.animation.TimelineState;
+	import dragonBones.core.IArmature;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.ArmatureEvent;
 	import dragonBones.events.FrameEvent;
-	import dragonBones.fast.FastBone;
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.DragonBonesData;
 	import dragonBones.objects.Frame;
@@ -69,7 +68,7 @@
 	 */
 	[Event(name="boneFrameEvent", type="dragonBones.events.FrameEvent")]
 
-	public class Armature extends EventDispatcher implements IAnimatable
+	public class Armature extends EventDispatcher implements IArmature
 	{
 		dragonBones_internal var __dragonBonesData:DragonBonesData;
 		
@@ -291,7 +290,7 @@
 			}
 		}
 
-		dragonBones_internal function resetAnimation():void
+		public function resetAnimation():void
 		{
 			animation.stop();
 			animation.resetAnimationStateList();
@@ -709,6 +708,11 @@
 				slot.displayList = displayList;
 				slot.changeDisplay(0);
 			}
+		}
+		
+		public function getAnimation():Object
+		{
+			return _animation;
 		}
 	}
 }

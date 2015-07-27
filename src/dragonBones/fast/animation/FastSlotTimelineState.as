@@ -115,7 +115,7 @@ package dragonBones.fast.animation
 		{
 			_slot = slot;
 			_armature = _slot.armature;
-			_animation = _armature.animation;
+			_animation = _armature.animation as FastAnimation;
 			_animationState = animationState;
 			_timelineData = timelineData;
 			

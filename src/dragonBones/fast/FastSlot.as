@@ -8,7 +8,6 @@ package dragonBones.fast
 	import dragonBones.core.ISlotCacheGenerator;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.fast.animation.FastAnimationState;
-	import dragonBones.fast.animation.FastSlotTimelineState;
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.SlotData;
@@ -501,7 +500,7 @@ package dragonBones.fast
 				var targetArmature:IArmature = childArmature;
 				if (targetArmature)
 				{
-					targetArmature.animation.gotoAndPlay(frame.action);
+					targetArmature.getAnimation().gotoAndPlay(frame.action);
 				}
 			}
 		}

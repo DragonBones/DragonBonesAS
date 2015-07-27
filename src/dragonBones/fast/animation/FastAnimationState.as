@@ -1,6 +1,7 @@
 package dragonBones.fast.animation
 {
 	import dragonBones.cache.AnimationCache;
+	import dragonBones.core.IAnimationState;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.AnimationEvent;
 	import dragonBones.fast.FastArmature;
@@ -13,7 +14,7 @@ package dragonBones.fast.animation
 
 	use namespace dragonBones_internal;
 	
-	public class FastAnimationState
+	public class FastAnimationState implements IAnimationState
 	{
 		
 		public var animationCache:AnimationCache;
@@ -21,7 +22,8 @@ package dragonBones.fast.animation
 		 * If auto genterate tween between keyframes.
 		 */
 		public var autoTween:Boolean;
-		public var progress:Number;
+		private var _progress:Number;
+		
 		dragonBones_internal var _armature:FastArmature;
 		
 		private var _boneTimelineStateList:Vector.<FastBoneTimelineState> = new Vector.<FastBoneTimelineState>;
@@ -144,7 +146,7 @@ package dragonBones.fast.animation
 			}
 			
 			_time = 0;
-			progress = 0;
+			_progress = 0;
 			
 			updateTimelineStateList();
 			hideBones();
@@ -192,10 +194,10 @@ package dragonBones.fast.animation
 			{
 				//计算progress
 				_time += passedTime;
-				progress = _time / _fadeTotalTime;
+				_progress = _time / _fadeTotalTime;
 				if(progress >= 1)
 				{
-					progress = 0;
+					_progress = 0;
 					_time = 0;
 					_fading = false;
 				}
@@ -236,9 +238,9 @@ package dragonBones.fast.animation
 			{
 				isThisComplete = false;
 				
-				progress = currentTime / _totalTime;
+				_progress = currentTime / _totalTime;
 				currentPlayTimes = Math.ceil(progress) || 1;
-				progress -= Math.floor(progress);
+				_progress -= Math.floor(progress);
 				currentTime %= _totalTime;
 			}
 			else
@@ -246,7 +248,7 @@ package dragonBones.fast.animation
 				currentPlayTimes = _playTimes;
 				currentTime = _totalTime;
 				isThisComplete = true;
-				progress = 1;
+				_progress = 1;
 			}
 			
 			_isComplete = isThisComplete;
@@ -394,6 +396,19 @@ package dragonBones.fast.animation
 				}
 			}
 		}
+
+		private function hideBones():void
+		{
+			for each(var timelineName:String in animationData.hideTimelineNameMap)
+			{
+				
+				var slot:FastSlot = _armature.getSlot(timelineName);
+				if(slot)
+				{
+					slot.hideSlots();
+				}
+			}
+		}
 		
 		public function setTimeScale(value:Number):FastAnimationState
 		{
@@ -473,18 +488,9 @@ package dragonBones.fast.animation
 			return _armature.enableCache && animationCache && !_fading;
 		}
 		
-		private function hideBones():void
+		public function get progress():Number
 		{
-			for each(var timelineName:String in animationData.hideTimelineNameMap)
-			{
-				
-				var slot:FastSlot = _armature.getSlot(timelineName);
-				trace("hide:", timelineName, slot);
-				if(slot)
-				{
-					slot.hideSlots();
-				}
-			}
+			return _progress;
 		}
 	}
 }

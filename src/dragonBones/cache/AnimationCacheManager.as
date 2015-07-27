@@ -1,9 +1,10 @@
 package dragonBones.cache
 {
+	import dragonBones.core.IAnimationState;
 	import dragonBones.core.ICacheUser;
+	import dragonBones.core.ICacheableArmature;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.fast.FastArmature;
-	import dragonBones.fast.animation.FastAnimationState;
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.ArmatureData;
 
@@ -11,7 +12,7 @@ package dragonBones.cache
 	
 	public class AnimationCacheManager
 	{
-		public var cacheGeneratorArmature:FastArmature
+		public var cacheGeneratorArmature:ICacheableArmature
 		public var armatureData:ArmatureData;
 		public var frameRate:Number;
 		public var animationCacheDic:Object = {};
@@ -117,16 +118,16 @@ package dragonBones.cache
 				return;
 			}
 			
-			var animationState:FastAnimationState = cacheGeneratorArmature.animation.animationState;
+			var animationState:IAnimationState = cacheGeneratorArmature.getAnimation().animationState;
 			var passTime:Number = 1 / frameRate;
 				
 			if (loop)
 			{
-				cacheGeneratorArmature.animation.gotoAndPlay(animationName,0,-1,0);
+				cacheGeneratorArmature.getAnimation().gotoAndPlay(animationName,0,-1,0);
 			}
 			else
 			{
-				cacheGeneratorArmature.animation.gotoAndPlay(animationName,0,-1,1);
+				cacheGeneratorArmature.getAnimation().gotoAndPlay(animationName,0,-1,1);
 			}
 			
 			var tempEnableEventDispatch:Boolean = cacheGeneratorArmature.enableEventDispatch;

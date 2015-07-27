@@ -4,7 +4,7 @@ package dragonBones.core
 
 	public interface IArmature extends IAnimatable
 	{
-		function get animation():Object;
+		function getAnimation():Object;
 		function resetAnimation():void
 		
 	}
