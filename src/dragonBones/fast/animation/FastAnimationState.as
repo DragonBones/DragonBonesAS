@@ -107,6 +107,7 @@ package dragonBones.fast.animation
 				FastSlotTimelineState.returnObject(_slotTimelineStateList[i]);
 			}
 			_slotTimelineStateList.length = 0;
+			name = null;
 		}
 		
 		/** @private */
