@@ -232,9 +232,9 @@ package dragonBones.fast
 				}
 				updateTransform();
 				
-				if(_currentDisplay is FastArmature)
+				if(display is FastArmature)
 				{
-					var targetArmature:FastArmature = _currentDisplay as FastArmature;
+					var targetArmature:FastArmature = display as FastArmature;
 					
 					if(	this.armature &&
 						this.armature.animation.animationState &&
@@ -367,7 +367,7 @@ package dragonBones.fast
 		
 		public function get dispalyIndex():int
 		{
-			return _currentDisplayIndex
+			return _currentDisplayIndex;
 		}
 		
 		public function get colorChanged():Boolean

@@ -204,7 +204,7 @@ package dragonBones.fast
 			i = slotHasChildArmatureList.length;
 			while(i--)
 			{
-				slot = slotList[i];
+				slot = slotHasChildArmatureList[i];
 				var childArmature:IArmature = slot.childArmature;
 				if(childArmature)
 				{

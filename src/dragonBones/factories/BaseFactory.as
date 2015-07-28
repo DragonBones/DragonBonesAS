@@ -446,7 +446,6 @@ package dragonBones.factories
 				slotData = slotDataList[i];
 				slot = generateFastSlot();
 				slot.initWithSlotData(slotData);
-				armature.addSlot(slot, slotData.parent);
 				
 				var l:int = slotData.displayDataList.length;
 				while(l--)
@@ -458,6 +457,7 @@ package dragonBones.factories
 						case DisplayData.ARMATURE:
 							var childArmature:FastArmature = buildFastArmatureUsingArmatureDataFromTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlas, skinName);
 							displayList[l] = childArmature;
+							slot.hasChildArmature = true;
 							break;
 						
 						case DisplayData.IMAGE:
@@ -471,9 +471,9 @@ package dragonBones.factories
 				//如果显示对象有name属性并且name属性可以设置的话，将name设置为与slot同名，dragonBones并不依赖这些属性，只是方便开发者
 				for each(var displayObject:Object in displayList)
 				{
-					if(displayObject is Armature)
+					if(displayObject is FastArmature)
 					{
-						displayObject = (displayObject as Armature).display;
+						displayObject = (displayObject as FastArmature).display;
 					}
 					
 					if(displayObject.hasOwnProperty("name"))
@@ -489,6 +489,7 @@ package dragonBones.factories
 				}
 				//==================================================
 				slot.initDisplayList(displayList.concat());
+				armature.addSlot(slot, slotData.parent);
 				slot.changeDisplayIndex(slotData.displayIndex);
 			}
 		}
@@ -531,6 +532,7 @@ package dragonBones.factories
 						case DisplayData.ARMATURE:
 							var childArmature:Armature = buildArmatureUsingArmatureDataFromTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlas, skinName);
 							displayList[l] = childArmature;
+							trace("slotsss",slot.name);
 							break;
 						
 						case DisplayData.IMAGE:

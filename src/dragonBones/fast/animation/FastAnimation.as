@@ -146,7 +146,7 @@ package dragonBones.fast.animation
 			{
 				return;
 			}
-			if(!animationState)
+			if(!animationState.name)
 			{
 				gotoAndPlay(_animationDataList[0].name);
 			}
