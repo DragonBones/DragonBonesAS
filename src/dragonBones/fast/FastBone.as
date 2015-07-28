@@ -131,7 +131,7 @@ package dragonBones.fast
 		/**
 		 * Unrecommended API. Recommend use slot.childArmature.
 		 */
-		public function get childArmature():IArmature
+		public function get childArmature():Object
 		{
 			var s:FastSlot = slot;
 			if(s)

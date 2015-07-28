@@ -138,7 +138,7 @@ package dragonBones.fast
 		{
 			if(hasChildArmature)
 			{
-				var targetArmature:IArmature = this.childArmature;
+				var targetArmature:IArmature = this.childArmature as IArmature;
 				if(targetArmature)
 				{
 					targetArmature.resetAnimation()
@@ -311,12 +311,12 @@ package dragonBones.fast
 		/**
 		 * The sub-armature of this Slot instance.
 		 */
-		public function get childArmature():IArmature
+		public function get childArmature():Object
 		{
 			return _displayList[_currentDisplayIndex] is FastArmature ? _displayList[_currentDisplayIndex] : null;
 		}
 		
-		public function set childArmature(value:IArmature):void
+		public function set childArmature(value:Object):void
 		{
 			display = value;
 		}
@@ -497,7 +497,7 @@ package dragonBones.fast
 			//后续会扩展更多的action，目前只有gotoAndPlay的含义
 			if(frame.action) 
 			{
-				var targetArmature:IArmature = childArmature;
+				var targetArmature:IArmature = childArmature as IArmature;
 				if (targetArmature)
 				{
 					targetArmature.getAnimation().gotoAndPlay(frame.action);

@@ -205,7 +205,7 @@ package dragonBones.fast
 			while(i--)
 			{
 				slot = slotList[i];
-				var childArmature:IArmature = slot.childArmature;
+				var childArmature:IArmature = slot.childArmature as IArmature;
 				if(childArmature)
 				{
 					childArmature.advanceTime(passedTime);
