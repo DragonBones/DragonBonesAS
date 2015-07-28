@@ -8,6 +8,7 @@
 	import dragonBones.core.DBObject;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.FrameEvent;
+	import dragonBones.events.SoundEventManager;
 	import dragonBones.objects.BoneData;
 	import dragonBones.objects.DBTransform;
 	import dragonBones.objects.Frame;
@@ -17,6 +18,11 @@
 	
 	public class Bone extends DBObject
 	{
+		/**
+		 * The instance dispatch sound event.
+		 */
+		private static const _soundManager:SoundEventManager = SoundEventManager.getInstance();
+		
 		public static function initWithBoneData(boneData:BoneData):Bone
 		{
 			var outputBone:Bone = new Bone();
