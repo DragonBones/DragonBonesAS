@@ -16,11 +16,11 @@ DragonBones AS Lib V4.1 是配合DragonBones4.1发布的AS版本的语言库。�
 ```
 
 Compare                  | Armature | FastArmature | FastArmature+数据缓存
------------------------- | -------- | ------------ | ------------
-Performance              | 100      | 120          | 300 
+------------------------ | -------- | ------------ | ---------------------
+Performance              | 100%     | 120%         | 300% 
 Animation Blending       | √        | √            | √ 
 Animation Tween          | √        | √            | √ 
-Dynamic Animation Tween  | √        | ×            | ×
+Dynamic Animation Tween  | √        | √            | ×
 Color Transform          | √        | √            | √ 
 Sequence Frame Animation | √        | √            | √ 
 Animation Time Scale     | √        | √            | √ 
