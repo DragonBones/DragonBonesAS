@@ -13,7 +13,6 @@ DragonBones AS Lib V4.1 是配合DragonBones4.1发布的AS版本的语言库。�
 
 ##### 极速模式和普通模式的性能和功能对比
 
-```
 
 Compare                  | Armature | FastArmature | FastArmature + Data Cache
 ------------------------ | -------- | ------------ | -------------------------
@@ -31,5 +30,4 @@ Animation Bone Mask      | √        | ×            | ×
 Animation Mixing         | √        | ×            | × 
 Timeline Event           | √        | √            | √ 
 
-```
 
