@@ -16,18 +16,18 @@ DragonBones AS Lib V4.1 是配合DragonBones4.1发布的AS版本的语言库。�
 
                          | Armature | FastArmature | FastArmature + Data Cache
 ------------------------ | -------- | ------------ | -------------------------
-性能对比                                               | 100%     | 120%         | 300% 
-Animation Blending       | √        | √            | √ 
-Animation Tween          | √        | √            | √ 
-Dynamic Animation Tween  | √        | √            | ×
-Color Transform          | √        | √            | √ 
-Sequence Frame Animation | √        | √            | √ 
-Animation Time Scale     | √        | √            | √ 
-Change Slot Image        | √        | √            | √ 
-Change Skin              | √        | ×            | × 
-Dynamic Add/Remove Bone  | √        | ×            | × 
-Animation Bone Mask      | √        | ×            | × 
-Animation Mixing         | √        | ×            | × 
-Timeline Event           | √        | √            | √ 
+性能对比 Performance              | 100%     | 120%         | 300% 
+动画间过渡 Animation Blending       | √        | √            | √ 
+动画补间 Animation Tween          | √        | √            | √ 
+动态动画补间 Dynamic Animation Tween  | √        | √            | ×
+颜色变换 Color Transform          | √        | √            | √ 
+帧动画 Sequence Frame Animation | √        | √            | √ 
+动画变速 Animation Time Scale     | √        | √            | √ 
+局部换肤 Change Slot Image        | √        | √            | √ 
+整体换肤 Change Skin              | √        | ×            | × 
+动态骨骼增加删除 Dynamic Add/Remove Bone  | √        | ×            | × 
+动画部分播放 Animation Bone Mask      | √        | ×            | × 
+多动画融合 Animation Mixing         | √        | ×            | × 
+时间轴事件 Timeline Event           | √        | √            | √ 
 
 
