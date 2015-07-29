@@ -532,7 +532,6 @@ package dragonBones.factories
 						case DisplayData.ARMATURE:
 							var childArmature:Armature = buildArmatureUsingArmatureDataFromTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlas, skinName);
 							displayList[l] = childArmature;
-							trace("slotsss",slot.name);
 							break;
 						
 						case DisplayData.IMAGE:

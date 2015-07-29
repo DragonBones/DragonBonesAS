@@ -327,7 +327,7 @@ package dragonBones.animation
 				{
 					_tweenEasing = currentFrame.tweenEasing;
 					_tweenCurve = currentFrame.curve;
-					if(isNaN(_tweenEasing))    //frame no tween
+					if(isNaN(_tweenEasing) && _tweenCurve == null)    //frame no tween
 					{
 						tweenEnabled = false;
 					}
@@ -351,7 +351,7 @@ package dragonBones.animation
 			{
 				_tweenEasing = currentFrame.tweenEasing;
 				_tweenCurve = currentFrame.curve;
-				if(isNaN(_tweenEasing) || _tweenEasing == 10)    //frame no tween
+				if((isNaN(_tweenEasing) || _tweenEasing == 10) && _tweenCurve == null)   //frame no tween
 				{
 					_tweenEasing = NaN;
 					tweenEnabled = false;

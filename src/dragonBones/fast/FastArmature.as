@@ -266,9 +266,9 @@ package dragonBones.fast
 		 * @return A Bone instance or null if no Bone with that DisplayObject exist..
 		 * @see dragonBones.Bone
 		 */
-		public function getBoneByDisplay(display:Object):Bone
+		public function getBoneByDisplay(display:Object):FastBone
 		{
-			var slot:Slot = getSlotByDisplay(display);
+			var slot:FastSlot = getSlotByDisplay(display);
 			return slot?slot.parent:null;
 		}
 		
@@ -278,11 +278,11 @@ package dragonBones.fast
 		 * @return A Slot instance or null if no Slot with that DisplayObject exist.
 		 * @see dragonBones.Slot
 		 */
-		public function getSlotByDisplay(displayObj:Object):Slot
+		public function getSlotByDisplay(displayObj:Object):FastSlot
 		{
 			if(displayObj)
 			{
-				for each(var slot:Slot in slotList)
+				for each(var slot:FastSlot in slotList)
 				{
 					if(slot.display == displayObj)
 					{
