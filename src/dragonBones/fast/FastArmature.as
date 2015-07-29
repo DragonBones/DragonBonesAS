@@ -3,8 +3,6 @@ package dragonBones.fast
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
-	import dragonBones.Bone;
-	import dragonBones.Slot;
 	import dragonBones.cache.AnimationCacheManager;
 	import dragonBones.cache.SlotFrameCache;
 	import dragonBones.core.IArmature;
