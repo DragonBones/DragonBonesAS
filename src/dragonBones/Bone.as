@@ -8,6 +8,8 @@
 	import dragonBones.core.DBObject;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.FrameEvent;
+	import dragonBones.events.SoundEvent;
+	import dragonBones.events.SoundEventManager;
 	import dragonBones.objects.BoneData;
 	import dragonBones.objects.DBTransform;
 	import dragonBones.objects.Frame;
@@ -17,6 +19,11 @@
 	
 	public class Bone extends DBObject
 	{
+		/**
+		 * The instance dispatch sound event.
+		 */
+		private static const _soundManager:SoundEventManager = SoundEventManager.getInstance();
+		
 		public static function initWithBoneData(boneData:BoneData):Bone
 		{
 			var outputBone:Bone = new Bone();
@@ -443,6 +450,15 @@
 					frameEvent.frameLabel = frame.event;
 					this._armature._eventList.push(frameEvent);
 				}
+				if(frame.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
+				{
+					var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
+					soundEvent.armature = this._armature;
+					soundEvent.animationState = animationState;
+					soundEvent.sound = frame.sound;
+					_soundManager.dispatchEvent(soundEvent);
+				}
+				
 				//[TODO]currently there is only gotoAndPlay belongs to frame action. In future, there will be more.  
 				//后续会扩展更多的action，目前只有gotoAndPlay的含义
 				if(frame.action) 
