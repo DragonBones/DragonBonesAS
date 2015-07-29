@@ -15,21 +15,21 @@ DragonBones AS Lib V4.1 是配合DragonBones4.1发布的AS版本的语言库。�
 
 ```
 
- | Armature | FastArmature | FastArmature+数据缓存
------------- | ------------- | ------------
-性能比较 | 100 | 120 | 300 
-动画间过渡 | √ | √ | √ 
-动画补间  | √ | √ | √ 
-动态动画补间  | √ | × 
-颜色变换 | √ | √ | √ 
-帧动画  | √ | √ | √ 
-动画变速 | √ | √ | √ 
-局部换肤 | √ | √ | √ 
-整体换肤  | √ | × | × 
-动态骨骼增加删除 | √ | × | × 
-动画部分播放 | √ | × | × 
-多动画融合 | √ | × | × 
-时间轴事件  | √ | √ | √ 
+Compare                  | Armature | FastArmature | FastArmature+数据缓存
+------------------------ | -------- | ------------ | ------------
+Performance              |  100     | 120 | 300 
+Animation Blending       | √        | √ | √ 
+Animation Tween          | √        | √ | √ 
+Dynamic Animation Tween  | √        | × | ×
+Color Transform          | √        | √ | √ 
+Sequence Frame Animation | √        | √ | √ 
+Animation Time Scale     | √        | √ | √ 
+Change Slot Image        | √        | √ | √ 
+Change Skin              | √        | × | × 
+Dynamic Add/Remove Bone  | √        | × | × 
+Animation Bone Mask      | √        | × | × 
+Animation Mixing         | √        | × | × 
+Timeline Event           | √        | √ | √ 
 
 ```
 

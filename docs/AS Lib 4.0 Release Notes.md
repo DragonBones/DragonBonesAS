@@ -1,4 +1,4 @@
-﻿DragonBones AS Lib V3.0.1 Release Notes
+﻿DragonBones AS Lib V4.0 Release Notes
 ======================
 最近更新时间：2015年6月17日  
 ### 概述
