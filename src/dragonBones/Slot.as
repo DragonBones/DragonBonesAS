@@ -527,7 +527,8 @@
 		/** @private When slot timeline enter a key frame, call this func*/
 		dragonBones_internal function arriveAtFrame(frame:Frame, timelineState:SlotTimelineState, animationState:AnimationState, isCross:Boolean):void
 		{
-			var displayControl:Boolean = animationState.displayControl
+			var displayControl:Boolean = animationState.displayControl &&
+										 animationState.containsBoneMask(parent.name)
 			
 			if(displayControl)
 			{
