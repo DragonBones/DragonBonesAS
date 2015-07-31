@@ -4,7 +4,6 @@ package dragonBones.cache
 	import dragonBones.core.ICacheUser;
 	import dragonBones.core.ICacheableArmature;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.fast.FastArmature;
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.ArmatureData;
 
@@ -57,38 +56,40 @@ package dragonBones.cache
 		
 		public function bindCacheUserArmatures(armatures:Array):void
 		{
-			for each(var armature:FastArmature in armatures)
+			for each(var armature:ICacheableArmature in armatures)
 			{
 				bindCacheUserArmature(armature);
 			}
 			
 		}
 		
-		public function bindCacheUserArmature(armature:FastArmature):void
+		public function bindCacheUserArmature(armature:ICacheableArmature):void
 		{
-			armature.animation.animationCacheManager = this;
+			armature.getAnimation().animationCacheManager = this;
 			
+			var slotDic:Object = armature.getSlotDic();
 			var cacheUser:ICacheUser;
 //			for each(cacheUser in armature._boneDic)
 //			{
 //				cacheUser.frameCache = boneFrameCacheDic[cacheUser.name];
 //			}
-			for each(cacheUser in armature._slotDic)
+			for each(cacheUser in slotDic)
 			{
 				cacheUser.frameCache = slotFrameCacheDic[cacheUser.name];
 			}
 		}
 		
-		public function setCacheGeneratorArmature(armature:FastArmature):void
+		public function setCacheGeneratorArmature(armature:ICacheableArmature):void
 		{
 			cacheGeneratorArmature = armature;
 			
+			var slotDic:Object = armature.getSlotDic();
 			var cacheUser:ICacheUser;
 //			for each(cacheUser in armature._boneDic)
 //			{
 //				boneFrameCacheDic[cacheUser.name] = new FrameCache();
 //			}
-			for each(cacheUser in armature._slotDic)
+			for each(cacheUser in armature.getSlotDic())
 			{
 				slotFrameCacheDic[cacheUser.name] = new SlotFrameCache();
 			}
@@ -96,7 +97,7 @@ package dragonBones.cache
 			for each(var animationCache:AnimationCache in animationCacheDic)
 			{
 //				animationCache.initBoneTimelineCacheDic(armature._boneDic, boneFrameCacheDic);
-				animationCache.initSlotTimelineCacheDic(armature._slotDic, slotFrameCacheDic);
+				animationCache.initSlotTimelineCacheDic(slotDic, slotFrameCacheDic);
 			}
 		}
 		

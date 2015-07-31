@@ -313,7 +313,7 @@ package dragonBones.fast
 		 */
 		public function get childArmature():Object
 		{
-			return _displayList[_currentDisplayIndex] is FastArmature ? _displayList[_currentDisplayIndex] : null;
+			return _displayList[_currentDisplayIndex] is IArmature ? _displayList[_currentDisplayIndex] : null;
 		}
 		
 		public function set childArmature(value:Object):void
