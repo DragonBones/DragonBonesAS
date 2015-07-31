@@ -11,6 +11,6 @@ package dragonBones.core
 		function get globalTransformMatrix():Matrix;
 		function get colorChanged():Boolean;
 		function get colorTransform():ColorTransform;
-		function get dispalyIndex():int;
+		function get displayIndex():int;
 	}
 }

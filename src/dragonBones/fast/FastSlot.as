@@ -365,7 +365,7 @@ package dragonBones.fast
 			return _colorTransform;
 		}
 		
-		public function get dispalyIndex():int
+		public function get displayIndex():int
 		{
 			return _currentDisplayIndex;
 		}

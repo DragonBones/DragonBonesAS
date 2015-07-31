@@ -285,17 +285,24 @@ package dragonBones.fast.animation
 			
 			//抛事件
 			var event:AnimationEvent;
-			if(_listenCompleteEvent && completeFlg)
+			if(completeFlg)
 			{
-				event = new AnimationEvent(AnimationEvent.COMPLETE);
-				event.animationState = this;
-				_armature.addEvent(event);
+				if (_armature.hasEventListener(AnimationEvent.COMPLETE))
+				{
+					event = new AnimationEvent(AnimationEvent.COMPLETE);
+					event.animationState = this;
+					_armature.addEvent(event);
+				}
 			}
-			else if(_listenLoopCompleteEvent && loopCompleteFlg)
+			else if(loopCompleteFlg)
 			{
-				event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
-				event.animationState = this;
-				_armature.addEvent(event);
+				if (_armature.hasEventListener(AnimationEvent.LOOP_COMPLETE))
+				{
+					event = new AnimationEvent(AnimationEvent.LOOP_COMPLETE);
+					event.animationState = this;
+					_armature.addEvent(event);
+				}
+				
 			}
 		}
 		

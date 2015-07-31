@@ -377,7 +377,8 @@ package dragonBones.fast
 			while(i --)
 			{
 				var slot:FastSlot = slotList[i];
-				if (slot._frameCache && (slot._frameCache as SlotFrameCache).displayIndex >= 0)
+				if ((slot._frameCache && (slot._frameCache as SlotFrameCache).displayIndex >= 0) 
+				    || (!slot._frameCache && slot.displayIndex >= 0))
 				{
 					slot.addDisplayToContainer(_display);
 				}
