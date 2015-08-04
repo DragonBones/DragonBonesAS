@@ -2,15 +2,18 @@
 {
 	import flash.errors.IllegalOperationError;
 	import flash.geom.ColorTransform;
+	import flash.geom.Matrix;
 	
 	import dragonBones.animation.AnimationState;
 	import dragonBones.animation.SlotTimelineState;
 	import dragonBones.core.DBObject;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.objects.DBTransform;
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.Frame;
 	import dragonBones.objects.SlotData;
 	import dragonBones.objects.SlotFrame;
+	import dragonBones.utils.TransformUtil;
 
 	//import dragonBones.objects.FrameCached;
 	//import dragonBones.objects.TimelineCached;
@@ -556,6 +559,21 @@
 					}
 				}
 			}
+		} 
+		
+		override protected function updateGlobal():Object 
+		{
+			calculateRelativeParentTransform();
+			TransformUtil.transformToMatrix(_global, _globalTransformMatrix);
+			var output:Object = calculateParentTransform();
+			if(output != null)
+			{
+				//计算父骨头绝对坐标
+				var parentMatrix:Matrix = output.parentGlobalTransformMatrix;
+				_globalTransformMatrix.concat(parentMatrix);
+			}
+			TransformUtil.matrixToTransform(_globalTransformMatrix,_global,true,true);
+			return output;
 		}
 	}
 }

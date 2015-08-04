@@ -2,6 +2,7 @@ package dragonBones.fast
 {
 	import flash.errors.IllegalOperationError;
 	import flash.geom.ColorTransform;
+	import flash.geom.Matrix;
 	
 	import dragonBones.cache.SlotFrameCache;
 	import dragonBones.core.IArmature;
@@ -13,6 +14,7 @@ package dragonBones.fast
 	import dragonBones.objects.SlotData;
 	import dragonBones.objects.SlotFrame;
 	import dragonBones.utils.ColorTransformUtil;
+	import dragonBones.utils.TransformUtil;
 
 	use namespace dragonBones_internal;
 
@@ -514,6 +516,21 @@ package dragonBones.fast
 			{
 				this._frameCache.clear();
 			}
+		}
+		
+		override protected function updateGlobal():Object 
+		{
+			calculateRelativeParentTransform();
+			TransformUtil.transformToMatrix(_global, _globalTransformMatrix);
+			var output:Object = calculateParentTransform();
+			if(output != null)
+			{
+				//计算父骨头绝对坐标
+				var parentMatrix:Matrix = output.parentGlobalTransformMatrix;
+				_globalTransformMatrix.concat(parentMatrix);
+			}
+			TransformUtil.matrixToTransform(_globalTransformMatrix,_global,true,true);
+			return output;
 		}
 	}
 }
