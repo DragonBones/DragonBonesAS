@@ -7,5 +7,7 @@ package dragonBones.core
 		
 		function get enableEventDispatch():Boolean;
 		function set enableEventDispatch(value:Boolean):void;
+		
+		function getSlotDic():Object;
 	}
 }

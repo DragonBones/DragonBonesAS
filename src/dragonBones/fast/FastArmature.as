@@ -528,6 +528,11 @@ package dragonBones.fast
 			_enableEventDispatch = value;
 		}
 		
+		public function getSlotDic():Object
+		{
+			return _slotDic;
+		}
+		
 		dragonBones_internal function addEvent(event:Event):void
 		{
 			if (_enableEventDispatch)

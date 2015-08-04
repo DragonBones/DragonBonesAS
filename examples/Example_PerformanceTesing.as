@@ -1,16 +1,15 @@
-﻿package demo
+﻿package
 {
 	import flash.display.Sprite;
-	import flash.events.KeyboardEvent;
-	import flash.text.TextField;
-	import flash.text.TextFieldAutoSize;
-	import flash.text.TextFieldType;
-	import flash.ui.Keyboard;
-
-	import starling.core.Starling;
-	import flash.text.TextFormat;
 	import flash.events.Event;
+	import flash.events.KeyboardEvent;
 	import flash.geom.Rectangle;
+	import flash.text.TextField;
+	import flash.text.TextFieldType;
+	import flash.text.TextFormat;
+	import flash.ui.Keyboard;
+	
+	import starling.core.Starling;
 
 	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#cccccc")]
 	public class Example_PerformanceTesing extends flash.display.Sprite
@@ -85,25 +84,20 @@
 	}
 }
 
-import demo.Example_PerformanceTesing;
-import dragonBones.cache.AnimationCacheManager;
-import dragonBones.fast.FastArmature;
-import flash.geom.Point;
 import flash.events.Event;
+
+import dragonBones.animation.WorldClock;
+import dragonBones.cache.AnimationCacheManager;
+import dragonBones.factories.StarlingFactory;
+import dragonBones.fast.FastArmature;
+
 import starling.display.Sprite;
 import starling.events.EnterFrameEvent;
-import starling.events.Touch;
-import starling.events.TouchPhase;
-import starling.events.TouchEvent;
 import starling.text.TextField;
-
-import dragonBones.Armature;
-import dragonBones.animation.WorldClock;
-import dragonBones.factories.StarlingFactory;
 
 class StarlingGame extends Sprite
 {
-	[Embed(source = "../assets/DragonWithClothes.png", mimeType = "application/octet-stream")]
+	[Embed(source = "assets/DragonWithClothes.png", mimeType = "application/octet-stream")]
 	private static const ResourcesData: Class;
 
 	private var factory: StarlingFactory;
@@ -111,7 +105,7 @@ class StarlingGame extends Sprite
 	private var instruction_txt: TextField;
 	private var mResultText: TextField;
 
-	private const WAIT_FRAME: int = 10;
+	private const WAIT_FRAME: int = 20;
 	private const PADDING: int = 60;
 
 	private var elapsedTime: Number = 0;
@@ -165,8 +159,6 @@ class StarlingGame extends Sprite
 	{
 		isTesting = false;
 		var i: int;
-		var _armature: Armature;
-
 
 		if(armatures.length == num)
 			return;
@@ -217,7 +209,7 @@ class StarlingGame extends Sprite
 		_armature.display.y = ((int)(count / columnNum)) * paddingHeight + paddingTop;
 
 		
-		if(count == 0)
+		if(!aniCachManager)
 		{
 			aniCachManager = _armature.enableAnimationCache(30);
 		}
@@ -262,35 +254,39 @@ class StarlingGame extends Sprite
 	{
 		WorldClock.clock.advanceTime(-1);
 
-		elapsedTime += _e.passedTime;
-		elapsedFrame++;
-
-		if(elapsedFrame % WAIT_FRAME == 0)
+		if(isTesting)
 		{
-			var fps: Number = elapsedFrame / elapsedTime;
-			if(isTesting)
+			elapsedTime += _e.passedTime;
+			elapsedFrame++;
+			
+			if(elapsedFrame % WAIT_FRAME == 0)
 			{
-				if(Math.ceil(fps) > 59)
+				var fps: Number = elapsedFrame / elapsedTime;
+				if(isTesting)
 				{
-					addObject();
-					isFailed = false;
-				}
-				else
-				{
-					removeLastObject();
-
-					if(!isFailed)
+					if(Math.ceil(fps) > 59)
 					{
-						failCount++;
+						addObject();
+						isFailed = false;
 					}
-					isFailed = true;
-
-					if(failCount == 10)
-						benchmarkComplete();
+					else
+					{
+						removeLastObject();
+						
+						if(!isFailed)
+						{
+							failCount++;
+						}
+						isFailed = true;
+						
+						if(failCount == 10)
+							benchmarkComplete();
+					}
 				}
+				elapsedTime = elapsedFrame = 0;
 			}
-			elapsedTime = elapsedFrame = 0;
 		}
+		
 	}
 
 	private function benchmarkComplete(): void
