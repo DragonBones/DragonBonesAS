@@ -146,7 +146,10 @@ package dragonBones.fast
 					targetArmature.resetAnimation()
 				}
 			}
-			
+			if (_isColorChanged)
+			{
+				updateDisplayColor(0, 0, 0, 0, 1, 1, 1, 1, true);
+			}
 			var slotIndex:int = getDisplayIndex();
 			removeDisplayFromContainer();
 			return slotIndex;
