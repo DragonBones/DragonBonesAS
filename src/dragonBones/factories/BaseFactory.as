@@ -472,6 +472,10 @@ package dragonBones.factories
 				//如果显示对象有name属性并且name属性可以设置的话，将name设置为与slot同名，dragonBones并不依赖这些属性，只是方便开发者
 				for each(var displayObject:Object in displayList)
 				{
+					if(!displayObject)
+					{
+						continue;
+					}
 					if(displayObject is FastArmature)
 					{
 						displayObject = (displayObject as FastArmature).display;
@@ -546,6 +550,10 @@ package dragonBones.factories
 				//如果显示对象有name属性并且name属性可以设置的话，将name设置为与slot同名，dragonBones并不依赖这些属性，只是方便开发者
 				for each(var displayObject:Object in displayList)
 				{
+					if(!displayObject)
+					{
+						continue;
+					}
 					if(displayObject is Armature)
 					{
 						displayObject = (displayObject as Armature).display;
