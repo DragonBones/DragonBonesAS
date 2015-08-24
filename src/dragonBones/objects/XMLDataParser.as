@@ -80,7 +80,6 @@
 			switch (version)
 			{
 				case "2.3":
-					throw new Error("Nonsupport version" + version + "!");
 				case "3.0":
 					return XML3DataParser.parseSkeletonData(rawData);
 					break;

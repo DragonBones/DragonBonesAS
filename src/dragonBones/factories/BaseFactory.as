@@ -343,6 +343,7 @@ package dragonBones.factories
 				outputBuildArmatureDataPackage.dragonBonesDataName = dragonBonesDataName;
 				outputBuildArmatureDataPackage.dragonBonesData = dragonBonesDataDic[dragonBonesDataName];
 				outputBuildArmatureDataPackage.armatureData = outputBuildArmatureDataPackage.dragonBonesData.getArmatureDataByName(armatureName);
+				return true;
 			}
 			else
 			{

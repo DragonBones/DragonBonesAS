@@ -229,6 +229,7 @@ package dragonBones.fast.animation
 			
 			//计算是否已经播放完成isThisComplete
 
+			var startFlg:Boolean = false;
 			var loopCompleteFlg:Boolean = false;
 			var completeFlg:Boolean = false;
 			var isThisComplete:Boolean = false;
@@ -274,6 +275,10 @@ package dragonBones.fast.animation
 					}
 					_currentPlayTimes = currentPlayTimes;
 				}
+				if(_currentTime < 0)    //check start
+				{
+					startFlg = true;
+				}
 				if (_isComplete)
 				{
 					completeFlg = true;
@@ -285,6 +290,15 @@ package dragonBones.fast.animation
 			
 			//抛事件
 			var event:AnimationEvent;
+			if(startFlg)
+			{
+				if(_armature.hasEventListener(AnimationEvent.START))
+				{
+					event = new AnimationEvent(AnimationEvent.START);
+					event.animationState = this;
+					_armature.addEvent(event);
+				}
+			}
 			if(completeFlg)
 			{
 				if (_armature.hasEventListener(AnimationEvent.COMPLETE))
