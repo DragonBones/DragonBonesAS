@@ -96,24 +96,24 @@
 }
 </code>
 # 和3.0相比的格式变化
-# Armature 中包含Slot列表.  
-# Skin 中增加默认Skin, 默认skin有如下特性：
-## 在skin列表中排第一
-## 名字为空字符串“”
-## 包含的slot会同时存在于其他的skin，相当于保存所有其他skin中共有的slot（相当于其他skin的基类）
-# Skin中包含的Slot的Display的transform属性中不在有pX,pY属性
-## Display不再有初始轴点属性，所有display的轴点均为中心点。
-## 因为display在运动时的轴点是骨骼的原点，所以这里的轴点信息可以在初始化时换算成display的位置信息，从而可以完美还原动画。
-# Animation中有下面的改动
-## 去掉"tweenEasing":	动画不会覆盖关键帧的缓动值
-## 去掉"autoTween":  	动画不会覆盖关键帧的补件值
-## "loop"改名为"playtime"
-## "colorTransform"改名为"color"
-# 区分Bone时间轴和Slot时间轴
-## Bone时间轴包含平移旋转缩放，自定义事件和声音事件
-## Slot时间轴包含颜色变换，dispalyIndex变换和zorder变换
-# Armature, Bone 和Slot中均添加了userData字段用于记录用户自定义信息，同时方便第三方扩展
-# Frame中有如下改动
-## 中去掉了hide 属性，动画中如果想隐藏某个插槽，改为设置dispalyIndex为-1. visible属性完全留给开发者使用，用于动态设置slot是否隐藏。
-## 增加curve属性，使用贝塞尔曲线描述动画补间的缓动效果
+* Armature 中包含Slot列表.
+* Skin 中增加默认Skin, 默认skin有如下特性：
+** 在skin列表中排第一
+** 名字为空字符串“”
+** 包含的slot会同时存在于其他的skin，相当于保存所有其他skin中共有的slot（相当于其他skin的基类）
+* Skin中包含的Slot的Display的transform属性中不在有pX,pY属性
+** Display不再有初始轴点属性，所有display的轴点均为中心点。
+** 因为display在运动时的轴点是骨骼的原点，所以这里的轴点信息可以在初始化时换算成display的位置信息，从而可以完美还原动画。
+* Animation中有下面的改动
+** 去掉"tweenEasing":	动画不会覆盖关键帧的缓动值
+** 去掉"autoTween":  	动画不会覆盖关键帧的补件值
+** "loop"改名为"playtime"
+** "colorTransform"改名为"color"
+* 区分Bone时间轴和Slot时间轴
+** Bone时间轴包含平移旋转缩放，自定义事件和声音事件
+** Slot时间轴包含颜色变换，dispalyIndex变换和zorder变换
+* Armature, Bone 和Slot中均添加了userData字段用于记录用户自定义信息，同时方便第三方扩展
+* Frame中有如下改动
+** 中去掉了hide 属性，动画中如果想隐藏某个插槽，改为设置dispalyIndex为-1. visible属性完全留给开发者使用，用于动态设置slot是否隐藏。
+** 增加curve属性，使用贝塞尔曲线描述动画补间的缓动效果
 
