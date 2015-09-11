@@ -1,4 +1,5 @@
-﻿h1.DragonBones 4.0 格式说明
+﻿# DragonBones 4.0 格式说明
+<code>
 {
 	"name": "dataName" 						// DB数据名称
 	"version": "4.0" 						// DB版本号
@@ -93,8 +94,8 @@
 		}]
 	}]
 }
- 
-h2.和3.0相比的格式变化
+</code>
+# 和3.0相比的格式变化
 # Armature 中包含Slot列表.  
 # Skin 中增加默认Skin, 默认skin有如下特性：
 ## 在skin列表中排第一
