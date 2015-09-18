@@ -816,6 +816,14 @@
 					bone.hideSlots();
 				}
 			}
+			for each(var slotTimelineName:String in _clip.hideSlotTimelineNameMap)
+			{
+				var slot:Slot = _armature.getSlot(slotTimelineName);
+				if (slot)
+				{
+					slot.resetToOrigin();
+				}
+			}
 		}
 		
 	//属性访问

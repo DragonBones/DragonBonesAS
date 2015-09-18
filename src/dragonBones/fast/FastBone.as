@@ -113,6 +113,15 @@ package dragonBones.fast
 			updateGlobal();
 		}
 		
+		/** @private */
+		dragonBones_internal function hideSlots():void
+		{
+			for each(var childSlot:FastSlot in slotList)
+			{
+				childSlot.hideSlots();
+			}
+		}
+		
 		/** @private When bone timeline enter a key frame, call this func*/
 		dragonBones_internal function arriveAtFrame(frame:Frame, animationState:FastAnimationState):void
 		{

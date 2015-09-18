@@ -13,6 +13,7 @@ package dragonBones.objects
 		public var lastFrameDuration:int;
 		
 		public var hideTimelineNameMap:Vector.<String>;
+		public var hideSlotTimelineNameMap:Vector.<String>;
 		
 		private var _timelineList:Vector.<TransformTimeline>;
 		public function get timelineList():Vector.<TransformTimeline>
@@ -35,6 +36,8 @@ package dragonBones.objects
 			tweenEasing = NaN;
 			hideTimelineNameMap = new Vector.<String>;
 			hideTimelineNameMap.fixed = true;
+			hideSlotTimelineNameMap = new Vector.<String>;
+			hideSlotTimelineNameMap.fixed = true;
 			
 			_timelineList = new Vector.<TransformTimeline>;
 			_timelineList.fixed = true;

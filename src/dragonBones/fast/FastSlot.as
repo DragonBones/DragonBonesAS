@@ -27,6 +27,8 @@ package dragonBones.fast
 		/** @private */
 		dragonBones_internal var _tweenZOrder:Number;
 		/** @private */
+		dragonBones_internal var _originDisplayIndex:Number;
+		/** @private */
 		protected var _offsetZOrder:Number;
 		
 		protected var _displayList:Array;
@@ -67,6 +69,7 @@ package dragonBones.fast
 			blendMode = slotData.blendMode;
 			_originZOrder = slotData.zOrder;
 			_displayDataList = slotData.displayDataList;
+			_originDisplayIndex = slotData.displayIndex;
 		}
 		
 		/**
@@ -534,6 +537,12 @@ package dragonBones.fast
 			}
 			TransformUtil.matrixToTransform(_globalTransformMatrix,_global,true,true);
 			return output;
+		}
+		
+		dragonBones_internal function resetToOrigin():void
+		{
+			changeDisplayIndex(_originDisplayIndex);
+			updateDisplayColor(0, 0, 0, 0, 1, 1, 1, 1, true);
 		}
 	}
 }
