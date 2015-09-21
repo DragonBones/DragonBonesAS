@@ -67,12 +67,16 @@ package dragonBones.fast.animation
 		
 		private var _updateMode:int;
 		private var _transformToFadein:DBTransform;
+		private var _durationPivot:Point;
+		private var _originPivot:Point;
 		/** @private */
 		dragonBones_internal var _animationState:FastAnimationState;
 		/** @private */
 		dragonBones_internal var _isComplete:Boolean;
 		/** @private */
 		dragonBones_internal var _transform:DBTransform;
+		/** @private */
+		dragonBones_internal var _pivot:Point;
 
 		
 		public function FastBoneTimelineState()
@@ -80,6 +84,8 @@ package dragonBones.fast.animation
 			_transform = new DBTransform();
 			_durationTransform = new DBTransform();
 			_transformToFadein = new DBTransform();
+			_pivot = new Point();
+			_durationPivot = new Point();
 		}
 		
 		private function clear():void
@@ -91,6 +97,7 @@ package dragonBones.fast.animation
 			}
 			_animationState = null;
 			_timelineData = null;
+			_originPivot = null;
 		}
 		
 		/** @private */
@@ -110,7 +117,12 @@ package dragonBones.fast.animation
 			_currentFrameIndex = -1;
 			_currentTime = -1;
 			_tweenEasing = NaN;
-
+			
+			_durationPivot.x = 0;
+			_durationPivot.y = 0;
+			_pivot.x = 0;
+			_pivot.y = 0;
+			_originPivot = _timelineData.originPivot;
 			switch(_timelineData.frameList.length)
 			{
 				case 0:
@@ -143,8 +155,6 @@ package dragonBones.fast.animation
 				var firstFrame:TransformFrame = _timelineData.frameList[0] as TransformFrame;
 				_durationTransform.copy(firstFrame.transform);
 				_durationTransform.minus(this._transformToFadein);
-//				_durationPivot.x = firstFrame.pivot.x - _pivotToFadein.x;
-//				_durationPivot.y = firstFrame.pivot.y - _pivotToFadein.y;
 			}
 			
 			_bone._timelineState = this;
@@ -184,7 +194,9 @@ package dragonBones.fast.animation
 			_isComplete = true;
 			_tweenEasing = NaN;
 			_tweenTransform = false;
-
+			_pivot.x = _originPivot.x + currentFrame.pivot.x;
+			_pivot.y = _originPivot.y + currentFrame.pivot.y;
+				
 			_transform.copy(currentFrame.transform);
 			
 			_bone.invalidUpdate();
@@ -378,6 +390,10 @@ package dragonBones.fast.animation
 				_durationTransform.scaleX = nextFrame.transform.scaleX - currentFrame.transform.scaleX + nextFrame.scaleOffset.x;
 				_durationTransform.scaleY = nextFrame.transform.scaleY - currentFrame.transform.scaleY + nextFrame.scaleOffset.y;
 				_durationTransform.normalizeRotation();
+				
+				_durationPivot.x = nextFrame.pivot.x - currentFrame.pivot.x;
+				_durationPivot.y = nextFrame.pivot.y - currentFrame.pivot.y;
+				
 				if(nextFrameIndex == 0)
 				{
 					_durationTransform.skewX = TransformUtil.formatRadian(_durationTransform.skewX);
@@ -390,7 +406,9 @@ package dragonBones.fast.animation
 					_durationTransform.skewX ||
 					_durationTransform.skewY ||
 					_durationTransform.scaleX != 1 ||
-					_durationTransform.scaleY != 1 //||
+					_durationTransform.scaleY != 1 ||
+					_durationPivot.x ||
+					_durationPivot.y 
 				)
 				{
 					_tweenTransform = true;
@@ -409,7 +427,8 @@ package dragonBones.fast.animation
 			if(!_tweenTransform)
 			{
 				_transform.copy(currentFrame.transform);
-				
+				_pivot.x = _originPivot.x + currentFrame.pivot.x;
+				_pivot.y = _originPivot.y + currentFrame.pivot.y;
 				_bone.invalidUpdate();
 			}
 		}
@@ -437,7 +456,8 @@ package dragonBones.fast.animation
 			_transform.skewY = currentTransform.skewY + _durationTransform.skewY * progress;
 			_transform.scaleX = currentTransform.scaleX + _durationTransform.scaleX * progress;
 			_transform.scaleY = currentTransform.scaleY + _durationTransform.scaleY * progress;
-
+			_pivot.x = currentPivot.x + _durationPivot.x * progress;
+			_pivot.y = currentPivot.y + _durationPivot.y * progress;
 			_bone.invalidUpdate();
 		}
 	}

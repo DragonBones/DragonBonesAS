@@ -132,6 +132,8 @@ package dragonBones.fast
 		override protected function calculateRelativeParentTransform():void
 		{
 			_global.copy(this._origin);
+			_global.x += this._parent._tweenPivot.x;
+			_global.y += this._parent._tweenPivot.y;
 		}
 		
 		dragonBones_internal function initDisplayList(newDisplayList:Array):void
