@@ -333,7 +333,7 @@ package dragonBones.utils
 			}
 		}
 		
-		public static function addHideTimeline(animationData:AnimationData, armatureData:ArmatureData):void
+		public static function addHideTimeline(animationData:AnimationData, armatureData:ArmatureData, addHideSlot:Boolean = false):void
 		{
 			var boneDataList:Vector.<BoneData> =armatureData.boneDataList;
 			var slotDataList:Vector.<SlotData> =armatureData.slotDataList;
@@ -353,23 +353,27 @@ package dragonBones.utils
 					}
 				}
 			}
-			i = slotDataList.length;
-			var slotData:SlotData;
-			var slotName:String;
-			while (i--)
+			if (addHideSlot)
 			{
-				slotData = slotDataList[i];
-				slotName = slotData.name;
-				if (!animationData.getSlotTimeline(slotName))
+				i = slotDataList.length;
+				var slotData:SlotData;
+				var slotName:String;
+				while (i--)
 				{
-					if (animationData.hideSlotTimelineNameMap.indexOf(slotName) < 0)
+					slotData = slotDataList[i];
+					slotName = slotData.name;
+					if (!animationData.getSlotTimeline(slotName))
 					{
-						animationData.hideSlotTimelineNameMap.fixed = false;
-						animationData.hideSlotTimelineNameMap.push(slotName);
-						animationData.hideSlotTimelineNameMap.fixed = true;
+						if (animationData.hideSlotTimelineNameMap.indexOf(slotName) < 0)
+						{
+							animationData.hideSlotTimelineNameMap.fixed = false;
+							animationData.hideSlotTimelineNameMap.push(slotName);
+							animationData.hideSlotTimelineNameMap.fixed = true;
+						}
 					}
 				}
 			}
+			
 		}
 	}
 }
