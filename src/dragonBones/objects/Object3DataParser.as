@@ -266,6 +266,8 @@ package dragonBones.objects
 			var displayIndexChangeSlotTimelines:Vector.<SlotTimeline> = new Vector.<SlotTimeline>();
 			var displayIndexChangeTimelines:Vector.<TransformTimeline> = new Vector.<TransformTimeline>();
 			var lastFrameDuration:int = animationData.duration;
+			var displayIndexChange:Boolean;
+			
 			for each(var timelineObject:Object in animationObject[ConstValues.TIMELINE])
 			{
 				var timeline:TransformTimeline = parseTransformTimeline(timelineObject, animationData.duration, frameRate, isGlobalData);
@@ -277,9 +279,9 @@ package dragonBones.objects
 				{
 					lastFrameDuration = Math.min(lastFrameDuration, slotTimeline.frameList[slotTimeline.frameList.length - 1].duration);
 					animationData.addSlotTimeline(slotTimeline);
-					if (animationData.autoTween)
+					if (animationData.autoTween && !displayIndexChange)
 					{
-						var displayIndexChange:Boolean;
+						
 						var slotFrame:SlotFrame;
 						for (var i:int = 0, len:int = slotTimeline.frameList.length; i < len; i++)
 						{
@@ -290,23 +292,22 @@ package dragonBones.objects
 								break;
 							}
 						}
-						if (displayIndexChange)
-						{
-							displayIndexChangeSlotTimelines.push(slotTimeline);
-							displayIndexChangeTimelines.push(timeline);
-						}
 					}
-					
 				}
 			}
-			len = displayIndexChangeSlotTimelines.length;
+			/**
+			 * 如果有slot的displayIndex为空的情况，那么当autoTween为ture时，它对应的bone的补间应该去掉
+			 * 以下就是处理这种情况，把autoTween的全局的tween应用到每一帧上，然后把autoTween变为false
+			 * 此时autoTween就不起任何作用了
+			 */
 			var animationTween:Number = animationData.tweenEasing;
-			if (len > 0)
+			if (displayIndexChange)
 			{
+				len = animationData.slotTimelineList.length;
 				for (i = 0; i < len; i++)
 				{
-					slotTimeline = displayIndexChangeSlotTimelines[i];
-					timeline = displayIndexChangeTimelines[i];
+					slotTimeline = animationData.slotTimelineList[i];
+					timeline = animationData.timelineList[i];
 					var curFrame:TransformFrame;
 					var curSlotFrame:SlotFrame;
 					var nextSlotFrame:SlotFrame;
