@@ -1,11 +1,14 @@
 package dragonBones.fast
 {
+	import dragonBones.animation.TimelineState;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.FrameEvent;
 	import dragonBones.fast.animation.FastAnimationState;
 	import dragonBones.fast.animation.FastBoneTimelineState;
 	import dragonBones.objects.BoneData;
+	import dragonBones.objects.DBTransform;
 	import dragonBones.objects.Frame;
+	import flash.geom.Point;
 
 	use namespace dragonBones_internal;
 	
@@ -34,11 +37,14 @@ package dragonBones.fast
 		
 		/** @private */
 		dragonBones_internal var _needUpdate:int;
+		/** @private */
+		dragonBones_internal var _tweenPivot:Point;
 		
 		public function FastBone()
 		{
 			super();
 			_needUpdate = 2;
+			_tweenPivot = new Point();
 		}
 		
 		/**
@@ -68,6 +74,7 @@ package dragonBones.fast
 		{
 			super.dispose();
 			_timelineState = null;
+			_tweenPivot = null;
 		}
 		
 	//动画
@@ -108,9 +115,18 @@ package dragonBones.fast
 			{
 				return;
 			}
-			
+			blendingTimeline();
 			//计算global
 			updateGlobal();
+		}
+		
+		/** @private */
+		dragonBones_internal function hideSlots():void
+		{
+			for each(var childSlot:FastSlot in slotList)
+			{
+				childSlot.hideSlots();
+			}
 		}
 		
 		/** @private When bone timeline enter a key frame, call this func*/
@@ -126,6 +142,15 @@ package dragonBones.fast
 				this.armature.addEvent(frameEvent);
 			}
 		}	
+		
+		private function blendingTimeline():void
+		{
+			if(_timelineState)
+			{
+				_tweenPivot.x = _timelineState._pivot.x;
+				_tweenPivot.y = _timelineState._pivot.y;
+			}
+		}
 		
 		/**
 		 * Unrecommended API. Recommend use slot.childArmature.

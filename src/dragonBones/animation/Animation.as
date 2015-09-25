@@ -138,6 +138,7 @@
 			{
 				return null;
 			}
+			var needUpdata:Boolean = !_isPlaying;
 			_isPlaying = true;
 			_isFading = true;
 			
@@ -228,7 +229,10 @@
 					slot.childArmature.animation.gotoAndPlay(animationName, fadeInTime);
 				}
 			}
-			
+			if(needUpdata)
+			{
+				_armature.advanceTime(0);
+			}
 			return _lastAnimationState;
 		}
 		

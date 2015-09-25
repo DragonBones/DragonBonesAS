@@ -135,7 +135,7 @@
 			for each(var animationObject:Object in armatureDataToParse[ConstValues.ANIMATION])
 			{
 				var animationData:AnimationData = parseAnimationData(animationObject, frameRate);
-				DBDataUtil.addHideTimeline(animationData, outputArmatureData);
+				DBDataUtil.addHideTimeline(animationData, outputArmatureData, true);
 				DBDataUtil.transformAnimationData(animationData, outputArmatureData, tempDragonBonesData.isGlobalData);
 				outputArmatureData.addAnimationData(animationData);
 			}
