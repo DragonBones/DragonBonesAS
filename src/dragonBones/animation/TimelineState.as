@@ -66,10 +66,6 @@ package dragonBones.animation
 		/** @private */
 		dragonBones_internal var _pivot:Point;
 		
-		//TO DO 干什么用的
-		/** @private */
-		dragonBones_internal var _blendEnabled:Boolean;
-		
 		/** @private */
 		dragonBones_internal var _isComplete:Boolean;
 		
@@ -148,7 +144,6 @@ package dragonBones.animation
 			_rawAnimationScale = _animationState.clip.scale;
 			
 			_isComplete = false;
-			_blendEnabled = false;
 			_tweenTransform = false;
 			_tweenScale = false;
 			_currentFrameIndex = -1;
@@ -320,24 +315,9 @@ package dragonBones.animation
 				{
 					_bone.arriveAtFrame(currentFrame, this, _animationState, false);
 					
-					_blendEnabled = !isNaN(currentFrame.tweenEasing);
-					
-					if(_blendEnabled)
-					{
-						updateToNextFrame(currentPlayTimes);
-					}
-					else
-					{
-						_tweenEasing = NaN;
-						_tweenTransform = false;
-						_tweenScale = false;
-					}
+					updateToNextFrame(currentPlayTimes);
 				}
-				
-				if(_blendEnabled)
-				{
-					updateTween();
-				}
+				updateTween();
 			}
 		}
 		
@@ -511,6 +491,7 @@ package dragonBones.animation
 			if(_tweenTransform)
 			{
 				var progress:Number = (_currentTime - _currentFramePosition) / _currentFrameDuration;
+				trace(_currentFrameIndex, progress);
 				if (_tweenCurve != null)
 				{
 					progress = _tweenCurve.getValueByProgress(progress);
@@ -568,8 +549,6 @@ package dragonBones.animation
 			_tweenTransform = false;
 			_tweenScale = false;
 			//_tweenColor = false;
-			
-			_blendEnabled = true;
 			/**
 			 * <使用绝对数据>
 			 * 单帧的timeline，第一个关键帧的transform为0
