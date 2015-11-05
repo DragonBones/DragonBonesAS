@@ -491,7 +491,6 @@ package dragonBones.animation
 			if(_tweenTransform)
 			{
 				var progress:Number = (_currentTime - _currentFramePosition) / _currentFrameDuration;
-				trace(_currentFrameIndex, progress);
 				if (_tweenCurve != null)
 				{
 					progress = _tweenCurve.getValueByProgress(progress);
