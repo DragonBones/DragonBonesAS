@@ -62,7 +62,14 @@ package dragonBones.factories
 				
 				for(var textureAtlasName:String in textureAtlasDic)
 				{
-					(textureAtlasDic[textureAtlasName] as ITextureAtlas).dispose();
+					var textureAtlasArr:Array = textureAtlasDic[textureAtlasName] as Array;
+					if (textureAtlasArr)
+					{
+						for (var i:int = 0, len:int = textureAtlasArr.length; i < len; i++ )
+						{
+							textureAtlasArr[i].dispose();
+						}
+					}
 					delete textureAtlasDic[textureAtlasName];
 				}
 			}
@@ -144,11 +151,17 @@ package dragonBones.factories
 			{
 				throw new ArgumentError("Unnamed data!");
 			}
-			if(textureAtlasDic[name])
+			var textureAtlasArr:Array = textureAtlasDic[name] as Array;
+			if (textureAtlasArr == null)
+			{
+				textureAtlasArr = [];
+				textureAtlasDic[name] = textureAtlasArr;
+			}
+			if(textureAtlasArr.indexOf(textureAtlas) != -1)
 			{
 				throw new ArgumentError();
 			}
-			textureAtlasDic[name] = textureAtlas;
+			textureAtlasArr.push(textureAtlas);
 		}
 		
 		/**
@@ -171,20 +184,47 @@ package dragonBones.factories
 		public function getTextureDisplay(textureName:String, textureAtlasName:String = null, pivotX:Number = NaN, pivotY:Number = NaN):Object
 		{
 			var targetTextureAtlas:Object;
+			var textureAtlasArr:Array;
+			var i:int;
+			var len:int;
+			
 			if(textureAtlasName)
 			{
-				targetTextureAtlas = textureAtlasDic[textureAtlasName];
+				textureAtlasArr = textureAtlasDic[textureAtlasName] as Array;
+				if (textureAtlasArr)
+				{
+					for (i = 0, len = textureAtlasArr.length; i < len; i++)
+					{
+						targetTextureAtlas = textureAtlasArr[i];
+						if (targetTextureAtlas.getRegion(textureName))
+						{
+							break;
+						}
+						targetTextureAtlas = null;
+					}
+				}
 			}
 			else
 			{
 				for (textureAtlasName in textureAtlasDic)
 				{
-					targetTextureAtlas = textureAtlasDic[textureAtlasName];
-					if(targetTextureAtlas.getRegion(textureName))
+					textureAtlasArr = textureAtlasDic[textureAtlasName] as Array;
+					if (textureAtlasArr)
 					{
-						break;
+						for (i = 0, len = textureAtlasArr.length; i < len; i++)
+						{
+							targetTextureAtlas = textureAtlasArr[i];
+							if (targetTextureAtlas.getRegion(textureName))
+							{
+								break;
+							}
+							targetTextureAtlas = null;
+						}
+						if (targetTextureAtlas != null)
+						{
+							break;
+						}
 					}
-					targetTextureAtlas = null;
 				}
 			}
 			
@@ -212,66 +252,11 @@ package dragonBones.factories
 			return generateDisplay(targetTextureAtlas, textureName, pivotX, pivotY);
 		}
 		
-		protected function getDisplayFromMultTexture(displayName:String, textureAtlasNames:Array = null, pivotX:Number = NaN, pivotY:Number = NaN):Object
-		{
-			var targetTextureAtlas:Object;
-			var textureAtlasName:String;
-			if (textureAtlasNames && textureAtlasNames.length > 0)
-			{
-				for each(textureAtlasName in textureAtlasNames)
-				{
-					targetTextureAtlas = textureAtlasDic[textureAtlasName];
-					if(targetTextureAtlas && targetTextureAtlas.getRegion(displayName))
-					{
-						break;
-					}
-					targetTextureAtlas = null;
-				}
-			}
-			else
-			{
-				for (textureAtlasName in textureAtlasDic)
-				{
-					targetTextureAtlas = textureAtlasDic[textureAtlasName];
-					if(targetTextureAtlas.getRegion(displayName))
-					{
-						break;
-					}
-					targetTextureAtlas = null;
-				}
-			}
-			if(!targetTextureAtlas)
-			{
-				return null;
-			}
-			return generateDisplay(targetTextureAtlas, displayName, pivotX, pivotY);
-		}
-		
 		//一般情况下dragonBonesData和textureAtlas是一对一的，通过相同的key对应。
 		public function buildArmature(armatureName:String, fromDragonBonesDataName:String = null, fromTextureAtlasName:String = null, skinName:String = null):Armature
 		{
 			var buildArmatureDataPackage:BuildArmatureDataPackage = new BuildArmatureDataPackage();
 			if(fillBuildArmatureDataPackageArmatureInfo(armatureName, fromDragonBonesDataName, buildArmatureDataPackage))
-			{
-				fillBuildArmatureDataPackageTextureInfo(fromTextureAtlasName, buildArmatureDataPackage);
-			}
-			
-			var dragonBonesData:DragonBonesData = buildArmatureDataPackage.dragonBonesData;
-			var armatureData:ArmatureData = buildArmatureDataPackage.armatureData;
-			var textureAtlas:Object = buildArmatureDataPackage.textureAtlas;
-			
-			if(!armatureData || !textureAtlas)
-			{
-				return null;
-			}
-			
-			return buildArmatureUsingArmatureDataFromTextureAtlas(dragonBonesData, armatureData, textureAtlas, skinName);
-		}
-		
-		public function buildArmatureFromMultTextureAtlas(armatureName:String, fromDragonBonesDataName:String = null, fromTextureAtlasNames:Array = null, skinName:String = null):Armature
-		{
-			var buildArmatureDataPackage:BuildArmatureDataPackage = new BuildArmatureDataPackage();
-			fillBuildArmatureDataPackageArmatureInfo(armatureName, fromDragonBonesDataName, buildArmatureDataPackage);
 			
 			var dragonBonesData:DragonBonesData = buildArmatureDataPackage.dragonBonesData;
 			var armatureData:ArmatureData = buildArmatureDataPackage.armatureData;
@@ -281,33 +266,13 @@ package dragonBones.factories
 				return null;
 			}
 			
-			return buildArmatureUsingArmatureDataFromMultTextureAtlas(dragonBonesData, armatureData, fromTextureAtlasNames, skinName);
+			return buildArmatureUsingArmatureDataFromTextureAtlas(dragonBonesData, armatureData, fromTextureAtlasName, skinName);
 		}
 		
 		public function buildFastArmature(armatureName:String, fromDragonBonesDataName:String = null, fromTextureAtlasName:String = null, skinName:String = null):FastArmature
 		{
 			var buildArmatureDataPackage:BuildArmatureDataPackage = new BuildArmatureDataPackage();
 			if(fillBuildArmatureDataPackageArmatureInfo(armatureName, fromDragonBonesDataName, buildArmatureDataPackage))
-			{
-				fillBuildArmatureDataPackageTextureInfo(fromTextureAtlasName, buildArmatureDataPackage);
-			}
-			
-			var dragonBonesData:DragonBonesData = buildArmatureDataPackage.dragonBonesData;
-			var armatureData:ArmatureData = buildArmatureDataPackage.armatureData;
-			var textureAtlas:Object = buildArmatureDataPackage.textureAtlas;
-			
-			if(!armatureData || !textureAtlas)
-			{
-				return null;
-			}
-			
-			return buildFastArmatureUsingArmatureDataFromTextureAtlas(dragonBonesData, armatureData, textureAtlas, skinName);
-		}
-		
-		public function buildFastArmatureFromMultTextureAtlas(armatureName:String, fromDragonBonesDataName:String = null, fromTextureAtlasNames:Array = null, skinName:String = null):FastArmature
-		{
-			var buildArmatureDataPackage:BuildArmatureDataPackage = new BuildArmatureDataPackage();
-			fillBuildArmatureDataPackageArmatureInfo(armatureName, fromDragonBonesDataName, buildArmatureDataPackage);
 			
 			var dragonBonesData:DragonBonesData = buildArmatureDataPackage.dragonBonesData;
 			var armatureData:ArmatureData = buildArmatureDataPackage.armatureData;
@@ -317,10 +282,10 @@ package dragonBones.factories
 				return null;
 			}
 			
-			return buildFastArmatureUsingArmatureDataFromMultTextureAtlas(dragonBonesData, armatureData, fromTextureAtlasNames, skinName);
+			return buildFastArmatureUsingArmatureDataFromTextureAtlas(dragonBonesData, armatureData, fromTextureAtlasName, skinName);
 		}
 		
-		protected function buildArmatureUsingArmatureDataFromTextureAtlas(dragonBonesData:DragonBonesData, armatureData:ArmatureData, textureAtlas:Object, skinName:String = null):Armature
+		protected function buildArmatureUsingArmatureDataFromTextureAtlas(dragonBonesData:DragonBonesData, armatureData:ArmatureData, textureAtlasName:String, skinName:String = null):Armature
 		{
 			var outputArmature:Armature = generateArmature();
 			outputArmature.name = armatureData.name;
@@ -329,30 +294,14 @@ package dragonBones.factories
 			outputArmature.animation.animationDataList = armatureData.animationDataList;
 			
 			buildBones(outputArmature);
-			//TO DO: Support multi textureAtlas case in future
-			buildSlots(outputArmature, skinName, textureAtlas);
+			
+			buildSlots(outputArmature, skinName, textureAtlasName);
 			
 			outputArmature.advanceTime(0);
 			return outputArmature;
 		}
 		
-		protected function buildArmatureUsingArmatureDataFromMultTextureAtlas(dragonBonesData:DragonBonesData, armatureData:ArmatureData, textureAtlasNames:Array = null, skinName:String = null):Armature
-		{
-			var outputArmature:Armature = generateArmature();
-			outputArmature.name = armatureData.name;
-			outputArmature.__dragonBonesData = dragonBonesData;
-			outputArmature._armatureData = armatureData;
-			outputArmature.animation.animationDataList = armatureData.animationDataList;
-			
-			buildBones(outputArmature);
-			//TO DO: Support multi textureAtlas case in future
-			buildSlotsFromMultTextureAtlas(outputArmature, skinName, textureAtlasNames);
-			
-			outputArmature.advanceTime(0);
-			return outputArmature;
-		}
-		
-		protected function buildFastArmatureUsingArmatureDataFromTextureAtlas(dragonBonesData:DragonBonesData, armatureData:ArmatureData, textureAtlas:Object, skinName:String = null):FastArmature
+		protected function buildFastArmatureUsingArmatureDataFromTextureAtlas(dragonBonesData:DragonBonesData, armatureData:ArmatureData, textureAtlasName:String, skinName:String = null):FastArmature
 		{
 			var outputArmature:FastArmature = generateFastArmature();
 			outputArmature.name = armatureData.name;
@@ -361,25 +310,10 @@ package dragonBones.factories
 			outputArmature.animation.animationDataList = armatureData.animationDataList;
 			
 			buildFastBones(outputArmature);
-			buildFastSlots(outputArmature, skinName, textureAtlas);
+			buildFastSlots(outputArmature, skinName, textureAtlasName);
 			
 			outputArmature.advanceTime(0);
 			
-			return outputArmature;
-		}
-		
-		protected function buildFastArmatureUsingArmatureDataFromMultTextureAtlas(dragonBonesData:DragonBonesData, armatureData:ArmatureData, textureAtlasNames:Array = null, skinName:String = null):FastArmature
-		{
-			var outputArmature:FastArmature = generateFastArmature();
-			outputArmature.name = armatureData.name;
-			outputArmature.__dragonBonesData = dragonBonesData;
-			outputArmature._armatureData = armatureData;
-			outputArmature.animation.animationDataList = armatureData.animationDataList;
-			
-			buildFastBones(outputArmature);
-			buildFastSlotsFromMultTextureAtlas(outputArmature, skinName, textureAtlasNames);
-			
-			outputArmature.advanceTime(0);
 			return outputArmature;
 		}
 		
@@ -459,7 +393,7 @@ package dragonBones.factories
 		
 		private function fillBuildArmatureDataPackageTextureInfo(fromTextureAtlasName:String, outputBuildArmatureDataPackage:BuildArmatureDataPackage):void
 		{
-			outputBuildArmatureDataPackage.textureAtlas = textureAtlasDic[fromTextureAtlasName ? fromTextureAtlasName : outputBuildArmatureDataPackage.dragonBonesDataName];
+			outputBuildArmatureDataPackage.textureAtlasName = fromTextureAtlasName;
 		}
 		
 		protected function findFirstDragonBonesData():DragonBonesData
@@ -523,7 +457,7 @@ package dragonBones.factories
 			}
 		}
 		
-		protected function buildFastSlots(armature:FastArmature, skinName:String, textureAtlas:Object):void
+		protected function buildFastSlots(armature:FastArmature, skinName:String, textureAtlasName:String):void
 		{
 		//根据皮肤初始化SlotData的DisplayDataList
 			var skinData:SkinData = armature.armatureData.getSkinData(skinName);
@@ -552,14 +486,14 @@ package dragonBones.factories
 					switch(displayData.type)
 					{
 						case DisplayData.ARMATURE:
-							var childArmature:FastArmature = buildFastArmatureUsingArmatureDataFromTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlas, skinName);
+							var childArmature:FastArmature = buildFastArmatureUsingArmatureDataFromTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlasName, skinName);
 							displayList[l] = childArmature;
 							slot.hasChildArmature = true;
 							break;
 						
 						case DisplayData.IMAGE:
 						default:
-							displayList[l] = generateDisplay(textureAtlas, displayData.name, displayData.pivot.x, displayData.pivot.y);
+							displayList[l] = getTextureDisplay(displayData.name, textureAtlasName, displayData.pivot.x, displayData.pivot.y);
 							break;
 						
 					}
@@ -595,79 +529,7 @@ package dragonBones.factories
 			}
 		}
 		
-		protected function buildFastSlotsFromMultTextureAtlas(armature:FastArmature, skinName:String, textureAtlasNames:Array = null):void
-		{
-		//根据皮肤初始化SlotData的DisplayDataList
-			var skinData:SkinData = armature.armatureData.getSkinData(skinName);
-			if(!skinData)
-			{
-				return;
-			}
-			armature.armatureData.setSkinData(skinName);
-			
-			var displayList:Array = [];
-			var slotDataList:Vector.<SlotData> = armature.armatureData.slotDataList;
-			var slotData:SlotData;
-			var slot:FastSlot;
-			for(var i:int = 0; i < slotDataList.length; i++)
-			{
-				displayList.length = 0;
-				slotData = slotDataList[i];
-				slot = generateFastSlot();
-				slot.initWithSlotData(slotData);
-				
-				var l:int = slotData.displayDataList.length;
-				while(l--)
-				{
-					var displayData:DisplayData = slotData.displayDataList[l];
-					
-					switch(displayData.type)
-					{
-						case DisplayData.ARMATURE:
-							var childArmature:FastArmature = buildFastArmatureUsingArmatureDataFromMultTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlasNames, skinName);
-							displayList[l] = childArmature;
-							slot.hasChildArmature = true;
-							break;
-						
-						case DisplayData.IMAGE:
-						default:
-							displayList[l] = getDisplayFromMultTexture(displayData.name, textureAtlasNames, displayData.pivot.x, displayData.pivot.y);
-							break;
-						
-					}
-				}
-				//==================================================
-				//如果显示对象有name属性并且name属性可以设置的话，将name设置为与slot同名，dragonBones并不依赖这些属性，只是方便开发者
-				for each(var displayObject:Object in displayList)
-				{
-					if(!displayObject)
-					{
-						continue;
-					}
-					if(displayObject is FastArmature)
-					{
-						displayObject = (displayObject as FastArmature).display;
-					}
-					
-					if(displayObject.hasOwnProperty("name"))
-					{
-						try
-						{
-							displayObject["name"] = slot.name;
-						}
-						catch(err:Error)
-						{
-						}
-					}
-				}
-				//==================================================
-				slot.initDisplayList(displayList.concat());
-				armature.addSlot(slot, slotData.parent);
-				slot.changeDisplayIndex(slotData.displayIndex);
-			}
-		}
-		
-		protected function buildSlotsFromMultTextureAtlas(armature:Armature, skinName:String, textureAtlasNames:Array = null):void
+		protected function buildSlots(armature:Armature, skinName:String, textureAtlasName:String):void
 		{
 			var skinData:SkinData = armature.armatureData.getSkinData(skinName);
 			if(!skinData)
@@ -703,92 +565,13 @@ package dragonBones.factories
 					switch(displayData.type)
 					{
 						case DisplayData.ARMATURE:
-							var childArmature:Armature = buildArmatureUsingArmatureDataFromMultTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlasNames, skinName);
+							var childArmature:Armature = buildArmatureUsingArmatureDataFromTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlasName, skinName);
 							displayList[l] = childArmature;
 							break;
 						
 						case DisplayData.IMAGE:
 						default:
-							displayList[l] = getDisplayFromMultTexture(displayData.name, textureAtlasNames, displayData.pivot.x, displayData.pivot.y);
-							break;
-						
-					}
-				}
-				//==================================================
-				//如果显示对象有name属性并且name属性可以设置的话，将name设置为与slot同名，dragonBones并不依赖这些属性，只是方便开发者
-				for each(var displayObject:Object in displayList)
-				{
-					if(!displayObject)
-					{
-						continue;
-					}
-					if(displayObject is Armature)
-					{
-						displayObject = (displayObject as Armature).display;
-					}
-					
-					if(displayObject.hasOwnProperty("name"))
-					{
-						try
-						{
-							displayObject["name"] = slot.name;
-						}
-						catch(err:Error)
-						{
-						}
-					}
-				}
-				//==================================================
-				skinListObject[slotData.name] = displayList.concat();
-				slot.displayList = displayList;
-				slot.changeDisplay(slotData.displayIndex);
-			}
-			armature.addSkinList(skinName, skinListObject);
-		}
-		
-		protected function buildSlots(armature:Armature, skinName:String, textureAtlas:Object):void
-		{
-			var skinData:SkinData = armature.armatureData.getSkinData(skinName);
-			if(!skinData)
-			{
-				return;
-			}
-			armature.armatureData.setSkinData(skinName);
-			var displayList:Array = [];
-			var slotDataList:Vector.<SlotData> = armature.armatureData.slotDataList;
-			var slotData:SlotData;
-			var slot:Slot;
-			var bone:Bone;
-			var skinListObject:Object = { };
-			for(var i:int = 0; i < slotDataList.length; i++)
-			{
-				displayList.length = 0;
-				slotData = slotDataList[i];
-				bone = armature.getBone(slotData.parent);
-				if(!bone)
-				{
-					continue;
-				}
-				
-				slot = generateSlot();
-				slot.initWithSlotData(slotData);
-				bone.addSlot(slot);
-				
-				var l:int = slotData.displayDataList.length;
-				while(l--)
-				{
-					var displayData:DisplayData = slotData.displayDataList[l];
-					
-					switch(displayData.type)
-					{
-						case DisplayData.ARMATURE:
-							var childArmature:Armature = buildArmatureUsingArmatureDataFromTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlas, skinName);
-							displayList[l] = childArmature;
-							break;
-						
-						case DisplayData.IMAGE:
-						default:
-							displayList[l] = generateDisplay(textureAtlas, displayData.name, displayData.pivot.x, displayData.pivot.y);
+							displayList[l] = getTextureDisplay(displayData.name, textureAtlasName, displayData.pivot.x, displayData.pivot.y);
 							break;
 						
 					}
@@ -828,9 +611,8 @@ package dragonBones.factories
 		
 		public function addSkinToArmature(armature:Armature, skinName:String, textureAtlasName:String):void
 		{
-			var textureAtlas:Object = textureAtlasDic[textureAtlasName]
 			var skinData:SkinData = armature.armatureData.getSkinData(skinName);
-			if(!skinData || !textureAtlas)
+			if(!skinData || !textureAtlasName)
 			{
 				return;
 			}
@@ -869,13 +651,13 @@ package dragonBones.factories
 					switch(displayData.type)
 					{
 						case DisplayData.ARMATURE:
-							var childArmature:Armature = buildArmatureUsingArmatureDataFromTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlas, skinName);
+							var childArmature:Armature = buildArmatureUsingArmatureDataFromTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlasName, skinName);
 							displayList[l] = childArmature;
 							break;
 						
 						case DisplayData.IMAGE:
 						default:
-							displayList[l] = generateDisplay(textureAtlas, displayData.name, displayData.pivot.x, displayData.pivot.y);
+							displayList[l] = (displayData.name, textureAtlasName, displayData.pivot.x, displayData.pivot.y);
 							break;
 						
 					}
@@ -1026,5 +808,5 @@ class BuildArmatureDataPackage
 	public var dragonBonesDataName:String;
 	public var dragonBonesData:DragonBonesData;
 	public var armatureData:ArmatureData;
-	public var textureAtlas:Object;
+	public var textureAtlasName:String;
 }
