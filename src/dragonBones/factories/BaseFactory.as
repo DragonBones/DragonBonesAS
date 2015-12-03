@@ -256,7 +256,11 @@ package dragonBones.factories
 		public function buildArmature(armatureName:String, fromDragonBonesDataName:String = null, fromTextureAtlasName:String = null, skinName:String = null):Armature
 		{
 			var buildArmatureDataPackage:BuildArmatureDataPackage = new BuildArmatureDataPackage();
-			if(fillBuildArmatureDataPackageArmatureInfo(armatureName, fromDragonBonesDataName, buildArmatureDataPackage))
+			fillBuildArmatureDataPackageArmatureInfo(armatureName, fromDragonBonesDataName, buildArmatureDataPackage);
+			if (fromTextureAtlasName == null)
+			{
+				fromTextureAtlasName = buildArmatureDataPackage.dragonBonesDataName;
+			}
 			
 			var dragonBonesData:DragonBonesData = buildArmatureDataPackage.dragonBonesData;
 			var armatureData:ArmatureData = buildArmatureDataPackage.armatureData;
@@ -272,8 +276,11 @@ package dragonBones.factories
 		public function buildFastArmature(armatureName:String, fromDragonBonesDataName:String = null, fromTextureAtlasName:String = null, skinName:String = null):FastArmature
 		{
 			var buildArmatureDataPackage:BuildArmatureDataPackage = new BuildArmatureDataPackage();
-			if(fillBuildArmatureDataPackageArmatureInfo(armatureName, fromDragonBonesDataName, buildArmatureDataPackage))
-			
+			fillBuildArmatureDataPackageArmatureInfo(armatureName, fromDragonBonesDataName, buildArmatureDataPackage);
+			if (fromTextureAtlasName == null)
+			{
+				fromTextureAtlasName = buildArmatureDataPackage.dragonBonesDataName;
+			}
 			var dragonBonesData:DragonBonesData = buildArmatureDataPackage.dragonBonesData;
 			var armatureData:ArmatureData = buildArmatureDataPackage.armatureData;
 			
