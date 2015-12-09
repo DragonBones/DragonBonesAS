@@ -5,7 +5,7 @@ package dragonBones.core
 		public static const DATA_VERSION:String = "4.0";
 		public static const PARENT_COORDINATE_DATA_VERSION:String = "3.0";
 		
-		public static const VERSION:String = "4.1.5";
+		public static const VERSION:String = "4.1.10";
 		
 		public function DragonBones()
 		{

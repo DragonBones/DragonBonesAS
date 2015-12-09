@@ -225,7 +225,10 @@ package dragonBones.fast.animation
 		
 		private function advanceTimelinesTime(passedTime:Number):void
 		{
-			_time += passedTime;
+			if(_isPlaying)
+			{
+				_time += passedTime;
+			}
 			
 			//计算是否已经播放完成isThisComplete
 

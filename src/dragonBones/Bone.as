@@ -567,7 +567,7 @@
 					
 					weight = timelineState._animationState.weight * timelineState._animationState.fadeWeight * weigthLeft;
 					timelineState._weight = weight;
-					if(weight && timelineState._blendEnabled)
+					if(weight)
 					{
 						transform = timelineState._transform;
 						pivot = timelineState._pivot;
