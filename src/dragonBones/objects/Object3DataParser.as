@@ -257,7 +257,7 @@ package dragonBones.objects
 			
 			for each(var frameObject:Object in animationObject[ConstValues.FRAME])
 			{
-				var frame:Frame = parseTransformFrame(frameObject, frameRate, isGlobalData);
+				var frame:Frame = parseTransformFrame(frameObject, null, frameRate, isGlobalData);
 				animationData.addFrame(frame);
 			}
 			
@@ -401,9 +401,25 @@ package dragonBones.objects
 			timeline.originPivot.y = getNumber(timelineObject, ConstValues.A_PIVOT_Y, 0) || 0;
 			timeline.duration = duration;
 			
-			for each(var frameObject:Object in timelineObject[ConstValues.FRAME])
+			var frameObject:Object;
+			var nextFrameObject:Object;
+			
+			for (var i:int = 0, len:int = timelineObject[ConstValues.FRAME].length; i < len; i++)
 			{
-				var frame:TransformFrame = parseTransformFrame(frameObject, frameRate, isGlobalData);
+				frameObject = timelineObject[ConstValues.FRAME][i];
+				if (i < len -1)
+				{
+					nextFrameObject = timelineObject[ConstValues.FRAME][i + 1];
+				}
+				else if( i != 0)
+				{
+					nextFrameObject = timelineObject[ConstValues.FRAME][0];
+				}
+				else
+				{
+					nextFrameObject = null;
+				}
+				var frame:TransformFrame = parseTransformFrame(frameObject, nextFrameObject, frameRate, isGlobalData);
 				timeline.addFrame(frame);
 			}
 			
@@ -419,7 +435,7 @@ package dragonBones.objects
 			return frame;
 		}
 		
-		private static function parseTransformFrame(frameObject:Object, frameRate:uint, isGlobalData:Boolean):TransformFrame
+		private static function parseTransformFrame(frameObject:Object, nextFrameObject:Object, frameRate:uint, isGlobalData:Boolean):TransformFrame
 		{
 			var frame:TransformFrame = new TransformFrame();
 			parseFrame(frameObject, frame, frameRate);
@@ -432,6 +448,10 @@ package dragonBones.objects
 			frame.tweenScale = getBoolean(frameObject, ConstValues.A_TWEEN_SCALE, true);
 			//frame.displayIndex = int(getNumber(frameObject, ConstValues.A_DISPLAY_INDEX, 0));
 			
+			if (nextFrameObject && int(getNumber(nextFrameObject, ConstValues.A_DISPLAY_INDEX, 0)) == -1)
+			{
+				frame.tweenEasing = NaN;
+			}
 			//如果为NaN，则说明没有改变过zOrder
 			//frame.zOrder = getNumber(frameObject, ConstValues.A_Z_ORDER, isGlobalData ? NaN : 0);
 			
