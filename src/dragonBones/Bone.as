@@ -10,11 +10,11 @@
 	import dragonBones.events.FrameEvent;
 	import dragonBones.events.SoundEvent;
 	import dragonBones.events.SoundEventManager;
+	import dragonBones.objects.BoneData;
 	import dragonBones.objects.DBTransform;
 	import dragonBones.objects.Frame;
-	import dragonBones.objects.FrameCached;
-	import dragonBones.objects.TimelineCached;
-	import dragonBones.objects.TransformFrame;
+	import dragonBones.objects.ParentTransformObject;
+	import dragonBones.utils.TransformUtil;
 	
 	use namespace dragonBones_internal;
 	
@@ -25,48 +25,24 @@
 		 */
 		private static const _soundManager:SoundEventManager = SoundEventManager.getInstance();
 		
-		
-		/**
-		 * Unrecommended API. Recommend use slot.childArmature.
-		 */
-		public function get childArmature():Armature
+		public static function initWithBoneData(boneData:BoneData):Bone
 		{
-			var slot:Slot = this.slot;
-			if(slot)
-			{
-				return slot.childArmature;
-			}
-			return null;
+			var outputBone:Bone = new Bone();
+			
+			outputBone.name = boneData.name;
+			outputBone.length = boneData.length;
+			outputBone.inheritRotation = boneData.inheritRotation;
+			outputBone.inheritScale = boneData.inheritScale;
+			outputBone.origin.copy(boneData.transform);
+			
+			return outputBone;
 		}
 		
-		/**
-		 * Unrecommended API. Recommend use slot.display.
-		 */
-		public function get display():Object
-		{
-			var slot:Slot = this.slot;
-			if(slot)
-			{
-				return slot.display;
-			}
-			return null;
-		}
-		public function set display(value:Object):void
-		{
-			var slot:Slot = this.slot;
-			if(slot)
-			{
-				slot.display = value;
-			}
-		}
+		public var applyOffsetTranslationToChild:Boolean = true;
 		
-		/**
-		 * Unrecommended API. Recommend use offset.
-		 */
-		public function get node():DBTransform
-		{
-			return _offset;
-		}
+		public var applyOffsetRotationToChild:Boolean = true;
+		
+		public var applyOffsetScaleToChild:Boolean = false;
 		
 		/**
 		 * AnimationState that slots belong to the bone will be controlled by.
@@ -74,26 +50,10 @@
 		 */
 		public var displayController:String;
 		
-		/** @private */
-		dragonBones_internal var _tween:DBTransform;
-		
-		/** @private */
-		dragonBones_internal var _tweenPivot:Point;
-		
-		/** @private */
-		dragonBones_internal var _needUpdate:int;
-		
-		/** @private */
-		dragonBones_internal var _isColorChanged:Boolean;
-		
-		/** @private */
-		dragonBones_internal var _frameCachedPosition:int;
-		
-		/** @private */
-		dragonBones_internal var _frameCachedDuration:int;
-		
-		/** @private */
-		dragonBones_internal var _timelineCached:TimelineCached;
+		public var rotationIK:Number;
+		public var length:Number;
+		public var isIKConstraint:Boolean = false;
+		public var childrenBones:Vector.<Bone> = new Vector.<Bone>();
 		
 		/** @private */
 		protected var _boneList:Vector.<Bone>;
@@ -105,51 +65,34 @@
 		protected var _timelineStateList:Vector.<TimelineState>;
 		
 		/** @private */
-		override public function set visible(value:Boolean):void
-		{
-			if(this._visible != value)
-			{
-				this._visible = value;
-				for each(var slot:Slot in _slotList)
-				{
-					slot.updateDisplayVisible(this._visible);
-				}
-			}
-		}
+		dragonBones_internal var _tween:DBTransform;
 		
 		/** @private */
-		override dragonBones_internal function setArmature(value:Armature):void
-		{
-			super.setArmature(value);
-			
-			var i:int = _boneList.length;
-			while(i --)
-			{
-				_boneList[i].setArmature(this._armature);
-			}
-			
-			i = _slotList.length;
-			while(i --)
-			{
-				_slotList[i].setArmature(this._armature);
-			}
-		}
+		dragonBones_internal var _tweenPivot:Point;
 		
-		public function get slot():Slot
-		{
-			return _slotList.length > 0?_slotList[0]:null;
-		}
+		/** @private */
+		dragonBones_internal var _needUpdate:int;
 		
-		/**
-		 * Creates a Bone blank instance.
-		 */
+		/** @private */
+		//dragonBones_internal var _isColorChanged:Boolean;
+		
+		/** @private */
+		dragonBones_internal var _globalTransformForChild:DBTransform;
+		/** @private */
+		dragonBones_internal var _globalTransformMatrixForChild:Matrix;
+		/** @private */
+		dragonBones_internal var _localTransform:DBTransform;
+		
+		private var _tempGlobalTransformForChild:DBTransform;
+		private var _tempGlobalTransformMatrixForChild:Matrix;
+		
 		public function Bone()
 		{
 			super();
 			
 			_tween = new DBTransform();
 			_tweenPivot = new Point();
-			_tween.scaleX = _tween.scaleY = 0;
+			_tween.scaleX = _tween.scaleY = 1;
 			
 			_boneList = new Vector.<Bone>;
 			_boneList.fixed = true;
@@ -158,12 +101,7 @@
 			_timelineStateList = new Vector.<TimelineState>;
 			
 			_needUpdate = 2;
-			_isColorChanged = false;
-			_frameCachedPosition = -1;
-			_frameCachedDuration = -1;
-			
-			this.inheritRotation = true;
-			this.inheritScale = false;
+			//_isColorChanged = false;
 		}
 		
 		/**
@@ -200,17 +138,9 @@
 			_boneList = null;
 			_slotList = null;
 			_timelineStateList = null;
-			_timelineCached = null;
 		}
 		
-		/**
-		 * Force update the bone in next frame even if the bone is not moving.
-		 */
-		public function invalidUpdate():void
-		{
-			_needUpdate = 2;
-		}
-		
+//骨架装配
 		/**
 		 * If contains some bone or slot
 		 * @param Slot or Bone instance
@@ -236,6 +166,165 @@
 		}
 		
 		/**
+		 * Add a bone as child
+		 * @param a Bone instance
+		 * @see dragonBones.core.DBObject
+		 */
+		public function addChildBone(childBone:Bone, updateLater:Boolean = false):void
+		{
+			if(!childBone)
+			{
+				throw new ArgumentError();
+			}
+			
+			if(childBone == this || childBone.contains(this))
+			{
+				throw new ArgumentError("An Bone cannot be added as a child to itself or one of its children (or children's children, etc.)");
+			}
+			
+			if(childBone.parent == this)
+			{
+				return;
+			}
+			
+			if(childBone.parent)
+			{
+				childBone.parent.removeChildBone(childBone);
+			}
+			
+			_boneList.fixed = false;
+			_boneList[_boneList.length] = childBone;
+			_boneList.fixed = true;
+			childBone.setParent(this);
+			childBone.setArmature(_armature);
+			var index:int = childrenBones.indexOf(childBone);
+			if (index < 0)
+			{
+				childrenBones.push(childBone);
+			}
+			
+			if(_armature && !updateLater)
+			{
+				_armature.updateAnimationAfterBoneListChanged();
+			}
+		}
+		
+		/**
+		 * remove a child bone 
+		 * @param a Bone instance
+		 * @see dragonBones.core.DBObject
+		 */
+		public function removeChildBone(childBone:Bone, updateLater:Boolean = false):void
+		{
+			if(!childBone)
+			{
+				throw new ArgumentError();
+			}
+			
+			var index:int = _boneList.indexOf(childBone);
+			if(index < 0)
+			{
+				throw new ArgumentError();
+			}
+			
+			_boneList.fixed = false;
+			_boneList.splice(index, 1);
+			_boneList.fixed = true;
+			var indexs:int = childrenBones.indexOf(childBone);
+			if (indexs >= 0)
+			{
+				childrenBones.splice(indexs, 1);
+			}
+			childBone.setParent(null);
+			childBone.setArmature(null);
+			
+			if(_armature && !updateLater)
+			{
+				_armature.updateAnimationAfterBoneListChanged(false);
+			}
+		}
+		
+		/**
+		 * Add a slot as child
+		 * @param a Slot instance
+		 * @see dragonBones.core.DBObject
+		 */
+		public function addSlot(childSlot:Slot):void
+		{
+			if(!childSlot)
+			{
+				throw new ArgumentError();
+			}
+			
+			if(childSlot.parent)
+			{
+				childSlot.parent.removeSlot(childSlot);
+			}
+			
+			_slotList.fixed = false;
+			_slotList[_slotList.length] = childSlot;
+			_slotList.fixed = true;
+			childSlot.setParent(this);
+			childSlot.setArmature(this._armature);
+		}
+		
+		/**
+		 * remove a child slot
+		 * @param a Slot instance
+		 * @see dragonBones.core.DBObject
+		 */
+		public function removeSlot(childSlot:Slot):void
+		{
+			if(!childSlot)
+			{
+				throw new ArgumentError();
+			}
+			
+			var index:int = _slotList.indexOf(childSlot);
+			if(index < 0)
+			{
+				throw new ArgumentError();
+			}
+			
+			_slotList.fixed = false;
+			_slotList.splice(index, 1);
+			_slotList.fixed = true;
+			childSlot.setParent(null);
+			childSlot.setArmature(null);
+		}
+		
+		/** @private */
+		override dragonBones_internal function setArmature(value:Armature):void
+		{
+			if(_armature == value)
+			{
+				return;
+			}
+			if(_armature)
+			{
+				_armature.removeBoneFromBoneList(this);
+				_armature.updateAnimationAfterBoneListChanged(false);
+			}
+			_armature = value;
+			if(_armature)
+			{
+				_armature.addBoneToBoneList(this);
+			}
+			
+			var i:int = _boneList.length;
+			while(i --)
+			{
+				_boneList[i].setArmature(this._armature);
+			}
+			
+			i = _slotList.length;
+			while(i --)
+			{
+				_slotList[i].setArmature(this._armature);
+			}
+		}
+		
+		/**
 		 * Get all Bone instance associated with this bone.
 		 * @return A Vector.&lt;Slot&gt; instance.
 		 * @see dragonBones.Slot
@@ -255,94 +344,53 @@
 			return returnCopy?_slotList.concat():_slotList;
 		}
 		
+//动画
 		/**
-		 * Add a bone or slot as child
-		 * @param a Slot or Bone instance
-		 * @see dragonBones.core.DBObject
+		 * Force update the bone in next frame even if the bone is not moving.
 		 */
-		public function addChild(child:DBObject):void
+		public function invalidUpdate():void
 		{
-			if(!child)
+			_needUpdate = 2;
+			operationInvalidUpdate(this);
+			for each (var i:Bone in childrenBones) 
 			{
-				throw new ArgumentError();
+				if(i._needUpdate != 2){
+					operationInvalidUpdate(i)	
+					i.invalidUpdate()
+				}
 			}
-			var bone:Bone = child as Bone;
-			if(bone == this || (bone && bone.contains(this)))
+		}
+		private function operationInvalidUpdate(bone:Bone):void
+		{
+			var arr:Array = this.armature.getIKTargetData(bone);
+			var i:int;
+			var len:int;
+			var j:int;
+			var jLen:int;
+			var ik:IKConstraint;
+			var bo:Bone;
+			for (i = 0, len = arr.length; i < len; i++)
 			{
-				throw new ArgumentError("An Bone cannot be added as a child to itself or one of its children (or children's children, etc.)");
-			}
-			
-			if(child.parent)
-			{
-				child.parent.removeChild(child);
-			}
-			
-			if(bone)
-			{
-				_boneList.fixed = false;
-				_boneList[_boneList.length] = bone;
-				_boneList.fixed = true;
-				bone.setParent(this);
-				bone.setArmature(this._armature);
-			}
-			else if(child is Slot)
-			{
-				var slot:Slot = child as Slot;
-				_slotList.fixed = false;
-				_slotList[_slotList.length] = slot;
-				_slotList.fixed = true;
-				slot.setParent(this);
-				slot.setArmature(this._armature);
+				ik = arr[i];
+				for (j = 0, jLen = ik.bones.length; j < jLen; j++)
+				{
+					bo = ik.bones[j];
+					if(bo._needUpdate != 2){
+						bo.invalidUpdate();
+					}
+				}
 			}
 		}
 		
-		/**
-		 * remove a child bone or slot
-		 * @param a Slot or Bone instance
-		 * @see dragonBones.core.DBObject
-		 */
-		public function removeChild(child:DBObject):void
+		override protected function calculateRelativeParentTransform():void
 		{
-			if(!child)
-			{
-				throw new ArgumentError();
-			}
+			_global.scaleX = this._origin.scaleX * _tween.scaleX * this._offset.scaleX;
+			_global.scaleY = this._origin.scaleY * _tween.scaleY * this._offset.scaleY;
+			_global.skewX = this._origin.skewX + _tween.skewX + this._offset.skewX;
+			_global.skewY = this._origin.skewY + _tween.skewY + this._offset.skewY;
+			_global.x = this._origin.x + _tween.x + this._offset.x;
+			_global.y = this._origin.y + _tween.y + this._offset.y;
 			
-			var index:int;
-			if(child is Bone)
-			{
-				var bone:Bone = child as Bone;
-				index = _boneList.indexOf(bone);
-				if(index >= 0)
-				{
-					_boneList.fixed = false;
-					_boneList.splice(index, 1);
-					_boneList.fixed = true;
-					bone.setParent(null);
-					bone.setArmature(null);
-				}
-				else
-				{
-					throw new ArgumentError();
-				}
-			}
-			else if(child is Slot)
-			{
-				var slot:Slot = child as Slot;
-				index = _slotList.indexOf(slot);
-				if(index >= 0)
-				{
-					_slotList.fixed = false;
-					_slotList.splice(index, 1);
-					_slotList.fixed = true;
-					slot.setParent(null);
-					slot.setArmature(null);
-				}
-				else
-				{
-					throw new ArgumentError();
-				}
-			}
 		}
 		
 		/** @private */
@@ -357,118 +405,104 @@
 			{
 				return;
 			}
-			
-			if(_frameCachedPosition >= 0 && _frameCachedDuration <= 0)
-			{
-				var frameCached:FrameCached = _timelineCached.timeline[_frameCachedPosition];
-				var transform:DBTransform = frameCached.transform;
-				this._global.x = transform.x;
-				this._global.y = transform.x;
-				this._global.skewX = transform.skewX;
-				this._global.skewY = transform.skewY;
-				this._global.scaleX = transform.scaleX;
-				this._global.scaleY = transform.scaleY;
-				//this._global.copy(_frameCached.transform);
-				
-				var matrix:Matrix = frameCached.matrix;
-				this._globalTransformMatrix.a = matrix.a;
-				this._globalTransformMatrix.b = matrix.b;
-				this._globalTransformMatrix.c = matrix.c;
-				this._globalTransformMatrix.d = matrix.d;
-				this._globalTransformMatrix.tx = matrix.tx;
-				this._globalTransformMatrix.ty = matrix.ty;
-				//this._globalTransformMatrix.copyFrom(_frameCached.matrix);
-				return;
-			}
-			
+			updataLocalTransform();
+			updateGlobalTransform();
+		}
+		private function updataLocalTransform():void
+		{
 			blendingTimeline();
-			
-			this._global.scaleX = (this._origin.scaleX + _tween.scaleX) * this._offset.scaleX;
-			this._global.scaleY = (this._origin.scaleY + _tween.scaleY) * this._offset.scaleY;
-			
-			if(this._parent)
+			calculateRelativeParentTransform();
+		}
+		private function updateGlobalTransform():void
+		{
+			//计算global
+			var result:ParentTransformObject = updateGlobal();
+			var parentGlobalTransform:DBTransform; 
+			var parentGlobalTransformMatrix:Matrix;
+			if (result)
 			{
-				var x:Number = this._origin.x + this._offset.x + _tween.x;
-				var y:Number = this._origin.y + this._offset.y + _tween.y;
-				var parentMatrix:Matrix = this._parent._globalTransformMatrix;
-				
-				this._globalTransformMatrix.tx = this._global.x = parentMatrix.a * x + parentMatrix.c * y + parentMatrix.tx;
-				this._globalTransformMatrix.ty = this._global.y = parentMatrix.d * y + parentMatrix.b * x + parentMatrix.ty;
-				
-				if(this.inheritRotation)
-				{
-					this._global.skewX = this._origin.skewX + this._offset.skewX + _tween.skewX + this._parent._global.skewX;
-					this._global.skewY = this._origin.skewY + this._offset.skewY + _tween.skewY + this._parent._global.skewY;
-				}
-				else
-				{
-					this._global.skewX = this._origin.skewX + this._offset.skewX + _tween.skewX;
-					this._global.skewY = this._origin.skewY + this._offset.skewY + _tween.skewY;
-				}
-				
-				if(this.inheritScale)
-				{
-					this._global.scaleX *= this._parent._global.scaleX;
-					this._global.scaleY *= this._parent._global.scaleY;
-				}
+				parentGlobalTransform = result.parentGlobalTransform;
+				parentGlobalTransformMatrix = result.parentGlobalTransformMatrix;
+				result.release();
+			}
+			//计算globalForChild
+			var ifExistOffsetTranslation:Boolean = _offset.x != 0 || _offset.y != 0;
+			var ifExistOffsetScale:Boolean = _offset.scaleX != 1 || _offset.scaleY != 1;
+			var ifExistOffsetRotation:Boolean = _offset.skewX != 0 || _offset.skewY != 0;
+			
+			if(	(!ifExistOffsetTranslation || applyOffsetTranslationToChild) &&
+				(!ifExistOffsetScale || applyOffsetScaleToChild) &&
+				(!ifExistOffsetRotation || applyOffsetRotationToChild))
+			{
+				_globalTransformForChild = _global;
+				_globalTransformMatrixForChild = _globalTransformMatrix;
 			}
 			else
 			{
-				this._globalTransformMatrix.tx = this._global.x = this._origin.x + this._offset.x + _tween.x;
-				this._globalTransformMatrix.ty = this._global.y = this._origin.y + this._offset.y + _tween.y;
+				if(!_tempGlobalTransformForChild)
+				{
+					_tempGlobalTransformForChild = new DBTransform();
+				}
+				_globalTransformForChild = _tempGlobalTransformForChild;
 				
-				this._global.skewX = this._origin.skewX + this._offset.skewX + _tween.skewX;
-				this._global.skewY = this._origin.skewY + this._offset.skewY + _tween.skewY;
-			}
-			
-			this._globalTransformMatrix.a = this._global.scaleX * Math.cos(this._global.skewY);
-			this._globalTransformMatrix.b = this._global.scaleX * Math.sin(this._global.skewY);
-			this._globalTransformMatrix.c = -this._global.scaleY * Math.sin(this._global.skewX);
-			this._globalTransformMatrix.d = this._global.scaleY * Math.cos(this._global.skewX);
-			
-			/*
-			this._globalTransformMatrix.a = this._offset.scaleX * Math.cos(this._global.skewY);
-			this._globalTransformMatrix.b = this._offset.scaleX * Math.sin(this._global.skewY);
-			this._globalTransformMatrix.c = -this._offset.scaleY * Math.sin(this._global.skewX);
-			this._globalTransformMatrix.d = this._offset.scaleY * Math.cos(this._global.skewX);
-			*/
-			
-			if(_frameCachedDuration > 0)    // && _frameCachedPosition >= 0
-			{
-				_timelineCached.addFrame(this._global, this._globalTransformMatrix, _frameCachedPosition, _frameCachedDuration);
+				if(!_tempGlobalTransformMatrixForChild)
+				{
+					_tempGlobalTransformMatrixForChild = new Matrix();
+				}
+				_globalTransformMatrixForChild = _tempGlobalTransformMatrixForChild;
+				
+				_globalTransformForChild.x = this._origin.x + _tween.x;
+				_globalTransformForChild.y = this._origin.y + _tween.y;
+				_globalTransformForChild.scaleX = this._origin.scaleX * _tween.scaleX;
+				_globalTransformForChild.scaleY = this._origin.scaleY * _tween.scaleY;
+				_globalTransformForChild.skewX = this._origin.skewX + _tween.skewX;
+				_globalTransformForChild.skewY = this._origin.skewY + _tween.skewY;
+				
+				if(applyOffsetTranslationToChild)
+				{
+					_globalTransformForChild.x += this._offset.x;
+					_globalTransformForChild.y += this._offset.y;
+				}
+				if(applyOffsetScaleToChild)
+				{
+					_globalTransformForChild.scaleX *= this._offset.scaleX;
+					_globalTransformForChild.scaleY *= this._offset.scaleY;
+				}
+				if(applyOffsetRotationToChild)
+				{
+					_globalTransformForChild.skewX += this._offset.skewX;
+					_globalTransformForChild.skewY += this._offset.skewY;
+				}
+				
+				TransformUtil.transformToMatrix(_globalTransformForChild, _globalTransformMatrixForChild);
+				if(parentGlobalTransformMatrix)
+				{
+					_globalTransformMatrixForChild.concat(parentGlobalTransformMatrix);
+					TransformUtil.matrixToTransform(_globalTransformMatrixForChild, _globalTransformForChild, _globalTransformForChild.scaleX * parentGlobalTransform.scaleX >= 0, _globalTransformForChild.scaleY * parentGlobalTransform.scaleY >= 0 );
+				}
 			}
 		}
-		
-		/** @private */
-		dragonBones_internal function updateColor(
-			aOffset:Number, 
-			rOffset:Number, 
-			gOffset:Number, 
-			bOffset:Number, 
-			aMultiplier:Number, 
-			rMultiplier:Number, 
-			gMultiplier:Number, 
-			bMultiplier:Number,
-			colorChanged:Boolean
-		):void
+		public function adjustGlobalTransformMatrixByIK():void
 		{
-			for each(var slot:Slot in _slotList)
+			if(!parent)
 			{
-				slot.updateDisplayColor(
-					aOffset, rOffset, gOffset, bOffset, 
-					aMultiplier, rMultiplier, gMultiplier, bMultiplier
-				);
+				return;
 			}
-			
-			_isColorChanged = colorChanged;
+			updataLocalTransform();
+			_global.rotation = rotationIK-parentBoneRotation;
+			updateGlobalTransform();
+			/*global.rotation = rotationIK;
+			TransformUtil.transformToMatrix(global, _globalTransformMatrix);
+			_globalTransformForChild.rotation= rotationIK;
+			TransformUtil.transformToMatrix(_globalTransformForChild, _globalTransformMatrixForChild);*/
 		}
 		
 		/** @private */
 		dragonBones_internal function hideSlots():void
 		{
-			for each(var slot:Slot in _slotList)
+			for each(var childSlot:Slot in _slotList)
 			{
-				slot.changeDisplay(-1);
+				childSlot.changeDisplay(-1);
 			}
 		}
 		
@@ -478,27 +512,11 @@
 			var displayControl:Boolean = 
 				animationState.displayControl &&
 				(!displayController || displayController == animationState.name) &&
-				animationState.getMixingTransform(name) == 0
+				animationState.containsBoneMask(name)
 			
 			if(displayControl)
 			{
-				var slot:Slot;
-				var tansformFrame:TransformFrame = frame as TransformFrame;
-				var displayIndex:int = tansformFrame.displayIndex;
-				for each(slot in _slotList)
-				{
-					slot.changeDisplay(displayIndex);
-					slot.updateDisplayVisible(tansformFrame.visible);
-					if(displayIndex >= 0)
-					{
-						if(!isNaN(tansformFrame.zOrder) && tansformFrame.zOrder != slot._tweenZOrder)
-						{
-							slot._tweenZOrder = tansformFrame.zOrder;
-							this._armature._slotsZOrderChanged = true;
-						}
-					}
-				}
-				
+				var childSlot:Slot;
 				if(frame.event && this._armature.hasEventListener(FrameEvent.BONE_FRAME_EVENT))
 				{
 					var frameEvent:FrameEvent = new FrameEvent(FrameEvent.BONE_FRAME_EVENT);
@@ -507,7 +525,6 @@
 					frameEvent.frameLabel = frame.event;
 					this._armature._eventList.push(frameEvent);
 				}
-				
 				if(frame.sound && _soundManager.hasEventListener(SoundEvent.SOUND))
 				{
 					var soundEvent:SoundEvent = new SoundEvent(SoundEvent.SOUND);
@@ -521,9 +538,9 @@
 				//后续会扩展更多的action，目前只有gotoAndPlay的含义
 				if(frame.action) 
 				{
-					for each(slot in _slotList)
+					for each(childSlot in _slotList)
 					{
-						var childArmature:Armature = slot.childArmature;
+						var childArmature:Armature = childSlot.childArmature;
 						if(childArmature)
 						{
 							childArmature.animation.gotoAndPlay(frame.action);
@@ -531,6 +548,58 @@
 					}
 				}
 			}
+		}
+		
+		override protected function updateGlobal():ParentTransformObject 
+		{
+			if (!_armature._skewEnable)
+			{
+				return super.updateGlobal();
+			}
+			
+			//calculateRelativeParentTransform();
+			var output:ParentTransformObject = calculateParentTransform();
+			if(output != null && output.parentGlobalTransformMatrix && output.parentGlobalTransform)
+			{
+				//计算父骨头绝对坐标
+				var parentMatrix:Matrix = output.parentGlobalTransformMatrix;
+				var parentGlobalTransform:DBTransform = output.parentGlobalTransform;
+				
+				var scaleXF:Boolean = _global.scaleX * parentGlobalTransform.scaleX > 0;
+				var scaleYF:Boolean = _global.scaleY * parentGlobalTransform.scaleY > 0;
+				var relativeRotation:Number = _global.rotation;
+				var relativeScaleX:Number = _global.scaleX;
+				var relativeScaleY:Number = _global.scaleY;
+				var parentRotation:Number = parentBoneRotation;
+				
+				_localTransform = _global;
+				if (this.inheritScale && !inheritRotation)
+				{
+					if (parentRotation != 0)
+					{
+						_localTransform = _localTransform.clone();
+						_localTransform.rotation -= parentRotation;
+					}
+				}
+				TransformUtil.transformToMatrix(_localTransform, _globalTransformMatrix);
+				_globalTransformMatrix.concat(parentMatrix);
+				
+				if (inheritScale)
+				{
+					TransformUtil.matrixToTransform(_globalTransformMatrix, _global, scaleXF, scaleYF);
+				}
+				else 
+				{
+					TransformUtil.matrixToTransformPosition(_globalTransformMatrix, _global);
+
+					_global.scaleX = _localTransform.scaleX;
+					_global.scaleY = _localTransform.scaleY;
+					_global.rotation = _localTransform.rotation + (inheritRotation ? parentRotation : 0);
+					
+					TransformUtil.transformToMatrix(_global, _globalTransformMatrix);
+				}
+			}
+			return output;
 		}
 		
 		/** @private */
@@ -553,6 +622,12 @@
 			}
 		}
 		
+		/** @private */
+		dragonBones_internal function removeAllStates():void
+		{
+			_timelineStateList.length = 0;
+		}
+		
 		private function blendingTimeline():void
 		{
 			var timelineState:TimelineState;
@@ -573,8 +648,8 @@
 				_tween.y = transform.y * weight;
 				_tween.skewX = transform.skewX * weight;
 				_tween.skewY = transform.skewY * weight;
-				_tween.scaleX = transform.scaleX * weight;
-				_tween.scaleY = transform.scaleY * weight;
+				_tween.scaleX = 1 + (transform.scaleX - 1) * weight;
+				_tween.scaleY = 1 + (transform.scaleY - 1) * weight;
 				
 				_tweenPivot.x = pivot.x * weight;
 				_tweenPivot.y = pivot.y * weight;
@@ -585,8 +660,8 @@
 				var y:Number = 0;
 				var skewX:Number = 0;
 				var skewY:Number = 0;
-				var scaleX:Number = 0;
-				var scaleY:Number = 0;
+				var scaleX:Number = 1;
+				var scaleY:Number = 1;
 				var pivotX:Number = 0;
 				var pivotY:Number = 0;
 				
@@ -597,7 +672,7 @@
 				
 				//Traversal the layer from up to down
 				//layer由高到低依次遍历
-
+				
 				while(i --)
 				{
 					timelineState = _timelineStateList[i];
@@ -619,7 +694,7 @@
 					
 					weight = timelineState._animationState.weight * timelineState._animationState.fadeWeight * weigthLeft;
 					timelineState._weight = weight;
-					if(weight && timelineState._blendEnabled)
+					if(weight)
 					{
 						transform = timelineState._transform;
 						pivot = timelineState._pivot;
@@ -628,8 +703,8 @@
 						y += transform.y * weight;
 						skewX += transform.skewX * weight;
 						skewY += transform.skewY * weight;
-						scaleX += transform.scaleX * weight;
-						scaleY += transform.scaleY * weight;
+						scaleX += (transform.scaleX - 1) * weight;
+						scaleY += (transform.scaleY - 1) * weight;
 						pivotX += pivot.x * weight;
 						pivotY += pivot.y * weight;
 						
@@ -651,6 +726,70 @@
 		private function sortState(state1:TimelineState, state2:TimelineState):int
 		{
 			return state1._animationState.layer < state2._animationState.layer?-1:1;
+		}
+		
+		/**
+		 * Unrecommended API. Recommend use slot.childArmature.
+		 */
+		public function get childArmature():Armature
+		{
+			if(slot)
+			{
+				return slot.childArmature;
+			}
+			return null;
+		}
+		
+		/**
+		 * Unrecommended API. Recommend use slot.display.
+		 */
+		public function get display():Object
+		{
+			if(slot)
+			{
+				return slot.display;
+			}
+			return null;
+		}
+		public function set display(value:Object):void
+		{
+			if(slot)
+			{
+				slot.display = value;
+			}
+		}
+		
+		/**
+		 * Unrecommended API. Recommend use offset.
+		 */
+		public function get node():DBTransform
+		{
+			return _offset;
+		}
+		
+		
+		
+		
+		/** @private */
+		override public function set visible(value:Boolean):void
+		{
+			if(this._visible != value)
+			{
+				this._visible = value;
+				for each(var childSlot:Slot in _slotList)
+				{
+					childSlot.updateDisplayVisible(this._visible);
+				}
+			}
+		}
+		
+		public function get slot():Slot
+		{
+			return _slotList.length > 0?_slotList[0]:null;
+		}
+		public function get parentBoneRotation():Number
+		{
+			return this.parent ? this.parent.rotationIK : 0;
 		}
 	}
 }

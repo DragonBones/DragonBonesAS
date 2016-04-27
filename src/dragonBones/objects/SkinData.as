@@ -4,12 +4,9 @@ package dragonBones.objects
 	final public class SkinData
 	{
 		public var name:String;
+		public var hasMesh:Boolean = false;
 		
 		private var _slotDataList:Vector.<SlotData>;
-		public function get slotDataList():Vector.<SlotData>
-		{
-			return _slotDataList;
-		}
 		
 		public function SkinData()
 		{
@@ -58,6 +55,11 @@ package dragonBones.objects
 			{
 				throw new ArgumentError();
 			}
+		}
+		
+		public function get slotDataList():Vector.<SlotData>
+		{
+			return _slotDataList;
 		}
 	}
 }

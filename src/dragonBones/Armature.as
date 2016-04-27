@@ -2,19 +2,23 @@
 {
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.utils.Dictionary;
 	
 	import dragonBones.animation.Animation;
 	import dragonBones.animation.AnimationState;
-	import dragonBones.animation.IAnimatable;
 	import dragonBones.animation.TimelineState;
-	import dragonBones.core.DBObject;
+	import dragonBones.core.IArmature;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.ArmatureEvent;
 	import dragonBones.events.FrameEvent;
 	import dragonBones.events.SoundEvent;
 	import dragonBones.events.SoundEventManager;
 	import dragonBones.objects.ArmatureData;
+	import dragonBones.objects.DragonBonesData;
 	import dragonBones.objects.Frame;
+	import dragonBones.objects.IKData;
+	import dragonBones.objects.SkinData;
+	import dragonBones.objects.SlotData;
 
 	use namespace dragonBones_internal;
 
@@ -68,8 +72,11 @@
 	 */
 	[Event(name="boneFrameEvent", type="dragonBones.events.FrameEvent")]
 
-	public class Armature extends EventDispatcher implements IAnimatable
+	public class Armature extends EventDispatcher implements IArmature
 	{
+		dragonBones_internal var __dragonBonesData:DragonBonesData;
+		
+		
 		/**
 		 * The instance dispatch sound event.
 		 */
@@ -90,6 +97,7 @@
 		
 		/** @private Store event needed to dispatch in current frame. When advanceTime execute complete, dispath them.*/
 		dragonBones_internal var _eventList:Vector.<Event>;
+		dragonBones_internal var _skewEnable:Boolean;
 		
 		
 		/** @private Store slots based on slots' zOrder*/
@@ -97,10 +105,20 @@
 		
 		/** @private Store bones based on bones' hierarchy (From root to leaf)*/
 		protected var _boneList:Vector.<Bone>;
+		/**计算IK约束**/
+		private var _boneIKList:Vector.<Vector.<Bone>> = new Vector.<Vector.<Bone>>();
+		protected var _ikList:Vector.<IKConstraint>;
 		
 		private var _delayDispose:Boolean;
 		private var _lockDispose:Boolean;
 		
+		// optimized by arhcy
+		private var _isFading:Boolean;
+ 		private var _i:int;
+ 		private var _tmpBone:Bone;
+ 		private var _childArmature:Armature;
+ 		private var _tmpSlot:Slot;
+ 
 		/** @private */
 		dragonBones_internal var _armatureData:ArmatureData;
 		/**
@@ -132,23 +150,11 @@
 		{
 			return _animation;
 		}
-		
-		/** @private */
-		protected var _cacheFrameRate:int;
-		public function get cacheFrameRate():int
-		{
-			return _cacheFrameRate;
-		}
-		public function set cacheFrameRate(value:int):void
-		{
-			if(_cacheFrameRate == value)
-			{
-				return;
-			}
-			_cacheFrameRate = value;
-			
-		}
 
+		/**
+		 * save more skinLists
+		 */
+		dragonBones_internal var _skinLists:Object;
 		/**
 		 * Creates a Armature blank instance.
 		 * @param Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
@@ -167,14 +173,14 @@
 			_slotList.fixed = true;
 			_boneList = new Vector.<Bone>;
 			_boneList.fixed = true;
+			_ikList = new Vector.<IKConstraint>();
+			_ikList.fixed = true;
 			_eventList = new Vector.<Event>;
-			
+			_skinLists = { };
 			_delayDispose = false;
 			_lockDispose = false;
 			
 			_armatureData = null;
-			
-			_cacheFrameRate = 0;
 		}
 		
 		/**
@@ -201,17 +207,25 @@
 			{
 				_boneList[i].dispose();
 			}
+			i = _ikList.length;
+			while(i --)
+			{
+				_ikList[i].dispose();
+			}
 			
 			_slotList.fixed = false;
 			_slotList.length = 0;
 			_boneList.fixed = false;
 			_boneList.length = 0;
+			_ikList.fixed = false;
+			_ikList.length = 0;
 			_eventList.length = 0;
 			
 			_armatureData = null;
 			_animation = null;
 			_slotList = null;
 			_boneList = null;
+			_ikList = null;
 			_eventList = null;
 			
 			//_display = null;
@@ -253,13 +267,31 @@
 			passedTime *= _animation.timeScale;    //_animation's time scale will impact childArmature
 			
 			var isFading:Boolean = _animation._isFading;
-			var i:int = _boneList.length;
-			while(i --)
-			{
-				var bone:Bone = _boneList[i];
-				bone.update(isFading);
-			}
+			var i:int = 0;
+			var len:int = _boneIKList.length;
+			var bone:Bone;
+			var j:int;
+			var jLen:int;
 			
+			for (i = 0; i < len; i++) 
+			{
+				if(i != 0)
+				{
+					_ikList[i-1].compute();
+					for (j = 0, jLen = _boneIKList[i].length; j < jLen; j++)
+					{
+						bone = _boneIKList[i][j];
+						bone.adjustGlobalTransformMatrixByIK();
+					}
+				}else{
+					for (j = 0, jLen = _boneIKList[i].length; j < jLen; j++)
+					{
+						bone = _boneIKList[i][j];
+						bone.update(isFading);
+						bone.rotationIK = bone.global.rotation;
+					}
+				}
+			}
 			i = _slotList.length;
 			while(i --)
 			{
@@ -301,6 +333,17 @@
 			}
 		}
 
+		public function resetAnimation():void
+		{
+			animation.stop();
+			animation.resetAnimationStateList();
+			
+			for each(var boneItem:Bone in _boneList)
+			{
+				boneItem.removeAllStates();
+			}
+		}
+		
 		/**
 		 * Get all Slot instance associated with this armature.
 		 * @param if return Vector copy
@@ -336,13 +379,13 @@
 		 * @return A Slot instance or null if no Slot with that DisplayObject exist.
 		 * @see dragonBones.Slot
 		 */
-		public function getSlotByDisplay(display:Object):Slot
+		public function getSlotByDisplay(displayObj:Object):Slot
 		{
-			if(display)
+			if(displayObj)
 			{
 				for each(var slot:Slot in _slotList)
 				{
-					if(slot.display == display)
+					if(slot.display == displayObj)
 					{
 						return slot;
 					}
@@ -362,7 +405,7 @@
 			var bone:Bone = getBone(boneName);
 			if (bone)
 			{
-				bone.addChild(slot);
+				bone.addSlot(slot);
 			}
 			else
 			{
@@ -382,7 +425,7 @@
 				throw new ArgumentError();
 			}
 			
-			slot.parent.removeChild(slot);
+			slot.parent.removeSlot(slot);
 		}
 
 		/**
@@ -399,7 +442,7 @@
 			}
 			return slot;
 		}
-		
+
 		/**
 		 * Get all Bone instance associated with this armature.
 		 * @param if return Vector copy
@@ -447,36 +490,42 @@
 		 * @param (optional) The parent's name of this Bone instance.
 		 * @see dragonBones.Bone
 		 */
-		public function addBone(bone:Bone, parentName:String = null):void
+		public function addBone(bone:Bone, parentName:String = null, updateLater:Boolean = false):void
 		{
+			var parentBone:Bone;
 			if(parentName)
 			{
-				var boneParent:Bone = getBone(parentName);
-				if (boneParent)
-				{
-					boneParent.addChild(bone);
-				}
-				else
+				parentBone = getBone(parentName);
+				if (!parentBone)
 				{
 					throw new ArgumentError();
 				}
+			}
+			
+			if(parentBone)
+			{
+				parentBone.addChildBone(bone, updateLater);
 			}
 			else
 			{
 				if(bone.parent)
 				{
-					bone.parent.removeChild(bone);
+					bone.parent.removeChildBone(bone, updateLater);
 				}
 				bone.setArmature(this);
+				if(!updateLater)
+				{
+					updateAnimationAfterBoneListChanged();
+				}
 			}
 		}
-
+		
 		/**
 		 * Remove a Bone instance from this Armature instance.
 		 * @param The Bone instance to remove.
 		 * @see	dragonBones.Bone
 		 */
-		public function removeBone(bone:Bone):void
+		public function removeBone(bone:Bone, updateLater:Boolean = false):void
 		{
 			if(!bone || bone.armature != this)
 			{
@@ -485,13 +534,16 @@
 			
 			if(bone.parent)
 			{
-				bone.parent.removeChild(bone);
+				bone.parent.removeChildBone(bone, updateLater);
 			}
 			else
 			{
 				bone.setArmature(null);
+				if(!updateLater)
+				{
+					updateAnimationAfterBoneListChanged(false);
+				}
 			}
-			
 		}
 
 		/**
@@ -510,60 +562,51 @@
 		}
 		
 		/** @private */
-		dragonBones_internal function addDBObject(object:DBObject):void
+		dragonBones_internal function addBoneToBoneList(bone:Bone):void
 		{
-			if(object is Slot)
+			if(_boneList.indexOf(bone) < 0)
 			{
-				var slot:Slot = object as Slot;
-				if(_slotList.indexOf(slot) < 0)
-				{
-					_slotList.fixed = false;
-					_slotList[_slotList.length] = slot;
-					_slotList.fixed = true;
-				}
-			}
-			else if(object is Bone)
-			{
-				var bone:Bone = object as Bone;
-				if(_boneList.indexOf(bone) < 0)
-				{
-					_boneList.fixed = false;
-					_boneList[_boneList.length] = bone;
-					sortBoneList();
-					_boneList.fixed = true;
-					_animation.updateAnimationStates();
-				}
+				_boneList.fixed = false;
+				_boneList[_boneList.length] = bone;
+				_boneList.fixed = true;
 			}
 		}
 		
 		/** @private */
-		dragonBones_internal function removeDBObject(object:DBObject):void
+		dragonBones_internal function removeBoneFromBoneList(bone:Bone):void
 		{
-			if(object is Slot)
+			var index:int = _boneList.indexOf(bone);
+			if(index >= 0)
 			{
-				var slot:Slot = object as Slot;
-				var index:int = _slotList.indexOf(slot);
-				if(index >= 0)
-				{
-					_slotList.fixed = false;
-					_slotList.splice(index, 1);
-					_slotList.fixed = true;
-				}
-			}
-			else if(object is Bone)
-			{
-				var bone:Bone = object as Bone;
-				index = _boneList.indexOf(bone);
-				if(index >= 0)
-				{
-					_boneList.fixed = false;
-					_boneList.splice(index, 1);
-					_boneList.fixed = true;
-					_animation.updateAnimationStates();
-				}
+				_boneList.fixed = false;
+				_boneList.splice(index, 1);
+				_boneList.fixed = true;
 			}
 		}
-
+		
+		/** @private */
+		dragonBones_internal function addSlotToSlotList(slot:Slot):void
+		{
+			if(_slotList.indexOf(slot) < 0)
+			{
+				_slotList.fixed = false;
+				_slotList[_slotList.length] = slot;
+				_slotList.fixed = true;
+			}
+		}
+		
+		/** @private */
+		dragonBones_internal function removeSlotFromSlotList(slot:Slot):void
+		{
+			var index:int = _slotList.indexOf(slot);
+			if(index >= 0)
+			{
+				_slotList.fixed = false;
+				_slotList.splice(index, 1);
+				_slotList.fixed = true;
+			}
+		}
+		
 		/**
 		 * Sort all slots based on zOrder
 		 */
@@ -578,6 +621,7 @@
 				var slot:Slot = _slotList[i];
 				if(slot._isShowDisplay)
 				{
+					//_display 实际上是container, 这个方法就是把原来的显示对象放到container中的第一个
 					slot.addDisplayToContainer(_display);
 				}
 			}
@@ -585,6 +629,15 @@
 			_slotsZOrderChanged = false;
 		}
 
+		dragonBones_internal function updateAnimationAfterBoneListChanged(ifNeedSortBoneList:Boolean = true):void
+		{
+			if(ifNeedSortBoneList)
+			{
+				sortBoneList();
+			}
+			_animation._updateTimelineStates = true;
+		}
+		
 		private function sortBoneList():void
 		{
 			var i:int = _boneList.length;
@@ -609,10 +662,14 @@
 			helpArray.sortOn("0", Array.NUMERIC|Array.DESCENDING);
 			
 			i = helpArray.length;
+			
+			_boneList.fixed = false;
 			while(i --)
 			{
 				_boneList[i] = helpArray[i][1];
 			}
+			_boneList.fixed = true;
+			
 			helpArray.length = 0;
 		}
 
@@ -651,6 +708,132 @@
 		{
 			return slot1.zOrder < slot2.zOrder?1: -1;
 		}
+		
+		public function addSkinList(skinName:String, list:Object):void
+		{
+			if (!skinName)
+			{
+				skinName = "default";
+			}
+			if (!_skinLists[skinName])
+			{
+				_skinLists[skinName] = list;
+			}
+		}
 
+		public function changeSkin(skinName:String):void
+		{
+			var skinData:SkinData = armatureData.getSkinData(skinName);
+			if(!skinData || !_skinLists[skinName])
+			{
+				return;
+			}
+			armatureData.setSkinData(skinName);
+			var displayList:Array = [];
+			var slotDataList:Vector.<SlotData> = armatureData.slotDataList;
+			var slotData:SlotData;
+			var slot:Slot;
+			var bone:Bone;
+			for(var i:int = 0; i < slotDataList.length; i++)
+			{
+				
+				slotData = slotDataList[i];
+				displayList = _skinLists[skinName][slotData.name];
+				bone = getBone(slotData.parent);
+				if(!bone || !displayList)
+				{
+					continue;
+				}
+				
+				slot = getSlot(slotData.name);
+				slot.initWithSlotData(slotData);
+				
+				slot.displayList = displayList;
+				slot.changeDisplay(0);
+			}
+		}
+		
+		public function getIKs(returnCopy:Boolean = true):Vector.<IKConstraint>
+		{
+			return returnCopy?_ikList.concat():_ikList;
+		}
+		
+		public function buildIK():void
+		{
+			var ikConstraintData:IKData;
+			_ikList.fixed = false;
+			_ikList.length = 0;
+			for (var i:int = 0, len:int = _armatureData.ikDataList.length; i < len; i++)
+			{
+				ikConstraintData = _armatureData.ikDataList[i];
+				_ikList.push(new IKConstraint(ikConstraintData, this));
+			}
+			_ikList.fixed = true;
+		}
+		
+		public function updateBoneCache():void
+		{
+			_boneList.reverse();
+			var temp:Object = { };
+			var ikConstraintsCount:int = _ikList.length;
+			var arrayCount:int = ikConstraintsCount + 1;
+			var i:int;
+			var len:int;
+			var j:int;
+			var jLen:int;
+			var bone:Bone;
+			var currentBone:Bone;
+			
+			_boneIKList = new Vector.<Vector.<Bone>>();
+			while (_boneIKList.length < arrayCount)
+			{
+				_boneIKList[_boneIKList.length] = new Vector.<Bone>();
+			}
+			
+			temp[_boneList[0].name] = 0;
+			for (i = 0, len = _ikList.length; i < len; i++) 
+			{
+				temp[_ikList[i].bones[0].name] = i+1;
+			}
+			next:
+			for (i = 0, len = _boneList.length; i < len; i++)
+			{
+				
+				bone = _boneList[i];
+				currentBone = bone;
+				while (currentBone)
+				{
+					if (currentBone.parent == null)
+					{
+						temp[currentBone.name] = 0;
+					}
+					if (temp.hasOwnProperty(currentBone.name))
+					{
+						_boneIKList[temp[currentBone.name]].push(bone);
+						continue next;
+					}
+					currentBone = currentBone.parent;
+				}
+			}
+		}
+		
+		public function getIKTargetData(bone:Bone):Array
+		{
+			var target:Array = [];
+			var ik:IKConstraint; 
+			for (var i:int = 0, len:int = _ikList.length; i < len; i++)
+			{
+				ik = _ikList[i];
+				if(bone.name == ik.target.name){
+					target.push(ik);
+				}
+			}
+			return target;
+		}
+		
+		public function getAnimation():Object
+		{
+			return _animation;
+		}
 	}
 }

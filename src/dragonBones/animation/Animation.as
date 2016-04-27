@@ -3,6 +3,8 @@
 	import dragonBones.Armature;
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.fast.animation.FastBoneTimelineState;
+	import dragonBones.fast.animation.FastSlotTimelineState;
 	import dragonBones.objects.AnimationData;
 	
 	use namespace dragonBones_internal;
@@ -22,30 +24,15 @@
 		public static const ALL:String = "all";
 		
 		/**
-		* Unrecommended API. Recommend use animationList.
-		*/
-		public function get movementList():Vector.<String>
-		{
-			return _animationList;
-		}
-		
-		/**
-		* Unrecommended API. Recommend use lastAnimationName.
-		*/
-		public function get movementID():String
-		{
-			return lastAnimationName;
-		}
-		
-		
-		/**
 		 * Whether animation tweening is enabled or not.
 		 */
 		public var tweenEnabled:Boolean;
-		
 		private var _armature:Armature;
-		
 		private var _animationStateList:Vector.<AnimationState>;
+		private var _animationDataList:Vector.<AnimationData>;
+		private var _animationList:Vector.<String>;
+		private var _isPlaying:Boolean;
+		private var _timeScale:Number;
 		
 		/** @private */
 		dragonBones_internal var _lastAnimationState:AnimationState;
@@ -56,107 +43,16 @@
 		/** @private */
 		dragonBones_internal var _animationStateCount:int;
 		
-		/**
-		 * The last AnimationState this Animation played.
-		 * @see dragonBones.objects.AnimationData.
-		 */
-		public function get lastAnimationState():AnimationState
-		{
-			return _lastAnimationState;
-		}
-		/**
-		 * The name of the last AnimationData played.
-		 * @see dragonBones.objects.AnimationData.
-		 */
-		public function get lastAnimationName():String
-		{
-			return _lastAnimationState?_lastAnimationState.name:null;
-		}
+		/** @private */
+		dragonBones_internal var _updateTimelineStates:Boolean = false;
 		
-		private var _animationList:Vector.<String>;
-		/**
-		 * An vector containing all AnimationData names the Animation can play.
-		 * @see dragonBones.objects.AnimationData.
-		 */
-		public function get animationList():Vector.<String>
-		{
-			return _animationList;
-		}
+		/** @private */
+		dragonBones_internal var _updateFFDTimelineStates:Boolean = false;
 		
-		private var _isPlaying:Boolean;
-		/**
-		 * Is the animation playing.
-		 * @see dragonBones.animation.AnimationState.
-		 */
-		public function get isPlaying():Boolean
-		{
-			return _isPlaying && !isComplete;
-		}
-		
-		/**
-		 * Is animation complete.
-		 * @see dragonBones.animation.AnimationState.
-		 */
-		public function get isComplete():Boolean
-		{
-			if(_lastAnimationState)
-			{
-				if(!_lastAnimationState.isComplete)
-				{
-					return false;
-				}
-				var i:int = _animationStateList.length;
-				while(i --)
-				{
-					if(!_animationStateList[i].isComplete)
-					{
-						return false;
-					}
-				}
-				return true;
-			}
-			return true;
-		}
-		
-		private var _timeScale:Number;
-		/**
-		 * The amount by which passed time should be scaled. Used to slow down or speed up animations. Defaults to 1.
-		 */
-		public function get timeScale():Number
-		{
-			return _timeScale;
-		}
-		public function set timeScale(value:Number):void
-		{
-			if(isNaN(value) || value < 0)
-			{
-				value = 1;
-			}
-			_timeScale = value;
-		}
-		
-		private var _animationDataList:Vector.<AnimationData>;
-		/**
-		 * The AnimationData list associated with this Animation instance.
-		 * @see dragonBones.objects.AnimationData.
-		 */
-		public function get animationDataList():Vector.<AnimationData>
-		{
-			return _animationDataList;
-		}
-		public function set animationDataList(value:Vector.<AnimationData>):void
-		{
-			_animationDataList = value;
-			_animationList.length = 0;
-			for each(var animationData:AnimationData in _animationDataList)
-			{
-				_animationList[_animationList.length] = animationData.name;
-			}
-		}
 		
 		/**
 		 * Creates a new Animation instance and attaches it to the passed Armature.
-		 * @param An Armature to attach this Animation instance to.
+		 * @param armature An Armature to attach this Animation instance to.
 		 */
 		public function Animation(armature:Armature)
 		{
@@ -179,18 +75,28 @@
 			{
 				return;
 			}
-			var i:int = _animationStateList.length;
-			while(i --)
-			{
-				AnimationState.returnObject(_animationStateList[i]);
-			}
+			
+			resetAnimationStateList();
+			
 			_animationList.length = 0;
-			_animationStateList.length = 0;
 			
 			_armature = null;
 			_animationDataList = null;
 			_animationList = null;
 			_animationStateList = null;
+		}
+		
+		dragonBones_internal function resetAnimationStateList():void
+		{
+			var i:int = _animationStateList.length;
+			var animationState:AnimationState;
+			while(i --)
+			{
+				animationState = _animationStateList[i];
+				animationState.resetTimelineStateList();
+				AnimationState.returnObject(animationState);
+			}
+			_animationStateList.length = 0;
 		}
 		
 		/**
@@ -238,6 +144,7 @@
 			{
 				return null;
 			}
+			var needUpdata:Boolean = !_isPlaying;
 			_isPlaying = true;
 			_isFading = true;
 			
@@ -255,6 +162,7 @@
 			
 			playTimes = isNaN(playTimes)?animationData.playTimes:playTimes;
 			
+	//根据fadeOutMode,选择正确的animationState执行fadeOut
 			var animationState:AnimationState;
 			switch(fadeOutMode)
 			{
@@ -316,6 +224,7 @@
 			
 			addState(_lastAnimationState);
 			
+		//控制子骨架播放同名动画
 			var slotList:Vector.<Slot> = _armature.getSlots(false);
 			i = slotList.length;
 			while(i --)
@@ -326,7 +235,10 @@
 					slot.childArmature.animation.gotoAndPlay(animationName, fadeInTime);
 				}
 			}
-			
+			if(needUpdata)
+			{
+				_armature.advanceTime(0);
+			}
 			return _lastAnimationState;
 		}
 		
@@ -355,12 +267,7 @@
 			fadeOutMode:String = ALL
 		):AnimationState
 		{
-			var animationState:AnimationState = getState(animationName, layer);
-			if(!animationState)
-			{
-				animationState = gotoAndPlay(animationName, fadeInTime, duration, NaN, layer, group, fadeOutMode);
-			}
-			
+			var animationState:AnimationState = gotoAndPlay(animationName, fadeInTime, duration, NaN, layer, group, fadeOutMode);
 			if(normalizedTime >= 0)
 			{
 				animationState.setCurrentTime(animationState.totalTime * normalizedTime);
@@ -370,6 +277,7 @@
 				animationState.setCurrentTime(time);
 			}
 			
+			animationState.lastFrameAutoTween = false;
 			animationState.stop();
 			
 			return animationState;
@@ -449,6 +357,17 @@
 				return;
 			}
 			
+			if (_updateTimelineStates)
+			{
+				_updateTimelineStates = false;
+				updateTimelineStates();
+			}
+			else if (_updateFFDTimelineStates)
+			{
+				_updateFFDTimelineStates = false;
+				updateFFDTimelineStates();
+			}
+			
 			var isFading:Boolean = false;
 			
 			passedTime *= _timeScale;
@@ -469,13 +388,23 @@
 			_isFading = isFading;
 		}
 		
-		/** @private */
-		dragonBones_internal function updateAnimationStates():void
+		//当动画播放过程中Bonelist改变时触发
+		private function updateTimelineStates():void
 		{
 			var i:int = _animationStateList.length;
 			while(i --)
 			{
 				_animationStateList[i].updateTimelineStates();
+			}
+		}
+		
+		//当动画播放过程中slotIndex改变时触发
+		private function updateFFDTimelineStates():void
+		{
+			var i:int = _animationStateList.length;
+			while(i --)
+			{
+				_animationStateList[i].updateFFDTimeline();
 			}
 		}
 		
@@ -512,5 +441,123 @@
 				_animationStateCount = _animationStateList.length;
 			}
 		}
+		
+		
+		
+		/**
+		* Unrecommended API. Recommend use animationList.
+		*/
+		public function get movementList():Vector.<String>
+		{
+			return _animationList;
+		}
+		
+		/**
+		* Unrecommended API. Recommend use lastAnimationName.
+		*/
+		public function get movementID():String
+		{
+			return lastAnimationName;
+		}
+		
+		
+		
+		/**
+		 * The last AnimationState this Animation played.
+		 * @see dragonBones.objects.AnimationData.
+		 */
+		public function get lastAnimationState():AnimationState
+		{
+			return _lastAnimationState;
+		}
+		/**
+		 * The name of the last AnimationData played.
+		 * @see dragonBones.objects.AnimationData.
+		 */
+		public function get lastAnimationName():String
+		{
+			return _lastAnimationState?_lastAnimationState.name:null;
+		}
+		
+		
+		/**
+		 * An vector containing all AnimationData names the Animation can play.
+		 * @see dragonBones.objects.AnimationData.
+		 */
+		public function get animationList():Vector.<String>
+		{
+			return _animationList;
+		}
+		
+		
+		/**
+		 * Is the animation playing.
+		 * @see dragonBones.animation.AnimationState.
+		 */
+		public function get isPlaying():Boolean
+		{
+			return _isPlaying && !isComplete;
+		}
+		
+		/**
+		 * Is animation complete.
+		 * @see dragonBones.animation.AnimationState.
+		 */
+		public function get isComplete():Boolean
+		{
+			if(_lastAnimationState)
+			{
+				if(!_lastAnimationState.isComplete)
+				{
+					return false;
+				}
+				var i:int = _animationStateList.length;
+				while(i --)
+				{
+					if(!_animationStateList[i].isComplete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			return true;
+		}
+		
+		
+		/**
+		 * The amount by which passed time should be scaled. Used to slow down or speed up animations. Defaults to 1.
+		 */
+		public function get timeScale():Number
+		{
+			return _timeScale;
+		}
+		public function set timeScale(value:Number):void
+		{
+			if(isNaN(value) || value < 0)
+			{
+				value = 1;
+			}
+			_timeScale = value;
+		}
+		
+		/**
+		 * The AnimationData list associated with this Animation instance.
+		 * @see dragonBones.objects.AnimationData.
+		 */
+		public function get animationDataList():Vector.<AnimationData>
+		{
+			return _animationDataList;
+		}
+		public function set animationDataList(value:Vector.<AnimationData>):void
+		{
+			_animationDataList = value;
+			_animationList.length = 0;
+			for each(var animationData:AnimationData in _animationDataList)
+			{
+				_animationList[_animationList.length] = animationData.name;
+			}
+		}
+		
 	}
 }

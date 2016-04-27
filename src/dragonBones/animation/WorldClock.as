@@ -23,6 +23,9 @@
 		}
 		
 		private var _timeScale:Number;
+		private var _animatable:IAnimatable;
+		private var _length:int;
+		private var _currentIndex:int;
 		/**
 		 * The time scale to apply to the number of second passed to the advanceTime() method.
 		 * @param A Number to use as a time scale.
@@ -103,40 +106,40 @@
 			{
 				passedTime = getTimer() * 0.001 - _time;
 			}
-			passedTime *= _timeScale;
-			
 			_time += passedTime;
 			
-			var length:int = _animatableList.length;
-			if(length == 0)
+			passedTime *= _timeScale;
+			
+			_length = _animatableList.length;
+			if(_length == 0)
 			{
 				return;
 			}
-			var currentIndex:int = 0;
+			_currentIndex = 0;
 			
-			for(var i:int = 0;i < length;i ++)
+			for(var i:int = 0;i < _length; i++)
 			{
-				var animatable:IAnimatable = _animatableList[i];
-				if(animatable)
+				_animatable = _animatableList[i];
+				if(_animatable)
 				{
-					if(currentIndex != i)
+					if(_currentIndex != i)
 					{
-						_animatableList[currentIndex] = animatable;
+						_animatableList[_currentIndex] = _animatable;
 						_animatableList[i] = null;
 					}
-					animatable.advanceTime(passedTime);
-					currentIndex ++;
+					_animatable.advanceTime(passedTime);
+					_currentIndex ++;
 				}
 			}
 			
-			if (currentIndex != i)
+			if (_currentIndex != i)
 			{
-				length = _animatableList.length;
-				while(i < length)
+				_length = _animatableList.length;
+				while(i < _length)
 				{
-					_animatableList[currentIndex ++] = _animatableList[i ++];
+					_animatableList[_currentIndex ++] = _animatableList[i ++];
 				}
-				_animatableList.length = currentIndex;
+				_animatableList.length = _currentIndex;
 			}
 		}
 	}

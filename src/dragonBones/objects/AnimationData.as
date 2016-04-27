@@ -13,11 +13,24 @@ package dragonBones.objects
 		public var lastFrameDuration:int;
 		
 		public var hideTimelineNameMap:Vector.<String>;
+		public var hideSlotTimelineNameMap:Vector.<String>;
 		
 		private var _timelineList:Vector.<TransformTimeline>;
 		public function get timelineList():Vector.<TransformTimeline>
 		{
 			return _timelineList;
+		}
+		
+		private var _slotTimelineList:Vector.<SlotTimeline>;
+		public function get slotTimelineList():Vector.<SlotTimeline>
+		{
+			return _slotTimelineList;
+		}
+		
+		private var _ffdTimelineList:Vector.<FFDTimeline>;
+		public function get ffdTimelineList():Vector.<FFDTimeline>
+		{
+			return _ffdTimelineList;
 		}
 		
 		public function AnimationData()
@@ -29,9 +42,15 @@ package dragonBones.objects
 			tweenEasing = NaN;
 			hideTimelineNameMap = new Vector.<String>;
 			hideTimelineNameMap.fixed = true;
+			hideSlotTimelineNameMap = new Vector.<String>;
+			hideSlotTimelineNameMap.fixed = true;
 			
 			_timelineList = new Vector.<TransformTimeline>;
 			_timelineList.fixed = true;
+			_slotTimelineList = new Vector.<SlotTimeline>;
+			_slotTimelineList.fixed = true;
+			_ffdTimelineList = new Vector.<FFDTimeline>();
+			_ffdTimelineList.fixed = true;
 		}
 		
 		override public function dispose():void
@@ -50,6 +69,15 @@ package dragonBones.objects
 			_timelineList.fixed = false;
 			_timelineList.length = 0;
 			_timelineList = null;
+			
+			_slotTimelineList.fixed = false;
+			for each(var slotTimeline:SlotTimeline in _slotTimelineList)
+			{
+				slotTimeline.dispose();
+			}
+			_slotTimelineList.fixed = false;
+			_slotTimelineList.length = 0;
+			_slotTimelineList = null;
 		}
 		
 		public function getTimeline(timelineName:String):TransformTimeline
@@ -77,6 +105,49 @@ package dragonBones.objects
 				_timelineList.fixed = false;
 				_timelineList[_timelineList.length] = timeline;
 				_timelineList.fixed = true;
+			}
+		}
+		
+		public function getSlotTimeline(timelineName:String):SlotTimeline
+		{
+			var i:int = _slotTimelineList.length;
+			while(i --)
+			{
+				if(_slotTimelineList[i].name == timelineName)
+				{
+					return _slotTimelineList[i];
+				}
+			}
+			return null;
+		}
+		
+		public function addSlotTimeline(timeline:SlotTimeline):void
+		{
+			if(!timeline)
+			{
+				throw new ArgumentError();
+			}
+			
+			if(_slotTimelineList.indexOf(timeline) < 0)
+			{
+				_slotTimelineList.fixed = false;
+				_slotTimelineList[_slotTimelineList.length] = timeline;
+				_slotTimelineList.fixed = true;
+			}
+		}
+		
+		public function addFFDTimeline(timeline:FFDTimeline):void
+		{
+			if(!timeline)
+			{
+				throw new ArgumentError();
+			}
+			
+			if(_ffdTimelineList.indexOf(timeline) < 0)
+			{
+				_ffdTimelineList.fixed = false;
+				_ffdTimelineList[_ffdTimelineList.length] = timeline;
+				_ffdTimelineList.fixed = true;
 			}
 		}
 	}
