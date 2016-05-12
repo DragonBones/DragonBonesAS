@@ -2,6 +2,7 @@
 {
 	import dragonBones.Armature;
 	import dragonBones.Bone;
+	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.AnimationEvent;
 	import dragonBones.objects.AnimationData;
@@ -10,7 +11,6 @@
 	import dragonBones.objects.MeshData;
 	import dragonBones.objects.SlotTimeline;
 	import dragonBones.objects.TransformTimeline;
-	import dragonBones.Slot;
 	
 	use namespace dragonBones_internal;
 	/**
@@ -329,6 +329,7 @@
 		
 		dragonBones_internal function updateFFDTimeline():void
 		{
+			var timelines:Object = {};
 			var ffdTimelineState:FFDTimelineState;
 			var i:int = _ffdTimelineStateList.length;
 			var slot:Slot;
@@ -341,13 +342,17 @@
 					_ffdTimelineStateList.splice(i, 1);
 					FFDTimelineState.returnObject(timelineState);
 				}
+				else
+				{
+					timelines[ffdTimelineState.name] = ffdTimelineState;
+				}
 			}
 			
 			for each(var ffdTimeline:FFDTimeline in _clip.ffdTimelineList)
 			{
 				//TODO:换肤 原始 display 匹配
 				slot = _armature.getSlot(ffdTimeline.name);
-				if(slot && slot.displayList.length > 0 && slot.displayIndex >= 0 && slot.displayIndex == ffdTimeline.displayIndex)
+				if(!timelines[ffdTimeline.name] && slot && slot.displayList.length > 0 && slot.displayIndex >= 0 && slot.displayIndex == ffdTimeline.displayIndex)
 				{
 					/*for each(var eachState:FFDTimelineState in _ffdTimelineStateList)
 					{
@@ -356,10 +361,18 @@
 					return;
 					}
 					}*/
-					
 					var timelineState:FFDTimelineState = FFDTimelineState.borrowObject();
 					timelineState.fadeIn(slot, this, ffdTimeline);
 					_ffdTimelineStateList.push(timelineState);
+					timelines[ffdTimeline.name] = timelineState;
+				}
+			}
+			
+			for each (slot in _armature.getSlots(false))
+			{
+				if (slot._meshData && !timelines[slot.name])
+				{
+					slot.updateFFD(null, 0);
 				}
 			}
 		}

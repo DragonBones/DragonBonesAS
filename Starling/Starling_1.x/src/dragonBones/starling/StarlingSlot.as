@@ -297,21 +297,20 @@
 			else if (_ffdChanged)
 			{
 				_ffdChanged = false;
-				for (i = _ffdOffset, l = _ffdOffset + this._ffdVertices.length; i < l; i += 2)
+				/*for (i = _ffdOffset, l = _ffdOffset + this._ffdVertices.length; i < l; i += 2)
 				{
 					iD = i / 2;
 					const vertexData:VertexData = meshData.vertices[iD];
 					xG = vertexData.x + this._ffdVertices[i - _ffdOffset];
 					yG = vertexData.y + this._ffdVertices[i - _ffdOffset + 1];
 					meshImage.mVertexData.setPosition(iD, xG, yG);
-				}
+				}*/
 				
-				
-				/*for (i = 0, l = meshData.numVertex; i < l; ++i)
+				for (i = 0, l = meshData.numVertex; i < l; ++i)
 				{
 					const vertexData:VertexData = meshData.vertices[i];
 					iD = i * 2;
-					if (iD < _ffdOffset || iD >= this._ffdVertices.length)
+					if (!_ffdVertices || iD < _ffdOffset || iD >= this._ffdVertices.length)
 					{
 						xG = vertexData.x;
 						yG = vertexData.y;
@@ -323,7 +322,7 @@
 					}
 					
 					meshImage.mVertexData.setPosition(i, xG, yG);
-				}*/
+				}
 				
 				meshImage.onVertexDataChanged(); 
 			}

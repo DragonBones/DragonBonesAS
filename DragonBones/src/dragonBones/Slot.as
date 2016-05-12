@@ -63,7 +63,7 @@
 		/** @private */
 		protected var _meshBones:Vector.<Bone> = null;
 		/** @private */
-		protected var _meshData:MeshData = null;
+		dragonBones_internal var _meshData:MeshData = null;
 		
 		public function get displayIndex():int
 		{

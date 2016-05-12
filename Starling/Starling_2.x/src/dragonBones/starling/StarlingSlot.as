@@ -269,7 +269,7 @@
 				{
 					const vertexData:VertexData = _meshData.vertices[i];
 					iD = i * 2;
-					if (iD < _ffdOffset || iD >= this._ffdVertices.length)
+					if (!this._ffdVertices || iD < _ffdOffset || iD >= this._ffdVertices.length)
 					{
 						xG = vertexData.x;
 						yG = vertexData.y;

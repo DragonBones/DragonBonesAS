@@ -255,7 +255,10 @@
 					updateToNextFrame(currentPlayTimes);
 				}
 				
-				updateTween();
+				if (_tweenEasing == _tweenEasing)
+				{
+					updateTween();
+				}
 			}
 		}
 		
