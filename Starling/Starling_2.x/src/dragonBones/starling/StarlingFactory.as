@@ -156,7 +156,6 @@
 			if (subTexture)
 			{
 				var image:Image = new Image(subTexture);
-				image.textureSmoothing = TextureSmoothing.TRILINEAR;
 				if (isNaN(pivotX) || isNaN(pivotY))
 				{
 					var subTextureFrame:Rectangle = (textureAtlas as TextureAtlas).getFrame(fullName);
@@ -209,7 +208,6 @@
 				
 				var image:Mesh = new Mesh(vertexData, indexData);
 				image.texture = subTexture;
-				image.textureSmoothing = TextureSmoothing.TRILINEAR;
 				return image;
 			}
 			return null;
