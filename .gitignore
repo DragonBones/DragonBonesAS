@@ -5,8 +5,10 @@ bin/
 libs/
 
 # Project property files
+.settings/
 .actionScriptProperties
 .flexProperties
-.settings/
 .project
 .flexLibProperties
+.swf
+.fla

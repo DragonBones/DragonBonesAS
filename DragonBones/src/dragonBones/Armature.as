@@ -639,7 +639,7 @@
 			{
 				sortBoneList();
 			}
-			_animation.updateAnimationStates();
+			_animation._updateTimelineStates = true;
 		}
 		
 		private function sortBoneList():void
