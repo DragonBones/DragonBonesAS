@@ -84,6 +84,7 @@
 					return XML3DataParser.parseSkeletonData(rawData);
 					break;
 				case DragonBones.DATA_VERSION:
+				case DragonBones.DATA_VERSION_4_5:
 					break;
 				
 				default:
