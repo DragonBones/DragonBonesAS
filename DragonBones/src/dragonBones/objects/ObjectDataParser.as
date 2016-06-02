@@ -541,11 +541,22 @@
 				if (meshData.skinned)
 				{
 					var vertices:Vector.<Number> = new Vector.<Number>();
-					for (var i:uint = 0, l:uint = frame.vertices.length; i < l; i += 2)
+					
+					for (var i:uint = 0, l:uint = meshData.vertices.length; i < l; ++i)
 					{
-						const vertexBoneData:VertexBoneData = meshData.vertexBones[i / 2];
-						helpPoint.x = frame.vertices[i];
-						helpPoint.y = frame.vertices[i + 1];
+						const vertexBoneData:VertexBoneData = meshData.vertexBones[i];
+						
+						if (i * 2 < frame.offset || i * 2 - frame.offset >= frame.vertices.length)
+						{
+							helpPoint.x = 0;
+							helpPoint.y = 0;
+						}
+						else
+						{
+							helpPoint.x = frame.vertices[i * 2 - frame.offset];
+							helpPoint.y = frame.vertices[i * 2 + 1 - frame.offset];
+						}
+						
 						var result:Point = meshData.slotPose.deltaTransformPoint(helpPoint);
 						for each (var boneIndex:uint in vertexBoneData.indices)
 						{
@@ -554,6 +565,7 @@
 						}
 					}
 					
+					frame.offset = 0;
 					vertices.fixed = true;
 					frame.vertices = vertices;
 				}

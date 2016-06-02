@@ -222,11 +222,11 @@
 			if (_meshData.skinned)
 			{
 				const bones:Vector.<Bone> = this._armature.getBones(false);
+				var iF:uint = 0;
 				for (i = 0, l = _meshData.numVertex; i < l; i++)
 				{
 					const vertexBoneData:VertexBoneData = _meshData.vertexBones[i];
 					var j:uint = 0;
-					var jD:uint = 0;
 					var xL:Number = 0;
 					var yL:Number = 0;
 					var xG:Number = 0;
@@ -240,22 +240,22 @@
 						const point:Point = vertexBoneData.vertices[j];
 						const weight:Number = vertexBoneData.weights[j];
 						
-						if (!this._ffdVertices || iD < _ffdOffset || iD >= this._ffdVertices.length)
+						if (!this._ffdVertices || iF < _ffdOffset || iF >= this._ffdVertices.length)
 						{
 							xL = point.x;
 							yL = point.y;
 						}
 						else
 						{
-							xL = point.x + this._ffdVertices[iD - _ffdOffset + jD];
-							yL = point.y + this._ffdVertices[iD - _ffdOffset + jD + 1];
+							xL = point.x + this._ffdVertices[iF];
+							yL = point.y + this._ffdVertices[iF + 1];
 						}
 						
 						xG += (matrix.a * xL + matrix.c * yL + matrix.tx) * weight;
 						yG += (matrix.b * xL + matrix.d * yL + matrix.ty) * weight;
 						
 						j++;
-						jD = j * 2;
+						iF += 2;
 					}
 					
 					style.setVertexPosition(i, xG, yG);

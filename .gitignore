@@ -10,5 +10,5 @@ libs/
 .flexProperties
 .project
 .flexLibProperties
-.swf
-.fla
+*.swf
+*.fla
