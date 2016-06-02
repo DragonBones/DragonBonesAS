@@ -1,370 +1,430 @@
 package dragonBones.objects
 {
-	/** @private */
-	final public class ArmatureData
+	import dragonBones.core.BaseObject;
+	
+	/**
+	 * @language zh_CN
+	 * 骨架数据。
+	 * @see dragonBones.Armature
+	 * @version DragonBones 3.0
+	 */
+	public final class ArmatureData extends BaseObject
 	{
-		public var name:String;
-		
-		private var _boneDataList:Vector.<BoneData>;
-		private var _ikDataList:Vector.<IKData>;
-		private var _skinDataList:Vector.<SkinData>;
-		private var _slotDataList:Vector.<SlotData>;
-		private var _animationDataList:Vector.<AnimationData>;
-		public var defaultAnimation:String;
+		/**
+		 * @language zh_CN
+		 * 动画帧率。
+		 * @version DragonBones 3.0
+		 */
 		public var frameRate:uint;
 		
+		/**
+		 * @private
+		 */
+		public var cacheFrameRate:uint = 0;
+		
+		/**
+		 * @language zh_CN
+		 * 骨架类型。
+		 * @version DragonBones 3.0
+		 */
+		public var type:int;
+		
+		/**
+		 * @language zh_CN
+		 * 骨架名称。
+		 * @version DragonBones 3.0
+		 */
+		public var name:String;
+		
+		/**
+		 * @language zh_CN
+		 * 所包含的骨骼数据。
+		 * @see dragonBones.objects.BoneData
+		 * @version DragonBones 3.0
+		 */
+		public const bones:Object = {};
+		
+		/**
+		 * @language zh_CN
+		 * 所包含的插槽数据。
+		 * @see dragonBones.objects.SlotData
+		 * @version DragonBones 3.0
+		 */
+		public const slots:Object = {};
+		
+		/**
+		 * @language zh_CN
+		 * 所包含的皮肤数据。
+		 * @see dragonBones.objects.SkinData
+		 * @version DragonBones 3.0
+		 */
+		public const skins:Object = {};
+		
+		/**
+		 * @language zh_CN
+		 * 所包含的动画数据。
+		 * @see dragonBones.objects.AnimationData
+		 * @version DragonBones 3.0
+		 */
+		public const animations:Object = {};
+		
+		private var _boneDirty:Boolean;
+		private var _slotDirty:Boolean;
+		private var _defaultSkin:SkinData;
+		private var _defaultAnimation:AnimationData;
+		private const _sortedBones:Vector.<BoneData> = new Vector.<BoneData>(0, true);
+		private const _sortedSlots:Vector.<SlotData> = new Vector.<SlotData>(0, true);
+		private const _bonesChildren:Object = {};
+		
+		/**
+		 * @private
+		 */
 		public function ArmatureData()
 		{
-			_boneDataList = new Vector.<BoneData>(0, true);
-			_ikDataList = new Vector.<IKData>(0, true);
-			_skinDataList = new Vector.<SkinData>(0, true);
-			_slotDataList = new Vector.<SlotData>(0, true);
-			_animationDataList = new Vector.<AnimationData>(0, true);
-			
-			//_areaDataList = new Vector.<IAreaData>(0, true);
+			super(this);
 		}
 		
-		public function setSkinData(skinName:String):void
+		/**
+		 * @inheritDoc
+		 */
+		override protected function _onClear():void
 		{
-			for (var i:int = 0, len:int = _slotDataList.length; i < len; i++)
+			frameRate = 0;
+			cacheFrameRate = 0;
+			type = 0;
+			name = null;
+			
+			var i:String = null;
+			
+			for (i in bones)
 			{
-				_slotDataList[i].dispose();
-			}
-			var skinData:SkinData;
-			if(!skinName && _skinDataList.length > 0)
-			{
-				skinData = _skinDataList[0];
-			}
-			else
-			{
-				for (i = 0, len = _skinDataList.length; i < len; i++)
-				{
-					if (_skinDataList[i].name == skinName)
-					{
-						skinData = _skinDataList[i];
-						break;
-					}
-				}
+				(bones[i] as BoneData).returnToPool();
+				delete bones[i];
 			}
 			
-			if (skinData)
+			for (i in slots)
 			{
-				var slotData:SlotData;
-				for (i = 0, len = skinData.slotDataList.length; i < len; i++)
-				{
-					slotData = getSlotData(skinData.slotDataList[i].name);
-					if (slotData)
-					{
-						for (var j:int = 0, jLen:int = skinData.slotDataList[i].displayDataList.length; j < jLen; j++)
-						{
-							slotData.addDisplayData(skinData.slotDataList[i].displayDataList[j]);
-						}
-					}
-				}
-			}
-		}
-		
-		public function dispose():void
-		{
-			var i:int = _boneDataList.length;
-			while(i --)
-			{
-				_boneDataList[i].dispose();
-			}
-			i = _ikDataList.length;
-			while(i --)
-			{
-				_ikDataList[i].dispose();
-			}
-			i = _skinDataList.length;
-			while(i --)
-			{
-				_skinDataList[i].dispose();
-			}
-			i = _slotDataList.length;
-			while(i --)
-			{
-				_slotDataList[i].dispose();
-			}
-			i = _animationDataList.length;
-			while(i --)
-			{
-				_animationDataList[i].dispose();
+				(slots[i] as SlotData).returnToPool();
+				delete slots[i];
 			}
 			
-			_boneDataList.fixed = false;
-			_boneDataList.length = 0;
-			_ikDataList.fixed = false;
-			_ikDataList.length = 0;
-			_skinDataList.fixed = false;
-			_skinDataList.length = 0;
-			_slotDataList.fixed = false;
-			_slotDataList.length = 0;
-			_animationDataList.fixed = false;
-			_animationDataList.length = 0;
-			//_animationsCached。clear();
-			_boneDataList = null;
-			_ikDataList = null;
-			_skinDataList = null;
-			_slotDataList = null;
-			_animationDataList = null;
-		}
-		
-		public function getBoneData(boneName:String):BoneData
-		{
-			var i:int = _boneDataList.length;
-			while(i --)
+			for (i in skins)
 			{
-				if(_boneDataList[i].name == boneName)
-				{
-					return _boneDataList[i];
-				}
-			}
-			return null;
-		}
-		public function getIKData(ikName:String):IKData
-		{
-			var i:int = _ikDataList.length;
-			while(i --)
-			{
-				if(_ikDataList[i].name == ikName)
-				{
-					return _ikDataList[i];
-				}
-			}
-			return null;
-		}
-		
-		public function getSlotData(slotName:String):SlotData
-		{
-			if(!slotName && _slotDataList.length > 0)
-			{
-				return _slotDataList[0];
-			}
-			var i:int = _slotDataList.length;
-			while(i --)
-			{
-				if(_slotDataList[i].name == slotName)
-				{
-					return _slotDataList[i];
-				}
+				(skins[i] as SkinData).returnToPool();
+				delete skins[i];
 			}
 			
-			return null;
-		}
-		
-		public function getSkinData(skinName:String):SkinData
-		{
-			if(!skinName && _skinDataList.length > 0)
+			for (i in animations)
 			{
-				return _skinDataList[0];
-			}
-			var i:int = _skinDataList.length;
-			while(i --)
-			{
-				if(_skinDataList[i].name == skinName)
-				{
-					return _skinDataList[i];
-				}
+				(animations[i] as AnimationData).returnToPool();
+				delete animations[i];
 			}
 			
-			return null;
-		}
-		
-		public function getAnimationData(animationName:String):AnimationData
-		{
-			var i:int = _animationDataList.length;
-			while(i --)
+			_boneDirty = false;
+			_slotDirty = false;
+			_defaultSkin = null;
+			_defaultAnimation = null;
+			
+			if (_sortedBones.length)
 			{
-				if(_animationDataList[i].name == animationName)
-				{
-					return _animationDataList[i];
-				}
-			}
-			return null;
-		}
-		
-		public function addBoneData(boneData:BoneData):void
-		{
-			if(!boneData)
-			{
-				throw new ArgumentError();
+				_sortedBones.fixed = false;
+				_sortedBones.length = 0;
+				_sortedBones.fixed = true;	
 			}
 			
-			if (_boneDataList.indexOf(boneData) < 0)
+			if (_sortedSlots.length)
 			{
-				_boneDataList.fixed = false;
-				_boneDataList[_boneDataList.length] = boneData;
-				_boneDataList.fixed = true;
-			}
-			else
-			{
-				throw new ArgumentError();
-			}
-		}
-		
-		public function addIKData(ikData:IKData):void
-		{
-			if(!ikData)
-			{
-				throw new ArgumentError();
-			}
-			if (_ikDataList.indexOf(ikData) < 0)
-			{
-				_ikDataList.fixed = false;
-				_ikDataList[_ikDataList.length] = ikData;
-				_ikDataList.fixed = true;
-			}
-			else
-			{
-				throw new ArgumentError();
-			}
-		}
-		
-		public function addSlotData(slotData:SlotData):void
-		{
-			if(!slotData)
-			{
-				throw new ArgumentError();
+				_sortedSlots.fixed = false;
+				_sortedSlots.length = 0;
+				_sortedSlots.fixed = true;	
 			}
 			
-			if(_slotDataList.indexOf(slotData) < 0)
+			for (i in _bonesChildren)
 			{
-				_slotDataList.fixed = false;
-				_slotDataList[_slotDataList.length] = slotData;
-				_slotDataList.fixed = true;
-			}
-			else
-			{
-				throw new ArgumentError();
+				delete _bonesChildren[i];
 			}
 		}
 		
-		public function addSkinData(skinData:SkinData):void
+		private function _onSortSlots(a:SlotData, b:SlotData):int
 		{
-			if(!skinData)
-			{
-				throw new ArgumentError();
-			}
-			
-			if(_skinDataList.indexOf(skinData) < 0)
-			{
-				_skinDataList.fixed = false;
-				_skinDataList[_skinDataList.length] = skinData;
-				_skinDataList.fixed = true;
-			}
-			else
-			{
-				throw new ArgumentError();
-			}
+			return a.zOrder > b.zOrder? 1: -1;
 		}
 		
-		public function addAnimationData(animationData:AnimationData):void
+		private function _sortBones():void
 		{
-			if(!animationData)
-			{
-				throw new ArgumentError();
-			}
-			
-			if(_animationDataList.indexOf(animationData) < 0)
-			{
-				_animationDataList.fixed = false;
-				_animationDataList[_animationDataList.length] = animationData;
-				_animationDataList.fixed = true;
-			}
-		}
-		
-		public function sortBoneDataList():void
-		{
-			var i:int = _boneDataList.length;
-			if(i == 0)
+			const total:uint = _sortedBones.length;
+			if (!total)
 			{
 				return;
 			}
 			
-			var helpArray:Array = [];
-			while(i --)
+			const sortHelper:Vector.<BoneData> = _sortedBones.concat();
+			var index:uint = 0;
+			var count:uint = 0;
+			
+			_sortedBones.length = 0; // clear
+			_sortedBones.length = total;
+			
+			while(count < total)
 			{
-				var boneData:BoneData = _boneDataList[i];
-				var level:int = 0;
-				var parentData:BoneData = boneData;
-				while(parentData)
+				const bone:BoneData = sortHelper[index++];
+				
+				if (index >= total)
 				{
-					level ++;
-					parentData = getBoneData(parentData.parent);
+					index = 0;
 				}
-				helpArray[i] = [level, boneData];
+				
+				if (_sortedBones.indexOf(bone) >= 0)
+				{
+					continue;
+				}
+				
+				if (bone.parent && _sortedBones.indexOf(bone.parent) < 0)
+				{
+					continue;
+				}
+				
+				if (bone.ik && _sortedBones.indexOf(bone.ik) < 0)
+				{
+					continue;
+				}
+				
+				_sortedBones[count++] = bone;
+			}
+		}
+		
+		private function _sortSlots():void
+		{
+			_sortedSlots.sort(_onSortSlots);
+		}
+		
+		/**
+		 * @private
+		 */
+		public function cacheFrame(value:uint):void
+		{
+			if (cacheFrameRate == value)
+			{
+				return;
 			}
 			
-			helpArray.sortOn("0", Array.NUMERIC);
+			cacheFrameRate = value;
 			
-			i = helpArray.length;
-			while(i --)
+			const frameScale:Number = cacheFrameRate / frameRate;
+			for each (var animation:AnimationData in animations)
 			{
-				_boneDataList[i] = helpArray[i][1];
+				animation.cacheFrame(frameScale);
 			}
 		}
 		
-		public function get boneDataList():Vector.<BoneData>
+		/**
+		 * @private
+		 */
+		public function addBone(value:BoneData, parentName:String):void
 		{
-			return _boneDataList;
-		}
-		public function get ikDataList():Vector.<IKData>
-		{
-			return _ikDataList;
-		}
-		public function get skinDataList():Vector.<SkinData>
-		{
-			return _skinDataList;
-		}
-		public function get animationDataList():Vector.<AnimationData>
-		{
-			return _animationDataList;
-		}
-		
-		public function get slotDataList():Vector.<SlotData> 
-		{
-			return _slotDataList;
-		}
-		
-		/*
-		private var _areaDataList:Vector.<IAreaData>;
-		public function get areaDataList():Vector.<IAreaData>
-		{
-			return _areaDataList;
-		}
-		
-		public function getAreaData(areaName:String):IAreaData
-		{
-			if(!areaName && _areaDataList.length > 0)
+			if (value && value.name && !bones[value.name])
 			{
-				return _areaDataList[0];
-			}
-			var i:int = _areaDataList.length;
-			while(i --)
-			{
-				if(_areaDataList[i]["name"] == areaName)
+				if (parentName)
 				{
-					return _areaDataList[i];
+					const parent:BoneData = getBone(parentName);
+					if (parent)
+					{
+						value.parent = parent;
+					}
+					else
+					{
+						(_bonesChildren[parentName] = _bonesChildren[parentName] || new Vector.<BoneData>()).push(value);
+					}
 				}
+				
+				const children:Vector.<BoneData> = _bonesChildren[value.name];
+				if (children)
+				{
+					for each (var child:BoneData in children)
+					{
+						child.parent = value;
+					}
+					
+					delete _bonesChildren[value.name];
+				}
+				
+				bones[value.name] = value;
+				
+				if (_sortedBones.fixed)
+				{
+					_sortedBones.fixed = false;
+				}
+				
+				_sortedBones.push(value);
+				_boneDirty = true;
 			}
-			return null;
-		}
-		
-		public function addAreaData(areaData:IAreaData):void
-		{
-			if(!areaData)
+			else
 			{
 				throw new ArgumentError();
 			}
-			
-			if(_areaDataList.indexOf(areaData) < 0)
+		}
+		
+		/**
+		 * @private
+		 */
+		public function addSlot(value:SlotData):void
+		{
+			if (value && value.name && !slots[value.name])
 			{
-				_areaDataList.fixed = false;
-				_areaDataList[_areaDataList.length] = areaData;
-				_areaDataList.fixed = true;
+				slots[value.name] = value;
+				
+				if (_sortedSlots.fixed)
+				{
+					_sortedSlots.fixed = false;
+				}
+				
+				_sortedSlots.push(value);
+				_slotDirty = true;
+			}
+			else
+			{
+				throw new ArgumentError();
 			}
 		}
-		*/
+		
+		/**
+		 * @private
+		 */
+		public function addSkin(value:SkinData):void
+		{
+			if (value && value.name && !skins[value.name])
+			{
+				skins[value.name] = value;
+				
+				if (!_defaultSkin)
+				{
+					_defaultSkin = value;
+				}
+			}
+			else
+			{
+				throw new ArgumentError();
+			}
+		}
+		
+		/**
+		 * @private
+		 */
+		public function addAnimation(value:AnimationData):void
+		{
+			if (value && value.name && !animations[value.name])
+			{
+				animations[value.name] = value;
+				
+				if (!_defaultAnimation)
+				{
+					_defaultAnimation = value;
+				}
+			}
+			else
+			{
+				throw new ArgumentError();
+			}
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 获得指定名称的骨骼。
+		 * @param name 骨骼名称
+		 * @see dragonBones.objects.BoneData
+		 * @version DragonBones 3.0
+		 */
+		public function getBone(name:String):BoneData
+		{
+			return bones[name] as BoneData;
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 获得指定名称的插槽。
+		 * @param name 插槽名称
+		 * @see dragonBones.objects.SlotData
+		 * @version DragonBones 3.0
+		 */
+		public function getSlot(name:String):SlotData
+		{
+			return slots[name] as SlotData;
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 获得指定名称的皮肤。
+		 * @param name 皮肤名称
+		 * @see dragonBones.objects.SkinData
+		 * @version DragonBones 3.0
+		 */
+		public function getSkin(name:String):SkinData
+		{
+			return name? (skins[name] as SkinData): _defaultSkin;
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 获得指定名称的动画。
+		 * @param name 动画名称
+		 * @see dragonBones.objects.AnimationData
+		 * @version DragonBones 3.0
+		 */
+		public function getAnimation(name:String):AnimationData
+		{
+			return name? (animations[name] as AnimationData): _defaultAnimation;
+		}
+		
+		/**
+		 * @private
+		 */
+		public function get sortedBones():Vector.<BoneData>
+		{
+			if (_boneDirty)
+			{
+				_boneDirty = false;
+				_sortBones();
+				_sortedBones.fixed = true;
+			}
+			
+			return _sortedBones;
+		}
+		
+		/**
+		 * @private
+		 */
+		public function get sortedSlots():Vector.<SlotData>
+		{
+			if (_slotDirty)
+			{
+				_slotDirty = false;
+				_sortSlots();
+				_sortedSlots.fixed = true;
+			}
+			
+			return _sortedSlots;
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 获得默认的皮肤。
+		 * @see dragonBones.objects.SkinData
+		 * @version DragonBones 4.5
+		 */
+		public function get defaultSkin():SkinData
+		{
+			return _defaultSkin;
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 获得默认的动画。
+		 * @see dragonBones.objects.AnimationData
+		 * @version DragonBones 4.5
+		 */
+		public function get defaultAnimation():AnimationData
+		{
+			return _defaultAnimation;
+		}
 	}
 }

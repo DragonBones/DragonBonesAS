@@ -1,64 +1,85 @@
 package dragonBones.objects
 {
-	/** @private */
-	public final class SlotData
+	import flash.geom.ColorTransform;
+	
+	import dragonBones.core.BaseObject;
+	import dragonBones.core.DragonBones;
+	
+	/**
+	 * @language zh_CN
+	 * 插槽数据。
+	 * @see dragonBones.Slot
+	 * @version DragonBones 3.0
+	 */
+	public final class SlotData extends BaseObject
 	{
-		public var name:String;
-		public var parent:String;
-		public var zOrder:Number;
-        public var blendMode:String;
+		/**
+		 * @private
+		 */
+		public static const DEFAULT_COLOR:ColorTransform = new ColorTransform();
+		
+		/**
+		 * @private
+		 */
+		public static function generateColor():ColorTransform
+		{
+			return new ColorTransform();
+		}
+		
+		/**
+		 * @private
+		 */
 		public var displayIndex:int;
-		public var gotoAndPlay:String;
 		
-		private var _displayDataList:Vector.<DisplayData>;
+		/**
+		 * @private
+		 */
+		public var zOrder:int;
 		
+		/**
+		 * @private
+		 */
+		public var blendMode:int;
+		
+		/**
+		 * @language zh_CN
+		 * 插槽名称。
+		 * @version DragonBones 3.0
+		 */
+		public var name:String;
+		
+		/**
+		 * @language zh_CN
+		 * 父骨骼。
+		 * @see dragonBones.objects.BoneData
+		 * @version DragonBones 3.0
+		 */
+		public var parent:BoneData;
+		
+		/**
+		 * @private
+		 */
+		public var color:ColorTransform;
+		
+		/**
+		 * @private
+		 */
 		public function SlotData()
 		{
-			_displayDataList = new Vector.<DisplayData>(0, true);
+			super(this);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override protected function _onClear():void
+		{
+			displayIndex = 0;
 			zOrder = 0;
-		}
-		
-		public function dispose():void
-		{
-			_displayDataList.fixed = false;
-			_displayDataList.length = 0;
-		}
-		
-		public function addDisplayData(displayData:DisplayData):void
-		{
-			if(!displayData)
-			{
-				throw new ArgumentError();
-			}
-			if (_displayDataList.indexOf(displayData) < 0)
-			{
-				_displayDataList.fixed = false;
-				_displayDataList[_displayDataList.length] = displayData;
-				_displayDataList.fixed = true;
-			}
-			else
-			{
-				throw new ArgumentError();
-			}
-		}
-		
-		public function getDisplayData(displayName:String):DisplayData
-		{
-			var i:int = _displayDataList.length;
-			while(i --)
-			{
-				if(_displayDataList[i].name == displayName)
-				{
-					return _displayDataList[i];
-				}
-			}
-			
-			return null;
-		}
-		
-		public function get displayDataList():Vector.<DisplayData>
-		{
-			return _displayDataList;
+			blendMode = DragonBones.BLEND_MODE_NORMAL;
+			name = null;
+			parent = null;
+			color = null;
 		}
 	}
 }

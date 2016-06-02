@@ -1,30 +1,48 @@
-﻿package dragonBones.objects
+package dragonBones.objects
 {
 	import flash.geom.Point;
 	
-	/** @private */
-	public class DisplayData
+	import dragonBones.core.BaseObject;
+	import dragonBones.core.DragonBones;
+	import dragonBones.geom.Transform;
+	import dragonBones.textures.TextureData;
+	
+	/**
+	 * @private
+	 */
+	public class DisplayData extends BaseObject
 	{
-		public static const ARMATURE:String = "armature";
-		public static const IMAGE:String = "image";
-		public static const MESH:String = "mesh";
-		
+		public var isRelativePivot:Boolean;
+		public var type:int;
 		public var name:String;
-		public var slotName:String;
-		public var type:String;
-		public var transform:DBTransform;
-		public var pivot:Point;
+		public var textureData:TextureData;
+		public var armatureData:ArmatureData;
+		public var meshData:MeshData;
+		public const pivot:Point = new Point();
+		public const transform:Transform = new Transform();
 		
 		public function DisplayData()
 		{
-			transform = new DBTransform();
-			pivot = new Point();
+			super(this);
 		}
 		
-		public function dispose():void
+		override protected function _onClear():void
 		{
-			transform = null;
-			pivot = null;
+			isRelativePivot = false;
+			type = DragonBones.DISPLAY_TYPE_IMAGE;
+			name = null;
+			textureData = null;
+			armatureData = null;
+			
+			if (meshData)
+			{
+				meshData.returnToPool();
+				meshData = null;
+			}
+			
+			pivot.x = 0;
+			pivot.y = 0;
+			transform.identity();
 		}
 	}
 }

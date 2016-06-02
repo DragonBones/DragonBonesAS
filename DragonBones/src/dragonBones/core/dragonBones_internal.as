@@ -1,6 +1,7 @@
 package dragonBones.core
 {
-	
-	/** @private */
+	/** 
+	 * @private
+	 */
 	public namespace dragonBones_internal;
 }

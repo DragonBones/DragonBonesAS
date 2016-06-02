@@ -1,55 +1,58 @@
 package dragonBones.objects
 {
-	/** @private */
-	final public class SkinData
+	import dragonBones.core.BaseObject;
+	
+	/**
+	 * @language zh_CN
+	 * 皮肤数据。
+	 * @version DragonBones 3.0
+	 */
+	public final class SkinData extends BaseObject
 	{
+		/**
+		 * @language zh_CN
+		 * 皮肤名称。
+		 * @version DragonBones 3.0
+		 */
 		public var name:String;
-		public var hasMesh:Boolean = false;
 		
-		private var _slotDataList:Vector.<SlotData>;
+		/**
+		 * @private
+		 */
+		public const slots:Object = {};
 		
+		/**
+		 * @private
+		 */
 		public function SkinData()
 		{
-			_slotDataList = new Vector.<SlotData>(0, true);
+			super(this);
 		}
 		
-		public function dispose():void
+		/**
+		 * @inheritDoc
+		 */
+		override protected function _onClear():void
 		{
-			var i:int = _slotDataList.length;
-			while(i --)
-			{
-				_slotDataList[i].dispose();
-			}
-			_slotDataList.fixed = false;
-			_slotDataList.length = 0;
-			_slotDataList = null;
-		}
-		
-		public function getSlotData(slotName:String):SlotData
-		{
-			var i:int = _slotDataList.length;
-			while(i --)
-			{
-				if(_slotDataList[i].name == slotName)
-				{
-					return _slotDataList[i];
-				}
-			}
-			return null;
-		}
-		
-		public function addSlotData(slotData:SlotData):void
-		{
-			if(!slotData)
-			{
-				throw new ArgumentError();
-			}
+			name = null;
 			
-			if (_slotDataList.indexOf(slotData) < 0)
+			var i:String = null;
+			
+			for (i in slots)
 			{
-				_slotDataList.fixed = false;
-				_slotDataList[_slotDataList.length] = slotData;
-				_slotDataList.fixed = true;
+				(slots[i] as SlotDisplayDataSet).returnToPool();
+				delete slots[i];
+			}
+		}
+		
+		/**
+		 * @private
+		 */
+		public function addSlot(value:SlotDisplayDataSet):void
+		{
+			if (value && value.slot && !slots[value.slot.name])
+			{
+				slots[value.slot.name] = value;
 			}
 			else
 			{
@@ -57,9 +60,12 @@ package dragonBones.objects
 			}
 		}
 		
-		public function get slotDataList():Vector.<SlotData>
+		/**
+		 * @private
+		 */
+		public function getSlot(name:String):SlotDisplayDataSet
 		{
-			return _slotDataList;
+			return slots[name] as SlotDisplayDataSet;
 		}
 	}
 }

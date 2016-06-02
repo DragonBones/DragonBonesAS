@@ -1,0 +1,27 @@
+package dragonBones.starling
+{
+	import dragonBones.textures.TextureData;
+	
+	import starling.textures.Texture;
+	
+	public final class StarlingTextureData extends TextureData
+	{
+		public var texture:Texture = null;
+		
+		public function StarlingTextureData()
+		{
+			super(this);
+		}
+		
+		override protected function _onClear():void
+		{
+			super._onClear();
+			
+			if (texture)
+			{
+				texture.dispose();
+				texture = null;
+			}
+		}
+	}
+}

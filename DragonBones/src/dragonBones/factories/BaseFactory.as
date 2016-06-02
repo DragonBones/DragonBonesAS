@@ -1,902 +1,781 @@
 package dragonBones.factories
 {
-	import flash.errors.IllegalOperationError;
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
+	import flash.display.DisplayObject;
+	import flash.display.LoaderInfo;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
-	import flash.geom.Matrix;
 	import flash.utils.ByteArray;
-	import flash.utils.Dictionary;
+	import flash.utils.clearTimeout;
+	import flash.utils.setTimeout;
 	
 	import dragonBones.Armature;
 	import dragonBones.Bone;
 	import dragonBones.Slot;
+	import dragonBones.core.BaseObject;
+	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.fast.FastArmature;
-	import dragonBones.fast.FastBone;
-	import dragonBones.fast.FastSlot;
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.BoneData;
-	import dragonBones.objects.DataParser;
-	import dragonBones.objects.DataSerializer;
-	import dragonBones.objects.DecompressedData;
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.DragonBonesData;
-	import dragonBones.objects.MeshData;
 	import dragonBones.objects.SkinData;
 	import dragonBones.objects.SlotData;
-	import dragonBones.textures.ITextureAtlas;
+	import dragonBones.objects.SlotDisplayDataSet;
+	import dragonBones.parsers.ObjectDataParser;
+	import dragonBones.textures.TextureAtlasData;
+	import dragonBones.textures.TextureData;
 	
-
 	use namespace dragonBones_internal;
 	
-	public class BaseFactory  extends EventDispatcher
+	/** 
+	 * Dispatched after a sucessful call to parseData().
+	 */
+	[Event(name="complete", type="flash.events.Event")]
+	
+	/** 
+	 * @private 
+	 */
+	public class BaseFactory extends EventDispatcher
 	{
-		protected static const _helpMatrix:Matrix = new Matrix();
+		/**
+		 * @language zh_CN
+		 * 是否自动索引，如果开启自动索引，创建一个骨架时可以从多个 DragonBonesData 中寻找资源，通常用于共享导出时使用。 [<code>true</code>: 开启, <code>false</code>: 不开启] (默认: <code>false</code>)
+		 * @see dragonBones.objects.DragonBonesData
+		 * @version DragonBones 4.5
+		 */
+		public var autoSearch:Boolean = false;
 		
-		/** @private */
-		protected var dragonBonesDataDic:Dictionary = new Dictionary();
+		/** 
+		 * @private 
+		 */
+		protected const _dragonBonesDataMap:Object = {};
 		
-		/** @private */
-		protected var textureAtlasDic:Dictionary = new Dictionary();
+		/** 
+		 * @private 
+		 */
+		protected const _textureAtlasDataMap:Object = {};
+		
+		/** 
+		 * @private 
+		 */
 		public function BaseFactory(self:BaseFactory)
 		{
 			super(this);
 			
-			if(self != this)
-			{ 
-				throw new IllegalOperationError("Abstract class can not be instantiated!");
-			}
-		}
-		
-		/**
-		 * Cleans up resources used by this BaseFactory instance.
-		 * @param (optional) Destroy all internal references.
-		 */
-		public function dispose(disposeData:Boolean = true):void
-		{
-			if(disposeData)
+			if (self != this)
 			{
-				for(var skeletonName:String in dragonBonesDataDic)
-				{ 
-					(dragonBonesDataDic[skeletonName] as DragonBonesData).dispose();
-					delete dragonBonesDataDic[skeletonName];
-				}
-				
-				for(var textureAtlasName:String in textureAtlasDic)
-				{
-					var textureAtlasArr:Array = textureAtlasDic[textureAtlasName] as Array;
-					if (textureAtlasArr)
-					{
-						for (var i:int = 0, len:int = textureAtlasArr.length; i < len; i++ )
-						{
-							textureAtlasArr[i].dispose();
-						}
-					}
-					delete textureAtlasDic[textureAtlasName];
-				}
+				throw new Error(DragonBones.ABSTRACT_CLASS_ERROR);
 			}
 			
-			dragonBonesDataDic = null;
-			textureAtlasDic = null;
-			//_currentDataName = null;
-			//_currentTextureAtlasName = null;
+			autoSearch = false;
 		}
 		
-		/**
-		 * Returns a SkeletonData instance.
-		 * @param The name of an existing SkeletonData instance.
-		 * @return A SkeletonData instance with given name (if exist).
-		 */
-		public function getSkeletonData(name:String):DragonBonesData
+		private var _delayID:uint = 0;
+		private const _decodeDataList:Vector.<DecodedData> = new Vector.<DecodedData>;
+		private function _loadTextureAtlasHandler(event:Event):void
 		{
-			return dragonBonesDataDic[name];
+			const loaderInfo:LoaderInfo = event.target as LoaderInfo;
+			const decodeData:DecodedData = loaderInfo.loader as DecodedData;
+			loaderInfo.removeEventListener(Event.COMPLETE, _loadTextureAtlasHandler);
+			parseTextureAtlasData(decodeData.textureAtlasData, decodeData.content, decodeData.name);
+			decodeData.dispose();
+			_decodeDataList.splice(_decodeDataList.indexOf(decodeData), 1);
+			if (_decodeDataList.length == 0)
+			{
+				this.dispatchEvent(event);
+			}
 		}
 		
-		/**
-		 * Add a SkeletonData instance to this BaseFactory instance.
-		 * @param A SkeletonData instance.
-		 * @param (optional) A name for this SkeletonData instance.
+		/** 
+		 * @private
 		 */
-		public function addSkeletonData(data:DragonBonesData, name:String = null):void
+		protected function _getTextureData(textureAtlasName:String, textureName:String):TextureData
 		{
-			if(!data)
-			{
-				throw new ArgumentError();
-			}
-			name = name || data.name;
-			if(!name)
-			{
-				throw new ArgumentError("Unnamed data!");
-			}
-			if(dragonBonesDataDic[name])
-			{
-				throw new ArgumentError();
-			}
-			dragonBonesDataDic[name] = data;
-		}
-		
-		/**
-		 * Remove a SkeletonData instance from this BaseFactory instance.
-		 * @param The name for the SkeletonData instance to remove.
-		 */
-		public function removeSkeletonData(name:String):void
-		{
-			delete dragonBonesDataDic[name];
-		}
-		
-		/**
-		 * Return the TextureAtlas by name.
-		 * @param The name of the TextureAtlas to return.
-		 * @return A textureAtlas.
-		 */
-		public function getTextureAtlas(name:String):Object
-		{
-			return textureAtlasDic[name];
-		}
-		
-		/**
-		 * Add a textureAtlas to this BaseFactory instance.
-		 * @param A textureAtlas to add to this BaseFactory instance.
-		 * @param (optional) A name for this TextureAtlas.
-		 */
-		public function addTextureAtlas(textureAtlas:Object, name:String = null):void
-		{
-			if(!textureAtlas)
-			{
-				throw new ArgumentError();
-			}
-			if(!name && textureAtlas is ITextureAtlas)
-			{
-				name = textureAtlas.name;
-			}
-			if(!name)
-			{
-				throw new ArgumentError("Unnamed data!");
-			}
-			var textureAtlasArr:Array = textureAtlasDic[name] as Array;
-			if (textureAtlasArr == null)
-			{
-				textureAtlasArr = [];
-				textureAtlasDic[name] = textureAtlasArr;
-			}
-			if(textureAtlasArr.indexOf(textureAtlas) != -1)
-			{
-				throw new ArgumentError();
-			}
-			textureAtlasArr.push(textureAtlas);
-		}
-		
-		/**
-		 * Remove a textureAtlas from this baseFactory instance.
-		 * @param The name of the TextureAtlas to remove.
-		 */
-		public function removeTextureAtlas(name:String):void
-		{
-			delete textureAtlasDic[name];
-		}
-		
-		/**
-		 * Return the TextureDisplay.
-		 * @param The name of this Texture.
-		 * @param The name of the TextureAtlas.
-		 * @param The registration pivotX position.
-		 * @param The registration pivotY position.
-		 * @return An Object.
-		 */
-		public function getTextureDisplay(textureName:String, textureAtlasName:String = null, pivotX:Number = NaN, pivotY:Number = NaN):Object
-		{
-			var targetTextureAtlas:Object;
-			var textureAtlasArr:Array;
-			var i:int;
-			var len:int;
+			var i:uint = 0, l:uint = 0;
+			var textureData:TextureData = null;
+			var textureAtlasDataList:Vector.<TextureAtlasData> = _textureAtlasDataMap[textureAtlasName];
 			
-			if(textureAtlasName)
+			if (textureAtlasDataList)
 			{
-				textureAtlasArr = textureAtlasDic[textureAtlasName] as Array;
-				if (textureAtlasArr)
+				for (i = 0, l = textureAtlasDataList.length; i < l; ++i)
 				{
-					for (i = 0, len = textureAtlasArr.length; i < len; i++)
+					textureData = textureAtlasDataList[i].getTexture(textureName);
+					if (textureData)
 					{
-						targetTextureAtlas = textureAtlasArr[i];
-						if (targetTextureAtlas.getRegion(textureName))
-						{
-							break;
-						}
-						targetTextureAtlas = null;
+						return textureData;
 					}
 				}
 			}
-			else
+			
+			if (autoSearch)
 			{
-				for (textureAtlasName in textureAtlasDic)
+				for each (textureAtlasDataList in _textureAtlasDataMap)
 				{
-					textureAtlasArr = textureAtlasDic[textureAtlasName] as Array;
-					if (textureAtlasArr)
+					for (i = 0, l = textureAtlasDataList.length; i < l; ++i)
 					{
-						for (i = 0, len = textureAtlasArr.length; i < len; i++)
+						const textureAtlasData:TextureAtlasData = textureAtlasDataList[i];
+						if (textureAtlasData.autoSearch)
 						{
-							targetTextureAtlas = textureAtlasArr[i];
-							if (targetTextureAtlas.getRegion(textureName))
+							textureData = textureAtlasData.getTexture(textureName);
+							if (textureData)
 							{
-								break;
+								return textureData;
 							}
-							targetTextureAtlas = null;
-						}
-						if (targetTextureAtlas != null)
-						{
-							break;
 						}
 					}
 				}
 			}
 			
-			if(!targetTextureAtlas)
-			{
-				return null;
-			}
-			
-			if(isNaN(pivotX) || isNaN(pivotY))
-			{
-				//默认dragonBonesData的名字和和纹理集的名字是一致的
-				var data:DragonBonesData = dragonBonesDataDic[textureAtlasName];
-				data = data ? data : findFirstDragonBonesData();
-				if(data)
-				{
-					var displayData:DisplayData = data.getDisplayDataByName(textureName);
-					if(displayData)
-					{
-						pivotX = displayData.pivot.x;
-						pivotY = displayData.pivot.y;
-					}
-				}
-			}
-			
-			return generateDisplay(targetTextureAtlas, textureName, pivotX, pivotY);
+			return textureData;
 		}
 		
-		/**
-		 * Return the MeshDisplay.
-		 * @param The name of this Texture.
-		 * @param The name of the TextureAtlas.
-		 * @param The registration pivotX position.
-		 * @param The registration pivotY position.
-		 * @return An Object.
+		/** 
+		 * @private
 		 */
-		public function getMeshDisplay(meshData:MeshData, textureAtlasName:String = null):Object
+		protected function _fillBuildArmaturePackage(dragonBonesName:String, armatureName:String, skinName:String, dataPackage:BuildArmaturePackage):Boolean
 		{
-			var targetTextureAtlas:Object;
-			var textureAtlasArr:Array;
-			var i:int;
-			var len:int;
-			var textureName:String = meshData.name;
-			if(textureAtlasName)
+			var dragonBonesData:DragonBonesData = null;
+			var armatureData:ArmatureData = null;
+			if (dragonBonesName)
 			{
-				textureAtlasArr = textureAtlasDic[textureAtlasName] as Array;
-				if (textureAtlasArr)
+				dragonBonesData = _dragonBonesDataMap[dragonBonesName];
+				if (dragonBonesData)
 				{
-					for (i = 0, len = textureAtlasArr.length; i < len; i++)
-					{
-						targetTextureAtlas = textureAtlasArr[i];
-						if (targetTextureAtlas.getRegion(textureName))
-						{
-							break;
-						}
-						targetTextureAtlas = null;
-					}
+					armatureData = dragonBonesData.getArmature(armatureName);
 				}
 			}
-			else
+			
+			if (!armatureData && (!dragonBonesName || autoSearch))
 			{
-				for (textureAtlasName in textureAtlasDic)
+				for (var eachDragonBonesName:String in _dragonBonesDataMap)
 				{
-					textureAtlasArr = textureAtlasDic[textureAtlasName] as Array;
-					if (textureAtlasArr)
+					dragonBonesData = _dragonBonesDataMap[eachDragonBonesName];
+					if (!dragonBonesName || dragonBonesData.autoSearch)
 					{
-						for (i = 0, len = textureAtlasArr.length; i < len; i++)
+						armatureData = dragonBonesData.getArmature(armatureName);
+						if (armatureData)
 						{
-							targetTextureAtlas = textureAtlasArr[i];
-							if (targetTextureAtlas.getRegion(textureName))
-							{
-								break;
-							}
-							targetTextureAtlas = null;
-						}
-						if (targetTextureAtlas != null)
-						{
+							dragonBonesName = eachDragonBonesName;
 							break;
 						}
 					}
 				}
 			}
 			
-			if(!targetTextureAtlas)
+			if (armatureData)
 			{
-				return null;
-			}
-			
-			return generateMesh(targetTextureAtlas, textureName, meshData);
-		}
-		
-		//一般情况下dragonBonesData和textureAtlas是一对一的，通过相同的key对应。
-		public function buildArmature(armatureName:String, fromDragonBonesDataName:String = null, fromTextureAtlasName:String = null, skinName:String = null):Armature
-		{
-			var buildArmatureDataPackage:BuildArmatureDataPackage = new BuildArmatureDataPackage();
-			fillBuildArmatureDataPackageArmatureInfo(armatureName, fromDragonBonesDataName, buildArmatureDataPackage);
-			if (fromTextureAtlasName == null)
-			{
-				fromTextureAtlasName = buildArmatureDataPackage.dragonBonesDataName;
-			}
-			
-			var dragonBonesData:DragonBonesData = buildArmatureDataPackage.dragonBonesData;
-			var armatureData:ArmatureData = buildArmatureDataPackage.armatureData;
-			
-			if(!armatureData)
-			{
-				return null;
-			}
-			
-			return buildArmatureUsingArmatureDataFromTextureAtlas(dragonBonesData, armatureData, fromTextureAtlasName, skinName);
-		}
-		
-		public function buildFastArmature(armatureName:String, fromDragonBonesDataName:String = null, fromTextureAtlasName:String = null, skinName:String = null):FastArmature
-		{
-			var buildArmatureDataPackage:BuildArmatureDataPackage = new BuildArmatureDataPackage();
-			fillBuildArmatureDataPackageArmatureInfo(armatureName, fromDragonBonesDataName, buildArmatureDataPackage);
-			if (fromTextureAtlasName == null)
-			{
-				fromTextureAtlasName = buildArmatureDataPackage.dragonBonesDataName;
-			}
-			var dragonBonesData:DragonBonesData = buildArmatureDataPackage.dragonBonesData;
-			var armatureData:ArmatureData = buildArmatureDataPackage.armatureData;
-			
-			if(!armatureData)
-			{
-				return null;
-			}
-			
-			return buildFastArmatureUsingArmatureDataFromTextureAtlas(dragonBonesData, armatureData, fromTextureAtlasName, skinName);
-		}
-		
-		protected var _hasMesh:Boolean = false;
-		protected function buildArmatureUsingArmatureDataFromTextureAtlas(dragonBonesData:DragonBonesData, armatureData:ArmatureData, textureAtlasName:String, skinName:String = null):Armature
-		{
-			var skinData:SkinData = armatureData.getSkinData(skinName);
-			_hasMesh = skinData? skinData.hasMesh: false;
-			
-			var outputArmature:Armature = generateArmature();
-			outputArmature.name = armatureData.name;
-			outputArmature.__dragonBonesData = dragonBonesData;
-			outputArmature._armatureData = armatureData;
-			outputArmature._skewEnable = dragonBonesData.version >= 4.5;
-			outputArmature.animation.animationDataList = armatureData.animationDataList;
-			
-			buildBones(outputArmature);
-			outputArmature.buildIK();
-			outputArmature.updateBoneCache();
-			buildSlots(outputArmature, skinName, textureAtlasName);
-			
-			outputArmature.advanceTime(0);
-			return outputArmature;
-		}
-		
-		protected function buildFastArmatureUsingArmatureDataFromTextureAtlas(dragonBonesData:DragonBonesData, armatureData:ArmatureData, textureAtlasName:String, skinName:String = null):FastArmature
-		{
-			var outputArmature:FastArmature = generateFastArmature();
-			outputArmature.name = armatureData.name;
-			outputArmature.__dragonBonesData = dragonBonesData;
-			outputArmature._armatureData = armatureData;
-			outputArmature._skewEnable = dragonBonesData.version >= 4.5;
-			outputArmature.animation.animationDataList = armatureData.animationDataList;
-			
-			buildFastBones(outputArmature);
-			outputArmature.buildIK();
-			outputArmature.updateBoneCache();
-			buildFastSlots(outputArmature, skinName, textureAtlasName);
-			
-			outputArmature.advanceTime(0);
-			
-			return outputArmature;
-		}
-		
-		//暂时不支持ifRemoveOriginalAnimationList为false的情况
-		public function copyAnimationsToArmature(toArmature:Armature, fromArmatreName:String, fromDragonBonesDataName:String = null, ifRemoveOriginalAnimationList:Boolean = true):Boolean
-		{
-			var buildArmatureDataPackage:BuildArmatureDataPackage = new BuildArmatureDataPackage();
-			if(!fillBuildArmatureDataPackageArmatureInfo(fromArmatreName, fromDragonBonesDataName, buildArmatureDataPackage))
-			{
-				return false;
-			}
-			
-			var fromArmatureData:ArmatureData = buildArmatureDataPackage.armatureData;
-			toArmature.animation.animationDataList = fromArmatureData.animationDataList;
-			
-		//处理子骨架的复制
-			var fromSkinData:SkinData = fromArmatureData.getSkinData("");
-			var fromSlotData:SlotData;
-			var fromDisplayData:DisplayData;
-			
-			var toSlotList:Vector.<Slot> = toArmature.getSlots(false); 
-			var toSlot:Slot;
-			var toSlotDisplayList:Array;
-			var toSlotDisplayListLength:uint;
-			var toDisplayObject:Object;
-			var toChildArmature:Armature;
-			
-			for each(toSlot in toSlotList)
-			{
-				toSlotDisplayList = toSlot.displayList;
-				toSlotDisplayListLength = toSlotDisplayList.length
-				for(var i:int = 0; i < toSlotDisplayListLength; i++)
-				{
-					toDisplayObject = toSlotDisplayList[i];
-					
-					if(toDisplayObject is Armature)
-					{
-						toChildArmature = toDisplayObject as Armature;
-						
-						fromSlotData = fromSkinData.getSlotData(toSlot.name);
-						fromDisplayData = fromSlotData.displayDataList[i];
-						if(fromDisplayData.type == DisplayData.ARMATURE)
-						{
-							copyAnimationsToArmature(toChildArmature, fromDisplayData.name, buildArmatureDataPackage.dragonBonesDataName, ifRemoveOriginalAnimationList);
-						}
-					}
-				}
-			}
-			
-			return true;
-		}
-		
-		private function fillBuildArmatureDataPackageArmatureInfo(armatureName:String, dragonBonesDataName:String, outputBuildArmatureDataPackage:BuildArmatureDataPackage):Boolean
-		{
-			if(dragonBonesDataName)
-			{
-				outputBuildArmatureDataPackage.dragonBonesDataName = dragonBonesDataName;
-				outputBuildArmatureDataPackage.dragonBonesData = dragonBonesDataDic[dragonBonesDataName];
-				outputBuildArmatureDataPackage.armatureData = outputBuildArmatureDataPackage.dragonBonesData.getArmatureDataByName(armatureName);
+				dataPackage.dataName = dragonBonesName;
+				dataPackage.data = dragonBonesData;
+				dataPackage.armature = armatureData;
+				dataPackage.skin = armatureData.getSkin(skinName) || armatureData.defaultSkin;
 				return true;
 			}
-			else
-			{
-				for(dragonBonesDataName in dragonBonesDataDic)
-				{
-					outputBuildArmatureDataPackage.dragonBonesData = dragonBonesDataDic[dragonBonesDataName];
-					outputBuildArmatureDataPackage.armatureData = outputBuildArmatureDataPackage.dragonBonesData.getArmatureDataByName(armatureName);
-					if(outputBuildArmatureDataPackage.armatureData)
-					{
-						outputBuildArmatureDataPackage.dragonBonesDataName = dragonBonesDataName;
-						return true;
-					}
-				}
-			}
+			
 			return false;
 		}
 		
-		private function fillBuildArmatureDataPackageTextureInfo(fromTextureAtlasName:String, outputBuildArmatureDataPackage:BuildArmatureDataPackage):void
+		/** 
+		 * @private
+		 */
+		protected function _buildBones(dataPackage:BuildArmaturePackage, armature:Armature):void
 		{
-			outputBuildArmatureDataPackage.textureAtlasName = fromTextureAtlasName;
-		}
-		
-		protected function findFirstDragonBonesData():DragonBonesData
-		{
-			for each(var outputDragonBonesData:DragonBonesData in dragonBonesDataDic)
-			{
-				if(outputDragonBonesData)
-				{
-					return outputDragonBonesData;
-				}
-			}
-			return null;
-		}
-		
-		protected function findFirstTextureAtlas():Object
-		{
-			for each(var outputTextureAtlas:Object in textureAtlasDic)
-			{
-				if(outputTextureAtlas)
-				{
-					return outputTextureAtlas;
-				}
-			}
-			return null;
-		}
-		
-		protected function buildBones(armature:Armature):void
-		{
-			//按照从属关系的顺序建立
-			var boneDataList:Vector.<BoneData> = armature.armatureData.boneDataList;
+			const bones:Vector.<BoneData> = dataPackage.armature.sortedBones;
 			
-			var boneData:BoneData;
-			var bone:Bone;
-			var parent:String;
-			for(var i:int = 0;i < boneDataList.length;i ++)
+			for (var i:uint = 0, l:uint = bones.length; i < l; ++i)
 			{
-				boneData = boneDataList[i];
-				bone = Bone.initWithBoneData(boneData);
-				parent = boneData.parent;
-				if(	parent && armature.armatureData.getBoneData(parent) == null)
-				{
-					parent = null;
-				}
-				armature.addBone(bone, parent, true);
-			}
-			armature.updateAnimationAfterBoneListChanged();
-		}
-		
-		protected function buildFastBones(armature:FastArmature):void
-		{
-			//按照从属关系的顺序建立
-			var boneDataList:Vector.<BoneData> = armature.armatureData.boneDataList;
-			
-			var boneData:BoneData;
-			var bone:FastBone;
-			for(var i:int = 0;i < boneDataList.length;i ++)
-			{
-				boneData = boneDataList[i];
-				bone = FastBone.initWithBoneData(boneData);
-				armature.addBone(bone, boneData.parent);
-			}
-		}
-		
-		protected function buildFastSlots(armature:FastArmature, skinName:String, textureAtlasName:String):void
-		{
-		//根据皮肤初始化SlotData的DisplayDataList
-			var skinData:SkinData = armature.armatureData.getSkinData(skinName);
-			if(!skinData)
-			{
-				return;
-			}
-			armature.armatureData.setSkinData(skinName);
-			
-			var displayList:Array = [];
-			var slotDataList:Vector.<SlotData> = armature.armatureData.slotDataList;
-			var slotData:SlotData;
-			var slot:FastSlot;
-			for(var i:int = 0; i < slotDataList.length; i++)
-			{
-				displayList.length = 0;
-				slotData = slotDataList[i];
-				slot = generateFastSlot();
-				slot.initWithSlotData(slotData);
+				const boneData:BoneData = bones[i]
+				const bone:Bone = BaseObject.borrowObject(Bone) as Bone;
 				
-				var l:int = slotData.displayDataList.length;
-				while(l--)
-				{
-					var displayData:DisplayData = slotData.displayDataList[l];
-					
-					switch(displayData.type)
-					{
-						case DisplayData.ARMATURE:
-							var childArmature:FastArmature = buildFastArmatureUsingArmatureDataFromTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlasName, skinName);
-							displayList[l] = childArmature;
-							slot.hasChildArmature = true;
-							break;
-						case DisplayData.MESH:
-							displayList[l] = getMeshDisplay(displayData as MeshData, textureAtlasName);
-							break;
-						case DisplayData.IMAGE:
-						default:
-							displayList[l] = getTextureDisplay(displayData.name, textureAtlasName, displayData.pivot.x, displayData.pivot.y);
-							break;
-						
-					}
-				}
-				//==================================================
-				//如果显示对象有name属性并且name属性可以设置的话，将name设置为与slot同名，dragonBones并不依赖这些属性，只是方便开发者
-				for each(var displayObject:Object in displayList)
-				{
-					if(!displayObject)
-					{
-						continue;
-					}
-					if(displayObject is FastArmature)
-					{
-						displayObject = (displayObject as FastArmature).display;
-					}
-					
-					if(displayObject.hasOwnProperty("name"))
-					{
-						try
-						{
-							displayObject["name"] = slot.name;
-						}
-						catch(err:Error)
-						{
-						}
-					}
-				}
-				//==================================================
-				slot.initDisplayList(displayList.concat());
-				armature.addSlot(slot, slotData.parent);
-				slot.changeDisplayIndex(slotData.displayIndex);
-			}
-		}
-		
-		protected function buildSlots(armature:Armature, skinName:String, textureAtlasName:String):void
-		{
-			var skinData:SkinData = armature.armatureData.getSkinData(skinName);
-			if(!skinData)
-			{
-				return;
-			}
-			armature.armatureData.setSkinData(skinName);
-			var displayList:Array = [];
-			var slotDataList:Vector.<SlotData> = armature.armatureData.slotDataList;
-			var slotData:SlotData;
-			var slot:Slot;
-			var bone:Bone;
-			var skinListObject:Object = { };
-			for(var i:int = 0; i < slotDataList.length; i++)
-			{
-				displayList.length = 0;
-				slotData = slotDataList[i];
-				bone = armature.getBone(slotData.parent);
-				if(!bone)
-				{
-					continue;
-				}
+				bone.name = boneData.name;
+				bone.inheritTranslation = boneData.inheritTranslation; 
+				bone.inheritRotation = boneData.inheritRotation; 
+				bone.inheritScale = boneData.inheritScale; 
+				bone.length = boneData.length;
+				bone.origin.copy(boneData.transform);
 				
-				slot = generateSlot();
-				slot.initWithSlotData(slotData);
-				bone.addSlot(slot);
-				
-				var l:int = slotData.displayDataList.length;
-				while(l--)
+				if (boneData.parent)
 				{
-					var displayData:DisplayData = slotData.displayDataList[l];
-					
-					switch(displayData.type)
-					{
-						case DisplayData.ARMATURE:
-							var childArmature:Armature = buildArmatureUsingArmatureDataFromTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlasName, skinName);
-							displayList[l] = childArmature;
-							break;
-						case DisplayData.MESH:
-							displayList[l] = getMeshDisplay(displayData as MeshData, textureAtlasName);
-							break;
-						case DisplayData.IMAGE:
-						default:
-							displayList[l] = getTextureDisplay(displayData.name, textureAtlasName, displayData.pivot.x, displayData.pivot.y);
-							break;
-						
-					}
-				}
-				//==================================================
-				//如果显示对象有name属性并且name属性可以设置的话，将name设置为与slot同名，dragonBones并不依赖这些属性，只是方便开发者
-				for each(var displayObject:Object in displayList)
-				{
-					if(!displayObject)
-					{
-						continue;
-					}
-					if(displayObject is Armature)
-					{
-						displayObject = (displayObject as Armature).display;
-					}
-					
-					if(displayObject.hasOwnProperty("name"))
-					{
-						try
-						{
-							displayObject["name"] = slot.name;
-						}
-						catch(err:Error)
-						{
-						}
-					}
-				}
-				//==================================================
-				skinListObject[slotData.name] = displayList.concat();
-				slot.displayList = displayList;
-				slot.changeDisplay(slotData.displayIndex);
-			}
-			armature.addSkinList(skinName, skinListObject);
-		}
-		
-		
-		public function addSkinToArmature(armature:Armature, skinName:String, textureAtlasName:String):void
-		{
-			var skinData:SkinData = armature.armatureData.getSkinData(skinName);
-			if(!skinData || !textureAtlasName)
-			{
-				return;
-			}
-			var displayList:Array = [];
-			var slotDataList:Vector.<SlotData> = armature.armatureData.slotDataList;
-			var slotData:SlotData;
-			var slot:Slot;
-			var bone:Bone;
-			var skinListData:Object = { };
-			var displayDataList:Vector.<DisplayData>
-			
-			for(var i:int = 0; i < slotDataList.length; i++)
-			{
-				displayList.length = 0;
-				slotData = slotDataList[i];
-				bone = armature.getBone(slotData.parent);
-				if(!bone)
-				{
-					continue;
-				}
-				
-				var l:int = 0;
-				if (i >= skinData.slotDataList.length)
-				{
-					l = 0;
+					armature.addBone(bone, boneData.parent.name);
 				}
 				else
 				{
-					displayDataList = skinData.slotDataList[i].displayDataList;
-					l = displayDataList.length;
+					armature.addBone(bone);
 				}
-				while(l--)
+				
+				if (boneData.ik)
 				{
-					var displayData:DisplayData = displayDataList[l];
-					
-					switch(displayData.type)
-					{
-						case DisplayData.ARMATURE:
-							var childArmature:Armature = buildArmatureUsingArmatureDataFromTextureAtlas(armature.__dragonBonesData, armature.__dragonBonesData.getArmatureDataByName(displayData.name), textureAtlasName, skinName);
-							displayList[l] = childArmature;
-							break;
-						
-						case DisplayData.IMAGE:
-						default:
-							displayList[l] = (displayData.name, textureAtlasName, displayData.pivot.x, displayData.pivot.y);
-							break;
-						
-					}
+					bone.ikBendPositive = boneData.bendPositive;
+					bone.ikWeight = boneData.weight;
+					bone._setIK(armature.getBone(boneData.ik.name), boneData.chain);
 				}
-				//==================================================
-				//如果显示对象有name属性并且name属性可以设置的话，将name设置为与slot同名，dragonBones并不依赖这些属性，只是方便开发者
-				for each(var displayObject:Object in displayList)
-				{
-					if(displayObject is Armature)
-					{
-						displayObject = (displayObject as Armature).display;
-					}
-					
-					if(displayObject.hasOwnProperty("name"))
-					{
-						try
-						{
-							displayObject["name"] = slot.name;
-						}
-						catch(err:Error)
-						{
-						}
-					}
-				}
-				//==================================================
-				skinListData[slotData.name] = displayList.concat();
 			}
-			armature.addSkinList(skinName, skinListData);
+		}
+		
+		/** 
+		 * @private
+		 */
+		protected function _buildSlots(dataPackage:BuildArmaturePackage, armature:Armature):void
+		{
+			const currentSkin:SkinData = dataPackage.skin;
+			const defaultSkin:SkinData = dataPackage.armature.defaultSkin;
+			const slotDisplayDataSetMap:Object = {};
+			
+			var slotName:String = null;
+			var slotDisplayDataSet:SlotDisplayDataSet = null;
+			
+			for each (slotDisplayDataSet in defaultSkin.slots)
+			{
+				slotDisplayDataSetMap[slotDisplayDataSet.slot.name] = slotDisplayDataSet;
+			}
+			
+			if (currentSkin != defaultSkin)
+			{
+				for each (slotDisplayDataSet in currentSkin.slots)
+				{
+					slotDisplayDataSetMap[slotDisplayDataSet.slot.name] = slotDisplayDataSet;
+				}
+			}
+			
+			const slots:Vector.<SlotData> = dataPackage.armature.sortedSlots;
+			for each (var slotData:SlotData in slots)
+			{
+				slotDisplayDataSet = slotDisplayDataSetMap[slotData.name];
+				if (!slotDisplayDataSet)
+				{
+					continue;
+				}
+				
+				const slot:Slot = _generateSlot(dataPackage, slotDisplayDataSet);
+				
+				slot._displayDataSet = slotDisplayDataSet;
+				slot._setDisplayIndex(slotData.displayIndex);
+				slot._setBlendMode(slotData.blendMode);
+				slot._setColor(slotData.color);
+				
+				armature.addSlot(slot, slotData.parent.name);
+			}
+		}
+		
+		/** 
+		 * @private
+		 */
+		protected function _replaceSlotDisplay(dataPackage:BuildArmaturePackage, displayData:DisplayData, slot:Slot, displayIndex:int):void
+		{
+			if (!displayData)
+			{
+				return;
+			}
+			
+			if (displayIndex < 0)
+			{
+				displayIndex = slot.displayIndex;
+			}
+			
+			if (displayIndex < 0)
+			{
+				slot.display = _generateDisplay(dataPackage, displayData, null);
+			}
+			else
+			{
+				const displayList:Vector.<Object> = slot.displayList;
+				if (displayList.length <= displayIndex)
+				{
+					displayList.fixed = false;
+					displayList.length = displayIndex + 1;
+					displayList.fixed = true;
+				}
+				
+				const rawDisplayData:DisplayData = slot._displayDataSet.displays.length <= displayIndex? null: slot._displayDataSet[displayIndex];
+				const display:Object = _generateDisplay(dataPackage, displayData, rawDisplayData);
+				displayList[displayIndex] = display;
+				
+				slot.displayList = displayList;
+			}
+		}
+		
+		/** 
+		 * @private
+		 */
+		protected function _generateTextureAtlasData(textureAtlasData:TextureAtlasData, textureAtlas:Object):TextureAtlasData
+		{
+			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
+			return null;
+		}
+		
+		/** 
+		 * @private
+		 */
+		protected function _generateArmature(dataPackage:BuildArmaturePackage):Armature
+		{
+			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
+			return null;
+		}
+		
+		/** 
+		 * @private
+		 */
+		protected function _generateSlot(dataPackage:BuildArmaturePackage, slotDisplayDataSet:SlotDisplayDataSet):Slot
+		{
+			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
+			return null;
+		}
+		
+		/** 
+		 * @private
+		 */
+		protected function _generateDisplay(dataPackage:BuildArmaturePackage, displayData:DisplayData, rawDisplayData:DisplayData):Object
+		{
+			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
+			return null;
 		}
 		
 		/**
-		 * Parses the raw data and returns a SkeletonData instance.	
-		 * @example 
-		 * <listing>
-		 * import flash.events.Event; 
-		 * import dragonBones.factorys.NativeFactory;
-		 * 
-		 * [Embed(source = "../assets/Dragon1.swf", mimeType = "application/octet-stream")]
-		 *	private static const ResourcesData:Class;
-		 * var factory:NativeFactory = new NativeFactory(); 
-		 * factory.addEventListener(Event.COMPLETE, textureCompleteHandler);
-		 * factory.parseData(new ResourcesData());
-		 * </listing>
-		 * @param ByteArray. Represents the raw data for the whole DragonBones system.
-		 * @param String. (optional) The SkeletonData instance name.
-		 * @param Boolean. (optional) flag if delay animation data parsing. Delay animation data parsing can reduce the data paring time to improve loading performance.
-		 * @param Dictionary. (optional) output parameter. If it is not null, and ifSkipAnimationData is true, it will be fulfilled animationData, so that developers can parse it later.
-		 * @return A SkeletonData instance.
+		 * @language zh_CN
+		 * 解析龙骨数据，并将解析后的数据添加到工厂。
+		 * @param rawData 需要解析的原始数据。 (JSON 或 合并后的 PNG 和 SWF 文件)
+		 * @param dragonBonesName 为解析后的数据提供一个名称，以便可以通过这个名称来访问数据，如果不提供，则使用数据中的名称。 (默认: <code>null</code>)
+		 * @return DragonBonesData
+		 * @see #getDragonBonesData()
+		 * @see #addDragonBonesData()
+		 * @see #removeDragonBonesData()
+		 * @see dragonBones.objects.DragonBonesData
+		 * @version DragonBones 4.5
 		 */
-		public function parseData(bytes:ByteArray, dataName:String = null):void
+		public function parseDragonBonesData(rawData:Object, dragonBonesName:String = null):DragonBonesData
 		{
-			if(!bytes)
+			var isComplete:Boolean = true;
+			if (rawData is ByteArray)
+			{
+				const decodeData:DecodedData = DecodedData.decode(rawData as ByteArray);
+				if (decodeData)
+				{
+					_decodeDataList.push(decodeData);
+					decodeData.name = dragonBonesName || "";
+					decodeData.contentLoaderInfo.addEventListener(Event.COMPLETE, _loadTextureAtlasHandler);
+					decodeData.loadBytes(decodeData.textureAtlasBytes, null);
+					rawData = decodeData.dragonBonesData;
+					isComplete = false;
+				}
+				else
+				{
+					return null;
+				}
+			}
+			
+			const dragonBonesData:DragonBonesData = ObjectDataParser.getInstance().parseDragonBonesData(rawData);
+			addDragonBonesData(dragonBonesData, dragonBonesName);
+			
+			if (isComplete)
+			{
+				clearTimeout(_delayID);
+				_delayID = setTimeout(this.dispatchEvent, 30, new Event(Event.COMPLETE));
+			}
+			
+			return dragonBonesData;
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 解析贴图集数据，并将解析后的数据添加到工厂。
+		 * @param rawData 需要解析的原始贴图集数据。 (JSON 或 XML 文件)
+		 * @param textureAtlas 贴图集。 (BitmapData 或 ATF 或 DisplayObject)
+		 * @param name 为解析后的数据提供一个名称，以便可以通过这个名称来访问数据，如果不提供，则使用数据中的名称。 (默认: <code>null</code>)
+		 * @param scale 为贴图集设置一个缩放值。 (默认: <code>0</code> 不缩放)
+		 * @return 贴图集数据
+		 * @see #getTextureAtlasData()
+		 * @see #addTextureAtlasData()
+		 * @see #removeTextureAtlasData()
+		 * @see dragonBones.textures.TextureAtlasData
+		 * @version DragonBones 4.5
+		 */
+		public function parseTextureAtlasData(rawData:Object, textureAtlas:Object, name:String = null, scale:Number = 0, rawScale:Number = 0):TextureAtlasData
+		{
+			const textureAtlasData:TextureAtlasData = _generateTextureAtlasData(null, null);
+			ObjectDataParser.getInstance().parseTextureAtlasData(rawData, textureAtlasData, scale, rawScale);
+			
+			if (textureAtlas is Bitmap)
+			{
+				textureAtlas = (textureAtlas as Bitmap).bitmapData;
+			}
+			else if (textureAtlas is DisplayObject)
+			{
+				const displayObject:DisplayObject = textureAtlas as DisplayObject;
+				textureAtlas = new BitmapData(displayObject.width, displayObject.height, true, 0);
+				(textureAtlas as BitmapData).draw(displayObject, null, null, null, null, true);
+			}
+			
+			_generateTextureAtlasData(textureAtlasData, textureAtlas);
+			addTextureAtlasData(textureAtlasData, name);
+			return textureAtlasData;
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 获得指定名称的 DragonBonesData。
+		 * @param name 指定的名称。
+		 * @return DragonBonesData
+		 * @see #parseDragonBonesData()
+		 * @see #addDragonBonesData()
+		 * @see #removeDragonBonesData()
+		 * @see dragonBones.objects.DragonBonesData
+		 * @version DragonBones 3.0
+		 */
+		public function getDragonBonesData(name:String):DragonBonesData
+		{
+			return _dragonBonesDataMap[name] as DragonBonesData;
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 将 DragonBonesData 添加到工厂。
+		 * @param data DragonBonesData。
+		 * @param dragonBonesName 为数据提供一个名称，以便可以通过这个名称来访问数据，如果不提供，则使用数据中的名称。 (默认: <code>null</code>)
+		 * @see #parseDragonBonesData()
+		 * @see #getDragonBonesData()
+		 * @see #removeDragonBonesData()
+		 * @see dragonBones.objects.DragonBonesData
+		 * @version DragonBones 3.0
+		 */
+		public function addDragonBonesData(data:DragonBonesData, dragonBonesName:String = null):void
+		{
+			if (data)
+			{
+				dragonBonesName = dragonBonesName || data.name;
+				if (dragonBonesName)
+				{
+					if (!_dragonBonesDataMap[dragonBonesName])
+					{
+						_dragonBonesDataMap[dragonBonesName] = data;
+					}
+					else
+					{
+						throw new ArgumentError("Same name data");
+					}
+				}
+				else
+				{
+					throw new ArgumentError("Unnamed data");
+				}
+			}
+			else
 			{
 				throw new ArgumentError();
 			}
-			
-			var decompressedData:DecompressedData = DataSerializer.decompressData(bytes);
-			
-			var dragonBonesData:DragonBonesData = DataParser.parseData(decompressedData.dragonBonesData);
-			decompressedData.name = dataName || dragonBonesData.name;
-			decompressedData.addEventListener(Event.COMPLETE, parseCompleteHandler);
-			decompressedData.parseTextureAtlasBytes();
-			
-			addSkeletonData(dragonBonesData, dataName);
 		}
 		
-		/** @private */
-		protected function parseCompleteHandler(event:Event):void
+		/**
+		 * @language zh_CN
+		 * 将指定名称的 DragonBonesData 从工厂中移除。
+		 * @param dragonBonesName 指定的名称。
+		 * @param dispose 是否释放数据。 [<code>false</code>: 开启, <code>true</code>: 不开启] (默认: <code>true</code>)
+		 * @see #parseDragonBonesData()
+		 * @see #getDragonBonesData()
+		 * @see #addDragonBonesData()
+		 * @see dragonBones.objects.DragonBonesData
+		 * @version DragonBones 3.0
+		 */
+		public function removeDragonBonesData(dragonBonesName:String, dispose:Boolean = true):void
 		{
-			var decompressedData:DecompressedData = event.target as DecompressedData;
-			decompressedData.removeEventListener(Event.COMPLETE, parseCompleteHandler);
-			
-			var textureAtlas:Object = generateTextureAtlas(decompressedData.textureAtlas, decompressedData.textureAtlasData);
-			addTextureAtlas(textureAtlas, decompressedData.name);
-			
-			decompressedData.dispose();
-			this.dispatchEvent(new Event(Event.COMPLETE));
+			const dragonBonesData:DragonBonesData = _dragonBonesDataMap[dragonBonesName];
+			if (dragonBonesData)
+			{
+				if (dispose)
+				{
+					dragonBonesData.returnToPool();
+				}
+				
+				delete _dragonBonesDataMap[dragonBonesName];
+			}
 		}
 		
-		
-		/** @private */
-		protected function generateTextureAtlas(content:Object, textureAtlasRawData:Object):ITextureAtlas
+		/**
+		 * @language zh_CN
+		 * 获得指定名称的贴图集数据列表。
+		 * @param name 指定的名称。
+		 * @return 贴图集数据列表
+		 * @see #parseTextureAtlasData()
+		 * @see #addTextureAtlasData()
+		 * @see #removeTextureAtlasData()
+		 * @see dragonBones.textures.TextureAtlasData
+		 * @version DragonBones 3.0
+		 */
+		public function getTextureAtlasData(name:String):Vector.<TextureAtlasData>
 		{
+			return _textureAtlasDataMap[name] as Vector.<TextureAtlasData>;
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 将贴图集数据添加到工厂。
+		 * @param data 贴图集数据。
+		 * @param dragonBonesName 为数据提供一个名称，以便可以通过这个名称来访问数据，如果不提供，则使用数据中的名称。 (默认: <code>null</code>)
+		 * @see #parseTextureAtlasData()
+		 * @see #getTextureAtlasData()
+		 * @see #removeTextureAtlasData()
+		 * @see dragonBones.textures.TextureAtlasData
+		 * @version DragonBones 3.0
+		 */
+		public function addTextureAtlasData(data:TextureAtlasData, name:String = null):void
+		{
+			if (data)
+			{
+				name = name || data.name;
+				if (name)
+				{
+					const textureAtlasList:Vector.<TextureAtlasData> = _textureAtlasDataMap[name] = _textureAtlasDataMap[name] || new Vector.<TextureAtlasData>;		
+					if (textureAtlasList.indexOf(data) < 0)
+					{
+						textureAtlasList.push(data);
+					}
+				}
+				else
+				{
+					throw new ArgumentError("Unnamed data");
+				}
+			}
+			else
+			{
+				throw new ArgumentError();
+			}
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 将指定名称的贴图集数据从工厂中移除。
+		 * @param name 指定的名称。
+		 * @param dispose 是否释放数据。 [<code>true</code>: 释放, <code>false</code>: 不释放] (默认: <code>true</code>)
+		 * @see #parseTextureAtlasData()
+		 * @see #getTextureAtlasData()
+		 * @see #addTextureAtlasData()
+		 * @see dragonBones.textures.TextureAtlasData
+		 * @version DragonBones 3.0
+		 */
+		public function removeTextureAtlasData(name:String, dispose:Boolean = true):void
+		{
+			const textureAtlasDataList:Vector.<TextureAtlasData> = _textureAtlasDataMap[name] as Vector.<TextureAtlasData>;
+			if (textureAtlasDataList)
+			{
+				if (dispose)
+				{
+					for each (var textureAtlasData:TextureAtlasData in textureAtlasDataList)
+					{
+						textureAtlasData.returnToPool();
+					}
+				}
+				
+				delete _textureAtlasDataMap[name];
+			}
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 清除所有的数据。
+		 * @param dispose 是否释放数据。 [<code>true</code>: 释放, <code>false</code>: 不释放] (默认: <code>true</code>)
+		 * @see dragonBones.objects.DragonBonesData
+		 * @see dragonBones.textures.TextureAtlasData
+		 * @version DragonBones 4.5
+		 */
+		public function clear(dispose:Boolean = true):void
+		{
+			var i:String = null;
+			
+			for (i in _dragonBonesDataMap)
+			{
+				if (dispose)
+				{
+					(_dragonBonesDataMap[i] as DragonBonesData).returnToPool();
+				}
+				
+				delete _dragonBonesDataMap[i];
+			}
+			
+			for (i in _textureAtlasDataMap)
+			{
+				if (dispose)
+				{
+					const textureAtlasDataList:Vector.<TextureAtlasData> = _dragonBonesDataMap[i];
+					for each (var textureAtlasData:TextureAtlasData in textureAtlasDataList)
+					{
+						textureAtlasData.returnToPool();
+					}
+				}
+				
+				delete _textureAtlasDataMap[i];
+			}
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 创建一个指定名称的骨架。
+		 * @param armatureName 骨架数据名称。
+		 * @param dragonBonesName DragonBonesData 名称，如果不提供此名称，将检索所有数据，如果多个数据中包含同名的骨架数据，可能无法创建出准确的骨架。 (默认: <code>null</code>)
+		 * @param skinName 皮肤名称。 (默认: <code>null</code>)
+		 * @return 创建的骨架
+		 * @see dragonBones.Armature
+		 * @version DragonBones 4.5
+		 */
+		public function buildArmature(armatureName:String, dragonBonesName:String = null, skinName:String = null):Armature
+		{
+			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
+			if (_fillBuildArmaturePackage(dragonBonesName, armatureName, skinName, dataPackage))
+			{
+				const armature:Armature = _generateArmature(dataPackage);
+				_buildBones(dataPackage, armature);
+				_buildSlots(dataPackage, armature);
+				
+				// Update armature pose
+				armature.advanceTime(0);
+				return armature;
+			}
+			
 			return null;
 		}
 		
 		/**
-		 * @private
-		 * Generates an Armature instance.
-		 * @return Armature An Armature instance.
+		 * @language zh_CN
+		 * 将指定骨架的动画替换成其他骨架的动画。 (通常这些骨架应该具有相同的骨架结构)
+		 * @param toArmature 指定的骨架。
+		 * @param fromArmatreName 其他骨架的名称。
+		 * @param fromSkinName 其他骨架的皮肤名称。 (默认: <code>null</code>)
+		 * @param fromDragonBonesDataName 其他骨架所在的 DragonBonesData 名称。 (默认: <code>null</code>)
+		 * @param ifRemoveOriginalAnimationList 是否移除原有的动画。 [<code>true</code>: 移除, <code>false</code>: 不移除] (默认: <code>true</code>)
+		 * @return 是否替换成功  [<code>true</code>: 成功, <code>false</code>: 不成功]
+		 * @see dragonBones.Armature
+		 * @version DragonBones 4.5
 		 */
-		protected function generateArmature():Armature
+		public function copyAnimationsToArmature(
+			toArmature:Armature, fromArmatreName:String, fromSkinName:String = null, 
+			fromDragonBonesDataName:String = null, ifRemoveOriginalAnimationList:Boolean = true
+		):Boolean
 		{
-			return null;
+			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
+			if (_fillBuildArmaturePackage(fromDragonBonesDataName, fromArmatreName, fromSkinName, dataPackage))
+			{
+				const fromArmatureData:ArmatureData = dataPackage.armature;
+				if (ifRemoveOriginalAnimationList)
+				{
+					toArmature.animation.animations = fromArmatureData.animations;
+				}
+				else
+				{
+					const animations:Object = {};
+					var animationName:String = null;
+					for (animationName in toArmature.animation.animations)
+					{
+						animations[animationName] = toArmature.animation.animations[animationName];
+					}
+					
+					for (animationName in fromArmatureData.animations)
+					{
+						animations[animationName] = fromArmatureData.animations[animationName];
+					}
+					
+					toArmature.animation.animations = animations;
+				}
+				
+				if (dataPackage.skin)
+				{
+					for each(var toSlot:Slot in toArmature.getSlots())
+					{
+						const toSlotDisplayList:Vector.<Object> = toSlot.displayList;
+						for (var i:uint = 0, l:uint = toSlotDisplayList.length; i < l; ++i)
+						{
+							const toDisplayObject:Object = toSlotDisplayList[i];
+							if (toDisplayObject is Armature)
+							{
+								const displays:Vector.<DisplayData> = dataPackage.skin.getSlot(toSlot.name).displays;
+								if (i < displays.length)
+								{
+									const fromDisplayData:DisplayData = displays[i];
+									if (fromDisplayData.type == DragonBones.DISPLAY_TYPE_ARMATURE)
+									{
+										copyAnimationsToArmature(toDisplayObject as Armature, fromDisplayData.name, fromSkinName, fromDragonBonesDataName, ifRemoveOriginalAnimationList);
+									}
+								}
+							}
+						}
+					}
+					
+					return true;
+				}
+			}
+			
+			return false;
 		}
 		
 		/**
-		 * @private
-		 * Generates an Armature instance.
-		 * @return Armature An Armature instance.
+		 * @language zh_CN
+		 * 将指定插槽的显示对象替换为指定资源创造出的显示对象。
+		 * @param dragonBonesName 指定的 DragonBonesData 名称。
+		 * @param armatureName 指定的骨架名称。
+		 * @param slotName 指定的插槽名称。
+		 * @param displayName 指定的显示对象名称。
+		 * @param slot 指定的插槽实例。
+		 * @param displayIndex 要替换的显示对象的索引，如果未指定索引则替换当前正在显示的显示对象。 (默认: -1)
+		 * @version DragonBones 3.0
 		 */
-		protected function generateFastArmature():FastArmature
+		public function replaceSlotDisplay(dragonBonesName:String, armatureName:String, slotName:String, displayName:String, slot:Slot, displayIndex:int = -1):void
 		{
-			return null;
+			var displayData:DisplayData = null;
+			
+			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
+			if (_fillBuildArmaturePackage(dragonBonesName, armatureName, null, dataPackage))
+			{
+				const slotDisplayDataSet:SlotDisplayDataSet = dataPackage.skin.getSlot(slotName);
+				if (slotDisplayDataSet)
+				{
+					for each (displayData in slotDisplayDataSet.displays)
+					{
+						if (displayData.name == displayName)
+						{
+							break;
+						}
+						
+						displayData = null;
+					}
+				}
+			}
+			
+			_replaceSlotDisplay(dataPackage, displayData, slot, displayIndex);
 		}
 		
 		/**
-		 * @private
-		 * Generates an Slot instance.
-		 * @return Slot An Slot instance.
+		 * @language zh_CN
+		 * 将指定插槽的显示对象列表替换为指定资源创造出的显示对象列表。
+		 * @param dragonBonesName 指定的 DragonBonesData 名称。
+		 * @param armatureName 指定的骨架名称。
+		 * @param slotName 指定的插槽名称。
+		 * @param slot 指定的插槽实例。
+		 * @version DragonBones 3.0
 		 */
-		protected function generateSlot():Slot
+		public function replaceSlotDisplayList(dragonBonesName:String, armatureName:String, slotName:String, slot:Slot):void
 		{
-			return null;
+			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
+			if (!_fillBuildArmaturePackage(dragonBonesName, armatureName, null, dataPackage))
+			{
+				return;
+			}
+			
+			const slotDisplayDataSet:SlotDisplayDataSet = dataPackage.skin.getSlot(slotName);
+			if (!slotDisplayDataSet)
+			{
+				return;
+			}
+			
+			// for _replaceSlotDisplay(dataPackage, displayData, slot, displayIndex);
 		}
 		
 		/**
-		 * @private
-		 * Generates an Slot instance.
-		 * @return Slot An Slot instance.
+		 * @language zh_CN
+		 * 不推荐使用的API。
+		 * @see #clear();
+		 * @version DragonBones 3.0
 		 */
-		protected function generateFastSlot():FastSlot
+		public function dispose():void
 		{
-			return null;
+			clear();
 		}
-		
-		/**
-		 * @private
-		 * Generates a DisplayObject
-		 * @param textureAtlas The TextureAtlas.
-		 * @param fullName A qualified name.
-		 * @param pivotX A pivot x based value.
-		 * @param pivotY A pivot y based value.
-		 * @return
-		 */
-		protected function generateDisplay(textureAtlas:Object, fullName:String, pivotX:Number, pivotY:Number):Object
-		{
-			return null;
-		}
-		
-		protected function generateMesh(textureAtlas:Object, fullName:String, meshData:MeshData):Object
-		{
-			return null;
-		}
-		
 	}
-}
-import dragonBones.objects.ArmatureData;
-import dragonBones.objects.DragonBonesData;
-
-class BuildArmatureDataPackage
-{
-	public var dragonBonesDataName:String;
-	public var dragonBonesData:DragonBonesData;
-	public var armatureData:ArmatureData;
-	public var textureAtlasName:String;
 }

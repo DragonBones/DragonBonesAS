@@ -1,415 +1,141 @@
-﻿package dragonBones.animation 
+package dragonBones.animation
 {
-	import dragonBones.Armature;
 	import dragonBones.Slot;
+	import dragonBones.core.BaseObject;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.objects.CurveData;
-	import dragonBones.objects.FFDFrame;
-	import dragonBones.objects.FFDTimeline;
-	import dragonBones.objects.Frame;
-	import dragonBones.utils.MathUtil;
+	import dragonBones.objects.ExtensionFrameData;
+	import dragonBones.objects.TweenFrameData;
 	
 	use namespace dragonBones_internal;
+	
 	/**
-	 * ...
-	 * @author sukui
+	 * @private
 	 */
-	public final class FFDTimelineState
+	public final class FFDTimelineState extends TweenTimelineState
 	{
-		private static var _pool:Vector.<FFDTimelineState> = new Vector.<FFDTimelineState>;
-		/** @private */
-		dragonBones_internal static function borrowObject():FFDTimelineState
+		public var slot:Slot;
+		
+		private var _tweenFFD:int;
+		private var _ffdVertices:Vector.<Number>;
+		private var _durationFFDFrame:ExtensionFrameData;
+		
+		public function FFDTimelineState()
 		{
-			if(_pool.length == 0)
+			super(this);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override protected function _onClear():void
+		{
+			super._onClear();
+			
+			slot = null;
+			
+			_tweenFFD = TWEEN_TYPE_NONE;
+			_ffdVertices = null;
+			
+			if (_durationFFDFrame)
 			{
-				return new FFDTimelineState();
-			}
-			return _pool.pop();
-		}
-		
-		/** @private */
-		dragonBones_internal static function returnObject(timeline:FFDTimelineState):void
-		{
-			if(_pool.indexOf(timeline) < 0)
-			{
-				_pool[_pool.length] = timeline;
-			}
-			
-			timeline.clear();
-		}
-		
-		/** @private */
-		dragonBones_internal static function clear():void
-		{
-			var i:int = _pool.length;
-			while(i --)
-			{
-				_pool[i].clear();
-			}
-			_pool.length = 0;
-		}
-		
-		public var skin:String;
-		public var name:String;
-		public var displayIndex:int = 0;
-		
-		/** @private */
-		dragonBones_internal var _weight:Number;
-		
-		/** @private */
-		dragonBones_internal var _blendEnabled:Boolean;
-		
-		/** @private */
-		dragonBones_internal var _isComplete:Boolean;
-		
-		/** @private */
-		dragonBones_internal var _animationState:AnimationState;
-		
-		private var _totalTime:int; //duration
-		
-		private var _currentTime:int;
-		private var _currentFrameIndex:int;
-		private var _currentFramePosition:int;
-		private var _currentFrameDuration:int;
-		
-		private var _tweenEasing:Number;
-		private var _tweenCurve:CurveData;
-		private var _tweenVertices:Boolean;
-		private var _offset:int;
-		private var _durationVertices:Vector.<Number>;
-		private var _updateVertices:Vector.<Number>;
-		private var _rawAnimationScale:Number;
-		
-		//-1: frameLength>1, 0:frameLength==0, 1:frameLength==1
-		private var _updateMode:int;
-		
-		private var _armature:Armature;
-		private var _animation:Animation;
-		private var _slot:Slot;
-		
-		private var _timelineData:FFDTimeline;
-		
-		public function FFDTimelineState() 
-		{
-			_durationVertices = new Vector.<Number>();
-			_updateVertices = new Vector.<Number>();
-		}
-		
-		private function clear():void
-		{
-			_slot = null;
-			_armature = null;
-			_animation = null;
-			_animationState = null;
-			_timelineData = null;
-		}
-		
-		/** @private */
-		dragonBones_internal function fadeIn(slot:Slot, animationState:AnimationState, timelineData:FFDTimeline):void
-		{
-			_slot = slot;
-			//_armature = _slot.armature;
-			//_animation = _armature.animation;
-			_animationState = animationState;
-			_timelineData = timelineData;
-			
-			name = timelineData.name;
-			skin = timelineData.skin;
-			displayIndex = timelineData.displayIndex;
-			
-			_totalTime = _timelineData.duration;
-			_rawAnimationScale = _animationState.clip.scale;
-			
-			_isComplete = false;
-			_blendEnabled = false;
-
-			_currentFrameIndex = -1;
-			_currentTime = -1;
-			_tweenEasing = NaN;
-			_weight = 1;
-			
-			switch(_timelineData.frameList.length)
-			{
-				case 0:
-					_updateMode = 0;
-					break;
-				case 1:
-					_updateMode = 1;
-					break;
-				default:
-					_updateMode = -1;
-					break;
+				_durationFFDFrame.returnToPool();
+				_durationFFDFrame = null;
 			}
 		}
 		
-		/** @private */
-		dragonBones_internal function update(progress:Number):void
+		override protected function _onFadeIn():void
 		{
-			if(_updateMode == -1)
-			{
-				updateMultipleFrame(progress);
-			}
-			else if(_updateMode == 1)
-			{
-				_updateMode = 0;
-				updateSingleFrame();
-			}
+			_ffdVertices = slot._ffdVertices;
+			
+			_durationFFDFrame = BaseObject.borrowObject(ExtensionFrameData) as ExtensionFrameData;
+			_durationFFDFrame.tweens.fixed = false;
+			_durationFFDFrame.tweens.length = _ffdVertices.length;
+			_durationFFDFrame.tweens.fixed = true;
 		}
 		
-		private function updateMultipleFrame(progress:Number):void
+		override protected function _onArriveAtFrame(isUpdate:Boolean):void
 		{
-			var currentPlayTimes:int = 0;
-			progress /= _timelineData.scale;
-			progress += _timelineData.offset;
+			super._onArriveAtFrame(isUpdate);
 			
-			var currentTime:int = _totalTime * progress;
-			var playTimes:int = _animationState.playTimes;
-			if(playTimes == 0)
+			if (this._animationState._isDisabled(slot))
 			{
-				_isComplete = false;
-				currentPlayTimes = Math.ceil(Math.abs(currentTime) / _totalTime) || 1;
-				currentTime -= int(currentTime / _totalTime) * _totalTime;
-				
-				if(currentTime < 0)
-				{
-					currentTime += _totalTime;
-				}
-			}
-			else
-			{
-				var totalTimes:int = playTimes * _totalTime;
-				if(currentTime >= totalTimes)
-				{
-					currentTime = totalTimes;
-					_isComplete = true;
-				}
-				else if(currentTime <= -totalTimes)
-				{
-					currentTime = -totalTimes;
-					_isComplete = true;
-				}
-				else
-				{
-					_isComplete = false;
-				}
-				
-				if(currentTime < 0)
-				{
-					currentTime += totalTimes;
-				}
-				
-				currentPlayTimes = Math.ceil(currentTime / _totalTime) || 1;
-				if(_isComplete)
-				{
-					currentTime = _totalTime;
-				}
-				else
-				{
-					currentTime -= int(currentTime / _totalTime) * _totalTime;
-				}
+				this._tweenEasing = TweenFrameData.NO_TWEEN;
+				this._curve = null;
+				_tweenFFD = TWEEN_TYPE_NONE;
+				return;
 			}
 			
-			if(_currentTime != currentTime)
+			const currentFrame:ExtensionFrameData = this._currentFrame as ExtensionFrameData;
+			
+			_tweenFFD = TWEEN_TYPE_NONE;
+			
+			if (this._tweenEasing != TweenFrameData.NO_TWEEN || this._curve)
 			{
-				_currentTime = currentTime;
-				
-				var frameList:Vector.<Frame> = _timelineData.frameList;
-				var prevFrame:FFDFrame;
-				var currentFrame:FFDFrame;
-				
-				for (var i:int = 0, l:int = _timelineData.frameList.length; i < l; ++i)
+				_tweenFFD = this._updateExtensionKeyFrame(currentFrame, currentFrame.next as ExtensionFrameData, _durationFFDFrame);
+			}
+			
+			if (_tweenFFD == TWEEN_TYPE_NONE)
+			{
+				for (var i:uint = 0, l:uint = currentFrame.tweens.length; i < l; ++i)
 				{
-					if(_currentFrameIndex < 0)
+					if (_ffdVertices[i] != currentFrame.tweens[i])
 					{
-						_currentFrameIndex = 0;
-					}
-					else if(_currentTime < _currentFramePosition || _currentTime >= _currentFramePosition + _currentFrameDuration)
-					{
-						_currentFrameIndex ++;
-						if(_currentFrameIndex >= frameList.length)
-						{
-							if(_isComplete)
-							{
-								_currentFrameIndex --;
-								break;
-							}
-							else
-							{
-								_currentFrameIndex = 0;
-							}
-						}
-					}
-					else
-					{
+						_tweenFFD = TWEEN_TYPE_ONCE;
 						break;
 					}
-					currentFrame = frameList[_currentFrameIndex] as FFDFrame;
-					
-					_currentFrameDuration = currentFrame.duration;
-					_currentFramePosition = currentFrame.position;
-					prevFrame = currentFrame;
-				}
-				
-				if(currentFrame)
-				{
-					updateToNextFrame(currentPlayTimes);
-				}
-				
-				if (_tweenEasing == _tweenEasing)
-				{
-					updateTween();
 				}
 			}
 		}
 		
-		private function updateToNextFrame(currentPlayTimes:int):void
+		override protected function _onUpdateFrame(isUpdate:Boolean):void
 		{
-			var nextFrameIndex:int = _currentFrameIndex + 1;
-			if(nextFrameIndex >= _timelineData.frameList.length)
+			super._onUpdateFrame(isUpdate);
+			
+			if (_tweenFFD != TWEEN_TYPE_NONE && this._animationState._fadeProgress >= 1)
 			{
-				nextFrameIndex = 0;
-			}
-			var currentFrame:FFDFrame = _timelineData.frameList[_currentFrameIndex] as FFDFrame;
-			var nextFrame:FFDFrame = _timelineData.frameList[nextFrameIndex] as FFDFrame;
-			var tweenEnabled:Boolean = false;
-			if(
-				nextFrameIndex == 0 &&
-				(
-					!_animationState.lastFrameAutoTween ||
-					(
-						_animationState.playTimes &&
-						_animationState.currentPlayTimes >= _animationState.playTimes && 
-						((_currentFramePosition + _currentFrameDuration) / _totalTime + currentPlayTimes - _timelineData.offset) * _timelineData.scale > 0.999999
-					)
-				)
-			)
-			{
-				_tweenEasing = NaN;
-				tweenEnabled = false;
-			}
-			else if(_animationState.autoTween)
-			{
-				_tweenEasing = _animationState.clip.tweenEasing;
-				if(isNaN(_tweenEasing))
+				if (_tweenFFD == TWEEN_TYPE_ONCE)
 				{
-					_tweenEasing = currentFrame.tweenEasing;
-					_tweenCurve = currentFrame.curve;
-					if(isNaN(_tweenEasing) && _tweenCurve == null)    //frame no tween
+					_tweenFFD = TWEEN_TYPE_NONE;
+				}
+				
+				const currentFFDVertices:Vector.<Number> = (this._currentFrame as ExtensionFrameData).tweens;
+				for (var i:uint = 0, l:uint = currentFFDVertices.length; i < l; ++i)
+				{
+					_ffdVertices[i] = currentFFDVertices[i] + _durationFFDFrame.tweens[i] * this._tweenProgress;
+				}
+				
+				slot._ffdDirty = true;
+			}
+		}
+		
+		override public function fadeOut():void
+		{
+			_tweenFFD = TWEEN_TYPE_NONE;
+		}
+		
+		override public function update(time:int):void
+		{
+			super.update(time);
+			
+			if (_tweenFFD != TWEEN_TYPE_NONE)
+			{
+				const weight:Number = this._animationState._weightResult;
+				if (weight > 0)
+				{
+					const fadeProgress:Number = this._animationState._fadeProgress;
+					if (fadeProgress < 1)
 					{
-						tweenEnabled = false;
-					}
-					else
-					{
-						if(_tweenEasing == 10)
+						
+						const currentFFDVertices:Vector.<Number> = (this._currentFrame as ExtensionFrameData).tweens;
+						for (var i:uint = 0, l:uint = currentFFDVertices.length; i < l; ++i)
 						{
-							_tweenEasing = 0;
+							_ffdVertices[i] += (currentFFDVertices[i] + _durationFFDFrame.tweens[i] * this._tweenProgress - _ffdVertices[i]) * fadeProgress;
 						}
-						tweenEnabled = true;
+						
+						slot._ffdDirty = true;
 					}
 				}
-				else
-				{
-					tweenEnabled = true;
-				}
-			}
-			else
-			{
-				_tweenEasing = NaN;
-				_tweenCurve = currentFrame.curve;
-				if((isNaN(_tweenEasing) || _tweenEasing == 10) && _tweenCurve == null)   //frame no tween
-				{
-					_tweenEasing = NaN;
-					tweenEnabled = false;
-				}
-				else
-				{
-					tweenEnabled = true;
-				}
-			}
-			
-			if(tweenEnabled)
-			{
-				_offset = currentFrame.offset < nextFrame.offset ? currentFrame.offset : nextFrame.offset;
-				var end:int = currentFrame.offset + currentFrame.vertices.length > nextFrame.offset + nextFrame.vertices.length ?
-							  currentFrame.offset + currentFrame.vertices.length :
-							  nextFrame.offset + nextFrame.vertices.length;
-				_durationVertices.length = end - _offset;
-				
-				var curVertex:Number;
-				var nextVertex:Number;
-				_tweenVertices = false;
-				for (var i:int = _offset; i < end; i++)
-				{
-					curVertex = 0;
-					nextVertex = 0;
-					if (currentFrame.offset <= i && currentFrame.vertices.length + currentFrame.offset > i)
-					{
-						curVertex = currentFrame.vertices[i - currentFrame.offset];
-					}
-					if (nextFrame.offset <= i && nextFrame.vertices.length + nextFrame.offset > i)
-					{
-						nextVertex = nextFrame.vertices[i - nextFrame.offset];
-					}
-					_durationVertices[i - _offset] = nextVertex - curVertex;
-					
-					if (_durationVertices[i - _offset] != 0)
-					{
-						_tweenVertices = true;
-					}
-				}
-			}
-			else
-			{
-				_tweenVertices = false;
-				_slot.updateFFD(currentFrame.vertices, currentFrame.offset);
-			}
-		}
-		
-		private function updateTween():void
-		{	
-			var currentFrame:FFDFrame = _timelineData.frameList[_currentFrameIndex] as FFDFrame;
-			
-			if(_tweenVertices && _animationState.displayControl)
-			{
-				var progress:Number = (_currentTime - _currentFramePosition) / _currentFrameDuration;
-				if (_tweenCurve != null)
-				{
-					progress = _tweenCurve.getValueByProgress(progress);
-				}
-				if(_tweenEasing)
-				{
-					progress = MathUtil.getEaseValue(progress, _tweenEasing);
-				}
-				
-				var end:int = _offset + _durationVertices.length;
-				_updateVertices.length = _durationVertices.length;
-				var curVertex:Number;
-				for (var i:int = _offset; i < end; i++)
-				{
-					curVertex = 0;
-					if (currentFrame.offset <= i && currentFrame.vertices.length + currentFrame.offset > i)
-					{
-						curVertex = currentFrame.vertices[i - currentFrame.offset];
-					}
-					_updateVertices[i - _offset] = curVertex + _durationVertices[i - _offset] * progress;
-					
-				}
-				_slot.updateFFD(_updateVertices, _offset);
-			}
-		}
-		
-		private function updateSingleFrame():void
-		{
-			var currentFrame:FFDFrame = _timelineData.frameList[0] as FFDFrame;
-			_isComplete = true;
-			_tweenEasing = NaN;
-			_tweenVertices = false;
-			
-			if(_animationState.displayControl)
-			{
-				_slot.updateFFD(currentFrame.vertices, currentFrame.offset);
 			}
 		}
 	}
-
 }

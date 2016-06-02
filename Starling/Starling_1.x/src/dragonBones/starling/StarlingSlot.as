@@ -1,235 +1,203 @@
 ﻿package dragonBones.starling
 {
-	import flash.display.BlendMode;
-	import flash.errors.IllegalOperationError;
 	import flash.geom.Matrix;
-	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	
 	import dragonBones.Armature;
 	import dragonBones.Bone;
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.starling.mesh.Mesh;
-	import dragonBones.starling.mesh.MeshImage;
-	import dragonBones.objects.MeshData;
-	import dragonBones.objects.VertexBoneData;
-	import dragonBones.objects.VertexData;
+	import dragonBones.objects.DisplayData;
 	
 	import starling.display.BlendMode;
 	import starling.display.DisplayObject;
 	import starling.display.DisplayObjectContainer;
+	import starling.display.Image;
 	import starling.display.Quad;
-	
-	
+	import starling.textures.SubTexture;
+	import starling.textures.Texture;
 	
 	use namespace dragonBones_internal;
 	
-	public class StarlingSlot extends Slot
+	public final class StarlingSlot extends Slot
 	{
-		private var _starlingDisplay:DisplayObject;
+		/**
+		 * @private
+		 */
+		dragonBones_internal static const EMPTY_TEXTURE:Texture = Texture.empty(1, 1);
 		
-		public var updateMatrix:Boolean;
+		public var updateTransformEnabled:Boolean = true;
+		
+		private var _renderDisplay:DisplayObject = null;
 		
 		public function StarlingSlot()
 		{
 			super(this);
-			
-			_starlingDisplay = null;
-			
-			updateMatrix = false;
 		}
 		
-		override public function dispose():void
+		/**
+		 * @inheritDoc
+		 */
+		override protected function _onClear():void
 		{
-			for each(var content:Object in this._displayList)
+			const disposeDisplayList:Vector.<Object> = new Vector.<Object>();
+			for each (var eachDisplay:Object in this._displayList)
 			{
-				if(content is Armature)
+				if (disposeDisplayList.indexOf(eachDisplay) < 0)
 				{
-					(content as Armature).dispose();
-				}
-				else if(content is DisplayObject)
-				{
-					(content as DisplayObject).dispose();
+					disposeDisplayList.push(eachDisplay);
 				}
 			}
-			super.dispose();
 			
-			_starlingDisplay = null;
-		}
-		
-		/** @private */
-		override dragonBones_internal function updateDisplay(value:Object):void
-		{
-			_starlingDisplay = value as DisplayObject;
-		}
-		
-		
-		//Abstract method
-		
-		/** @private */
-		override dragonBones_internal function getDisplayIndex():int
-		{
-			if(_starlingDisplay && _starlingDisplay.parent)
+			for each (eachDisplay in disposeDisplayList)
 			{
-				return _starlingDisplay.parent.getChildIndex(_starlingDisplay);
-			}
-			return -1;
-		}
-		
-		/** @private */
-		override dragonBones_internal function addDisplayToContainer(container:Object, index:int = -1):void
-		{
-			var starlingContainer:DisplayObjectContainer = container as DisplayObjectContainer;
-			if(_starlingDisplay && starlingContainer)
-			{
-				if (index < 0)
+				if (eachDisplay is Armature)
 				{
-					starlingContainer.addChild(_starlingDisplay);
+					(eachDisplay as Armature).returnToPool();
 				}
 				else
 				{
-					starlingContainer.addChildAt(_starlingDisplay, Math.min(index, starlingContainer.numChildren));
+					this._disposeDisplay(eachDisplay);
 				}
+			}
+			
+			super._onClear();
+			
+			_renderDisplay = null;
+		}
+		
+		// Abstract method
+		
+		/**
+		 * @private
+		 */
+		override protected function _onUpdateDisplay():void
+		{
+			if (!this._rawDisplay)
+			{
+				this._rawDisplay = new Image(EMPTY_TEXTURE);	
+			}
+			
+			_renderDisplay = (this._display || this._rawDisplay) as DisplayObject;
+		}
+		
+		/**
+		 * @private
+		 */
+		override protected function _initDisplay(value:Object):void
+		{
+		}
+		
+		/**
+		 * @private
+		 */
+		override protected function _addDisplay():void
+		{
+			const container:DisplayObjectContainer = this._armature.display as DisplayObjectContainer;
+			container.addChild(_renderDisplay);
+		}
+		
+		/**
+		 * @private
+		 */
+		override protected function _replaceDisplay(value:Object):void
+		{
+			const container:DisplayObjectContainer = this._armature.display as DisplayObjectContainer;
+			const prevDisplay:DisplayObject = value as DisplayObject;
+			container.addChild(_renderDisplay);
+			container.swapChildren(_renderDisplay, prevDisplay);
+			container.removeChild(prevDisplay);
+		}
+		
+		/**
+		 * @private
+		 */
+		override protected function _removeDisplay():void
+		{
+			_renderDisplay.removeFromParent();
+		}
+		
+		/**
+		 * @private
+		 */
+		override protected function _disposeDisplay(value:Object):void
+		{
+			const prevDisplay:DisplayObject = value as DisplayObject;
+			prevDisplay.dispose();
+		}
+		
+		/**
+		 * @private
+		 */
+		override dragonBones_internal function _getDisplayZIndex():int
+		{
+			const container:DisplayObjectContainer = this._armature.display as DisplayObjectContainer;
+			return container.getChildIndex(_renderDisplay);
+		}
+		
+		/**
+		 * @private
+		 */
+		override dragonBones_internal function _setDisplayZIndex(value:int):void
+		{
+			const container:DisplayObjectContainer = this._armature.display as DisplayObjectContainer;
+			const index:int = container.getChildIndex(_renderDisplay);
+			if (index == value)
+			{
+				return;
+			}
+			
+			if (index < value)
+			{
+				container.addChildAt(_renderDisplay, value);
+			}
+			else
+			{
+				container.addChildAt(_renderDisplay, value + 1);
 			}
 		}
 		
-		/** @private */
-		override dragonBones_internal function removeDisplayFromContainer():void
+		/**
+		 * @private
+		 */
+		override dragonBones_internal function _updateVisible():void
 		{
-			if(_starlingDisplay && _starlingDisplay.parent)
-			{
-				_starlingDisplay.parent.removeChild(_starlingDisplay);
-			}
+			_renderDisplay.visible = this._parent.visible;
 		}
 		
-		/** @private */
-		override dragonBones_internal function updateTransform():void
-		{
-			if(_starlingDisplay)
-			{
-				var pivotX:Number = _starlingDisplay.pivotX;
-				var pivotY:Number = _starlingDisplay.pivotY;
-				
-				
-				if(updateMatrix)
-				{
-					//_starlingDisplay.transformationMatrix setter 比较慢暂时走下面
-					_starlingDisplay.transformationMatrix = _globalTransformMatrix;
-					if(pivotX || pivotY)
-					{
-						_starlingDisplay.pivotX = pivotX;
-						_starlingDisplay.pivotY = pivotY;
-					}
-				}
-				else
-				{
-					var displayMatrix:Matrix = _starlingDisplay.transformationMatrix;
-					displayMatrix.a = _globalTransformMatrix.a;
-					displayMatrix.b = _globalTransformMatrix.b;
-					displayMatrix.c = _globalTransformMatrix.c;
-					displayMatrix.d = _globalTransformMatrix.d;
-					//displayMatrix.copyFrom(_globalTransformMatrix);
-					if(pivotX || pivotY)
-					{
-						displayMatrix.tx = _globalTransformMatrix.tx - (displayMatrix.a * pivotX + displayMatrix.c * pivotY);
-						displayMatrix.ty = _globalTransformMatrix.ty - (displayMatrix.b * pivotX + displayMatrix.d * pivotY);
-					}
-					else
-					{
-						displayMatrix.tx = _globalTransformMatrix.tx;
-						displayMatrix.ty = _globalTransformMatrix.ty;
-					}
-				}
-			}
-		}
+		/**
+		 * @private
+		 */
+		private static const BLEND_MODE_LIST:Vector.<String> = Vector.<String>(
+			[
+				BlendMode.NORMAL,
+				BlendMode.ADD,
+				null,
+				null,
+				null,
+				BlendMode.ERASE,
+				null,
+				null,
+				null,
+				null,
+				BlendMode.MULTIPLY,
+				null,
+				BlendMode.SCREEN,
+				null
+			]
+		);
 		
-		/** @private */
-		override dragonBones_internal function updateDisplayVisible(value:Boolean):void
+		/**
+		 * @private
+		 */
+		override protected function _updateBlendMode():void
 		{
-			if(_starlingDisplay && this._parent)
+			if (this._blendMode < BLEND_MODE_LIST.length)
 			{
-				_starlingDisplay.visible = this._parent.visible && this._visible && value;
-			}
-		}
-		
-		/** @private */
-		override dragonBones_internal function updateDisplayColor(
-			aOffset:Number, 
-			rOffset:Number, 
-			gOffset:Number, 
-			bOffset:Number, 
-			aMultiplier:Number, 
-			rMultiplier:Number, 
-			gMultiplier:Number, 
-			bMultiplier:Number,
-			colorChanged:Boolean = false):void
-		{
-			if(_starlingDisplay)
-			{
-				super.updateDisplayColor(aOffset, rOffset, gOffset, bOffset, aMultiplier, rMultiplier, gMultiplier, bMultiplier,colorChanged);
-				_starlingDisplay.alpha = aMultiplier;
-				if (_starlingDisplay is Quad)
+				const blendMode:String = BLEND_MODE_LIST[this._blendMode];
+				if (blendMode)
 				{
-					(_starlingDisplay as Quad).color = (uint(rMultiplier * 0xff) << 16) + (uint(gMultiplier * 0xff) << 8) + uint(bMultiplier * 0xff);
-				}
-				else if (_starlingDisplay is Mesh)
-				{
-					(_starlingDisplay as Mesh).color = (uint(rMultiplier * 0xff) << 16) + (uint(gMultiplier * 0xff) << 8) + uint(bMultiplier * 0xff);
-				}
-			}
-		}
-		
-		/** @private */
-		override dragonBones_internal function updateDisplayBlendMode(value:String):void
-		{
-			if(_starlingDisplay)
-			{
-				switch(blendMode)
-				{
-					case starling.display.BlendMode.NONE:
-					case starling.display.BlendMode.AUTO:
-					case starling.display.BlendMode.ADD:
-					case starling.display.BlendMode.ERASE:
-					case starling.display.BlendMode.MULTIPLY:
-					case starling.display.BlendMode.NORMAL:
-					case starling.display.BlendMode.SCREEN:
-						_starlingDisplay.blendMode = blendMode;
-						break;
-					
-					case flash.display.BlendMode.ADD:
-						_starlingDisplay.blendMode = starling.display.BlendMode.ADD;
-						break;
-					
-					case flash.display.BlendMode.ERASE:
-						_starlingDisplay.blendMode = starling.display.BlendMode.ERASE;
-						break;
-					
-					case flash.display.BlendMode.MULTIPLY:
-						_starlingDisplay.blendMode = starling.display.BlendMode.MULTIPLY;
-						break;
-					
-					case flash.display.BlendMode.NORMAL:
-						_starlingDisplay.blendMode = starling.display.BlendMode.NORMAL;
-						break;
-					
-					case flash.display.BlendMode.SCREEN:
-						_starlingDisplay.blendMode = starling.display.BlendMode.SCREEN;
-						break;
-					
-					case flash.display.BlendMode.ALPHA:
-					case flash.display.BlendMode.DARKEN:
-					case flash.display.BlendMode.DIFFERENCE:
-					case flash.display.BlendMode.HARDLIGHT:
-					case flash.display.BlendMode.INVERT:
-					case flash.display.BlendMode.LAYER:
-					case flash.display.BlendMode.LIGHTEN:
-					case flash.display.BlendMode.OVERLAY:
-					case flash.display.BlendMode.SHADER:
-					case flash.display.BlendMode.SUBTRACT:
-						break;
-					
-					default:
-						break;
+					_renderDisplay.blendMode = blendMode;
 				}
 			}
 		}
@@ -237,96 +205,172 @@
 		/**
 		 * @private
 		 */
-		override dragonBones_internal function updateMesh():void
+		override protected function _updateColor():void
 		{
-			var meshImage:MeshImage = _starlingDisplay as MeshImage;
-			if (!meshImage)
+			_renderDisplay.alpha = this._colorTransform.alphaMultiplier;
+			
+			const quad:Quad = _renderDisplay as Quad;
+			if (quad)
 			{
-				return;
+				const color:uint = (uint(this._colorTransform.redMultiplier * 0xFF) << 16) + (uint(this._colorTransform.greenMultiplier * 0xFF) << 8) + uint(this._colorTransform.blueMultiplier * 0xFF);
+				if (quad.color != color)
+				{
+					quad.color = color;
+				}
+			}
+		}
+		
+		/**
+		 * @private
+		 */
+		override protected function _updateFrame():void
+		{
+			const frameDisplay:Image = _renderDisplay as Image;
+			
+			if (this._display && this._displayIndex >= 0 && this._displayIndex < this._displayDataSet.displays.length)
+			{
+				const displayData:DisplayData = this._displayDataSet.displays[this._displayIndex];
+				const textureData:StarlingTextureData = displayData.textureData as StarlingTextureData;
+				
+				if (textureData && !textureData.texture)
+				{
+					const textureAtlasTexture:Texture = (textureData.parent as StarlingTextureAtlasData).texture;
+					if (textureAtlasTexture)
+					{
+						textureData.texture = new SubTexture(textureAtlasTexture, textureData.region, false, textureData.frame, textureData.rotated);
+					}
+				}
+				
+				if (textureData && textureData.texture)
+				{
+					const rect:Rectangle = textureData.frame || textureData.region;
+					
+					var width:Number = rect.width;
+					var height:Number = rect.height;
+					if (textureData.rotated)
+					{
+						width = rect.height;
+						height = rect.width;
+					}
+					
+					var pivotX:Number = displayData.pivot.x;
+					var pivotY:Number = displayData.pivot.y;
+					if (displayData.isRelativePivot)
+					{
+						pivotX *= width;
+						pivotY *= height;
+					}
+					
+					if (textureData.frame)
+					{
+						pivotX -= textureData.frame.x;
+						pivotY -= textureData.frame.y;
+					}
+					
+					frameDisplay.texture = textureData.texture;
+					frameDisplay.readjustSize();
+					frameDisplay.pivotX = pivotX;
+					frameDisplay.pivotY = pivotY;
+					
+					this._updateVisible();
+					return;
+				}
 			}
 			
-			var meshData:MeshData = meshImage.meshData;
-			var i:uint = 0;
-			var iD:uint = 0;
-			var l:uint = 0;
+			frameDisplay.texture = EMPTY_TEXTURE;
+			frameDisplay.readjustSize();
+			frameDisplay.pivotX = 0;
+			frameDisplay.pivotY = 0;
+			frameDisplay.visible = false;
+		}
+		
+		/**
+		 * @private
+		 */
+		override protected function _updateMesh():void
+		{
+			/*const mesh:Mesh = _renderDisplay as Mesh;
+			const meshStyle:MeshStyle = mesh.style;
 			
-			if (meshData.skinned)
+			var i:uint = 0, iH:uint = 0, l:uint = _meshData.vertices.length;
+			var xG:Number = 0, yG:Number = 0;
+			if (_meshData.skinned)
 			{
-				const bones:Vector.<Bone> = this._armature.getBones(false);
-				var iF:uint = 0;
-				for (i = 0, l = meshData.numVertex; i < l; i++)
+				for (i = 0; i < l; i += 2)
 				{
-					const vertexBoneData:VertexBoneData = meshData.vertexBones[i];
-					var j:uint = 0;
-					var xL:Number = 0;
-					var yL:Number = 0;
-					var xG:Number = 0;
-					var yG:Number = 0;
-					iD = i * 2;
+					iH = i / 2;
 					
-					for each (var boneIndex:uint in vertexBoneData.indices)
+					const boneIndices:Vector.<uint> = _meshData.boneIndices[iH];
+					const boneVertices:Vector.<Number> = _meshData.boneVertices[iH];
+					const weights:Vector.<Number> = _meshData.weights[iH];
+					
+					xG = 0, yG = 0;
+					
+					for (var iB:uint = 0, lB:uint = boneIndices.length; iB < lB; ++iB)
 					{
-						const bone:Bone = this._meshBones[boneIndex];
-						const matrix:Matrix = bone._globalTransformMatrix;
-						const point:Point = vertexBoneData.vertices[j];
-						const weight:Number = vertexBoneData.weights[j];
+						const bone:Bone = this._meshBones[boneIndices[iB]];
+						const weight:Number = weights[iB];
+						const matrix:Matrix = bone.globalTransformMatrix;
 						
-						if (!this._ffdVertices || iF < _ffdOffset || iF >= this._ffdVertices.length)
-						{
-							xL = point.x;
-							yL = point.y;
-						}
-						else
-						{
-							xL = point.x + this._ffdVertices[iF];
-							yL = point.y + this._ffdVertices[iF + 1];
-						}
-						
+						const xL:Number = boneVertices[iB / 2] + this._ffdVertices[i * lB];
+						const yL:Number = boneVertices[iB / 2 + 1] + this._ffdVertices[i * lB + 1];
+					
 						xG += (matrix.a * xL + matrix.c * yL + matrix.tx) * weight;
 						yG += (matrix.b * xL + matrix.d * yL + matrix.ty) * weight;
-						
-						j++;
-						iF += 2;
 					}
 					
-					meshImage.mVertexData.setPosition(i, xG, yG);
+					meshStyle.setVertexPosition(i / 2, xG, yG);
 				}
-				
-				meshImage.onVertexDataChanged(); 
 			}
-			else if (_ffdChanged)
+			else
 			{
-				_ffdChanged = false;
-				/*for (i = _ffdOffset, l = _ffdOffset + this._ffdVertices.length; i < l; i += 2)
+				const vertices:Vector.<Number> = _meshData.vertices;
+				for (i = 0; i < l; i += 2)
 				{
-					iD = i / 2;
-					const vertexData:VertexData = meshData.vertices[iD];
-					xG = vertexData.x + this._ffdVertices[i - _ffdOffset];
-					yG = vertexData.y + this._ffdVertices[i - _ffdOffset + 1];
-					meshImage.mVertexData.setPosition(iD, xG, yG);
-				}*/
-				
-				for (i = 0, l = meshData.numVertex; i < l; ++i)
-				{
-					const vertexData:VertexData = meshData.vertices[i];
-					iD = i * 2;
-					if (!_ffdVertices || iD < _ffdOffset || iD >= this._ffdVertices.length)
-					{
-						xG = vertexData.x;
-						yG = vertexData.y;
-					}
-					else
-					{
-						xG = vertexData.x + this._ffdVertices[iD - _ffdOffset];
-						yG = vertexData.y + this._ffdVertices[iD - _ffdOffset + 1];
-					}
-					
-					meshImage.mVertexData.setPosition(i, xG, yG);
+					xG = vertices[i] + this._ffdVertices[i];
+					yG = vertices[i + 1] + this._ffdVertices[i + 1];
+					meshStyle.setVertexPosition(i / 2, xG, yG);
 				}
-				
-				meshImage.onVertexDataChanged(); 
-			}
+			}*/
+		}
+		
+		/**
+		 * @private
+		 */
+		override protected function _updateTransform():void
+		{
+			const pivotX:Number = _renderDisplay.pivotX;
+			const pivotY:Number = _renderDisplay.pivotY;
 			
+			if (updateTransformEnabled)
+			{
+				_renderDisplay.transformationMatrix = this.globalTransformMatrix;
+				
+				if (pivotX || pivotY)
+				{
+					_renderDisplay.pivotX = pivotX;
+					_renderDisplay.pivotY = pivotY;
+				}
+			}
+			else
+			{
+				const displayMatrix:Matrix = _renderDisplay.transformationMatrix;
+				//displayMatrix.copyFrom(this.globalMatrix);
+				displayMatrix.a = this.globalTransformMatrix.a;
+				displayMatrix.b = this.globalTransformMatrix.b;
+				displayMatrix.c = this.globalTransformMatrix.c;
+				displayMatrix.d = this.globalTransformMatrix.d;
+				if (pivotX || pivotY)
+				{
+					displayMatrix.tx = this.globalTransformMatrix.tx - (displayMatrix.a * pivotX + displayMatrix.c * pivotY);
+					displayMatrix.ty = this.globalTransformMatrix.ty - (displayMatrix.b * pivotX + displayMatrix.d * pivotY);
+				}
+				else
+				{
+					displayMatrix.tx = this.globalTransformMatrix.tx;
+					displayMatrix.ty = this.globalTransformMatrix.ty;
+				}
+			}
 		}
 	}
 }

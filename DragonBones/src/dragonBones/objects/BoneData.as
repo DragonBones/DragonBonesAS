@@ -1,85 +1,109 @@
 package dragonBones.objects
 {
-	final public class BoneData
+	import dragonBones.core.BaseObject;
+	import dragonBones.geom.Transform;
+	
+	/**
+	 * @language zh_CN
+	 * 骨骼数据。
+	 * @see dragonBones.Bone
+	 * @version DragonBones 3.0
+	 */
+	public final class BoneData extends BaseObject
 	{
-		public var name:String;
-		public var parent:String;
-		public var length:Number;
+		/**
+		 * @private
+		 */
+		public var inheritTranslation:Boolean;
 		
-		public var global:DBTransform;
-		public var transform:DBTransform;
-		
-		public var inheritScale:Boolean;
+		/**
+		 * @private
+		 */
 		public var inheritRotation:Boolean;
 		
+		/**
+		 * @private
+		 */
+		public var inheritScale:Boolean;
+		
+		/**
+		 * @private
+		 */
+		public var bendPositive:Boolean;
+		
+		/**
+		 * @private
+		 */
+		public var chain:uint;
+		
+		/**
+		 * @private
+		 */
+		public var weight:Number;
+		
+		/**
+		 * @private
+		 */
+		public var length:Number;
+		
+		/**
+		 * @language zh_CN
+		 * 骨骼名称。
+		 * @see dragonBones.Bone#name
+		 * @version DragonBones 3.0
+		 */
+		public var name:String;
+		
+		/**
+		 * @language zh_CN
+		 * 父骨骼。
+		 * @see dragonBones.Bone#parent
+		 * @version DragonBones 3.0
+		 */
+		public var parent:BoneData;
+		
+		/**
+		 * @private
+		 */
+		public var ik:BoneData;
+		
+		/**
+		 * @private
+		 */
+		public const transform:Transform = new Transform();
+		
+		/**
+		 * @private
+		 */
 		public function BoneData()
 		{
-			length = 0;
-			global = new DBTransform();
-			transform = new DBTransform();
-			inheritRotation = true;
+			super(this);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override protected function _onClear():void
+		{
+			inheritTranslation = false;
+			inheritRotation = false;
 			inheritScale = false;
-			
-			//_areaDataList = new Vector.<IAreaData>(0, true);
+			bendPositive = false;
+			chain = 0;
+			weight = 0;
+			length = 0;
+			name = null;
+			parent = null;
+			ik = null;
+			transform.identity();
 		}
 		
-		public function dispose():void
+		/**
+		 * @private
+		 */
+		public function toString():String
 		{
-			global = null;
-			transform = null;
-			/*
-			if(_areaDataList)
-			{
-				for each(var areaData:IAreaData in _areaDataList)
-				{
-					areaData.dispose();
-				}
-				_areaDataList.fixed = false;
-				_areaDataList.length = 0;
-				_areaDataList = null;
-			}
-			*/
+			return name;
 		}
-		
-		/*
-		private var _areaDataList:Vector.<IAreaData>;
-		public function get areaDataList():Vector.<IAreaData>
-		{
-			return _areaDataList;
-		}
-		
-		
-		public function getAreaData(areaName:String):IAreaData
-		{
-			if(!areaName && _areaDataList.length > 0)
-			{
-				return _areaDataList[0];
-			}
-			var i:int = _areaDataList.length;
-			while(i --)
-			{
-				if(_areaDataList[i]["name"] == areaName)
-				{
-					return _areaDataList[i];
-				}
-			}
-			return null;
-		}
-		
-		public function addAreaData(areaData:IAreaData):void
-		{
-			if(!areaData)
-			{
-				throw new ArgumentError();
-			}
-			
-			if(_areaDataList.indexOf(areaData) < 0)
-			{
-				_areaDataList.fixed = false;
-				_areaDataList[_areaDataList.length] = areaData;
-				_areaDataList.fixed = true;
-			}
-		}
-		*/
 	}
 }

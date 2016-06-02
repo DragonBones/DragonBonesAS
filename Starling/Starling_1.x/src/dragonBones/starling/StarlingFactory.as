@@ -1,232 +1,184 @@
-﻿package dragonBones.starling
+package dragonBones.starling
 {
-	/**
-	* Copyright 2012-2013. DragonBones. All Rights Reserved.
-	* @playerversion Flash 10.0, Flash 10
-	* @langversion 3.0
-	* @version 2.0
-	*/
-	import dragonBones.Armature;
-	import dragonBones.core.dragonBones_internal;
-	import dragonBones.starling.mesh.MeshArmature;
-	import dragonBones.starling.mesh.MeshImage;
-	import dragonBones.starling.mesh.MeshQuadImage;
-	import dragonBones.fast.FastArmature;
-	import dragonBones.fast.FastSlot;
-	import dragonBones.objects.ArmatureData;
-	import dragonBones.objects.DragonBonesData;
-	import dragonBones.objects.MeshData;
-	import dragonBones.Slot;
-	import dragonBones.textures.ITextureAtlas;
-	
 	import flash.display.BitmapData;
-	import flash.display.MovieClip;
-	import flash.geom.Rectangle;
 	
-	import starling.core.Starling;
-	import starling.display.DisplayObject;
+	import dragonBones.Armature;
+	import dragonBones.Slot;
+	import dragonBones.animation.Animation;
+	import dragonBones.core.BaseObject;
+	import dragonBones.core.DragonBones;
+	import dragonBones.core.dragonBones_internal;
+	import dragonBones.factories.BaseFactory;
+	import dragonBones.factories.BuildArmaturePackage;
+	import dragonBones.flash.FlashArmatureDisplayContainer;
+	import dragonBones.flash.FlashSlot;
+	import dragonBones.objects.DisplayData;
+	import dragonBones.objects.MeshData;
+	import dragonBones.objects.SlotData;
+	import dragonBones.objects.SlotDisplayDataSet;
+	import dragonBones.textures.TextureAtlasData;
+	
 	import starling.display.Image;
-	import starling.display.Sprite;
 	import starling.textures.SubTexture;
 	import starling.textures.Texture;
-	import starling.textures.TextureAtlas;
-	import dragonBones.factories.BaseFactory;
 	
-	
-
 	use namespace dragonBones_internal;
 	
-	/**
-	 * A object managing the set of armature resources for Starling engine. It parses the raw data, stores the armature resources and creates armature instances.
-	 * @see dragonBones.Armature
-	 */
-	
-	/**
-	 * A StarlingFactory instance manages the set of armature resources for the starling DisplayList. It parses the raw data (ByteArray), stores the armature resources and creates armature instances.
-	 * <p>Create an instance of the StarlingFactory class that way:</p>
-	 * <listing>
-	 * import flash.events.Event; 
-	 * import dragonBones.factorys.BaseFactory;
-	 * 
-	 * [Embed(source = "../assets/Dragon2.png", mimeType = "application/octet-stream")]  
-	 *	private static const ResourcesData:Class;
-	 * var factory:StarlingFactory = new StarlingFactory(); 
-	 * factory.addEventListener(Event.COMPLETE, textureCompleteHandler);
-	 * factory.parseData(new ResourcesData());
-	 * </listing>
-	 * @see dragonBones.Armature
-	 */
-	public class StarlingFactory extends BaseFactory
+	public final class StarlingFactory extends BaseFactory
 	{
-		/**
-		 * Whether to generate mapmaps (true) or not (false).
-		 */
-		public var generateMipMaps:Boolean;
-		/**
-		 * Whether to optimize for rendering (true) or not (false).
-		 */
-		public var optimizeForRenderToTexture:Boolean;
-		/**
-		 * Apply a scale for SWF specific texture. Use 1 for no scale.
-		 */
-		public var scaleForTexture:Number;
+		public var generateMipMaps:Boolean = true;
 		
-		/**
-		 * Creates a new StarlingFactory instance.
-		 */
 		public function StarlingFactory()
 		{
 			super(this);
-			scaleForTexture = 1;
-		}
-		
-		/** @private */
-		override protected function generateTextureAtlas(content:Object, textureAtlasRawData:Object):ITextureAtlas
-		{
-			var texture:Texture;
-			var bitmapData:BitmapData;
-			if (content is BitmapData)
-			{
-				bitmapData = content as BitmapData;
-				texture = Texture.fromBitmapData(bitmapData, generateMipMaps, optimizeForRenderToTexture);
-			}
-			else if (content is MovieClip)
-			{
-				var width:int = getNearest2N(content.width) * scaleForTexture;
-				var height:int = getNearest2N(content.height) * scaleForTexture;
-				
-//				_helpMatrix.a = 1;
-//				_helpMatrix.b = 0;
-//				_helpMatrix.c = 0;
-//				_helpMatrix.d = 1;
-				_helpMatrix.scale(scaleForTexture, scaleForTexture);
-				_helpMatrix.tx = 0;
-				_helpMatrix.ty = 0;				
-				var movieClip:MovieClip = content as MovieClip;
-				movieClip.gotoAndStop(1);
-				bitmapData = new BitmapData(width, height, true, 0xFF00FF);
-				bitmapData.draw(movieClip, _helpMatrix);
-				movieClip.gotoAndStop(movieClip.totalFrames);
-				texture = Texture.fromBitmapData(bitmapData, generateMipMaps, optimizeForRenderToTexture, scaleForTexture);
-			}
-			else
-			{
-				throw new Error();
-			}			
-			var textureAtlas:StarlingTextureAtlas = new StarlingTextureAtlas(texture, textureAtlasRawData, false);			
-			if (Starling.handleLostContext)
-			{
-				textureAtlas._bitmapData = bitmapData;
-			}
-			else
-			{
-				bitmapData.dispose();
-			}
-			return textureAtlas;
-		}
-		
-		/** @private */
-		override protected function generateArmature():Armature
-		{
-			var armature:Armature
-			if (this._hasMesh)
-			{
-				armature = new Armature(new MeshArmature());
-			}
-			else
-			{
-				armature = new Armature(new Sprite());
-			}
-			
-			return armature;
-		}
-		
-		/** @private */
-		override protected function generateFastArmature():FastArmature
-		{
-			var armature:FastArmature;
-			if (this._hasMesh)
-			{
-				armature = new FastArmature(new MeshArmature());
-			}
-			else
-			{
-				armature = new FastArmature(new Sprite());
-			}
-			return armature;
-		}
-		
-		/** @private */
-		override protected function generateSlot():Slot
-		{
-			var slot:Slot = new StarlingSlot();
-			return slot;
 		}
 		
 		/**
 		 * @private
-		 * Generates an Slot instance.
-		 * @return Slot An Slot instance.
 		 */
-		override protected function generateFastSlot():FastSlot
+		override protected function _generateTextureAtlasData(textureAtlasData:TextureAtlasData, textureAtlas:Object):TextureAtlasData
 		{
-			var slot:FastSlot = new StarlingFastSlot();
+			if (textureAtlasData)
+			{
+				if (textureAtlas is BitmapData)
+				{
+					(textureAtlasData as StarlingTextureAtlasData).texture = Texture.fromBitmapData(textureAtlas as BitmapData, generateMipMaps, false, textureAtlasData.scale);
+				}
+				else if (textureAtlas is Texture)
+				{
+					(textureAtlasData as StarlingTextureAtlasData).texture = textureAtlas as Texture;
+				}
+			}
+			else
+			{
+				textureAtlasData = BaseObject.borrowObject(StarlingTextureAtlasData) as StarlingTextureAtlasData;
+			}
+			
+			return textureAtlasData;
+		}
+		
+		/**
+		 * @private
+		 */
+		override protected function _generateArmature(dataPackage:BuildArmaturePackage):Armature
+		{
+			const armature:Armature = BaseObject.borrowObject(Armature) as Armature;
+			const armatureDisplayContainer:StarlingArmatureDisplayContainer = new StarlingArmatureDisplayContainer();
+			
+			armature._armatureData = dataPackage.armature;
+			armature._skinData = dataPackage.skin;
+			armature._animation = BaseObject.borrowObject(Animation) as Animation;
+			armature._display = armatureDisplayContainer;
+			
+			armatureDisplayContainer._armature = armature;
+			armature._animation._armature = armature;
+			
+			armature.animation.animations = dataPackage.armature.animations;
+			
+			return armature;
+		}
+		
+		/**
+		 * @private
+		 */
+		override protected function _generateSlot(dataPackage:BuildArmaturePackage, slotDisplayDataSet:SlotDisplayDataSet):Slot
+		{
+			const slot:Slot = BaseObject.borrowObject(StarlingSlot) as StarlingSlot;
+			const slotData:SlotData = slotDisplayDataSet.slot;
+			const displayList:Vector.<Object> = new Vector.<Object>(slotDisplayDataSet.displays.length, true);
+			
+			slot.name = slotData.name;
+			slot._rawDisplay = new Image(StarlingSlot.EMPTY_TEXTURE);
+			
+			var displayIndex:uint = 0;
+			for each (var displayData:DisplayData in slotDisplayDataSet.displays)
+			{
+				switch (displayData.type)
+				{
+					case DragonBones.DISPLAY_TYPE_IMAGE:
+						if (!displayData.textureData)
+						{
+							displayData.textureData = this._getTextureData(dataPackage.dataName, displayData.name);
+						}
+						
+						displayList[displayIndex] = slot._rawDisplay;
+						break;
+					
+					case DragonBones.DISPLAY_TYPE_ARMATURE:
+						const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName);
+						if (childArmature)
+						{
+							childArmature.animation.play();
+						}
+						
+						displayList[displayIndex] = childArmature;
+						break;
+					
+					case DragonBones.DISPLAY_TYPE_MESH:
+						if (!displayData.textureData)
+						{
+							displayData.textureData = this._getTextureData(dataPackage.dataName, displayData.name);
+						}
+						
+						displayList[displayIndex] = _generateMeshDisplay(displayData);
+						break;
+					
+					default:
+						displayList[displayIndex] = null;
+						break;
+				}
+				
+				displayIndex++;
+			}
+		
+			slot._setDisplayList(displayList);
+			
 			return slot;
 		}
 		
-		/** @private */
-		override protected function generateDisplay(textureAtlas:Object, fullName:String, pivotX:Number, pivotY:Number):Object
-		{			
-			var subTexture:SubTexture = (textureAtlas as TextureAtlas).getTexture(fullName) as SubTexture;
-			if (subTexture)
+		private function _generateMeshDisplay(displayData:DisplayData):*
+		{
+			/*const meshData:MeshData = displayData.meshData;
+			const vertexData:VertexData = new VertexData();
+			const indexData:IndexData = new IndexData();
+			
+			var i:uint = 0, l:uint = 0;
+			for (i = 0, l = meshData.uvs.length; i < l; i += 2)
 			{
-				var image:DisplayObject;
-				if (this._hasMesh)
-				{
-					image = new MeshQuadImage(subTexture);
-				}
-				else
-				{
-					image = new Image(subTexture);
-				}
-				
-				if (isNaN(pivotX) || isNaN(pivotY))
-				{
-					var subTextureFrame:Rectangle = (textureAtlas as TextureAtlas).getFrame(fullName);
-					if(subTextureFrame)
-					{
-						pivotX = subTextureFrame.width / 2;//pivotX;
-						pivotY = subTextureFrame.height / 2;// pivotY;
-					}
-					else
-					{
-						pivotX = subTexture.width / 2;//pivotX;
-						pivotY = subTexture.height / 2;// pivotY;
-					}
-					
-				}
-				image.pivotX = pivotX;
-				image.pivotY = pivotY;
-				
-				return image;
+				const iH:uint = i / 2;
+				vertexData.setPoint(iH, "texCoords", meshData.uvs[i], meshData.uvs[i + 1]);
+				vertexData.setPoint(iH, "position", meshData.vertices[i], meshData.vertices[i + 1]);
 			}
+			
+			for (i = 0, l = meshData.vertexIndices.length; i < l; ++i)
+			{
+				indexData.setIndex(i, meshData.vertexIndices[i]);
+			}
+			
+			const textureData:StarlingTextureData = displayData.textureData as StarlingTextureData;
+			if (!textureData.texture)
+			{
+				const textureAtlasTexture:Texture = (textureData.parent as StarlingTextureAtlasData).texture;
+				if (textureAtlasTexture)
+				{
+					textureData.texture = new SubTexture(textureAtlasTexture, textureData.region, false, textureData.frame, textureData.rotated, 1 / textureData.parent.scale);
+				}
+			}
+			
+			const mesh:Mesh = new Mesh(vertexData, indexData);
+			mesh.texture = textureData.texture;*/
+			
 			return null;
 		}
 		
-		private function getNearest2N(_n:uint):uint
+		/**
+		 * 
+		 */
+		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null):StarlingArmatureDisplayContainer
 		{
-			return _n & _n - 1?1 << _n.toString(2).length:_n;
-		}
-		
-		override protected function generateMesh(textureAtlas:Object, fullName:String, meshData:MeshData):Object 
-		{
-			var subTexture:SubTexture = (textureAtlas as TextureAtlas).getTexture(fullName) as SubTexture;
-			if (subTexture)
-			{
-				var image:MeshImage = new MeshImage(subTexture,meshData);
-				return image;
-			}
-			return null;
+			const armature:Armature = this.buildArmature(armatureName, dragonBonesName, skinName);
+			
+			return armature? (armature.display as StarlingArmatureDisplayContainer): null;
 		}
 	}
 }

@@ -1,66 +1,101 @@
-package dragonBones.objects 
+package dragonBones.objects
 {
-	import flash.geom.Point;
-	import flash.utils.Dictionary;
-
-	public class DragonBonesData
+	import dragonBones.core.BaseObject;
+	
+	/**
+	 * @language zh_CN
+	 * 龙骨数据，包含多个骨架数据。
+	 * @see dragonBones.objects.ArmatureData
+	 * @version DragonBones 3.0
+	 */
+	public final class DragonBonesData extends BaseObject
 	{
+		/**
+		 * @language zh_CN
+		 * 是否自动搜索。 [<code>true</code>: 启用, <code>false</code>: 不启用] (默认: <code>false</code>)
+		 * @see dragonBones.objects.ArmatureData
+		 * @version DragonBones 4.5
+		 */
+		public var autoSearch:Boolean;
+		
+		/**
+		 * @language zh_CN
+		 * 动画帧频。
+		 * @version DragonBones 3.0
+		 */
+		public var frameRate:uint;
+		
+		/**
+		 * @language zh_CN
+		 * 数据名称。
+		 * @version DragonBones 3.0
+		 */
 		public var name:String;
-		public var isGlobalData:Boolean;
-		public var version:Number = 0;
 		
-		private var _armatureDataList:Vector.<ArmatureData> = new Vector.<ArmatureData>(0, true);
-		private var _displayDataDictionary:Dictionary = new Dictionary();
+		/**
+		 * @language zh_CN
+		 * 所有骨架。
+		 * @see dragonBones.objects.ArmatureData
+		 * @version DragonBones 3.0
+		 */
+		public const armatures:Object = {};
 		
+		/**
+		 * @private
+		 */
+		private const _armatures:Vector.<ArmatureData> = new Vector.<ArmatureData>();
+		
+		/**
+		 * @private
+		 */
 		public function DragonBonesData()
 		{
+			super(this);
 		}
 		
-		public function dispose():void
+		/**
+		 * @inheritDoc
+		 */
+		override protected function _onClear():void
 		{
-			for each(var armatureData:ArmatureData in _armatureDataList)
-			{
-				armatureData.dispose();
-			}
-			_armatureDataList.fixed = false;
-			_armatureDataList.length = 0;
-			_armatureDataList = null;
+			autoSearch = false;
+			frameRate = 0;
+			name = null;
 			
-			removeAllDisplayData();
-			_displayDataDictionary = null;
-		}
-		
-		public function get armatureDataList():Vector.<ArmatureData>
-		{
-			return _armatureDataList;
-		}
-		
-		public function getArmatureDataByName(armatureName:String):ArmatureData
-		{
-			var i:int = _armatureDataList.length;
-			while(i --)
+			var i:String = null;
+			for (i in armatures)
 			{
-				if(_armatureDataList[i].name == armatureName)
-				{
-					return _armatureDataList[i];
-				}
+				(armatures[i] as ArmatureData).returnToPool();
+				delete armatures[i];
 			}
 			
-			return null;
+			if (_armatures.length)
+			{
+				_armatures.length = 0;
+			}
 		}
 		
-		public function addArmatureData(armatureData:ArmatureData):void
+		/**
+		 * @language zh_CN
+		 * 获得指定名称的骨架。
+		 * @param name 骨架名称
+		 * @see dragonBones.objects.ArmatureData
+		 * @version DragonBones 3.0
+		 */
+		public function getArmature(name:String):ArmatureData
 		{
-			if(!armatureData)
+			return armatures[name] as ArmatureData;
+		}
+		
+		/**
+		 * @private
+		 */
+		public function addArmature(value:ArmatureData):void
+		{
+			if (value && value.name && !armatures[value.name])
 			{
-				throw new ArgumentError();
-			}
-			
-			if(_armatureDataList.indexOf(armatureData) < 0)
-			{
-				_armatureDataList.fixed = false;
-				_armatureDataList[_armatureDataList.length] = armatureData;
-				_armatureDataList.fixed = true;
+				armatures[value.name] = value;
+				_armatures.push(value);
 			}
 			else
 			{
@@ -68,52 +103,15 @@ package dragonBones.objects
 			}
 		}
 		
-		public function removeArmatureData(armatureData:ArmatureData):void
+		/**
+		 * @language zh_CN
+		 * 所有骨架。
+		 * @see dragonBones.objects.ArmatureData
+		 * @version DragonBones 3.0
+		 */
+		public function get armatureDataList():Vector.<ArmatureData>
 		{
-			var index:int = _armatureDataList.indexOf(armatureData);
-			if(index >= 0)
-			{
-				_armatureDataList.fixed = false;
-				_armatureDataList.splice(index, 1);
-				_armatureDataList.fixed = true;
-			}
-		}
-		
-		public function removeArmatureDataByName(armatureName:String):void
-		{
-			var i:int = _armatureDataList.length;
-			while(i --)
-			{
-				if(_armatureDataList[i].name == armatureName)
-				{
-					_armatureDataList.fixed = false;
-					_armatureDataList.splice(i, 1);
-					_armatureDataList.fixed = true;
-				}
-			}
-		}
-		
-		public function getDisplayDataByName(name:String):DisplayData
-		{
-			return _displayDataDictionary[name];
-		}
-		
-		public function addDisplayData(displayData:DisplayData):void
-		{
-			_displayDataDictionary[displayData.name] = displayData;
-		}
-		
-		public function removeDisplayDataByName(name:String):void
-		{
-			delete _displayDataDictionary[name]
-		}
-		
-		public function removeAllDisplayData():void
-		{
-			for(var name:String in _displayDataDictionary)
-			{
-				delete _displayDataDictionary[name];
-			}
+			return _armatures;
 		}
 	}
 }
