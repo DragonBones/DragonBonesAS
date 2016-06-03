@@ -178,16 +178,18 @@
 		}
 		
 		/**
-		 * @language zh_CN
-		 * 更新动画。
-		 * @param passedTime 更新的时间间隔。 (以秒为单位)
-		 * @version DragonBones 3.0
+		 * @private
 		 */
-		public function advanceTime(passedTime:Number):void
+		dragonBones_internal function _advanceTime(passedTime:Number):void
 		{
 			if (!_isPlaying)
 			{
 				return;
+			}
+			
+			if (passedTime < 0)
+			{
+				passedTime = -passedTime;
 			}
 			
 			var animationState:AnimationState = null;

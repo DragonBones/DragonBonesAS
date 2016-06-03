@@ -79,6 +79,11 @@
 		dragonBones_internal var _rawDisplay:Object;
 		
 		/**
+		 * @private Factory
+		 */
+		dragonBones_internal var _meshDisplay:Object;
+		
+		/**
 		 * @private SlotTimelineState
 		 */
 		dragonBones_internal const _colorTransform:ColorTransform = new ColorTransform();
@@ -87,6 +92,11 @@
 		 * @private FFDTimelineState
 		 */
 		dragonBones_internal const _ffdVertices:Vector.<Number> = new Vector.<Number>(0, true);
+		
+		/**
+		 * @private Factory
+		 */
+		dragonBones_internal const _replaceDisplayDataSet:Vector.<DisplayData> = new Vector.<DisplayData>(0, true);
 		
 		/**
 		 * @private
@@ -173,6 +183,7 @@
 			_meshData = null;
 			_cacheFrames = null;
 			_rawDisplay = null;
+			_meshDisplay = null;
 			//_colorTransform;
 			
 			if (_ffdVertices.length)
@@ -180,6 +191,13 @@
 				_ffdVertices.fixed = false;
 				_ffdVertices.length = 0;
 				_ffdVertices.fixed = true;
+			}
+			
+			if (_replaceDisplayDataSet.length)
+			{
+				_replaceDisplayDataSet.fixed = false;
+				_replaceDisplayDataSet.length = 0;
+				_replaceDisplayDataSet.fixed = true;
 			}
 			
 			_displayDirty = false;
@@ -350,7 +368,7 @@
 		 * @private
 		 */
 		protected function _updateDisplay():void
-		{
+		{	
 			const prevDisplay:Object = _display || _rawDisplay;
 			const prevChildArmature:Armature = _childArmature;
 			
@@ -379,35 +397,35 @@
 			{
 				_onUpdateDisplay();
 				
-				if (this._armature)
+				if (prevDisplay)
 				{
-					if (prevDisplay)
-					{
-						_replaceDisplay(prevDisplay);
-					}
-					else
-					{
-						_addDisplay();
-					}
+					_replaceDisplay(prevDisplay);
+				}
+				else
+				{
+					_addDisplay();
 				}
 				
 				_blendModeDirty = true;
 				_colorDirty = true;
 			}
 			
-			if (currentDisplay == _rawDisplay)
-			{
-				_updateFrame();
-			}
-			
+			// update origin
 			if (_displayDataSet && _displayIndex >= 0 && _displayIndex < _displayDataSet.displays.length)
 			{
 				this.origin.copy(_displayDataSet.displays[_displayIndex].transform);
 				_originDirty = true;
 			}
 			
+			// update meshData
 			_updateMeshData(false);
 			
+			if (currentDisplay == _rawDisplay || currentDisplay == _meshDisplay)
+			{
+				_updateFrame();
+			}
+			
+			// update child armature
 			if (_childArmature != prevChildArmature)
 			{
 				if (prevChildArmature)
@@ -485,7 +503,7 @@
 		{
 			const prevMeshData:MeshData = _meshData;
 			
-			if (_displayDataSet && _displayIndex >= 0 && _displayIndex < _displayDataSet.displays.length)
+			if (_display == _meshDisplay && _displayDataSet && _displayIndex >= 0 && _displayIndex < _displayDataSet.displays.length)
 			{
 				_meshData = _displayDataSet.displays[_displayIndex].meshData;
 			}
@@ -519,10 +537,6 @@
 						}
 						
 						_ffdVertices.length = ffdVerticesCount * 2;
-						
-						this.globalTransformMatrix = this._globalTransformMatrix;  // 由于蒙皮顶点坐标是相对于骨架空间的, 所以将 mesh 的矩阵清空
-						this.globalTransformMatrix.identity();
-						_updateTransform();
 					}
 					else
 					{

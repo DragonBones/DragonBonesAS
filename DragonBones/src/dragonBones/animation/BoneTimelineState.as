@@ -83,19 +83,20 @@
 				}
 				
 				// Rotate
-				if (currentFrame.tweenRotate == currentFrame.tweenRotate)
+				const tweenRotate:Number = currentFrame.tweenRotate;
+				if (tweenRotate == tweenRotate)
 				{
-					if (currentFrame.tweenRotate)
+					if (tweenRotate)
 					{
-						if (currentFrame.tweenRotate > 0 ? nextTransform.skewY >= _currentTransform.skewY : nextTransform.skewY <= _currentTransform.skewY) {
-							const rotate:int = currentFrame.tweenRotate > 0? currentFrame.tweenRotate - 1: currentFrame.tweenRotate + 1;
+						if (tweenRotate > 0 ? nextTransform.skewY >= _currentTransform.skewY : nextTransform.skewY <= _currentTransform.skewY) {
+							const rotate:int = tweenRotate > 0? tweenRotate - 1: tweenRotate + 1;
 							_durationTransform.skewX = nextTransform.skewX - _currentTransform.skewX + PI_D * rotate;
 							_durationTransform.skewY = nextTransform.skewY - _currentTransform.skewY + PI_D * rotate;
 						} 
 						else
 						{
-							_durationTransform.skewX = nextTransform.skewX - _currentTransform.skewX + PI_D * currentFrame.tweenRotate;
-							_durationTransform.skewY = nextTransform.skewY - _currentTransform.skewY + PI_D * currentFrame.tweenRotate;
+							_durationTransform.skewX = nextTransform.skewX - _currentTransform.skewX + PI_D * tweenRotate;
+							_durationTransform.skewY = nextTransform.skewY - _currentTransform.skewY + PI_D * tweenRotate;
 						}
 					}
 					else

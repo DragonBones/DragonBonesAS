@@ -76,9 +76,10 @@ package dragonBones.animation
 			
 			if (_tweenFFD == TWEEN_TYPE_NONE)
 			{
-				for (var i:uint = 0, l:uint = currentFrame.tweens.length; i < l; ++i)
+				const currentFFDVertices:Vector.<Number> = currentFrame.tweens;
+				for (var i:uint = 0, l:uint = currentFFDVertices.length; i < l; ++i)
 				{
-					if (_ffdVertices[i] != currentFrame.tweens[i])
+					if (_ffdVertices[i] != currentFFDVertices[i])
 					{
 						_tweenFFD = TWEEN_TYPE_ONCE;
 						break;
@@ -99,9 +100,10 @@ package dragonBones.animation
 				}
 				
 				const currentFFDVertices:Vector.<Number> = (this._currentFrame as ExtensionFrameData).tweens;
+				const nextFFDVertices:Vector.<Number> = _durationFFDFrame.tweens;
 				for (var i:uint = 0, l:uint = currentFFDVertices.length; i < l; ++i)
 				{
-					_ffdVertices[i] = currentFFDVertices[i] + _durationFFDFrame.tweens[i] * this._tweenProgress;
+					_ffdVertices[i] = currentFFDVertices[i] + nextFFDVertices[i] * this._tweenProgress;
 				}
 				
 				slot._ffdDirty = true;

@@ -219,75 +219,70 @@ package dragonBones.flash
 			const frameDisplay:Shape = _renderDisplay as Shape;
 			frameDisplay.graphics.clear();
 			
-			if (!this._display || this._displayIndex < 0 || this._displayIndex >= this._displayDataSet.displays.length)
+			if (this._display && this._displayIndex >= 0 && this._displayIndex < this._displayDataSet.displays.length)
 			{
-				frameDisplay.visible = false;
-				return;
+				const displayData:DisplayData = this._displayDataSet.displays[this._displayIndex];
+				const textureData:FlashTextureData = displayData.textureData as FlashTextureData;
+				if (textureData)
+				{
+					const texture:BitmapData = (textureData.parent as FlashTextureAtlasData).texture || textureData.texture;
+					if (texture)
+					{
+						const rect:Rectangle = textureData.frame || textureData.region;
+						
+						var width:Number = rect.width;
+						var height:Number = rect.height;
+						if (textureData.rotated)
+						{
+							width = rect.height;
+							height = rect.width;
+						}
+						
+						var pivotX:Number = displayData.pivot.x;
+						var pivotY:Number = displayData.pivot.y;
+						if (displayData.isRelativePivot)
+						{
+							pivotX = width * pivotX;
+							pivotY = height * pivotY;
+						}
+						
+						if (textureData.frame)
+						{
+							pivotX -= textureData.frame.x;
+							pivotY -= textureData.frame.y;
+						}
+						
+						const scale:Number = 1 / textureData.parent.scale;
+						
+						if (textureData.rotated)
+						{
+							_helpMatrix.a = 0;
+							_helpMatrix.b = -scale;
+							_helpMatrix.c = scale;
+							_helpMatrix.d = 0;
+							_helpMatrix.tx = -pivotX - textureData.region.y;
+							_helpMatrix.ty = -pivotY + textureData.region.x + height;
+						}
+						else
+						{
+							_helpMatrix.a = scale;
+							_helpMatrix.b = 0;
+							_helpMatrix.c = 0;
+							_helpMatrix.d = scale;
+							_helpMatrix.tx = -pivotX - textureData.region.x;
+							_helpMatrix.ty = -pivotY - textureData.region.y;
+						}
+						
+						frameDisplay.graphics.beginBitmapFill(texture, _helpMatrix, false, true);
+						frameDisplay.graphics.drawRect(-pivotX, -pivotY, width, height);
+						this._updateVisible();
+						
+						return;
+					}
+				}
 			}
 			
-			const displayData:DisplayData = this._displayDataSet.displays[this._displayIndex];
-			const textureData:FlashTextureData = displayData.textureData as FlashTextureData;
-			if (!textureData)
-			{
-				frameDisplay.visible = false;
-				return;
-			}
-			
-			const texture:BitmapData = (textureData.parent as FlashTextureAtlasData).texture || textureData.texture;
-			if (!texture)
-			{
-				frameDisplay.visible = false;
-				return;
-			}
-			
-			const rect:Rectangle = textureData.frame || textureData.region;
-			
-			var width:Number = rect.width;
-			var height:Number = rect.height;
-			if (textureData.rotated)
-			{
-				width = rect.height;
-				height = rect.width;
-			}
-			
-			var pivotX:Number = displayData.pivot.x;
-			var pivotY:Number = displayData.pivot.y;
-			if (displayData.isRelativePivot)
-			{
-				pivotX = width * pivotX;
-				pivotY = height * pivotY;
-			}
-			
-			if (textureData.frame)
-			{
-				pivotX -= textureData.frame.x;
-				pivotY -= textureData.frame.y;
-			}
-			
-			const scale:Number = 1 / textureData.parent.scale;
-			
-			if (textureData.rotated)
-			{
-				_helpMatrix.a = 0;
-				_helpMatrix.b = -scale;
-				_helpMatrix.c = scale;
-				_helpMatrix.d = 0;
-				_helpMatrix.tx = -pivotX - textureData.region.y;
-				_helpMatrix.ty = -pivotY + textureData.region.x + height;
-			}
-			else
-			{
-				_helpMatrix.a = scale;
-				_helpMatrix.b = 0;
-				_helpMatrix.c = 0;
-				_helpMatrix.d = scale;
-				_helpMatrix.tx = -pivotX - textureData.region.x;
-				_helpMatrix.ty = -pivotY - textureData.region.y;
-			}
-			
-			frameDisplay.graphics.beginBitmapFill(texture, _helpMatrix, false, true);
-			frameDisplay.graphics.drawRect(-pivotX, -pivotY, width, height);
-			this._updateVisible();
+			frameDisplay.visible = false;
 		}
 		
 		/**

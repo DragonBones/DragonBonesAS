@@ -328,7 +328,7 @@ package dragonBones
 			_lockDispose = true;
 			
 			//
-			_animation.advanceTime(passedTime);
+			_animation._advanceTime(passedTime);
 			
 			//
 			if (_bonesDirty)

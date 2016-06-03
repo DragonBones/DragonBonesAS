@@ -74,12 +74,13 @@
 		 */
 		override protected function _generateSlot(dataPackage:BuildArmaturePackage, slotDisplayDataSet:SlotDisplayDataSet):Slot
 		{
-			const slot:Slot = BaseObject.borrowObject(FlashSlot) as FlashSlot;
+			const slot:FlashSlot = BaseObject.borrowObject(FlashSlot) as FlashSlot;
 			const slotData:SlotData = slotDisplayDataSet.slot;
 			const displayList:Vector.<Object> = new Vector.<Object>(slotDisplayDataSet.displays.length, true);
 			
 			slot.name = slotData.name;
 			slot._rawDisplay = new Shape();
+			slot._meshDisplay = slot._rawDisplay;
 			
 			var displayIndex:uint = 0;
 			for each (var displayData:DisplayData in slotDisplayDataSet.displays)
@@ -87,13 +88,21 @@
 				switch (displayData.type)
 				{
 					case DragonBones.DISPLAY_TYPE_IMAGE:
-					case DragonBones.DISPLAY_TYPE_MESH:
 						if (!displayData.textureData)
 						{
 							displayData.textureData = this._getTextureData(dataPackage.dataName, displayData.name);
 						}
 						
 						displayList[displayIndex] = slot._rawDisplay;
+						break;
+					
+					case DragonBones.DISPLAY_TYPE_MESH:
+						if (!displayData.textureData)
+						{
+							displayData.textureData = this._getTextureData(dataPackage.dataName, displayData.name);
+						}
+						
+						displayList[displayIndex] = slot._meshDisplay;
 						break;
 					
 					case DragonBones.DISPLAY_TYPE_ARMATURE:

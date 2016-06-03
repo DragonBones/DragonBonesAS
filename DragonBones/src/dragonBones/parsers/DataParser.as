@@ -20,6 +20,7 @@ package dragonBones.parsers
 	{
 		protected static const TEXTURE_ATLAS:String = "TextureAtlas";
 		protected static const SUB_TEXTURE:String = "SubTexture";
+		protected static const FORMAT:String = "format";;
 		protected static const IMAGE_PATH:String = "imagePath";
 		protected static const WIDTH:String = "width";
 		protected static const HEIGHT:String = "height";

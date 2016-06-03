@@ -225,7 +225,8 @@
 		 */
 		override protected function _updateFrame():void
 		{
-			const frameDisplay:Image = _renderDisplay as Image;
+			
+			const frameDisplay:Image = this._rawDisplay as Image;
 			
 			if (this._display && this._displayIndex >= 0 && this._displayIndex < this._displayDataSet.displays.length)
 			{
@@ -257,8 +258,8 @@
 					var pivotY:Number = displayData.pivot.y;
 					if (displayData.isRelativePivot)
 					{
-						pivotX *= width;
-						pivotY *= height;
+						pivotX = width * pivotX;
+						pivotY = height * pivotY;
 					}
 					
 					if (textureData.frame)
@@ -271,17 +272,17 @@
 					frameDisplay.readjustSize();
 					frameDisplay.pivotX = pivotX;
 					frameDisplay.pivotY = pivotY;
-					
 					this._updateVisible();
+					
 					return;
 				}
 			}
 			
+			frameDisplay.visible = false;
 			frameDisplay.texture = EMPTY_TEXTURE;
 			frameDisplay.readjustSize();
 			frameDisplay.pivotX = 0;
 			frameDisplay.pivotY = 0;
-			frameDisplay.visible = false;
 		}
 		
 		/**
@@ -355,11 +356,11 @@
 			else
 			{
 				const displayMatrix:Matrix = _renderDisplay.transformationMatrix;
-				//displayMatrix.copyFrom(this.globalMatrix);
 				displayMatrix.a = this.globalTransformMatrix.a;
 				displayMatrix.b = this.globalTransformMatrix.b;
 				displayMatrix.c = this.globalTransformMatrix.c;
 				displayMatrix.d = this.globalTransformMatrix.d;
+				
 				if (pivotX || pivotY)
 				{
 					displayMatrix.tx = this.globalTransformMatrix.tx - (displayMatrix.a * pivotX + displayMatrix.c * pivotY);

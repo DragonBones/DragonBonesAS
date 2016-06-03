@@ -15,6 +15,8 @@
 	import starling.display.Image;
 	import starling.display.Mesh;
 	import starling.display.Quad;
+	import starling.rendering.IndexData;
+	import starling.rendering.VertexData;
 	import starling.styles.MeshStyle;
 	import starling.textures.SubTexture;
 	import starling.textures.Texture;
@@ -23,9 +25,18 @@
 	
 	public final class StarlingSlot extends Slot
 	{
-		public var updateTransformEnabled:Boolean = true;
+		public var updateTransformEnabled:Boolean;
 		
-		private var _renderDisplay:DisplayObject = null;
+		/**
+		 * @private
+		 */
+		dragonBones_internal var _indexData:IndexData;
+		/**
+		 * @private
+		 */
+		dragonBones_internal var _vertexData:VertexData;
+		
+		private var _renderDisplay:DisplayObject;
 		
 		public function StarlingSlot()
 		{
@@ -59,6 +70,11 @@
 			}
 			
 			super._onClear();
+			
+			updateTransformEnabled = false;
+			
+			_indexData = null;
+			_vertexData = null;
 			
 			_renderDisplay = null;
 		}
@@ -119,8 +135,8 @@
 		 */
 		override protected function _disposeDisplay(value:Object):void
 		{
-			const prevDisplay:DisplayObject = value as DisplayObject;
-			prevDisplay.dispose();
+			const renderDisplay:DisplayObject = value as DisplayObject;
+			renderDisplay.dispose();
 		}
 		
 		/**
@@ -222,7 +238,7 @@
 		 */
 		override protected function _updateFrame():void
 		{
-			const frameDisplay:Image = _renderDisplay as Image;
+			const frameDisplay:Image = this._rawDisplay as Image;
 			
 			if (this._display && this._displayIndex >= 0 && this._displayIndex < this._displayDataSet.displays.length)
 			{
@@ -234,51 +250,87 @@
 					const textureAtlasTexture:Texture = (textureData.parent as StarlingTextureAtlasData).texture;
 					if (textureAtlasTexture)
 					{
-						textureData.texture = new SubTexture(textureAtlasTexture, textureData.region, false, textureData.frame, textureData.rotated);
+						textureData.texture = new SubTexture(textureAtlasTexture, textureData.region, false, textureData.frame, textureData.rotated, 1 / textureData.parent.scale);
 					}
 				}
 				
 				if (textureData && textureData.texture)
 				{
-					const rect:Rectangle = textureData.frame || textureData.region;
-					
-					var width:Number = rect.width;
-					var height:Number = rect.height;
-					if (textureData.rotated)
+					if (this._meshData && this._display == this._meshDisplay)
 					{
-						width = rect.height;
-						height = rect.width;
+						const meshDisplay:Mesh = this._meshDisplay as Mesh;
+						const meshStyle:MeshStyle = meshDisplay.style;
+						
+						_indexData.clear();
+						_vertexData.clear();
+						
+						var i:uint = 0, l:uint = 0;
+						
+						for (i = 0, l = this._meshData.vertexIndices.length; i < l; ++i)
+						{
+							_indexData.setIndex(i, this._meshData.vertexIndices[i]);
+						}
+						
+						for (i = 0, l = this._meshData.uvs.length; i < l; i += 2)
+						{
+							const iH:uint = uint(i / 2);
+							meshStyle.setTexCoords(iH, this._meshData.uvs[i], this._meshData.uvs[i + 1]);
+							meshStyle.setVertexPosition(iH, this._meshData.vertices[i], this._meshData.vertices[i + 1]);
+						}
+						
+						meshDisplay.texture = textureData.texture;
+						frameDisplay.readjustSize();
+						
+						if (this._meshData.skinned)
+						{
+							const transformationMatrix:Matrix = meshDisplay.transformationMatrix;
+							transformationMatrix.identity();
+							meshDisplay.transformationMatrix = transformationMatrix;
+						}
 					}
-					
-					var pivotX:Number = displayData.pivot.x;
-					var pivotY:Number = displayData.pivot.y;
-					if (displayData.isRelativePivot)
+					else
 					{
-						pivotX = width * pivotX;
-						pivotY = height * pivotY;
+						const rect:Rectangle = textureData.frame || textureData.region;
+						
+						var width:Number = rect.width;
+						var height:Number = rect.height;
+						if (textureData.rotated)
+						{
+							width = rect.height;
+							height = rect.width;
+						}
+						
+						var pivotX:Number = displayData.pivot.x;
+						var pivotY:Number = displayData.pivot.y;
+						if (displayData.isRelativePivot)
+						{
+							pivotX = width * pivotX;
+							pivotY = height * pivotY;
+						}
+						
+						if (textureData.frame)
+						{
+							pivotX -= textureData.frame.x;
+							pivotY -= textureData.frame.y;
+						}
+						
+						frameDisplay.texture = textureData.texture;
+						frameDisplay.readjustSize();
+						frameDisplay.pivotX = pivotX;
+						frameDisplay.pivotY = pivotY;
 					}
-					
-					if (textureData.frame)
-					{
-						pivotX -= textureData.frame.x;
-						pivotY -= textureData.frame.y;
-					}
-					
-					frameDisplay.texture = textureData.texture;
-					frameDisplay.readjustSize();
-					frameDisplay.pivotX = pivotX;
-					frameDisplay.pivotY = pivotY;
 					
 					this._updateVisible();
+					
 					return;
 				}
 			}
 			
+			frameDisplay.visible = false;
 			frameDisplay.texture = null;
 			frameDisplay.readjustSize();
 			frameDisplay.pivotX = 0;
 			frameDisplay.pivotY = 0;
-			frameDisplay.visible = false;
 		}
 		
 		/**
@@ -290,17 +342,17 @@
 			const meshStyle:MeshStyle = meshDisplay.style;
 			const hasFFD:Boolean = this._ffdVertices.length > 0;
 			
-			var i:uint = 0, iH:uint = 0, iF:uint = 0, l:uint = _meshData.vertices.length;
+			var i:uint = 0, iH:uint = 0, iF:uint = 0, l:uint = this._meshData.vertices.length;
 			var xG:Number = 0, yG:Number = 0;
-			if (_meshData.skinned)
+			if (this._meshData.skinned)
 			{
 				for (i = 0; i < l; i += 2)
 				{
-					iH = i / 2;
+					iH = uint(i / 2);
 					
-					const boneIndices:Vector.<uint> = _meshData.boneIndices[iH];
-					const boneVertices:Vector.<Number> = _meshData.boneVertices[iH];
-					const weights:Vector.<Number> = _meshData.weights[iH];
+					const boneIndices:Vector.<uint> = this._meshData.boneIndices[iH];
+					const boneVertices:Vector.<Number> = this._meshData.boneVertices[iH];
+					const weights:Vector.<Number> = this._meshData.weights[iH];
 					
 					xG = 0, yG = 0;
 					
@@ -310,10 +362,11 @@
 						const matrix:Matrix = bone.globalTransformMatrix;
 						const weight:Number = weights[iB];
 						
+						var xL:Number = 0, yL:Number = 0;
 						if (hasFFD)
 						{
-							var xL:Number = boneVertices[iB * 2] + this._ffdVertices[iF];
-							var yL:Number = boneVertices[iB * 2 + 1] + this._ffdVertices[iF + 1];
+							xL = boneVertices[iB * 2] + this._ffdVertices[iF];
+							yL = boneVertices[iB * 2 + 1] + this._ffdVertices[iF + 1];
 						}
 						else
 						{
@@ -333,7 +386,7 @@
 			}
 			else if (hasFFD)
 			{
-				const vertices:Vector.<Number> = _meshData.vertices;
+				const vertices:Vector.<Number> = this._meshData.vertices;
 				for (i = 0; i < l; i += 2)
 				{
 					xG = vertices[i] + this._ffdVertices[i];
@@ -364,7 +417,6 @@
 			else
 			{
 				const displayMatrix:Matrix = _renderDisplay.transformationMatrix;
-				//displayMatrix.copyFrom(this.globalMatrix);
 				displayMatrix.a = this.globalTransformMatrix.a;
 				displayMatrix.b = this.globalTransformMatrix.b;
 				displayMatrix.c = this.globalTransformMatrix.c;

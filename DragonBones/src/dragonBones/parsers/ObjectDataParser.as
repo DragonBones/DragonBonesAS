@@ -483,6 +483,7 @@
 					break;
 				
 				case DragonBones.DISPLAY_TYPE_MESH:
+					trace(display.name);
 					display.meshData = _parseMesh(rawData);
 					break;
 				
@@ -510,7 +511,6 @@
 			const numTriangles:uint = uint(rawTriangles.length / 3);
 			
 			const inverseBindPose:Vector.<Matrix> = new Vector.<Matrix>(this._armature.sortedBones.length, true);
-			const helpPoint:Point = new Point();
 			
 			mesh.skinned = rawWeights && rawWeights.length;
 			mesh.uvs.fixed = false;
@@ -587,9 +587,9 @@
 					const weights:Vector.<Number> = mesh.weights[vertexIndex] = new Vector.<Number>(numBones, true);
 					const boneVertices:Vector.<Number> = mesh.boneVertices[vertexIndex] = new Vector.<Number>(numBones * 2, true);
 					
-					Transform.transformPoint(mesh.slotPose, x, y, helpPoint);
-					x = mesh.vertices[i] = helpPoint.x;
-					y = mesh.vertices[iN] = helpPoint.y;
+					Transform.transformPoint(mesh.slotPose, x, y, _helpPoint);
+					x = mesh.vertices[i] = _helpPoint.x;
+					y = mesh.vertices[iN] = _helpPoint.y;
 					
 					for (var iB:uint = 0; iB < numBones; ++iB)
 					{
@@ -605,12 +605,12 @@
 							mesh.inverseBindPose[boneIndex] = inverseBindPose[rawBoneIndex];
 						}
 						
-						Transform.transformPoint(mesh.inverseBindPose[boneIndex], x, y, helpPoint);
+						Transform.transformPoint(mesh.inverseBindPose[boneIndex], x, y, _helpPoint);
 						
 						indices[iB] = boneIndex;
 						weights[iB] = rawWeights[iI + 1];
-						boneVertices[iB * 2] = helpPoint.x;
-						boneVertices[iB * 2 + 1] = helpPoint.y;
+						boneVertices[iB * 2] = _helpPoint.x;
+						boneVertices[iB * 2 + 1] = _helpPoint.y;
 					}
 					
 					iW += numBones * 2 + 1;
