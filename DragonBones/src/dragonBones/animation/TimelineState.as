@@ -1,9 +1,14 @@
 ﻿package dragonBones.animation
 {
 	import dragonBones.Armature;
+	import dragonBones.Slot;
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.events.EventObject;
+	import dragonBones.events.IEventDispatcher;
+	import dragonBones.objects.ActionData;
+	import dragonBones.objects.EventData;
 	import dragonBones.objects.FrameData;
 	import dragonBones.objects.TimelineData;
 	
@@ -89,6 +94,70 @@
 		
 		protected function _onCrossFrame(frame:FrameData):void
 		{
+			var i:uint = 0, l:uint = 0;
+			
+			const actions:Vector.<ActionData> = frame.actions;
+			for (i = 0, l = actions.length; i < l; ++i)
+			{
+				const actionData:ActionData = actions[i];
+				
+				if (actionData.slot)
+				{
+					const slot:Slot = this._armature.getSlot(actionData.slot.name);
+					if (slot)
+					{
+						const childArmature:Armature = slot.childArmature;
+						if (childArmature)
+						{
+							childArmature._action = actionData;
+						}
+					}
+				}
+				else
+				{
+					this._armature._action = actionData;
+				}
+			}
+			
+			const eventDispatcher:IEventDispatcher = this._armature.display;
+			const events:Vector.<EventData> = frame.events;
+			for (i = 0, l = events.length; i < l; ++i)
+			{
+				const eventData:EventData = events[i];
+				
+				var eventType:String = null;
+				switch (eventData.type)
+				{
+					case DragonBones.EVENT_TYPE_FRAME:
+						eventType = EventObject.FRAME_EVENT;
+						break;
+					
+					case DragonBones.EVENT_TYPE_SOUND:
+						eventType = EventObject.SOUND_EVENT;
+						break;
+				}
+				
+				if (eventDispatcher.hasEvent(eventType))
+				{
+					const eventObject:EventObject = BaseObject.borrowObject(EventObject) as EventObject;
+					eventObject.animationState = this._animationState;
+					
+					if (eventData.bone)
+					{
+						eventObject.bone = this._armature.getBone(eventData.bone.name);
+					}
+					
+					if (eventData.slot)
+					{
+						eventObject.slot = this._armature.getSlot(eventData.slot.name);
+					}
+					
+					eventObject.name = eventData.name;
+					eventObject.data = eventData.data;
+					
+					this._armature._bufferEvent(eventObject, eventType);
+				}
+			}
 		}
 		
 		protected function _setCurrentTime(value:int):Boolean
@@ -185,13 +254,13 @@
 					break;
 				
 				default:
-					_currentFrame = _timeline.frames[uint(_currentTime * _timeToFrameSccale)]; // floor
+					_currentFrame = _timeline.frames[uint(_currentTime * _timeToFrameSccale)];
 					_onArriveAtFrame(false);
 					_onUpdateFrame(false);
 					break;
 			}
 			
-			// _currentFrame = null; // TODO For first event frame
+			_currentFrame = null;  // For first event frame
 		}
 		
 		public function fadeIn(armature:Armature, animationState:AnimationState, timelineData:TimelineData):void

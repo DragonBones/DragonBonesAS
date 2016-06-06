@@ -1,4 +1,4 @@
-package dragonBones.factories
+﻿package dragonBones.factories
 {
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -185,7 +185,7 @@ package dragonBones.factories
 			
 			for (var i:uint = 0, l:uint = bones.length; i < l; ++i)
 			{
-				const boneData:BoneData = bones[i]
+				const boneData:BoneData = bones[i];
 				const bone:Bone = BaseObject.borrowObject(Bone) as Bone;
 				
 				bone.name = boneData.name;
@@ -194,7 +194,6 @@ package dragonBones.factories
 				bone.inheritScale = boneData.inheritScale; 
 				bone.length = boneData.length;
 				bone.origin.copy(boneData.transform);
-				
 				if (boneData.parent)
 				{
 					armature.addBone(bone, boneData.parent.name);
@@ -208,7 +207,7 @@ package dragonBones.factories
 				{
 					bone.ikBendPositive = boneData.bendPositive;
 					bone.ikWeight = boneData.weight;
-					bone._setIK(armature.getBone(boneData.ik.name), boneData.chain);
+					bone._setIK(armature.getBone(boneData.ik.name), boneData.chain, boneData.chainIndex);
 				}
 			}
 		}
@@ -254,6 +253,10 @@ package dragonBones.factories
 				slot._setBlendMode(slotData.blendMode);
 				slot._setColor(slotData.color);
 				
+				slot._replaceDisplayDataSet.fixed = false;
+				slot._replaceDisplayDataSet.length = slotDisplayDataSet.displays.length;
+				slot._replaceDisplayDataSet.fixed = true;
+				
 				armature.addSlot(slot, slotData.parent.name);
 			}
 		}
@@ -275,23 +278,37 @@ package dragonBones.factories
 			
 			if (displayIndex < 0)
 			{
-				slot.display = _generateDisplay(dataPackage, displayData, null);
+				return;
 			}
 			else
 			{
+				if (slot._replaceDisplayDataSet.length <= displayIndex)
+				{
+					slot._replaceDisplayDataSet.fixed = false;
+					slot._replaceDisplayDataSet.length = displayIndex + 1;
+					slot._replaceDisplayDataSet.fixed = true;
+				}
+				
+				slot._replaceDisplayDataSet[displayIndex] = displayData;
+				
 				const displayList:Vector.<Object> = slot.displayList;
-				if (displayList.length <= displayIndex)
+				if (displayList.length <=  displayIndex)
 				{
 					displayList.fixed = false;
 					displayList.length = displayIndex + 1;
-					displayList.fixed = true;
 				}
 				
-				const rawDisplayData:DisplayData = slot._displayDataSet.displays.length <= displayIndex? null: slot._displayDataSet[displayIndex];
-				const display:Object = _generateDisplay(dataPackage, displayData, rawDisplayData);
-				displayList[displayIndex] = display;
+				if (displayData.meshData)
+				{
+					displayList[displayIndex] = slot.MeshDisplay;
+				}
+				else
+				{
+					displayList[displayIndex] = slot.rawDisplay;
+				}
 				
 				slot.displayList = displayList;
+				slot.invalidUpdate();
 			}
 		}
 		
@@ -317,15 +334,6 @@ package dragonBones.factories
 		 * @private
 		 */
 		protected function _generateSlot(dataPackage:BuildArmaturePackage, slotDisplayDataSet:SlotDisplayDataSet):Slot
-		{
-			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
-			return null;
-		}
-		
-		/** 
-		 * @private
-		 */
-		protected function _generateDisplay(dataPackage:BuildArmaturePackage, displayData:DisplayData, rawDisplayData:DisplayData):Object
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 			return null;
@@ -572,18 +580,18 @@ package dragonBones.factories
 		/**
 		 * @language zh_CN
 		 * 清除所有的数据。
-		 * @param dispose 是否释放数据。 [<code>true</code>: 释放, <code>false</code>: 不释放] (默认: <code>true</code>)
+		 * @param disposeData 是否释放骨架和贴图数据。 [<code>true</code>: 释放, <code>false</code>: 不释放] (默认: <code>true</code>)
 		 * @see dragonBones.objects.DragonBonesData
 		 * @see dragonBones.textures.TextureAtlasData
 		 * @version DragonBones 4.5
 		 */
-		public function clear(dispose:Boolean = true):void
+		public function clear(disposeData:Boolean = true):void
 		{
 			var i:String = null;
 			
 			for (i in _dragonBonesDataMap)
 			{
-				if (dispose)
+				if (disposeData)
 				{
 					(_dragonBonesDataMap[i] as DragonBonesData).returnToPool();
 				}
@@ -593,7 +601,7 @@ package dragonBones.factories
 			
 			for (i in _textureAtlasDataMap)
 			{
-				if (dispose)
+				if (disposeData)
 				{
 					const textureAtlasDataList:Vector.<TextureAtlasData> = _dragonBonesDataMap[i];
 					for each (var textureAtlasData:TextureAtlasData in textureAtlasDataList)
@@ -764,7 +772,11 @@ package dragonBones.factories
 				return;
 			}
 			
-			// for _replaceSlotDisplay(dataPackage, displayData, slot, displayIndex);
+			var displayIndex:uint = 0;
+			for each (var displayData:DisplayData in slotDisplayDataSet.displays)
+			{
+				_replaceSlotDisplay(dataPackage, displayData, slot, displayIndex++);
+			}
 		}
 		
 		/**

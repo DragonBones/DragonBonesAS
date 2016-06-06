@@ -764,20 +764,29 @@
 		}
 		
 		/**
-		 * @private //TODO
+		 * @language zh_CN
+		 * 
+		 * @version DragonBones 4.5
 		 */
 		public function invalidUpdate():void
 		{
+			_displayDirty = true;
 		}
 		
 		/**
-		 * @language zh_CN
-		 * 原始显示对象，该显示对象用来实现序列帧切换和深度占位。
-		 * @version DragonBones 4.5
+		 * @private
 		 */
 		public function get rawDisplay():Object
 		{
 			return _rawDisplay;
+		}
+		
+		/**
+		 * @private
+		 */
+		public function get MeshDisplay():Object
+		{
+			return _meshDisplay;
 		}
 		
 		/**
@@ -857,15 +866,8 @@
 			}
 			
 			const displayListLength:uint = _displayList.length;
-			if (displayListLength <= 1) // Emprty or only one display 
+			if (_displayIndex < 0 && displayListLength == 0)  // Emprty
 			{
-				if (displayListLength == 0)
-				{
-					_displayList.fixed = false;
-					_displayList.length = 1;
-					_displayList.fixed = true;
-				}
-				
 				_displayIndex = 0;
 			}
 			

@@ -14,6 +14,11 @@ package dragonBones.objects
 		public var hasAsynchronyTimeline:Boolean;
 		
 		/**
+		 * @private
+		 */
+		public var hasBoneTimelineEvent:Boolean;
+		
+		/**
 		 * @language zh_CN
 		 * 持续的帧数。
 		 * @version DragonBones 3.0
@@ -101,6 +106,7 @@ package dragonBones.objects
 			super._onClear();
 			
 			hasAsynchronyTimeline = false;
+			hasBoneTimelineEvent = false;
 			frameCount = 0;
 			playTimes = 0;
 			position = 0;
@@ -122,12 +128,6 @@ package dragonBones.objects
 			{
 				(slotTimelines[i] as SlotTimelineData).returnToPool();
 				delete slotTimelines[i];
-			}
-			
-			for (i in ffdTimelines)
-			{
-				(ffdTimelines[i] as FFDTimelineData).returnToPool();
-				delete ffdTimelines[i];
 			}
 			
 			for (i in ffdTimelines) {

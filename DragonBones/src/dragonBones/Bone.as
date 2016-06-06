@@ -1,6 +1,7 @@
 ﻿package dragonBones
 {
 	import flash.geom.Matrix;
+	import flash.geom.Point;
 	
 	import dragonBones.core.TransformObject;
 	import dragonBones.core.dragonBones_internal;
@@ -90,6 +91,11 @@
 		/**
 		 * @private
 		 */
+		private var _ikChainIndex:uint;
+		
+		/**
+		 * @private
+		 */
 		private var _ik:Bone;
 		
 		/**
@@ -117,19 +123,20 @@
 		{
 			super._onClear();
 			
-			inheritTranslation = true;
-			inheritRotation = true;
-			inheritScale = true;
-			ikBendPositive = true;
-			ikWeight = 1;
+			inheritTranslation = false;
+			inheritRotation = false;
+			inheritScale = false;
+			ikBendPositive = false;
+			ikWeight = 0;
 			length = 0;
 			
 			_transformDirty = 2; // Update
 			_cacheFrames = null;
 			_animationPose.identity();
 			
-			_visible = true;
-			_ikChain = 1;
+			_visible = true; //
+			_ikChain = 0;
+			_ikChainIndex = 0;
 			_ik = null;
 			
 			if (_bones.length)
@@ -197,15 +204,49 @@
 			}
 		}
 		
+		private static const _helpPoint:Point = new Point();
+		private static const _helpMatrix:Matrix = new Matrix();
+		
 		/**
 		 * @private
 		 */
-		private function _computeIK():void
+		private function _computeIKA():void
 		{
+			const ikGlobal:Transform = _ik.global;
+			
+			/* //TODO
+			if (this._parent && inheritScale)
+			{
+			if (this._parent.global.skewX == this._parent.global.skewY)
+			{
+			}
+			}
+			*/
+			
+			const x:Number = this.globalTransformMatrix.a * length;
+			const y:Number = this.globalTransformMatrix.b * length;
+			
+			const ikRadian:Number = 
+				(
+					Math.atan2(ikGlobal.y - this.global.y, ikGlobal.x - this.global.x) + this.offset.skewY - 
+					this.global.skewY * 2 + Math.atan2(y, x)
+				) * ikWeight; // Support offset
+			
+			this.global.skewX += ikRadian;
+			this.global.skewY += ikRadian;
+			this.global.toMatrix(this.globalTransformMatrix);
+		}
+		
+		/**
+		 * @private
+		 */
+		private function _computeIKB():void
+		{
+			//TODO
 			const ikGlobal:Transform = _ik.global;
 			const x:Number = this.globalTransformMatrix.a * length;
 			const y:Number = this.globalTransformMatrix.b * length;
-			if (this.inheritTranslation && _ikChain > 0 && this._parent) // IK chain
+			if (this.inheritTranslation && _ikChain > 0 && this._parent)
 			{
 				const parentGlobal:Transform = this._parent.global;
 				const lLL:Number = x * x + y * y;
@@ -276,36 +317,6 @@
 		/**
 		 * @private
 		 */
-		private function _computeIKA():void
-		{
-			const ikGlobal:Transform = _ik.global;
-			
-			if (this._parent && inheritScale)
-			{
-				if (this._parent.global.skewX == this._parent.global.skewY)
-				{
-				}
-			}
-			else
-			{
-				const x:Number = this.globalTransformMatrix.a * length;
-				const y:Number = this.globalTransformMatrix.b * length;
-				
-				const ikRadian:Number = 
-					(
-						Math.atan2(ikGlobal.y - this.global.y, ikGlobal.x - this.global.x) + this.offset.skewY - 
-						this.global.skewY * 2 + Math.atan2(y, x)
-					) * ikWeight; // Support offset
-				
-				this.global.skewX += ikRadian;
-				this.global.skewY += ikRadian;
-				this.global.toMatrix(this.globalTransformMatrix);
-			}
-		}
-		
-		/**
-		 * @private
-		 */
 		dragonBones_internal function _update(cacheFrameIndex:int):void
 		{
 			if (cacheFrameIndex >= 0)
@@ -324,7 +335,7 @@
 				else if (
 					_transformDirty == 2 ||
 					(this._parent && this._parent._transformDirty) ||
-					(_ik && _ik._transformDirty)
+					(_ik && ikWeight > 0 && _ik._transformDirty)
 				)
 				{
 					_transformDirty = 2; // For update children and ik children
@@ -344,7 +355,7 @@
 			else if (
 				_transformDirty == 2 ||
 				(this._parent && this._parent._transformDirty) ||
-				(_ik && _ik._transformDirty)
+				(_ik && ikWeight > 0 && _ik._transformDirty)
 			)
 			{
 				_transformDirty = 2; // For update children and ik children
@@ -367,9 +378,16 @@
 					
 					_updateGlobalTransformMatrix();
 					
-					if (_ik && ikWeight)
+					if (_ik && _ikChainIndex == _ikChain  && ikWeight > 0)
 					{
-						_computeIK();
+						if (this.inheritTranslation && _ikChain > 0 && this._parent)
+						{
+							_computeIKB();
+						}
+						else
+						{
+							_computeIKA();
+						}
 					}
 					
 					if (cacheFrameIndex >= 0)
@@ -435,50 +453,57 @@
 		/**
 		 * @private
 		 */
-		dragonBones_internal function _setIK(value:Bone, chain:uint = 0):void
+		dragonBones_internal function _setIK(value:Bone, chain:uint, chainIndex:uint):void
 		{
 			if (value)
 			{
-				var chainEnd:Bone = null;
-				if (chain && this._parent)
+				if (chain == chainIndex)
 				{
-					chain = 1;
-					chainEnd = this._parent;
-				}
-				else
-				{
-					chain = 0;
-					chainEnd = this;
-				}
-				
-				if (chainEnd == value || chainEnd.contains(value))
-				{
-					value = null;
-					chain = 1;
-				}
-				else
-				{
-					var ancestor:Bone = value;
-					while(ancestor.ik && ancestor.ikChain)
+					var chainEnd:Bone = this._parent;
+					if (chain && chainEnd)
 					{
-						if (chainEnd.contains(ancestor.ik))
+						chain = 1;
+					}
+					else
+					{
+						chain = 0;
+						chainIndex = 0;
+						chainEnd = this;
+					}
+					
+					if (chainEnd == value || chainEnd.contains(value))
+					{
+						value = null;
+						chain = 0;
+						chainIndex = 0;
+					}
+					else
+					{
+						var ancestor:Bone = value;
+						while(ancestor.ik && ancestor.ikChain)
 						{
-							value = null;
-							chain = 1;
-							break;
+							if (chainEnd.contains(ancestor.ik))
+							{
+								value = null;
+								chain = 0;
+								chainIndex = 0;
+								break;
+							}
+							
+							ancestor = ancestor.parent;
 						}
-						
-						ancestor = ancestor.parent;
 					}
 				}
 			}
 			else
 			{
-				chain = 1;
+				chain = 0;
+				chainIndex = 0;
 			}
 			
 			_ik = value;
 			_ikChain = chain;
+			_ikChainIndex = chainIndex;
 			
 			if (this._armature)
 			{
@@ -568,13 +593,19 @@
 		}
 		
 		/**
-		 * @language zh_CN
-		 * 当前的 IK 约束链长度。
-		 * @version DragonBones 4.5
+		 * @private
 		 */
 		public function get ikChain():uint
 		{
 			return _ikChain;
+		}
+		
+		/**
+		 * @private
+		 */
+		public function get ikChainIndex():uint
+		{
+			return _ikChainIndex;
 		}
 		
 		/**

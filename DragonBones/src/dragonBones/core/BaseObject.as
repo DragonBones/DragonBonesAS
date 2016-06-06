@@ -32,6 +32,29 @@
 		private static const _poolsMap:Dictionary = new Dictionary();
 		
 		/**
+		 * @private
+		 */
+		private static function _returnObject(object:BaseObject):void
+		{
+			//const objectConstructor:Class = getDefinitionByName(getQualifiedClassName(object));
+			const objectConstructor:Class = object["constructor"];
+			const maxCount:uint = _maxCountMap[objectConstructor] == null? _defaultMaxCount: _maxCountMap[objectConstructor];
+			const pool:Vector.<BaseObject> = _poolsMap[objectConstructor] = _poolsMap[objectConstructor] || new Vector.<BaseObject>;
+			
+			if (pool.length < maxCount)
+			{
+				if (pool.indexOf(object) < 0)
+				{
+					pool.push(object);
+				}
+				else
+				{
+					throw new Error();
+				}
+			}
+		}
+		
+		/**
 		 * @language zh_CN
 		 * 设置每种对象池的最大缓存数量。
 		 * @version DragonBones 4.5
@@ -48,11 +71,6 @@
 				pool = _poolsMap[objectConstructor];
 				if (pool && pool.length > maxCount)
 				{
-					for (i = maxCount, l = pool.length; i < l; ++i)
-					{
-						//pool[i].dispose();
-					}
-					
 					pool.length = maxCount;
 				}
 			}
@@ -70,11 +88,6 @@
 					pool = _poolsMap[classType];
 					if (pool.length > maxCount)
 					{
-						for (i = maxCount, l = pool.length; i < l; ++i)
-						{
-							//pool[i].dispose();
-						}
-						
 						pool.length = maxCount;
 					}
 				}
@@ -96,11 +109,6 @@
 				pool = _poolsMap[objectConstructor];
 				if (pool && pool.length)
 				{
-					for each (object in pool)
-					{
-						//object.dispose();
-					}
-					
 					pool.length = 0;
 				}
 			}
@@ -108,11 +116,6 @@
 			{
 				for each (pool in _poolsMap)
 				{
-					for each (object in pool)
-					{
-						//object.dispose();
-					}
-					
 					pool.length = 0;
 				}
 			}
@@ -133,33 +136,6 @@
 			else
 			{
 				return new objectConstructor();
-			}
-		}
-		
-		/**
-		 * @private
-		 */
-		private static function _returnObject(object:BaseObject):void
-		{
-			//const objectConstructor:Class = getDefinitionByName(getQualifiedClassName(object));
-			const objectConstructor:Class = object["constructor"];
-			const maxCount:uint = _maxCountMap[objectConstructor] == null? _defaultMaxCount: _maxCountMap[objectConstructor];
-			const pool:Vector.<BaseObject> = _poolsMap[objectConstructor] = _poolsMap[objectConstructor] || new Vector.<BaseObject>;
-			
-			if (pool.length < maxCount)
-			{
-				if (pool.indexOf(object) < 0)
-				{
-					pool.push(object);
-				}
-				else
-				{
-					throw new Error();
-				}
-			}
-			else
-			{
-				//object.dispose();
 			}
 		}
 		
@@ -189,16 +165,6 @@
 		protected function _onClear():void
 		{
 		}
-		
-		/**
-		 * @language zh_CN
-		 * Dispose
-		 * @version DragonBones 4.5
-		 */
-		/*public function dispose():void
-		{
-			_onClear();
-		}*/
 		
 		/**
 		 * @language zh_CN

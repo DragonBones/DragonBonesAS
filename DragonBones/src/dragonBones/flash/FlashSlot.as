@@ -10,7 +10,6 @@ package dragonBones.flash
 	
 	import dragonBones.Armature;
 	import dragonBones.Slot;
-	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DisplayData;
 	
@@ -219,49 +218,58 @@ package dragonBones.flash
 			const frameDisplay:Shape = _renderDisplay as Shape;
 			frameDisplay.graphics.clear();
 			
-			if (this._display && this._displayIndex >= 0 && this._displayIndex < this._displayDataSet.displays.length)
+			if (this._display && this._displayIndex >= 0)
 			{
-				const displayData:DisplayData = this._displayDataSet.displays[this._displayIndex];
-				const textureData:FlashTextureData = displayData.textureData as FlashTextureData;
-				if (textureData)
+				const rawDisplayData:DisplayData = this._displayIndex < this._displayDataSet.displays.length? this._displayDataSet.displays[this._displayIndex]: null;
+				const replaceDisplayData:DisplayData = this._displayIndex < this._replaceDisplayDataSet.length? this._replaceDisplayDataSet[this._displayIndex]: null;
+				const contentDisplayData:DisplayData = replaceDisplayData || rawDisplayData;
+				const currentTextureData:FlashTextureData = contentDisplayData.textureData as FlashTextureData;
+				if (currentTextureData)
 				{
-					const texture:BitmapData = (textureData.parent as FlashTextureAtlasData).texture || textureData.texture;
+					const texture:BitmapData = (this._armature._replaceTexture as BitmapData) || (currentTextureData.parent as FlashTextureAtlasData).texture || currentTextureData.texture;
 					if (texture)
 					{
-						const rect:Rectangle = textureData.frame || textureData.region;
+						const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
 						
 						var width:Number = rect.width;
 						var height:Number = rect.height;
-						if (textureData.rotated)
+						if (currentTextureData.rotated)
 						{
 							width = rect.height;
 							height = rect.width;
 						}
 						
-						var pivotX:Number = displayData.pivot.x;
-						var pivotY:Number = displayData.pivot.y;
-						if (displayData.isRelativePivot)
+						var pivotX:Number = contentDisplayData.pivot.x;
+						var pivotY:Number = contentDisplayData.pivot.y;
+						
+						if (contentDisplayData.isRelativePivot)
 						{
 							pivotX = width * pivotX;
 							pivotY = height * pivotY;
 						}
 						
-						if (textureData.frame)
+						if (currentTextureData.frame)
 						{
-							pivotX -= textureData.frame.x;
-							pivotY -= textureData.frame.y;
+							pivotX -= currentTextureData.frame.x;
+							pivotY -= currentTextureData.frame.y;
 						}
 						
-						const scale:Number = 1 / textureData.parent.scale;
+						if (rawDisplayData && replaceDisplayData)
+						{
+							pivotX += replaceDisplayData.transform.x - rawDisplayData.transform.x;
+							pivotY += replaceDisplayData.transform.y - rawDisplayData.transform.y;
+						}
 						
-						if (textureData.rotated)
+						const scale:Number = 1 / currentTextureData.parent.scale;
+						
+						if (currentTextureData.rotated)
 						{
 							_helpMatrix.a = 0;
 							_helpMatrix.b = -scale;
 							_helpMatrix.c = scale;
 							_helpMatrix.d = 0;
-							_helpMatrix.tx = -pivotX - textureData.region.y;
-							_helpMatrix.ty = -pivotY + textureData.region.x + height;
+							_helpMatrix.tx = -pivotX - currentTextureData.region.y;
+							_helpMatrix.ty = -pivotY + currentTextureData.region.x + height;
 						}
 						else
 						{
@@ -269,8 +277,8 @@ package dragonBones.flash
 							_helpMatrix.b = 0;
 							_helpMatrix.c = 0;
 							_helpMatrix.d = scale;
-							_helpMatrix.tx = -pivotX - textureData.region.x;
-							_helpMatrix.ty = -pivotY - textureData.region.y;
+							_helpMatrix.tx = -pivotX - currentTextureData.region.x;
+							_helpMatrix.ty = -pivotY - currentTextureData.region.y;
 						}
 						
 						frameDisplay.graphics.beginBitmapFill(texture, _helpMatrix, false, true);

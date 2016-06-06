@@ -39,6 +39,11 @@ package dragonBones.objects
 		/**
 		 * @private
 		 */
+		public var chainIndex:uint;
+		
+		/**
+		 * @private
+		 */
 		public var weight:Number;
 		
 		/**
@@ -90,6 +95,7 @@ package dragonBones.objects
 			inheritScale = false;
 			bendPositive = false;
 			chain = 0;
+			chainIndex = 0;
 			weight = 0;
 			length = 0;
 			name = null;

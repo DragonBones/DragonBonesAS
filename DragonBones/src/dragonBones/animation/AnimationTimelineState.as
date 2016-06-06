@@ -1,16 +1,9 @@
 package dragonBones.animation
 {
-	import dragonBones.Armature;
-	import dragonBones.Slot;
 	import dragonBones.core.BaseObject;
-	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.EventObject;
 	import dragonBones.events.IEventDispatcher;
-	import dragonBones.objects.ActionData;
-	import dragonBones.objects.AnimationFrameData;
-	import dragonBones.objects.EventData;
-	import dragonBones.objects.FrameData;
 	
 	use namespace dragonBones_internal;
 	
@@ -34,71 +27,6 @@ package dragonBones.animation
 			_isStarted = false;
 		}
 		
-		override protected function _onCrossFrame(frame:FrameData):void
-		{
-			const animationFrame:AnimationFrameData = frame as AnimationFrameData;
-			
-			var i:uint = 0, l:uint = 0;
-				
-			const events:Vector.<EventData> = animationFrame.events;
-			const eventDispatcher:IEventDispatcher = this._armature.display;
-			for (i = 0, l = events.length; i < l; ++i)
-			{
-				const eventData:EventData = events[i];
-				
-				var eventType:String = null;
-				switch (eventData.type)
-				{
-					case DragonBones.EVENT_TYPE_FRAME:
-						eventType = EventObject.FRAME_EVENT;
-						break;
-					
-					case DragonBones.EVENT_TYPE_SOUND:
-						eventType = EventObject.SOUND_EVENT;
-						break;
-				}
-				
-				if (eventDispatcher.hasEvent(eventType))
-				{
-					const eventObject:EventObject = BaseObject.borrowObject(EventObject) as EventObject;
-					eventObject.animationState = this._animationState;
-					
-					if (eventData.bone)
-					{
-						eventObject.bone = this._armature.getBone(eventData.bone.name);
-					}
-					
-					if (eventData.slot)
-					{
-						eventObject.slot = this._armature.getSlot(eventData.slot.name);
-					}
-					
-					eventObject.name = eventData.name;
-					eventObject.data = eventData.data;
-					
-					this._armature._bufferEvent(eventObject, eventType);
-				}
-			}
-			
-			const actions:Vector.<ActionData> = animationFrame.actions;
-			for (i = 0, l = actions.length; i < l; ++i)
-			{
-				const actionData:ActionData = actions[i];
-				
-				var animationActionTarget:Armature = this._armature;
-				if (actionData.slot)
-				{
-					const slot:Slot = this._armature.getSlot(actionData.slot.name);
-					if (slot)
-					{
-						animationActionTarget = slot.childArmature || animationActionTarget;
-					}
-				}
-				
-				animationActionTarget._action = actionData;
-			}
-		}
-		
 		override public function update(time:int):void
 		{
 			const prevPlayTimes:uint = this._currentPlayTimes;
@@ -115,6 +43,7 @@ package dragonBones.animation
 				if (eventDispatcher.hasEvent(EventObject.START))
 				{
 					eventObject = BaseObject.borrowObject(EventObject) as EventObject;
+					eventObject.animationState = this._animationState;
 					this._armature._bufferEvent(eventObject, EventObject.START);
 				}
 			}

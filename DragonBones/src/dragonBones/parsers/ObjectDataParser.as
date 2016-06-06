@@ -126,7 +126,7 @@
 		}
 		
 		/**
-		 * 
+		 * @inheritDoc
 		 */
 		override public function parseTextureAtlasData(rawData:*, textureAtlasData:TextureAtlasData, scale:Number = 0, rawScale:Number = 0):TextureAtlasData
 		{
@@ -142,6 +142,7 @@
 			
 			textureAtlasData.name = _getString(rawData, NAME, null);
 			textureAtlasData.imagePath = _getString(rawData, IMAGE_PATH, null);
+			
 			if (scale > 0)
 			{
 				textureAtlasData.scale = scale;
@@ -194,7 +195,7 @@
 		}
 		
 		/**
-		 * 
+		 * @inheritDoc
 		 */
 		override public function parseDragonBonesData(rawData:*):DragonBonesData
 		{
@@ -336,6 +337,18 @@
 				bone.bendPositive = _getBoolean(rawData, BEND_POSITIVE, true);
 				bone.chain = _getNumber(rawData, CHAIN, 0);
 				bone.weight = _getNumber(rawData, WEIGHT, 1);
+				
+				if (bone.chain > 0 && bone.parent && !bone.parent.ik)
+				{
+					bone.parent.ik = bone.ik;
+					bone.parent.chainIndex = 0;
+					bone.chainIndex = 1;
+				}
+				else
+				{
+					bone.chain = 0;
+					bone.chainIndex = 0;
+				}
 			}
 		}
 		
@@ -483,7 +496,6 @@
 					break;
 				
 				case DragonBones.DISPLAY_TYPE_MESH:
-					trace(display.name);
 					display.meshData = _parseMesh(rawData);
 					break;
 				
@@ -818,7 +830,7 @@
 				_parseActionData(rawData, frame.actions, null, null);
 			}
 			
-			if ((SOUND in rawData) || (EVENT in rawData))
+			if ((EVENT in rawData) || (SOUND in rawData))
 			{
 				_parseEventData(rawData, frame.events, null, null);
 			}
@@ -838,49 +850,17 @@
 			
 			_parseTweenFrame(rawData, frame, frameStart, frameCount);
 			
-			if (ACTION in rawData)
-			{
-				const bone:BoneData = (this._timeline as BoneTimelineData).bone;
-				const slot:SlotData = this._armature.getSlot(bone.name);
-				if (slot)
-				{
-					if (this._animation.frames.length < this._animation.frameCount + 1)
-					{
-						this._animation.frames.fixed = false;
-						
-						for (var i:uint = this._animation.frames.length, l:uint = this._animation.frameCount + 1; i < l; ++i)
-						{
-							if (i == 0)
-							{
-								this._animation.frames[i] = _parseAnimationFrame({}, 0, this._animation.frameCount);
-								this._animation.frames[i].prev = this._animation.frames[i];
-								this._animation.frames[i].next = this._animation.frames[i];
-							}
-							else
-							{
-								this._animation.frames[i] = this._animation.frames[i - 1];
-							}
-						}
-						
-						this._animation.frames.fixed = true;
-					}
-					
-					this._animation.frames[i] = _parseAnimationFrame({}, 0, this._animation.frameCount);
-					
-					this._animation.frames.length = 0;
-					//_parseActionData(rawData, frame.actions, null, slot);
-				}
-			}
-			
-			/*
-			frame.sound = frameObject[A_SOUND];
-			frame.event = frameObject[A_EVENT];
-			frame.data = frameObject[A_DATA];
-			*/
-			
 			if (TRANSFORM in rawData)
 			{
 				_parseTransform(rawData[TRANSFORM], frame.transform);
+			}
+			
+			if ((EVENT in rawData) || (SOUND in rawData))
+			{
+				const bone:BoneData = (this._timeline as BoneTimelineData).bone;
+				_parseEventData(rawData, frame.events, bone, null);
+				
+				this._animation.hasBoneTimelineEvent = true;
 			}
 			
 			return frame;
@@ -905,6 +885,18 @@
 			else
 			{
 				frame.color = SlotFrameData.DEFAULT_COLOR;
+			}
+			
+			const slot:SlotData = (this._timeline as SlotTimelineData).slot;
+			
+			if (ACTION in rawData)
+			{
+				_parseActionData(rawData, frame.actions, slot.parent, slot);
+			}
+			
+			if ((SOUND in rawData) || (EVENT in rawData))
+			{
+				_parseEventData(rawData, frame.events, slot.parent, slot);
 			}
 			
 			return frame;
@@ -1067,21 +1059,21 @@
 				actionDataA.params = [actionsObject];
 				actionDataA.bone = bone;
 				actionDataA.slot = slot;
-				actions[0] = actionDataA;
+				actions.push(actionDataA);
 			}
 			else if (actionsObject is Array)
 			{
 				for each (var actionObject:Array in actionsObject)
 				{
 					const actionDataB:ActionData = BaseObject.borrowObject(ActionData) as ActionData;
-					const actionType:* = _getParameter(actionObject, 0, DragonBones.ACTION_TYPE_FADE_IN);
+					const actionType:* = actionObject[0];
 					if (actionType is String)
 					{
 						actionDataB.type = _getActionType(actionType);
 					}
 					else
 					{
-						actionDataB.type = actionType;
+						actionDataB.type = _getParameter(actionObject, 0, DragonBones.ACTION_TYPE_FADE_IN);
 					}
 					
 					switch (actionDataB.type)

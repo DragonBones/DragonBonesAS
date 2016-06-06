@@ -188,7 +188,7 @@ package dragonBones.geom
 		 * @private
 		 */
 		[inline]
-		final public function fromMatrix(matrix:Matrix):Transform 
+		final public function fromMatrix(matrix:Matrix):Transform
 		{
 			const PI_Q:Number = Math.PI * 0.25;
 			
@@ -220,6 +220,19 @@ package dragonBones.geom
 			else
 			{
 				scaleX = matrix.b / Math.sin(skewY);
+			}
+			
+			// TODO
+			if (scaleX < 0)
+			{
+				scaleX = -scaleX;
+				skewY = skewY - Math.PI;
+			}
+			
+			if (scaleY < 0)
+			{
+				scaleY = -scaleY;
+				skewX = skewX - Math.PI;
 			}
 			
 			return this;

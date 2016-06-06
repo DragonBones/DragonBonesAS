@@ -209,16 +209,16 @@ package dragonBones.parsers
 				case "stop":
 					return DragonBones.ACTION_TYPE_STOP;
 					
-				case "gotoAndPlay":
+				case "gotoandplay":
 					return DragonBones.ACTION_TYPE_GOTO_AND_PLAY;
 					
-				case "gotoAndStop":
+				case "gotoandstop":
 					return DragonBones.ACTION_TYPE_GOTO_AND_STOP;
 					
-				case "fadeIn":
+				case "fadein":
 					return DragonBones.ACTION_TYPE_FADE_IN;
 					
-				case "fadeOut":
+				case "fadeout":
 					return DragonBones.ACTION_TYPE_FADE_OUT;
 					
 				default:
@@ -248,12 +248,18 @@ package dragonBones.parsers
 			}
 		}
 		
+		/** 
+		 * @private 
+		 */
 		public function parseTextureAtlasData(rawData:*, textureAtlasData:TextureAtlasData, scale:Number = 0, rawScale:Number = 0):TextureAtlasData
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 			return null;
 		}
 		
+		/** 
+		 * @private 
+		 */
 		public function parseDragonBonesData(rawData:*):DragonBonesData
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);

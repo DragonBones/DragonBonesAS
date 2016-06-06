@@ -189,8 +189,18 @@ package dragonBones.objects
 					continue;
 				}
 				
-				_sortedBones[count++] = bone;
+				if (bone.ik && bone.chain > 0 && bone.chainIndex == bone.chain)
+				{
+					_sortedBones.splice(_sortedBones.indexOf(bone.parent) + 1, 0, bone); // ik, parent, bone, children
+					count++;
+				}
+				else
+				{
+					_sortedBones[count++] = bone;
+				}
 			}
+			
+			_sortedBones.length = total; // Modify splice
 		}
 		
 		private function _sortSlots():void

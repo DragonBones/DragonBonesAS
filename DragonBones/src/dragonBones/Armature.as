@@ -73,6 +73,11 @@ package dragonBones
 		/**
 		 * @private Slot
 		 */
+		dragonBones_internal var _replaceTexture:Object;
+		
+		/**
+		 * @private Slot
+		 */
 		dragonBones_internal var _parent:Slot;
 		
 		/**
@@ -84,11 +89,6 @@ package dragonBones
 		 * @private
 		 */
 		private var _delayDispose:Boolean;
-		
-		/**
-		 * @private
-		 */
-		private var _lockDispose:Boolean;
 		
 		/**
 		 * @private
@@ -142,11 +142,11 @@ package dragonBones
 			}
 			
 			_display = null;
+			_replaceTexture = null;
 			_parent = null;
 			_action = null;
 			
 			_delayDispose = false;
-			_lockDispose = false;
 			_lockEvent = false;
 			_slotsDirty = false;
 			
@@ -193,11 +193,6 @@ package dragonBones
 		public function dispose():void
 		{
 			_delayDispose = true;
-			
-			if (_display)
-			{
-				_display.dispose();
-			}
 		}
 		
 		/**
@@ -214,6 +209,7 @@ package dragonBones
 			const sortHelper:Vector.<Bone> = _bones.concat();
 			var index:uint = 0;
 			var count:uint = 0;
+			
 			_bones.length = 0; // clear
 			_bones.length = total;
 			while(count < total)
@@ -240,8 +236,18 @@ package dragonBones
 					continue;
 				}
 				
-				_bones[count++] = bone;
+				if (bone.ik && bone.ikChain > 0 && bone.ikChainIndex == bone.ikChain)
+				{
+					_bones.splice(_bones.indexOf(bone.parent) + 1, 0, bone); // ik, parent, bone, children
+					count++;
+				}
+				else
+				{
+					_bones[count++] = bone;
+				}
 			}
+			
+			_bones.length = total; // Modify splice
 		}
 		
 		/**
@@ -325,7 +331,7 @@ package dragonBones
 		 */
 		public function advanceTime(passedTime:Number):void
 		{
-			_lockDispose = true;
+			const scaledPassedTime:Number = passedTime * _animation.timeScale;
 			
 			//
 			_animation._advanceTime(passedTime);
@@ -352,8 +358,6 @@ package dragonBones
 			{
 				_bones[i]._update(_cacheFrameIndex);
 			}
-			
-			const scaledPassedTime:Number = passedTime * _animation.timeScale;
 			
 			for (i = 0, l = _slots.length; i < l; ++i)
 			{
@@ -445,12 +449,9 @@ package dragonBones
 				_action = null;
 			}
 			
-			_lockDispose = false;
-			
-			//
 			if (_delayDispose)
 			{
-				//dispose();
+				this._onClear();
 			}
 		}
 		
@@ -629,6 +630,21 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
+		 * 替换骨架的主贴图，根据渲染引擎的不同，提供不同的贴图数据。
+		 * @see dragonBones.Bone
+		 * @version DragonBones 4.5
+		 */
+		public function setReplaceTexture(texture:Object):void
+		{
+			_replaceTexture = texture;
+			for each (var slot:Slot in _slots)
+			{
+				slot.invalidUpdate();
+			}
+		}
+		
+		/**
+		 * @language zh_CN
 		 * 获得该骨架所有骨骼的列表，注意这里返回的是直接引用。
 		 * @see dragonBones.Bone
 		 * @version DragonBones 3.0
@@ -708,7 +724,7 @@ package dragonBones
 		 * 动画缓存的帧率，当设置一个大于 0 的帧率时，将会开启动画缓存机制。
 		 * 通过将动画数据缓存在内存中来提高运行性能，会有一定的内存开销。
 		 * 帧率不宜设置的过高，通常跟动画的帧率相当且低于程序的帧率。
-		 * 开启动画缓存后，某些功能将会失效，比如 Bone 和 Slot 的 offset 属性，动态 IK 等。
+		 * 开启动画缓存后，某些功能将会失效，比如 Bone 和 Slot 的 offset 属性等。
 		 * @see dragonBones.objects.DragonBonesData#frameRate
 		 * @see dragonBones.objects.ArmatureData#frameRate
 		 * @version DragonBones 4.0

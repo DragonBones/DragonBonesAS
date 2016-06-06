@@ -686,7 +686,7 @@
 					const cacheFrameIndex:uint = _timeline._currentTime * _clip.cacheTimeToFrameScale;
 					_armature._cacheFrameIndex = cacheFrameIndex;
 					
-					if (!_clip.cacheFrames[cacheFrameIndex])
+					if (!_clip.cacheFrames[cacheFrameIndex] || _clip.hasBoneTimelineEvent)
 					{
 						_clip.cacheFrames[cacheFrameIndex] = true;
 						
