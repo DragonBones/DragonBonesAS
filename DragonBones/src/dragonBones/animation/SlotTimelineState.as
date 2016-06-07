@@ -3,9 +3,9 @@
 	import flash.geom.ColorTransform;
 	
 	import dragonBones.Slot;
+	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.SlotFrameData;
-	import dragonBones.objects.TweenFrameData;
 	
 	use namespace dragonBones_internal;
 	
@@ -68,7 +68,7 @@
 			
 			if (this._animationState._isDisabled(slot))
 			{
-				this._tweenEasing = TweenFrameData.NO_TWEEN;
+				this._tweenEasing = DragonBones.NO_TWEEN;
 				this._curve = null;
 				_tweenColor = TWEEN_TYPE_NONE;
 				return;
@@ -101,7 +101,7 @@
 				const nextFrame:SlotFrameData = this._currentFrame.next as SlotFrameData;
 				const currentColor:ColorTransform = currentFrame.color;
 				
-				if (this._keyFrameCount > 1 && (this._tweenEasing != TweenFrameData.NO_TWEEN || this._curve))
+				if (this._keyFrameCount > 1 && (this._tweenEasing != DragonBones.NO_TWEEN || this._curve))
 				{
 					const nextColor:ColorTransform = nextFrame.color;
 					if (currentColor != nextColor)
@@ -159,7 +159,7 @@
 			}
 			else
 			{
-				this._tweenEasing = TweenFrameData.NO_TWEEN;
+				this._tweenEasing = DragonBones.NO_TWEEN;
 				this._curve = null;
 				_tweenColor = TWEEN_TYPE_NONE;
 			}

@@ -19,6 +19,8 @@ package dragonBones.objects
 		 */
 		override protected function _onClear():void
 		{
+			super._onClear();
+			
 			displayIndex = 0;
 			skin = null;
 			slot = null;

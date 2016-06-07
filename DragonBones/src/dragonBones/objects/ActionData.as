@@ -8,7 +8,7 @@ package dragonBones.objects
 	public final class ActionData extends BaseObject
 	{
 		public var type:int;
-		public var params:Array;
+		public var data:Array;
 		public var bone:BoneData;
 		public var slot:SlotData;
 		
@@ -23,7 +23,7 @@ package dragonBones.objects
 		override protected function _onClear():void
 		{
 			type = 0;
-			params = null;
+			data = null;
 			bone = null;
 			slot = null;
 		}

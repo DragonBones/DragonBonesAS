@@ -1,5 +1,7 @@
 ﻿package dragonBones.animation
 {
+	import dragonBones.core.DragonBones;
+
 	/**
 	 * @language zh_CN
 	 * WorldClock 提供时钟的支持，为每个加入到时钟的 IAnimatable 对象更新时间。
@@ -21,7 +23,7 @@
 		 * 当前的时间。 (以秒为单位)
 		 * @version DragonBones 3.0
 		 */
-		public var time:Number;
+		public var time:Number = new Date().getTime() / DragonBones.SECOND_TO_MILLISECOND;
 		
 		/**
 		 * @language zh_CN
@@ -29,7 +31,7 @@
 		 * [(-N~0): 倒转播放, 0: 停止播放, (0~1): 慢速播放, 1: 正常播放, (1~N): 快速播放] (默认: 1)
 		 * @version DragonBones 3.0
 		 */
-		public var timeScale:Number ;
+		public var timeScale:Number = 1;
 		
 		/**
 		 * @private
@@ -45,8 +47,6 @@
 		 */
 		public function WorldClock()
 		{
-			time = new Date().getTime() * 0.001;
-			timeScale = 1;
 		}
 		
 		/**
@@ -64,7 +64,7 @@
 			
 			if (passedTime < 0)
 			{
-				passedTime = new Date().getTime() * 0.001 - time;
+				passedTime = new Date().getTime() / DragonBones.SECOND_TO_MILLISECOND - time;
 			}
 			
 			passedTime *= timeScale;

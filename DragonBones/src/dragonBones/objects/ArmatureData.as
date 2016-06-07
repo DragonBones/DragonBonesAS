@@ -211,7 +211,7 @@ package dragonBones.objects
 		/**
 		 * @private
 		 */
-		public function cacheFrame(value:uint):void
+		public function cacheFrames(value:uint):void
 		{
 			if (cacheFrameRate == value)
 			{
@@ -223,7 +223,7 @@ package dragonBones.objects
 			const frameScale:Number = cacheFrameRate / frameRate;
 			for each (var animation:AnimationData in animations)
 			{
-				animation.cacheFrame(frameScale);
+				animation.cacheFrames(frameScale);
 			}
 		}
 		

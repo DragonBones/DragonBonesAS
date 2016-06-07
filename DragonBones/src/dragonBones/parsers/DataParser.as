@@ -18,6 +18,10 @@ package dragonBones.parsers
 	 */
 	public class DataParser
 	{
+		protected static const PARENT_COORDINATE_DATA_VERSION:String = "3.0";
+		protected static const DATA_VERSION_4_0:String = "4.0";
+		protected static const DATA_VERSION:String = "4.5";
+		
 		protected static const TEXTURE_ATLAS:String = "TextureAtlas";
 		protected static const SUB_TEXTURE:String = "SubTexture";
 		protected static const FORMAT:String = "format";;
@@ -237,9 +241,6 @@ package dragonBones.parsers
 		protected const _helpPoint:Point = new Point();
 		protected const _rawBones:Vector.<BoneData> = new Vector.<BoneData>();
 		
-		/** 
-		 * @private 
-		 */
 		public function DataParser(self:DataParser)
 		{
 			if (self != this)

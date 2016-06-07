@@ -7,6 +7,7 @@
 	import dragonBones.Bone;
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.flash.FlashTextureData;
 	import dragonBones.objects.DisplayData;
 	
 	import starling.display.BlendMode;
@@ -49,24 +50,21 @@
 		override protected function _onClear():void
 		{
 			const disposeDisplayList:Vector.<Object> = new Vector.<Object>();
-			for each (var eachDisplay:Object in this._displayList)
+			for each (var renderDisplay:Object in this._displayList)
 			{
-				if (disposeDisplayList.indexOf(eachDisplay) < 0)
+				if (renderDisplay is Armature)
 				{
-					disposeDisplayList.push(eachDisplay);
+					(renderDisplay as Armature).returnToPool();
+				}
+				else if (disposeDisplayList.indexOf(renderDisplay) < 0)
+				{
+					disposeDisplayList.push(renderDisplay);
 				}
 			}
 			
-			for each (eachDisplay in disposeDisplayList)
+			for each (renderDisplay in disposeDisplayList)
 			{
-				if (eachDisplay is Armature)
-				{
-					(eachDisplay as Armature).returnToPool();
-				}
-				else
-				{
-					this._disposeDisplay(eachDisplay);
-				}
+				this._disposeDisplay(renderDisplay);
 			}
 			
 			super._onClear();
@@ -240,89 +238,109 @@
 		{
 			const frameDisplay:Image = this._rawDisplay as Image;
 			
-			if (this._display && this._displayIndex >= 0 && this._displayIndex < this._displayDataSet.displays.length)
+			if (this._display && this._displayIndex >= 0)
 			{
-				const displayData:DisplayData = this._displayDataSet.displays[this._displayIndex];
-				const textureData:StarlingTextureData = displayData.textureData as StarlingTextureData;
+				const rawDisplayData:DisplayData = this._displayIndex < this._displayDataSet.displays.length? this._displayDataSet.displays[this._displayIndex]: null;
+				const replaceDisplayData:DisplayData = this._displayIndex < this._replaceDisplayDataSet.length? this._replaceDisplayDataSet[this._displayIndex]: null;
+				const contentDisplayData:DisplayData = replaceDisplayData || rawDisplayData;
+				const currentTextureData:StarlingTextureData = contentDisplayData.textureData as StarlingTextureData;
 				
-				if (textureData && !textureData.texture)
+				if (currentTextureData)
 				{
-					const textureAtlasTexture:Texture = (textureData.parent as StarlingTextureAtlasData).texture;
-					if (textureAtlasTexture)
+					if (!currentTextureData.texture)
 					{
-						textureData.texture = new SubTexture(textureAtlasTexture, textureData.region, false, textureData.frame, textureData.rotated, 1 / textureData.parent.scale);
-					}
-				}
-				
-				if (textureData && textureData.texture)
-				{
-					if (this._meshData && this._display == this._meshDisplay)
-					{
-						const meshDisplay:Mesh = this._meshDisplay as Mesh;
-						const meshStyle:MeshStyle = meshDisplay.style;
-						
-						_indexData.clear();
-						_vertexData.clear();
-						
-						var i:uint = 0, l:uint = 0;
-						
-						for (i = 0, l = this._meshData.vertexIndices.length; i < l; ++i)
+						const textureAtlasTexture:Texture = (currentTextureData.parent as StarlingTextureAtlasData).texture;
+						if (textureAtlasTexture)
 						{
-							_indexData.setIndex(i, this._meshData.vertexIndices[i]);
+							currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, currentTextureData.frame, currentTextureData.rotated);
 						}
-						
-						for (i = 0, l = this._meshData.uvs.length; i < l; i += 2)
-						{
-							const iH:uint = uint(i / 2);
-							meshStyle.setTexCoords(iH, this._meshData.uvs[i], this._meshData.uvs[i + 1]);
-							meshStyle.setVertexPosition(iH, this._meshData.vertices[i], this._meshData.vertices[i + 1]);
-						}
-						
-						meshDisplay.texture = textureData.texture;
-						frameDisplay.readjustSize();
-						
-						if (this._meshData.skinned)
-						{
-							const transformationMatrix:Matrix = meshDisplay.transformationMatrix;
-							transformationMatrix.identity();
-							meshDisplay.transformationMatrix = transformationMatrix;
-						}
-					}
-					else
-					{
-						const rect:Rectangle = textureData.frame || textureData.region;
-						
-						var width:Number = rect.width;
-						var height:Number = rect.height;
-						if (textureData.rotated)
-						{
-							width = rect.height;
-							height = rect.width;
-						}
-						
-						var pivotX:Number = displayData.pivot.x;
-						var pivotY:Number = displayData.pivot.y;
-						if (displayData.isRelativePivot)
-						{
-							pivotX = width * pivotX;
-							pivotY = height * pivotY;
-						}
-						
-						if (textureData.frame)
-						{
-							pivotX -= textureData.frame.x;
-							pivotY -= textureData.frame.y;
-						}
-						
-						frameDisplay.texture = textureData.texture;
-						frameDisplay.readjustSize();
-						frameDisplay.pivotX = pivotX;
-						frameDisplay.pivotY = pivotY;
 					}
 					
-					this._updateVisible();
+					const texture:Texture = (this._armature._replaceTexture as Texture) || currentTextureData.texture;
 					
-					return;
+					if (texture)
+					{
+						if (this._meshData && this._display == this._meshDisplay)
+						{
+							const meshDisplay:Mesh = this._meshDisplay as Mesh;
+							const meshStyle:MeshStyle = meshDisplay.style;
+							
+							_indexData.clear();
+							_vertexData.clear();
+							
+							var i:uint = 0, l:uint = 0;
+							
+							for (i = 0, l = this._meshData.vertexIndices.length; i < l; ++i)
+							{
+								_indexData.setIndex(i, this._meshData.vertexIndices[i]);
+							}
+							
+							for (i = 0, l = this._meshData.uvs.length; i < l; i += 2)
+							{
+								const iH:uint = uint(i / 2);
+								meshStyle.setTexCoords(iH, this._meshData.uvs[i], this._meshData.uvs[i + 1]);
+								meshStyle.setVertexPosition(iH, this._meshData.vertices[i], this._meshData.vertices[i + 1]);
+							}
+							
+							meshDisplay.texture = currentTextureData.texture;
+							frameDisplay.readjustSize();
+							
+							if (this._meshData.skinned)
+							{
+								const transformationMatrix:Matrix = meshDisplay.transformationMatrix;
+								transformationMatrix.identity();
+								meshDisplay.transformationMatrix = transformationMatrix;
+								meshDisplay.pivotX = 0;
+								meshDisplay.pivotY = 0;
+							}
+							else
+							{
+								//meshDisplay.pivotX = 0.5; // TODO
+								//meshDisplay.pivotY = 0.5;
+							}
+						}
+						else
+						{
+							const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
+							
+							var width:Number = rect.width;
+							var height:Number = rect.height;
+							if (currentTextureData.rotated)
+							{
+								width = rect.height;
+								height = rect.width;
+							}
+							
+							var pivotX:Number = contentDisplayData.pivot.x;
+							var pivotY:Number = contentDisplayData.pivot.y;
+							if (contentDisplayData.isRelativePivot)
+							{
+								pivotX = width * pivotX;
+								pivotY = height * pivotY;
+							}
+							
+							if (currentTextureData.frame)
+							{
+								pivotX -= currentTextureData.frame.x;
+								pivotY -= currentTextureData.frame.y;
+							}
+							
+							if (rawDisplayData && replaceDisplayData)
+							{
+								pivotX += replaceDisplayData.transform.x - rawDisplayData.transform.x;
+								pivotY += replaceDisplayData.transform.y - rawDisplayData.transform.y;
+							}
+							
+							frameDisplay.texture = currentTextureData.texture;
+							frameDisplay.readjustSize();
+							frameDisplay.pivotX = pivotX;
+							frameDisplay.pivotY = pivotY;
+						}
+						
+						this._updateVisible();
+						
+						return;
+					}
 				}
 			}
 			

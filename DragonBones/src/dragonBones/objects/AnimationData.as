@@ -88,7 +88,7 @@ package dragonBones.objects
 		/**
 		 * @private
 		 */
-		public const cacheFrames:Vector.<Boolean> = new Vector.<Boolean>(0, true);
+		public const cachedFrames:Vector.<Boolean> = new Vector.<Boolean>(0, true);
 		
 		/**
 		 * @private
@@ -140,18 +140,18 @@ package dragonBones.objects
 				delete ffdTimelines[i];
 			}
 			
-			if (cacheFrames.length)
+			if (cachedFrames.length)
 			{
-				cacheFrames.fixed = false;
-				cacheFrames.length = 0;
-				cacheFrames.fixed = true;
+				cachedFrames.fixed = false;
+				cachedFrames.length = 0;
+				cachedFrames.fixed = true;
 			}
 		}
 		
 		/**
 		 * @private
 		 */
-		public function cacheFrame(value:Number):void
+		public function cacheFrames(value:Number):void
 		{
 			if (animation)
 			{
@@ -161,25 +161,25 @@ package dragonBones.objects
 			const cacheFrameCount:uint = frameCount * scale * value;
 			
 			cacheTimeToFrameScale = cacheFrameCount / (duration + 1);
-			cacheFrames.fixed = false;
-			cacheFrames.length = 0; // Clear vector 
-			cacheFrames.length = cacheFrameCount;
-			cacheFrames.fixed = true;
+			cachedFrames.fixed = false;
+			cachedFrames.length = 0; // Clear vector 
+			cachedFrames.length = cacheFrameCount;
+			cachedFrames.fixed = true;
 			
 			for each (var boneTimeline:BoneTimelineData in boneTimelines)
 			{
-				boneTimeline.cacheFrames.fixed = false;
-				boneTimeline.cacheFrames.length = 0;
-				boneTimeline.cacheFrames.length = cacheFrameCount;
-				boneTimeline.cacheFrames.fixed = true;
+				boneTimeline.cachedFrames.fixed = false;
+				boneTimeline.cachedFrames.length = 0;
+				boneTimeline.cachedFrames.length = cacheFrameCount;
+				boneTimeline.cachedFrames.fixed = true;
 			}
 			
 			for each (var slotTimeline:SlotTimelineData in slotTimelines)
 			{
-				slotTimeline.cacheFrames.fixed = false;
-				slotTimeline.cacheFrames.length = 0;
-				slotTimeline.cacheFrames.length = cacheFrameCount;
-				slotTimeline.cacheFrames.fixed = true;
+				slotTimeline.cachedFrames.fixed = false;
+				slotTimeline.cachedFrames.length = 0;
+				slotTimeline.cachedFrames.length = cacheFrameCount;
+				slotTimeline.cachedFrames.fixed = true;
 			}
 		}
 		

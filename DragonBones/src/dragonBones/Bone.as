@@ -212,8 +212,6 @@
 		 */
 		private function _computeIKA():void
 		{
-			const ikGlobal:Transform = _ik.global;
-			
 			/* //TODO
 			if (this._parent && inheritScale)
 			{
@@ -223,13 +221,16 @@
 			}
 			*/
 			
+			const ikGlobal:Transform = _ik.global;
 			const x:Number = this.globalTransformMatrix.a * length;
 			const y:Number = this.globalTransformMatrix.b * length;
 			
 			const ikRadian:Number = 
 				(
-					Math.atan2(ikGlobal.y - this.global.y, ikGlobal.x - this.global.x) + this.offset.skewY - 
-					this.global.skewY * 2 + Math.atan2(y, x)
+					Math.atan2(ikGlobal.y - this.global.y, ikGlobal.x - this.global.x) + 
+					this.offset.skewY - 
+					this.global.skewY * 2 + 
+					Math.atan2(y, x)
 				) * ikWeight; // Support offset
 			
 			this.global.skewX += ikRadian;
@@ -243,74 +244,76 @@
 		private function _computeIKB():void
 		{
 			//TODO
+			const parentGlobal:Transform = this._parent.global;
 			const ikGlobal:Transform = _ik.global;
+			
 			const x:Number = this.globalTransformMatrix.a * length;
 			const y:Number = this.globalTransformMatrix.b * length;
-			if (this.inheritTranslation && _ikChain > 0 && this._parent)
+			
+			const lLL:Number = x * x + y * y;
+			const lL:Number = Math.sqrt(lLL);
+			
+			var dX:Number = this.global.x - parentGlobal.x;
+			var dY:Number = this.global.y - parentGlobal.y;
+			const lPP:Number = dX * dX + dY * dY;
+			const lP:Number = Math.sqrt(lPP);
+			
+			dX = ikGlobal.x - parentGlobal.x;
+			dY = ikGlobal.y - parentGlobal.y;
+			const lTT:Number = dX * dX + dY * dY;
+			const lT:Number = Math.sqrt(lTT);
+			
+			var ikRadianA:Number = 0;
+			if (lL + lP <= lT || lT + lL <= lP || lT + lP <= lL)
 			{
-				const parentGlobal:Transform = this._parent.global;
-				const lLL:Number = x * x + y * y;
-				const lL:Number = Math.sqrt(lLL);
-				
-				var dX:Number = this.global.x - parentGlobal.x;
-				var dY:Number = this.global.y - parentGlobal.y;
-				const lPP:Number = dX * dX + dY * dY;
-				const lP:Number = Math.sqrt(lPP);
-				
-				dX = ikGlobal.x - parentGlobal.x;
-				dY = ikGlobal.y - parentGlobal.y;
-				const lTT:Number = dX * dX + dY * dY;
-				const lT:Number = Math.sqrt(lTT);
-				
-				var ikRadianA:Number = 0;
-				if (lL + lP <= lT || lT + lL <= lP || lT + lP <= lL)
+				ikRadianA = Math.atan2(ikGlobal.y - parentGlobal.y, ikGlobal.x - parentGlobal.x) + this._parent.offset.skewY; // Support offset
+				if (lL + lP <= lT)
 				{
-					ikRadianA = Math.atan2(ikGlobal.y - parentGlobal.y, ikGlobal.x - parentGlobal.x) + this._parent.offset.skewY; // Support offset
-					if (lL + lP <= lT)
-					{
-					}
-					else if (lP < lL)
-					{
-						ikRadianA += Math.PI;
-					}
+				}
+				else if (lP < lL)
+				{
+					ikRadianA += Math.PI;
+				}
+			}
+			else
+			{
+				const h:Number = (lPP - lLL + lTT) / (2 * lTT);
+				const r:Number = Math.sqrt(lPP - h * h * lTT) / lT;
+				const hX:Number = parentGlobal.x + (dX * h);
+				const hY:Number = parentGlobal.y + (dY * h);
+				const rX:Number = -dY * r;
+				const rY:Number = dX * r;
+				
+				if (ikBendPositive)
+				{
+					this.global.x = hX - rX;
+					this.global.y = hY - rY;
 				}
 				else
 				{
-					const h:Number = (lPP - lLL + lTT) / (2 * lTT);
-					const r:Number = Math.sqrt(lPP - h * h * lTT) / lT;
-					const hX:Number = parentGlobal.x + (dX * h);
-					const hY:Number = parentGlobal.y + (dY * h);
-					const rX:Number = -dY * r;
-					const rY:Number = dX * r;
-					if (ikBendPositive)
-					{
-						this.global.x = hX - rX;
-						this.global.y = hY - rY;
-					}
-					else
-					{
-						this.global.x = hX + rX;
-						this.global.y = hY + rY;
-					}
-					
-					ikRadianA = Math.atan2(this.global.y - parentGlobal.y, this.global.x - parentGlobal.x) + this._parent.offset.skewY; // Support offset
+					this.global.x = hX + rX;
+					this.global.y = hY + rY;
 				}
 				
-				ikRadianA = (ikRadianA - parentGlobal.skewY) * ikWeight;
-				parentGlobal.skewX += ikRadianA;
-				parentGlobal.skewY += ikRadianA;
-				this.global.x = parentGlobal.x + Math.cos(parentGlobal.skewY) * lP;
-				this.global.y = parentGlobal.y + Math.sin(parentGlobal.skewY) * lP;
-				parentGlobal.toMatrix(this._parent.globalTransformMatrix);
+				ikRadianA = Math.atan2(this.global.y - parentGlobal.y, this.global.x - parentGlobal.x) + this._parent.offset.skewY; // Support offset
 			}
+			
+			ikRadianA = (ikRadianA - parentGlobal.skewY) * ikWeight;
+			
+			parentGlobal.skewX += ikRadianA;
+			parentGlobal.skewY += ikRadianA;
+			parentGlobal.toMatrix(this._parent.globalTransformMatrix);
 			
 			const ikRadianB:Number = 
 				(
 					Math.atan2(ikGlobal.y - this.global.y, ikGlobal.x - this.global.x) + this.offset.skewY - 
 					this.global.skewY * 2 + Math.atan2(y, x)
 				) * ikWeight; // Support offset
+			
 			this.global.skewX += ikRadianB;
 			this.global.skewY += ikRadianB;
+			this.global.x = parentGlobal.x + Math.cos(parentGlobal.skewY) * lP;
+			this.global.y = parentGlobal.y + Math.sin(parentGlobal.skewY) * lP;
 			this.global.toMatrix(this.globalTransformMatrix);
 		}
 		

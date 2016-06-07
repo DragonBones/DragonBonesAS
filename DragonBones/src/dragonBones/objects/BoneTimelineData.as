@@ -19,7 +19,7 @@ package dragonBones.objects
 		
 		public var bone:BoneData;
 		public const originTransform:Transform = new Transform();
-		public const cacheFrames:Vector.<Matrix> = new Vector.<Matrix>(0, true);
+		public const cachedFrames:Vector.<Matrix> = new Vector.<Matrix>(0, true);
 		
 		public function BoneTimelineData()
 		{
@@ -36,11 +36,11 @@ package dragonBones.objects
 			bone = null;
 			originTransform.identity();
 			
-			if (cacheFrames.length)
+			if (cachedFrames.length)
 			{
-				cacheFrames.fixed = false;
-				cacheFrames.length = 0;
-				cacheFrames.fixed = true;
+				cachedFrames.fixed = false;
+				cachedFrames.length = 0;
+				cachedFrames.fixed = true;
 			}
 		}
 	}

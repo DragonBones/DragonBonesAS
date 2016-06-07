@@ -230,7 +230,7 @@
 		/**
 		 * @private
 		 */
-		protected function _initDisplay(value:Object):void
+		protected function _onUpdateDisplay():void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
@@ -238,7 +238,7 @@
 		/**
 		 * @private
 		 */
-		protected function _onUpdateDisplay():void
+		protected function _initDisplay(value:Object):void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
@@ -690,6 +690,7 @@
 					{
 						_initDisplay(eachDisplay);
 					}
+					
 					_displayList[i] = eachDisplay;
 				}
 			}

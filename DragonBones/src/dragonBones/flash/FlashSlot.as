@@ -226,8 +226,12 @@ package dragonBones.flash
 				const currentTextureData:FlashTextureData = contentDisplayData.textureData as FlashTextureData;
 				if (currentTextureData)
 				{
-					const texture:BitmapData = (this._armature._replaceTexture as BitmapData) || (currentTextureData.parent as FlashTextureAtlasData).texture || currentTextureData.texture;
-					if (texture)
+					const currentTexture:BitmapData = 
+						(this._armature._replaceTexture as BitmapData) 
+						|| (currentTextureData.parent as FlashTextureAtlasData).texture 
+						|| currentTextureData.texture;
+					
+					if (currentTexture)
 					{
 						const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
 						
@@ -281,7 +285,7 @@ package dragonBones.flash
 							_helpMatrix.ty = -pivotY - currentTextureData.region.y;
 						}
 						
-						frameDisplay.graphics.beginBitmapFill(texture, _helpMatrix, false, true);
+						frameDisplay.graphics.beginBitmapFill(currentTexture, _helpMatrix, false, true);
 						frameDisplay.graphics.drawRect(-pivotX, -pivotY, width, height);
 						this._updateVisible();
 						

@@ -34,8 +34,13 @@
 	 */
 	[Event(name="complete", type="flash.events.Event")]
 	
-	/** 
-	 * @private 
+	/**
+	 * @language zh_CN
+	 * 建造骨架的基础工厂。
+	 * @see dragonBones.objects.DragonBonesData
+	 * @see dragonBones.objects.ArmatureData
+	 * @see dragonBones.Armature
+	 * @version DragonBones 3.0
 	 */
 	public class BaseFactory extends EventDispatcher
 	{
@@ -68,8 +73,6 @@
 			{
 				throw new Error(DragonBones.ABSTRACT_CLASS_ERROR);
 			}
-			
-			autoSearch = false;
 		}
 		
 		private var _delayID:uint = 0;
@@ -194,6 +197,7 @@
 				bone.inheritScale = boneData.inheritScale; 
 				bone.length = boneData.length;
 				bone.origin.copy(boneData.transform);
+				
 				if (boneData.parent)
 				{
 					armature.addBone(bone, boneData.parent.name);
@@ -254,7 +258,7 @@
 				slot._setColor(slotData.color);
 				
 				slot._replaceDisplayDataSet.fixed = false;
-				slot._replaceDisplayDataSet.length = slotDisplayDataSet.displays.length;
+				slot._replaceDisplayDataSet.length = slot._displayDataSet.displays.length;
 				slot._replaceDisplayDataSet.fixed = true;
 				
 				armature.addSlot(slot, slotData.parent.name);
@@ -266,48 +270,48 @@
 		 */
 		protected function _replaceSlotDisplay(dataPackage:BuildArmaturePackage, displayData:DisplayData, slot:Slot, displayIndex:int):void
 		{
-			if (!displayData)
-			{
-				return;
-			}
-			
 			if (displayIndex < 0)
 			{
 				displayIndex = slot.displayIndex;
 			}
 			
-			if (displayIndex < 0)
+			if (displayIndex >= 0)
 			{
-				return;
-			}
-			else
-			{
-				if (slot._replaceDisplayDataSet.length <= displayIndex)
+				if (displayData.type == DragonBones.DISPLAY_TYPE_ARMATURE)
 				{
-					slot._replaceDisplayDataSet.fixed = false;
-					slot._replaceDisplayDataSet.length = displayIndex + 1;
-					slot._replaceDisplayDataSet.fixed = true;
-				}
-				
-				slot._replaceDisplayDataSet[displayIndex] = displayData;
-				
-				const displayList:Vector.<Object> = slot.displayList;
-				if (displayList.length <=  displayIndex)
-				{
-					displayList.fixed = false;
-					displayList.length = displayIndex + 1;
-				}
-				
-				if (displayData.meshData)
-				{
-					displayList[displayIndex] = slot.MeshDisplay;
+					// TODO
 				}
 				else
 				{
-					displayList[displayIndex] = slot.rawDisplay;
+					if (slot._replaceDisplayDataSet.length <= displayIndex)
+					{
+						slot._replaceDisplayDataSet.fixed = false;
+						slot._replaceDisplayDataSet.length = displayIndex + 1;
+						slot._replaceDisplayDataSet.fixed = true;
+					}
+					
+					slot._replaceDisplayDataSet[displayIndex] = displayData;
+					
+					const displayList:Vector.<Object> = slot.displayList;
+					if (displayList.length <=  displayIndex)
+					{
+						displayList.fixed = false;
+						displayList.length = displayIndex + 1;
+					}
+					
+					if (displayData.meshData)
+					{
+						displayList[displayIndex] = slot.MeshDisplay;
+					}
+					else
+					{
+						displayList[displayIndex] = slot.rawDisplay;
+					}
+					
+					slot.displayList = displayList;
 				}
 				
-				slot.displayList = displayList;
+				
 				slot.invalidUpdate();
 			}
 		}
@@ -459,12 +463,12 @@
 					}
 					else
 					{
-						throw new ArgumentError("Same name data");
+						throw new Error("Same name data.");
 					}
 				}
 				else
 				{
-					throw new ArgumentError("Unnamed data");
+					throw new Error("Unnamed data.");
 				}
 			}
 			else
@@ -484,12 +488,12 @@
 		 * @see dragonBones.objects.DragonBonesData
 		 * @version DragonBones 3.0
 		 */
-		public function removeDragonBonesData(dragonBonesName:String, dispose:Boolean = true):void
+		public function removeDragonBonesData(dragonBonesName:String, disposeData:Boolean = true):void
 		{
 			const dragonBonesData:DragonBonesData = _dragonBonesDataMap[dragonBonesName];
 			if (dragonBonesData)
 			{
-				if (dispose)
+				if (disposeData)
 				{
 					dragonBonesData.returnToPool();
 				}
@@ -501,7 +505,7 @@
 		/**
 		 * @language zh_CN
 		 * 获得指定名称的贴图集数据列表。
-		 * @param name 指定的名称。
+		 * @param dragonBonesName 指定的名称。
 		 * @return 贴图集数据列表
 		 * @see #parseTextureAtlasData()
 		 * @see #addTextureAtlasData()
@@ -509,9 +513,9 @@
 		 * @see dragonBones.textures.TextureAtlasData
 		 * @version DragonBones 3.0
 		 */
-		public function getTextureAtlasData(name:String):Vector.<TextureAtlasData>
+		public function getTextureAtlasData(dragonBonesName:String):Vector.<TextureAtlasData>
 		{
-			return _textureAtlasDataMap[name] as Vector.<TextureAtlasData>;
+			return _textureAtlasDataMap[dragonBonesName] as Vector.<TextureAtlasData>;
 		}
 		
 		/**
@@ -525,14 +529,14 @@
 		 * @see dragonBones.textures.TextureAtlasData
 		 * @version DragonBones 3.0
 		 */
-		public function addTextureAtlasData(data:TextureAtlasData, name:String = null):void
+		public function addTextureAtlasData(data:TextureAtlasData, dragonBonesName:String = null):void
 		{
 			if (data)
 			{
-				name = name || data.name;
-				if (name)
+				dragonBonesName = dragonBonesName || data.name;
+				if (dragonBonesName)
 				{
-					const textureAtlasList:Vector.<TextureAtlasData> = _textureAtlasDataMap[name] = _textureAtlasDataMap[name] || new Vector.<TextureAtlasData>;		
+					const textureAtlasList:Vector.<TextureAtlasData> = _textureAtlasDataMap[dragonBonesName] = _textureAtlasDataMap[dragonBonesName] || new Vector.<TextureAtlasData>;		
 					if (textureAtlasList.indexOf(data) < 0)
 					{
 						textureAtlasList.push(data);
@@ -540,7 +544,7 @@
 				}
 				else
 				{
-					throw new ArgumentError("Unnamed data");
+					throw new Error("Unnamed data.");
 				}
 			}
 			else
@@ -552,7 +556,7 @@
 		/**
 		 * @language zh_CN
 		 * 将指定名称的贴图集数据从工厂中移除。
-		 * @param name 指定的名称。
+		 * @param dragonBonesName 指定的名称。
 		 * @param dispose 是否释放数据。 [<code>true</code>: 释放, <code>false</code>: 不释放] (默认: <code>true</code>)
 		 * @see #parseTextureAtlasData()
 		 * @see #getTextureAtlasData()
@@ -560,12 +564,12 @@
 		 * @see dragonBones.textures.TextureAtlasData
 		 * @version DragonBones 3.0
 		 */
-		public function removeTextureAtlasData(name:String, dispose:Boolean = true):void
+		public function removeTextureAtlasData(dragonBonesName:String, disposeData:Boolean = true):void
 		{
-			const textureAtlasDataList:Vector.<TextureAtlasData> = _textureAtlasDataMap[name] as Vector.<TextureAtlasData>;
+			const textureAtlasDataList:Vector.<TextureAtlasData> = _textureAtlasDataMap[dragonBonesName] as Vector.<TextureAtlasData>;
 			if (textureAtlasDataList)
 			{
-				if (dispose)
+				if (disposeData)
 				{
 					for each (var textureAtlasData:TextureAtlasData in textureAtlasDataList)
 					{
@@ -573,7 +577,7 @@
 					}
 				}
 				
-				delete _textureAtlasDataMap[name];
+				delete _textureAtlasDataMap[dragonBonesName];
 			}
 		}
 		
@@ -738,15 +742,12 @@
 					{
 						if (displayData.name == displayName)
 						{
+							_replaceSlotDisplay(dataPackage, displayData, slot, displayIndex);
 							break;
 						}
-						
-						displayData = null;
 					}
 				}
 			}
-			
-			_replaceSlotDisplay(dataPackage, displayData, slot, displayIndex);
 		}
 		
 		/**
@@ -761,27 +762,23 @@
 		public function replaceSlotDisplayList(dragonBonesName:String, armatureName:String, slotName:String, slot:Slot):void
 		{
 			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
-			if (!_fillBuildArmaturePackage(dragonBonesName, armatureName, null, dataPackage))
+			if (_fillBuildArmaturePackage(dragonBonesName, armatureName, null, dataPackage))
 			{
-				return;
-			}
-			
-			const slotDisplayDataSet:SlotDisplayDataSet = dataPackage.skin.getSlot(slotName);
-			if (!slotDisplayDataSet)
-			{
-				return;
-			}
-			
-			var displayIndex:uint = 0;
-			for each (var displayData:DisplayData in slotDisplayDataSet.displays)
-			{
-				_replaceSlotDisplay(dataPackage, displayData, slot, displayIndex++);
+				const slotDisplayDataSet:SlotDisplayDataSet = dataPackage.skin.getSlot(slotName);
+				if (slotDisplayDataSet)
+				{
+					var displayIndex:uint = 0;
+					for each (var displayData:DisplayData in slotDisplayDataSet.displays)
+					{
+						_replaceSlotDisplay(dataPackage, displayData, slot, displayIndex++);
+					}
+				}
 			}
 		}
 		
 		/**
 		 * @language zh_CN
-		 * 不推荐使用的API。
+		 * 不推荐使用的 API。
 		 * @see #clear();
 		 * @version DragonBones 3.0
 		 */

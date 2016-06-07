@@ -4,6 +4,7 @@
 	import dragonBones.Bone;
 	import dragonBones.Slot;
 	import dragonBones.core.BaseObject;
+	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.EventObject;
 	import dragonBones.events.IEventDispatcher;
@@ -334,10 +335,10 @@
 			
 			if (_fadeProgress != fadeProgress)
 			{
+				_fadeProgress = fadeProgress;
+				
 				const eventDispatcher:IEventDispatcher = _armature.display;
 				var event:EventObject = null;
-				
-				_fadeProgress = fadeProgress;
 				
 				if (_fadeTime <= passedTime)
 				{
@@ -365,25 +366,25 @@
 				{
 					if (_isFadeOut)
 					{
+						_isFadeOutComplete = true;
+						
 						if (eventDispatcher.hasEvent(EventObject.FADE_OUT_COMPLETE))
 						{
 							event = BaseObject.borrowObject(EventObject) as EventObject;
 							event.animationState = this;
 							_armature._bufferEvent(event, EventObject.FADE_OUT_COMPLETE);
 						}
-						
-						_isFadeOutComplete = true;
 					}
 					else
 					{
+						_isPausePlayhead = false;
+						
 						if (eventDispatcher.hasEvent(EventObject.FADE_IN_COMPLETE))
 						{
 							event = BaseObject.borrowObject(EventObject) as EventObject;
 							event.animationState = this;
 							_armature._bufferEvent(event, EventObject.FADE_IN_COMPLETE);
 						}
-						
-						_isPausePlayhead = false;
 					}
 				}
 			}
@@ -486,7 +487,7 @@
 						
 						if (_armature.cacheFrameRate > 0) // TODO
 						{
-							bone._cacheFrames = boneTimelineData.cacheFrames;
+							bone._cacheFrames = boneTimelineData.cachedFrames;
 						}
 					}
 				}
@@ -502,7 +503,6 @@
 			
 			//
 			_slotTimelines.fixed = false;
-			_ffdTimelines.fixed = false;
 			
 			for (i = 0, l = _slotTimelines.length; i < l; ++i)
 			{
@@ -534,7 +534,7 @@
 						
 						if (_armature.cacheFrameRate > 0) // TODO
 						{
-							slot._cacheFrames = slotTimelineData.cacheFrames;
+							slot._cacheFrames = slotTimelineData.cachedFrames;
 						}
 					}
 				}
@@ -659,7 +659,7 @@
 			if (passedTime != 0 && _isPlaying && !_isPausePlayhead)
 			{
 				_time += passedTime;
-				time = _time * 1000000;
+				time = _time * DragonBones.SECOND_TO_MICROSECOND;
 				_timeline.update(time);
 				
 				if (autoFadeOutTime >= 0 && _fadeProgress >= 1 && _timeline._isCompleted)
@@ -669,7 +669,7 @@
 			}
 			else
 			{
-				time = _time * 1000000;
+				time = _time * DragonBones.SECOND_TO_MICROSECOND;
 			}
 			
 			if (_weightResult != 0)
@@ -686,9 +686,9 @@
 					const cacheFrameIndex:uint = _timeline._currentTime * _clip.cacheTimeToFrameScale;
 					_armature._cacheFrameIndex = cacheFrameIndex;
 					
-					if (!_clip.cacheFrames[cacheFrameIndex] || _clip.hasBoneTimelineEvent)
+					if (!_clip.cachedFrames[cacheFrameIndex] || _clip.hasBoneTimelineEvent)
 					{
-						_clip.cacheFrames[cacheFrameIndex] = true;
+						_clip.cachedFrames[cacheFrameIndex] = true;
 						
 						for (i = 0, l = _boneTimelines.length; i < l; ++i)
 						{
@@ -973,7 +973,7 @@
 		 */
 		public function get totalTime():Number
 		{
-			return _duration * 0.000001;
+			return _duration / DragonBones.SECOND_TO_MICROSECOND;
 		}
 		
 		/**
@@ -983,7 +983,7 @@
 		 */
 		public function get currentTime():Number
 		{
-			return _timeline._currentTime * 0.000001;
+			return _timeline._currentTime / DragonBones.SECOND_TO_MICROSECOND;
 		}
 		public function set currentTime(value:Number):void
 		{
@@ -994,7 +994,7 @@
 			
 			_time = value;
 			
-			var time:int = _time * 1000000;
+			var time:int = _time * DragonBones.SECOND_TO_MICROSECOND;
 			var i:uint = 0, l:uint = 0;
 			
 			_timeline.setCurrentTime(time);

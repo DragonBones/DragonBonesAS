@@ -1,11 +1,11 @@
 ﻿package dragonBones.animation
 {
 	import dragonBones.Bone;
+	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.geom.Transform;
 	import dragonBones.objects.BoneFrameData;
 	import dragonBones.objects.BoneTimelineData;
-	import dragonBones.objects.TweenFrameData;
 	
 	use namespace dragonBones_internal;
 	
@@ -69,7 +69,7 @@
 			_tweenRotate = TWEEN_TYPE_ONCE;
 			_tweenScale = TWEEN_TYPE_ONCE;
 			
-			if (this._keyFrameCount > 1 && (this._tweenEasing != TweenFrameData.NO_TWEEN || this._curve))
+			if (this._keyFrameCount > 1 && (this._tweenEasing != DragonBones.NO_TWEEN || this._curve))
 			{
 				const nextFrame:BoneFrameData = this._currentFrame.next as BoneFrameData;
 				const nextTransform:Transform = nextFrame.transform;

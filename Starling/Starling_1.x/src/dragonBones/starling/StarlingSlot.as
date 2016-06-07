@@ -225,56 +225,76 @@
 		 */
 		override protected function _updateFrame():void
 		{
-			
 			const frameDisplay:Image = this._rawDisplay as Image;
 			
-			if (this._display && this._displayIndex >= 0 && this._displayIndex < this._displayDataSet.displays.length)
+			if (this._display && this._displayIndex >= 0)
 			{
-				const displayData:DisplayData = this._displayDataSet.displays[this._displayIndex];
-				const textureData:StarlingTextureData = displayData.textureData as StarlingTextureData;
+				const rawDisplayData:DisplayData = this._displayIndex < this._displayDataSet.displays.length? this._displayDataSet.displays[this._displayIndex]: null;
+				const replaceDisplayData:DisplayData = this._displayIndex < this._replaceDisplayDataSet.length? this._replaceDisplayDataSet[this._displayIndex]: null;
+				const contentDisplayData:DisplayData = replaceDisplayData || rawDisplayData;
+				const currentTextureData:StarlingTextureData = contentDisplayData.textureData as StarlingTextureData;
 				
-				if (textureData && !textureData.texture)
+				if (currentTextureData)
 				{
-					const textureAtlasTexture:Texture = (textureData.parent as StarlingTextureAtlasData).texture;
-					if (textureAtlasTexture)
+					if (!currentTextureData.texture)
 					{
-						textureData.texture = new SubTexture(textureAtlasTexture, textureData.region, false, textureData.frame, textureData.rotated);
-					}
-				}
-				
-				if (textureData && textureData.texture)
-				{
-					const rect:Rectangle = textureData.frame || textureData.region;
-					
-					var width:Number = rect.width;
-					var height:Number = rect.height;
-					if (textureData.rotated)
-					{
-						width = rect.height;
-						height = rect.width;
+						const textureAtlasTexture:Texture = (currentTextureData.parent as StarlingTextureAtlasData).texture;
+						if (textureAtlasTexture)
+						{
+							currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, currentTextureData.frame, currentTextureData.rotated);
+						}
 					}
 					
-					var pivotX:Number = displayData.pivot.x;
-					var pivotY:Number = displayData.pivot.y;
-					if (displayData.isRelativePivot)
+					const currentTexture:Texture = (this._armature._replaceTexture as Texture) || currentTextureData.texture;
+					
+					if (currentTexture)
 					{
-						pivotX = width * pivotX;
-						pivotY = height * pivotY;
+						if (this._meshData && this._display == this._meshDisplay)
+						{
+							// TODO
+						}
+						else
+						{
+							const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
+							
+							var width:Number = rect.width;
+							var height:Number = rect.height;
+							if (currentTextureData.rotated)
+							{
+								width = rect.height;
+								height = rect.width;
+							}
+							
+							var pivotX:Number = contentDisplayData.pivot.x;
+							var pivotY:Number = contentDisplayData.pivot.y;
+							if (contentDisplayData.isRelativePivot)
+							{
+								pivotX = width * pivotX;
+								pivotY = height * pivotY;
+							}
+							
+							if (currentTextureData.frame)
+							{
+								pivotX -= currentTextureData.frame.x;
+								pivotY -= currentTextureData.frame.y;
+							}
+							
+							if (rawDisplayData && replaceDisplayData)
+							{
+								pivotX += replaceDisplayData.transform.x - rawDisplayData.transform.x;
+								pivotY += replaceDisplayData.transform.y - rawDisplayData.transform.y;
+							}
+							
+							frameDisplay.texture = currentTexture;
+							frameDisplay.readjustSize();
+							frameDisplay.pivotX = pivotX;
+							frameDisplay.pivotY = pivotY;
+						}
+						
+						this._updateVisible();
+						
+						return;
 					}
-					
-					if (textureData.frame)
-					{
-						pivotX -= textureData.frame.x;
-						pivotY -= textureData.frame.y;
-					}
-					
-					frameDisplay.texture = textureData.texture;
-					frameDisplay.readjustSize();
-					frameDisplay.pivotX = pivotX;
-					frameDisplay.pivotY = pivotY;
-					this._updateVisible();
-					
-					return;
 				}
 			}
 			
@@ -290,49 +310,7 @@
 		 */
 		override protected function _updateMesh():void
 		{
-			/*const mesh:Mesh = _renderDisplay as Mesh;
-			const meshStyle:MeshStyle = mesh.style;
-			
-			var i:uint = 0, iH:uint = 0, l:uint = _meshData.vertices.length;
-			var xG:Number = 0, yG:Number = 0;
-			if (_meshData.skinned)
-			{
-				for (i = 0; i < l; i += 2)
-				{
-					iH = i / 2;
-					
-					const boneIndices:Vector.<uint> = _meshData.boneIndices[iH];
-					const boneVertices:Vector.<Number> = _meshData.boneVertices[iH];
-					const weights:Vector.<Number> = _meshData.weights[iH];
-					
-					xG = 0, yG = 0;
-					
-					for (var iB:uint = 0, lB:uint = boneIndices.length; iB < lB; ++iB)
-					{
-						const bone:Bone = this._meshBones[boneIndices[iB]];
-						const weight:Number = weights[iB];
-						const matrix:Matrix = bone.globalTransformMatrix;
-						
-						const xL:Number = boneVertices[iB / 2] + this._ffdVertices[i * lB];
-						const yL:Number = boneVertices[iB / 2 + 1] + this._ffdVertices[i * lB + 1];
-					
-						xG += (matrix.a * xL + matrix.c * yL + matrix.tx) * weight;
-						yG += (matrix.b * xL + matrix.d * yL + matrix.ty) * weight;
-					}
-					
-					meshStyle.setVertexPosition(i / 2, xG, yG);
-				}
-			}
-			else
-			{
-				const vertices:Vector.<Number> = _meshData.vertices;
-				for (i = 0; i < l; i += 2)
-				{
-					xG = vertices[i] + this._ffdVertices[i];
-					yG = vertices[i + 1] + this._ffdVertices[i + 1];
-					meshStyle.setVertexPosition(i / 2, xG, yG);
-				}
-			}*/
+			// TODO
 		}
 		
 		/**

@@ -2,7 +2,6 @@
 {
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
-	import flash.geom.Point;
 	
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
@@ -126,126 +125,6 @@
 		}
 		
 		/**
-		 * @inheritDoc
-		 */
-		override public function parseTextureAtlasData(rawData:*, textureAtlasData:TextureAtlasData, scale:Number = 0, rawScale:Number = 0):TextureAtlasData
-		{
-			if (!rawData)
-			{
-				throw new ArgumentError();
-			}
-			
-			if (rawData is String)
-			{
-				rawData = JSON.parse(rawData);
-			}
-			
-			textureAtlasData.name = _getString(rawData, NAME, null);
-			textureAtlasData.imagePath = _getString(rawData, IMAGE_PATH, null);
-			
-			if (scale > 0)
-			{
-				textureAtlasData.scale = scale;
-			}
-			else
-			{
-				scale = textureAtlasData.scale = _getNumber(rawData, SCALE, textureAtlasData.scale);
-			}
-			
-			scale = 1 / scale;
-			
-			if (rawScale > 0)
-			{
-				textureAtlasData.modifyScale = scale * rawScale;
-				scale *= textureAtlasData.modifyScale;
-			}
-			else
-			{
-				textureAtlasData.modifyScale = 1;
-			}
-			
-			if (SUB_TEXTURE in rawData)
-			{
-				for each (var textureObject:Object in rawData[SUB_TEXTURE])
-				{
-					const textureData:TextureData = textureAtlasData.generateTexture();
-					textureData.name = _getString(textureObject, NAME, null);
-					textureData.rotated = _getBoolean(textureObject, ROTATED, false);
-					textureData.region.x = _getNumber(textureObject, X, 0) * scale ;
-					textureData.region.y = _getNumber(textureObject, Y, 0) * scale;
-					textureData.region.width = _getNumber(textureObject, WIDTH, 0) * scale;
-					textureData.region.height = _getNumber(textureObject, HEIGHT, 0) * scale;
-					
-					const frameWidth:Number = _getNumber(textureObject, FRAME_WIDTH, -1);
-					const frameHeight:Number = _getNumber(textureObject, FRAME_HEIGHT, -1);
-					if (frameWidth > 0 && frameHeight > 0)
-					{
-						textureData.frame = TextureData.generateRectangle();
-						textureData.frame.x = _getNumber(textureObject, FRAME_X, 0) * scale;
-						textureData.frame.y = _getNumber(textureObject, FRAME_Y, 0) * scale;
-						textureData.frame.width = frameWidth * scale;
-						textureData.frame.height = frameHeight * scale;
-					}
-					
-					textureAtlasData.addTexture(textureData);
-				}
-			}
-			
-			return textureAtlasData;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function parseDragonBonesData(rawData:*):DragonBonesData
-		{
-			if (!rawData)
-			{
-				throw new ArgumentError();
-			}
-			
-			if (rawData is String)
-			{
-				rawData = JSON.parse(rawData);
-			}
-			
-			const version:String = _getString(rawData, VERSION, null);
-			
-			/*
-			switch (version)
-			{
-				case "2.3":
-				//Update2_3To3_0.format(rawData);
-				break;
-				
-				case DragonBones.DATA_VERSION:
-				break;
-				
-				default:
-				throw new Error("Nonsupport version!");
-			}
-			*/
-			
-			const data:DragonBonesData = BaseObject.borrowObject(DragonBonesData) as DragonBonesData;
-			data.name = _getString(rawData, NAME, null);
-			data.frameRate = _getNumber(rawData, FRAME_RATE, 24);
-			
-			if (ARMATURE in rawData)
-			{
-				this._data = data;
-				
-				for each (var armatureObject:Object in rawData[ARMATURE])
-				{
-					data.addArmature(_parseArmature(armatureObject));
-				}
-				
-				this._data = null;
-			}
-			
-			return data;
-		}
-		
-		/**
 		 * @private
 		 */
 		protected function _parseArmature(rawData:Object):ArmatureData
@@ -342,6 +221,7 @@
 				{
 					bone.parent.ik = bone.ik;
 					bone.parent.chainIndex = 0;
+					bone.parent.chain = 0;
 					bone.chainIndex = 1;
 				}
 				else
@@ -498,10 +378,6 @@
 				case DragonBones.DISPLAY_TYPE_MESH:
 					display.meshData = _parseMesh(rawData);
 					break;
-				
-				default:
-					throw new Error("Unknown display type");
-					break;
 			}
 			
 			return display;
@@ -652,8 +528,8 @@
 			const animation:AnimationData = BaseObject.borrowObject(AnimationData) as AnimationData;
 			animation.name = _getString(rawData, NAME, "__default") || "__default";
 			animation.frameCount = _getNumber(rawData, DURATION, 1);
-			animation.position = _getNumber(rawData, POSITION, 0) * 1000000 / this._armature.frameRate; // floor
-			animation.duration = animation.frameCount * 1000000 / this._armature.frameRate; // floor
+			animation.position = uint(_getNumber(rawData, POSITION, 0) * DragonBones.SECOND_TO_MICROSECOND / this._armature.frameRate);
+			animation.duration = uint(animation.frameCount * DragonBones.SECOND_TO_MICROSECOND / this._armature.frameRate);
 			animation.playTimes = _getNumber(rawData, PLAY_TIMES, 1);
 			animation.fadeInTime = _getNumber(rawData, FADE_IN_TIME, 0);
 			
@@ -721,7 +597,24 @@
 					slotTimeline.slot = slot;
 					slotFrame.displayIndex = slot.displayIndex;
 					//slotFrame.zOrder = -2;
-					slotFrame.color = SlotFrameData.DEFAULT_COLOR;
+					
+					if (slotFrame.color == SlotFrameData.DEFAULT_COLOR)
+					{
+						slotFrame.color = SlotFrameData.DEFAULT_COLOR;
+					}
+					else
+					{
+						slotFrame.color = SlotFrameData.generateColor();
+						slotFrame.color.alphaMultiplier = slot.color.alphaMultiplier;
+						slotFrame.color.redMultiplier = slot.color.redMultiplier;
+						slotFrame.color.greenMultiplier = slot.color.greenMultiplier;
+						slotFrame.color.blueMultiplier = slot.color.blueMultiplier;
+						slotFrame.color.alphaOffset = slot.color.alphaOffset;
+						slotFrame.color.redOffset = slot.color.redOffset;
+						slotFrame.color.greenOffset = slot.color.greenOffset;
+						slotFrame.color.blueOffset = slot.color.blueOffset;
+					}
+					
 					slotTimeline.frames.fixed = false;
 					slotTimeline.frames[0] = slotFrame;
 					slotTimeline.frames.fixed = true;
@@ -887,16 +780,10 @@
 				frame.color = SlotFrameData.DEFAULT_COLOR;
 			}
 			
-			const slot:SlotData = (this._timeline as SlotTimelineData).slot;
-			
 			if (ACTION in rawData)
 			{
+				const slot:SlotData = (this._timeline as SlotTimelineData).slot;
 				_parseActionData(rawData, frame.actions, slot.parent, slot);
-			}
-			
-			if ((SOUND in rawData) || (EVENT in rawData))
-			{
-				_parseEventData(rawData, frame.events, slot.parent, slot);
 			}
 			
 			return frame;
@@ -963,7 +850,7 @@
 		{
 			_parseFrame(rawData, frame, frameStart, frameCount);
 			
-			frame.tweenEasing = _getNumber(rawData, TWEEN_EASING, TweenFrameData.NO_TWEEN);
+			frame.tweenEasing = _getNumber(rawData, TWEEN_EASING, DragonBones.NO_TWEEN);
 			
 			if (CURVE in rawData)
 			{
@@ -973,8 +860,8 @@
 		
 		protected function _parseFrame(rawData:Object, frame:FrameData, frameStart:uint, frameCount:uint):void
 		{
-			frame.position = frameStart * 1000000 / this._armature.frameRate;
-			frame.duration = frameCount * 1000000 / this._armature.frameRate;
+			frame.position = uint(frameStart * DragonBones.SECOND_TO_MICROSECOND / this._armature.frameRate);
+			frame.duration = uint(frameCount * DragonBones.SECOND_TO_MICROSECOND / this._armature.frameRate);
 		}
 		
 		/**
@@ -1056,7 +943,7 @@
 			{
 				const actionDataA:ActionData = BaseObject.borrowObject(ActionData) as ActionData;
 				actionDataA.type = DragonBones.ACTION_TYPE_FADE_IN;
-				actionDataA.params = [actionsObject];
+				actionDataA.data = [actionsObject];
 				actionDataA.bone = bone;
 				actionDataA.slot = slot;
 				actions.push(actionDataA);
@@ -1079,20 +966,20 @@
 					switch (actionDataB.type)
 					{
 						case DragonBones.ACTION_TYPE_PLAY:
-							actionDataA.params = [
+							actionDataB.data = [
 								_getParameter(actionObject, 1, null), // animationName
 								_getParameter(actionObject, 2, -1), // playTimes
 							];
 							break;
 						
 						case DragonBones.ACTION_TYPE_STOP:
-							actionDataA.params = [
+							actionDataB.data = [
 								_getParameter(actionObject, 1, null) // animation
 							];
 							break;
 						
 						case DragonBones.ACTION_TYPE_GOTO_AND_PLAY:
-							actionDataA.params = [
+							actionDataB.data = [
 								_getParameter(actionObject, 1, null), // animationName
 								_getParameter(actionObject, 2, 0), // time
 								_getParameter(actionObject, 3, -1) // playTimes
@@ -1100,14 +987,14 @@
 							break;
 						
 						case DragonBones.ACTION_TYPE_GOTO_AND_STOP:
-							actionDataA.params = [
+							actionDataB.data = [
 								_getParameter(actionObject, 1, null), // animationName
 								_getParameter(actionObject, 2, 0), // time
 							];
 							break;
 						
 						case DragonBones.ACTION_TYPE_FADE_IN:
-							actionDataA.params = [
+							actionDataB.data = [
 								_getParameter(actionObject, 1, null), // animationName
 								_getParameter(actionObject, 2, -1), // playTimes
 								_getParameter(actionObject, 3, 0) // fadeInTime
@@ -1115,7 +1002,7 @@
 							break;
 						
 						case DragonBones.ACTION_TYPE_FADE_OUT:
-							actionDataA.params = [
+							actionDataB.data = [
 								_getParameter(actionObject, 1, null), // animationName
 								_getParameter(actionObject, 2, 0) // fadeOutTime
 							];
@@ -1196,12 +1083,138 @@
 		}
 		
 		/**
+		 * @inheritDoc
+		 */
+		override public function parseTextureAtlasData(rawData:*, textureAtlasData:TextureAtlasData, scale:Number = 0, rawScale:Number = 0):TextureAtlasData
+		{
+			if (rawData)
+			{
+				if (rawData is String)
+				{
+					rawData = JSON.parse(rawData);
+				}
+				
+				// format
+				textureAtlasData.name = _getString(rawData, NAME, null);
+				textureAtlasData.imagePath = _getString(rawData, IMAGE_PATH, null);
+				
+				if (scale > 0)
+				{
+					textureAtlasData.scale = scale;
+				}
+				else
+				{
+					scale = textureAtlasData.scale = _getNumber(rawData, SCALE, textureAtlasData.scale);
+				}
+				
+				scale = 1 / scale;
+				
+				if (rawScale > 0)
+				{
+					textureAtlasData.modifyScale = scale * rawScale;
+					scale *= textureAtlasData.modifyScale;
+				}
+				else
+				{
+					textureAtlasData.modifyScale = 1;
+				}
+				
+				if (SUB_TEXTURE in rawData)
+				{
+					for each (var textureObject:Object in rawData[SUB_TEXTURE])
+					{
+						const textureData:TextureData = textureAtlasData.generateTexture();
+						textureData.name = _getString(textureObject, NAME, null);
+						textureData.rotated = _getBoolean(textureObject, ROTATED, false);
+						textureData.region.x = _getNumber(textureObject, X, 0) * scale ;
+						textureData.region.y = _getNumber(textureObject, Y, 0) * scale;
+						textureData.region.width = _getNumber(textureObject, WIDTH, 0) * scale;
+						textureData.region.height = _getNumber(textureObject, HEIGHT, 0) * scale;
+						
+						const frameWidth:Number = _getNumber(textureObject, FRAME_WIDTH, -1);
+						const frameHeight:Number = _getNumber(textureObject, FRAME_HEIGHT, -1);
+						if (frameWidth > 0 && frameHeight > 0)
+						{
+							textureData.frame = TextureData.generateRectangle();
+							textureData.frame.x = _getNumber(textureObject, FRAME_X, 0) * scale;
+							textureData.frame.y = _getNumber(textureObject, FRAME_Y, 0) * scale;
+							textureData.frame.width = frameWidth * scale;
+							textureData.frame.height = frameHeight * scale;
+						}
+						
+						textureAtlasData.addTexture(textureData);
+					}
+				}
+				
+				return textureAtlasData;
+			}
+			else
+			{
+				throw new ArgumentError();
+			}
+			
+			return null;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function parseDragonBonesData(rawData:*):DragonBonesData
+		{
+			if (rawData)
+			{
+				if (rawData is String)
+				{
+					rawData = JSON.parse(rawData);
+				}
+				
+				const version:String = _getString(rawData, VERSION, null);
+				
+				if (version == DATA_VERSION)
+				{
+					const data:DragonBonesData = BaseObject.borrowObject(DragonBonesData) as DragonBonesData;
+					data.name = _getString(rawData, NAME, null);
+					data.frameRate = _getNumber(rawData, FRAME_RATE, 24);
+					
+					if (ARMATURE in rawData)
+					{
+						this._data = data;
+						
+						for each (var armatureObject:Object in rawData[ARMATURE])
+						{
+							data.addArmature(_parseArmature(armatureObject));
+						}
+						
+						this._data = null;
+					}
+					
+					return data;
+				}
+				else // TODO
+				{
+					throw new Error("Nonsupport data version.");
+				}
+			}
+			else
+			{
+				throw new ArgumentError();
+			}
+			
+			return null;
+		}
+		
+		/**
 		 * @private
 		 */
 		private static var _instance:ObjectDataParser = null;
 		
 		/**
-		 * 
+		 * @language zh_CN
+		 * 不推荐使用的 API。
+		 * 请选择以下 API。
+		 * @see dragonBones.factories.BaseFactory#parseTextureAtlasData()
+		 * @see dragonBones.factories.BaseFactory#parseDragonBonesData()
+		 * @version DragonBones 3.0
 		 */
 		public static function getInstance():ObjectDataParser
 		{

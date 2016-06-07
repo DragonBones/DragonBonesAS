@@ -34,7 +34,7 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 所有骨架。
+		 * 所有骨架数据。
 		 * @see dragonBones.objects.ArmatureData
 		 * @version DragonBones 3.0
 		 */
@@ -105,8 +105,8 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 所有骨架。
-		 * @see dragonBones.objects.ArmatureData
+		 * 不推荐使用的 API。
+		 * @see #armatures
 		 * @version DragonBones 3.0
 		 */
 		public function get armatureDataList():Vector.<ArmatureData>

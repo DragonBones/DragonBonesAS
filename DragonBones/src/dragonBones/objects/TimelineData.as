@@ -10,7 +10,7 @@ package dragonBones.objects
 	{
 		public var scale:Number;
 		public var offset:Number;
-		public const frames:Vector.<FrameData> = new Vector.<FrameData>(0, true);
+		public var frames:Vector.<FrameData> = new Vector.<FrameData>(0, true);
 		
 		public function TimelineData(self:TimelineData)
 		{

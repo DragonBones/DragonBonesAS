@@ -2,9 +2,9 @@ package dragonBones.animation
 {
 	import dragonBones.Slot;
 	import dragonBones.core.BaseObject;
+	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.ExtensionFrameData;
-	import dragonBones.objects.TweenFrameData;
 	
 	use namespace dragonBones_internal;
 	
@@ -68,19 +68,11 @@ package dragonBones.animation
 		{
 			super._onArriveAtFrame(isUpdate);
 			
-			if (this._animationState._isDisabled(slot))
-			{
-				this._tweenEasing = TweenFrameData.NO_TWEEN;
-				this._curve = null;
-				_tweenFFD = TWEEN_TYPE_NONE;
-				return;
-			}
-			
 			const currentFrame:ExtensionFrameData = this._currentFrame as ExtensionFrameData;
 			
 			_tweenFFD = TWEEN_TYPE_NONE;
 			
-			if (this._tweenEasing != TweenFrameData.NO_TWEEN || this._curve)
+			if (this._tweenEasing != DragonBones.NO_TWEEN || this._curve)
 			{
 				_tweenFFD = this._updateExtensionKeyFrame(currentFrame, currentFrame.next as ExtensionFrameData, _durationFFDFrame);
 			}

@@ -7,8 +7,6 @@ package dragonBones.objects
 	 */
 	public class TweenFrameData extends FrameData
 	{
-		public static const NO_TWEEN:Number = 100;
-		
 		public static function samplingCurve(curve:Array, frameCount:uint):Vector.<Number>
 		{
 			if (!curve || !frameCount)

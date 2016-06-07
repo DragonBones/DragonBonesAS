@@ -100,7 +100,7 @@ package dragonBones.animation
 			super._onClear();
 			
 			_tweenProgress = 0;
-			_tweenEasing = TweenFrameData.NO_TWEEN;
+			_tweenEasing = DragonBones.NO_TWEEN;
 			_curve = null;
 		}
 		
@@ -114,13 +114,13 @@ package dragonBones.animation
 				this._keyFrameCount == 1 ||
 				(
 					this._currentFrame.next == this._timeline.frames[0] && 
-					(_tweenEasing != TweenFrameData.NO_TWEEN || _curve) &&
+					(_tweenEasing != DragonBones.NO_TWEEN || _curve) &&
 					this._animationState.playTimes > 0 && 
 					this._animationState.currentPlayTimes == this._animationState.playTimes - 1
 				)
 			)
 			{
-				_tweenEasing = TweenFrameData.NO_TWEEN;
+				_tweenEasing = DragonBones.NO_TWEEN;
 				_curve = null;
 			}
 		}
@@ -131,7 +131,7 @@ package dragonBones.animation
 			{
 				_tweenProgress = 0;
 			}
-			else if (_tweenEasing != TweenFrameData.NO_TWEEN)
+			else if (_tweenEasing != DragonBones.NO_TWEEN)
 			{
 				_tweenProgress = (this._currentTime - this._currentFrame.position + this._position) / this._currentFrame.duration;
 				if (_tweenEasing != 0)

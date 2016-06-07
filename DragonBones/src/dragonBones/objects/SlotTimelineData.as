@@ -16,7 +16,7 @@ package dragonBones.objects
 		}
 		
 		public var slot:SlotData;
-		public const cacheFrames:Vector.<Matrix> = new Vector.<Matrix>(0, true);
+		public const cachedFrames:Vector.<Matrix> = new Vector.<Matrix>(0, true);
 		
 		public function SlotTimelineData()
 		{
@@ -32,11 +32,11 @@ package dragonBones.objects
 			
 			slot = null;
 			
-			if (cacheFrames.length)
+			if (cachedFrames.length)
 			{
-				cacheFrames.fixed = false;
-				cacheFrames.length = 0;
-				cacheFrames.fixed = true;
+				cachedFrames.fixed = false;
+				cachedFrames.length = 0;
+				cachedFrames.fixed = true;
 			}
 		}
 	}

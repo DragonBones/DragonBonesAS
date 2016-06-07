@@ -17,11 +17,12 @@ package dragonBones
 	
 	/**
 	 * @language zh_CN
-	 * 骨架，是龙骨骨骼动画系统的核心，由 ArmatureDisplayContainer, Bone, Animation, EventDispatcher 构成。
+	 * 骨架，是龙骨骨骼动画系统的核心，由显示容器、骨骼、插槽、动画、事件系统构成。
      * @see dragonBones.objects.ArmatureData
      * @see dragonBones.Bone
+     * @see dragonBones.Slot
      * @see dragonBones.animation.Animation
-     * @see dragonBones.events
+     * @see dragonBones.core.IArmatureDisplayContainer
 	 * @version DragonBones 3.0
 	 */
 	public final class Armature extends BaseObject implements IAnimateble
@@ -410,11 +411,11 @@ package dragonBones
 				switch (_action.type)
 				{
 					case DragonBones.ACTION_TYPE_PLAY:
-						_animation.play(_action.params[0], _action.params[1]);
+						_animation.play(_action.data[0], _action.data[1]);
 						break;
 					
 					case DragonBones.ACTION_TYPE_STOP:
-						const animationName:String = _action.params[0];
+						const animationName:String = _action.data[0];
 						if (animationName)
 						{
 							const animationState:AnimationState = _animation.getState(animationName);
@@ -430,15 +431,15 @@ package dragonBones
 						break;
 					
 					case DragonBones.ACTION_TYPE_GOTO_AND_PLAY:
-						_animation.gotoAndPlayWithTime(_action.params[0], _action.params[1], _action.params[2]);
+						_animation.gotoAndPlayWithTime(_action.data[0], _action.data[1], _action.data[2]);
 						break;
 					
 					case DragonBones.ACTION_TYPE_GOTO_AND_STOP:
-						_animation.gotoAndStopWithTime(_action.params[0], _action.params[1]);
+						_animation.gotoAndStopWithTime(_action.data[0], _action.data[1]);
 						break;
 					
 					case DragonBones.ACTION_TYPE_FADE_IN:
-						_animation.fadeIn(_action.params[0], _action.params[1], _action.params[2]);
+						_animation.fadeIn(_action.data[0], _action.data[1], _action.data[2]);
 						break;
 					
 					case DragonBones.ACTION_TYPE_FADE_OUT:
@@ -740,7 +741,7 @@ package dragonBones
 				return;
 			}
 			
-			_armatureData.cacheFrame(value);
+			_armatureData.cacheFrames(value);
 		}
 		
 		/**
