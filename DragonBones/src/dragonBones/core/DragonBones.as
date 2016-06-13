@@ -50,7 +50,6 @@ package dragonBones.core
 		public static const ANGLE_TO_RADIAN:Number = Math.PI / 180;
 		public static const RADIAN_TO_ANGLE:Number = 180 / Math.PI;
 		public static const SECOND_TO_MILLISECOND:Number = 1000;
-		public static const SECOND_TO_MICROSECOND:Number = 1000000;
 		public static const NO_TWEEN:Number = 100;
 		
 		public static const ABSTRACT_CLASS_ERROR:String = "Abstract class can not be instantiated.";

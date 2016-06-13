@@ -192,6 +192,8 @@ package dragonBones.geom
 		{
 			const PI_Q:Number = Math.PI * 0.25;
 			
+			const backupScaleX:Number = scaleX, backupScaleY:Number = scaleY;
+			
 			x = matrix.tx;
 			y = matrix.ty;
 			
@@ -222,14 +224,13 @@ package dragonBones.geom
 				scaleX = matrix.b / Math.sin(skewY);
 			}
 			
-			// TODO
-			if (scaleX < 0)
+			if (backupScaleX >=0 && scaleX < 0)
 			{
 				scaleX = -scaleX;
 				skewY = skewY - Math.PI;
 			}
 			
-			if (scaleY < 0)
+			if (backupScaleY >= 0 && scaleY < 0)
 			{
 				scaleY = -scaleY;
 				skewX = skewX - Math.PI;

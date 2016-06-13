@@ -197,7 +197,7 @@
 			_tweenColor = TWEEN_TYPE_NONE;
 		}
 		
-		override public function update(time:int):void
+		override public function update(time:Number):void
 		{
 			super.update(time);
 			

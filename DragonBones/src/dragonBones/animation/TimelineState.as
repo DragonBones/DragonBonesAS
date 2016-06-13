@@ -27,21 +27,29 @@
 		/**
 		 * @private AnimationState
 		 */
-		dragonBones_internal var _currentTime:uint;
+		dragonBones_internal var _currentPlayTimes:uint;
+		
+		/**
+		 * @private AnimationState
+		 */
+		dragonBones_internal var _currentTime:Number;
+		
+		/**
+		 * @private AnimationState
+		 */
+		dragonBones_internal var _timeline:TimelineData;
 		
 		protected var _isReverse:Boolean;
 		protected var _hasAsynchronyTimeline:Boolean;
 		protected var _keyFrameCount:uint;
 		protected var _frameCount:uint;
-		protected var _currentPlayTimes:uint;
-		protected var _position:uint;
-		protected var _duration:uint;
-		protected var _clipDutation:uint;
+		protected var _position:Number;
+		protected var _duration:Number;
+		protected var _clipDutation:Number;
 		protected var _timeScale:Number;
 		protected var _timeOffset:Number;
 		protected var _timeToFrameSccale:Number;
 		protected var _currentFrame:FrameData;
-		protected var _timeline:TimelineData;
 		protected var _armature:Armature;
 		protected var _animationState:AnimationState;
 		
@@ -61,13 +69,14 @@
 		override protected function _onClear():void
 		{
 			_isCompleted = false;
+			_currentPlayTimes = 0;
 			_currentTime = 0;
+			_timeline = null;
 			
 			_isReverse = false;
 			_hasAsynchronyTimeline = false;
 			_keyFrameCount =0;
 			_frameCount = 0;
-			_currentPlayTimes = 0;
 			_position = 0;
 			_duration = 0;
 			_clipDutation = 0;
@@ -75,7 +84,6 @@
 			_timeOffset = 0;
 			_timeToFrameSccale = 0;
 			_currentFrame = null;
-			_timeline = null;
 			_armature = null;
 			_animationState = null;
 		}
@@ -103,7 +111,7 @@
 				
 				if (actionData.slot)
 				{
-					const slot:Slot = this._armature.getSlot(actionData.slot.name);
+					const slot:Slot = _armature.getSlot(actionData.slot.name);
 					if (slot)
 					{
 						const childArmature:Armature = slot.childArmature;
@@ -115,12 +123,13 @@
 				}
 				else
 				{
-					this._armature._action = actionData;
+					_armature._action = actionData;
 				}
 			}
 			
-			const eventDispatcher:IEventDispatcher = this._armature.display;
+			const eventDispatcher:IEventDispatcher = _armature.display;
 			const events:Vector.<EventData> = frame.events;
+			
 			for (i = 0, l = events.length; i < l; ++i)
 			{
 				const eventData:EventData = events[i];
@@ -140,32 +149,32 @@
 				if (eventDispatcher.hasEvent(eventType))
 				{
 					const eventObject:EventObject = BaseObject.borrowObject(EventObject) as EventObject;
-					eventObject.animationState = this._animationState;
+					eventObject.animationState = _animationState;
 					
 					if (eventData.bone)
 					{
-						eventObject.bone = this._armature.getBone(eventData.bone.name);
+						eventObject.bone = _armature.getBone(eventData.bone.name);
 					}
 					
 					if (eventData.slot)
 					{
-						eventObject.slot = this._armature.getSlot(eventData.slot.name);
+						eventObject.slot = _armature.getSlot(eventData.slot.name);
 					}
 					
 					eventObject.name = eventData.name;
 					eventObject.data = eventData.data;
 					
-					this._armature._bufferEvent(eventObject, eventType);
+					_armature._bufferEvent(eventObject, eventType);
 				}
 			}
 		}
 		
-		protected function _setCurrentTime(value:int):Boolean
+		protected function _setCurrentTime(value:Number):Boolean
 		{
 			if (_hasAsynchronyTimeline)
 			{
 				const playTimes:uint = _animationState.playTimes;
-				const totalTimes:uint = playTimes * _duration;
+				const totalTimes:Number = playTimes * _duration;
 				
 				value *= _timeScale;
 				if (_timeOffset != 0)
@@ -212,8 +221,8 @@
 			}
 			else
 			{
-				// _isCompleted = _animationState._timeline._isCompleted;
-				// _currentPlayTimes = _animationState._timeline._currentPlayTimes;
+				_isCompleted = _animationState._timeline._isCompleted;
+				_currentPlayTimes = _animationState._timeline._currentPlayTimes;
 			}
 			
 			if (_currentTime == value)
@@ -279,7 +288,7 @@
 			_clipDutation = _animationState._clipDutation;
 			_timeScale = isMainTimeline? 1: (1 / _timeline.scale);
 			_timeOffset = isMainTimeline? 0: _timeline.offset;
-			_timeToFrameSccale = _frameCount / (_clipDutation + 1);
+			_timeToFrameSccale = _frameCount / _clipDutation;
 			
 			_onFadeIn();
 			
@@ -290,7 +299,7 @@
 		{
 		}
 		
-		public function update(time:int):void
+		public function update(time:Number):void
 		{
 			if (!_isCompleted && _setCurrentTime(time) && _keyFrameCount)
 			{

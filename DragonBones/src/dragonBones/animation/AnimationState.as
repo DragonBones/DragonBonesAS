@@ -4,7 +4,6 @@
 	import dragonBones.Bone;
 	import dragonBones.Slot;
 	import dragonBones.core.BaseObject;
-	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.EventObject;
 	import dragonBones.events.IEventDispatcher;
@@ -78,21 +77,6 @@
 		dragonBones_internal var _isFadeOutComplete:Boolean;
 		
 		/**
-		 * @private TimelineState
-		 */
-		dragonBones_internal var _position:uint;
-		
-		/**
-		 * @private TimelineState
-		 */
-		dragonBones_internal var _duration:uint;
-		
-		/**
-		 * @private TimelineState
-		 */
-		dragonBones_internal var _clipDutation:uint;
-		
-		/**
 		 * @private Animation, TimelineState
 		 */
 		dragonBones_internal var _index:int;
@@ -101,6 +85,21 @@
 		 * @private Animation
 		 */
 		dragonBones_internal var _layer:int;
+		
+		/**
+		 * @private TimelineState
+		 */
+		dragonBones_internal var _position:Number;
+		
+		/**
+		 * @private TimelineState
+		 */
+		dragonBones_internal var _duration:Number;
+		
+		/**
+		 * @private TimelineState
+		 */
+		dragonBones_internal var _clipDutation:Number;
 		
 		/**
 		 * @private Animation, TimelineState
@@ -209,11 +208,11 @@
 			fadeTotalTime = 0;
 			
 			_isFadeOutComplete = false;
+			_index = 0;
+			_layer = 0;
 			_position = 0;
 			_duration = 0;
 			_clipDutation = 0;
-			_index = 0;
-			_layer = 0;
 			_weightResult = 0;
 			_fadeProgress = 0;
 			_group = null;
@@ -416,7 +415,7 @@
 		 */
 		dragonBones_internal function _fadeIn(
 			armature:Armature, clip:AnimationData, animationName:String, 
-			playTimes:uint, position:uint, duration:uint, timeScale:Number, fadeInTime:Number, 
+			playTimes:uint, position:Number, duration:Number, timeScale:Number, fadeInTime:Number, 
 			pausePlayhead:Boolean
 		):void
 		{
@@ -484,11 +483,6 @@
 						boneTimelineState.bone = bone;
 						boneTimelineState.fadeIn(_armature, this, boneTimelineData);
 						_boneTimelines.push(boneTimelineState);
-						
-						if (_armature.cacheFrameRate > 0) // TODO
-						{
-							bone._cacheFrames = boneTimelineData.cachedFrames;
-						}
 					}
 				}
 			}
@@ -531,11 +525,6 @@
 						slotTimelineState.slot = slot;
 						slotTimelineState.fadeIn(_armature, this, slotTimelineData);
 						_slotTimelines.push(slotTimelineState);
-						
-						if (_armature.cacheFrameRate > 0) // TODO
-						{
-							slot._cacheFrames = slotTimelineData.cachedFrames;
-						}
 					}
 				}
 			}
@@ -654,26 +643,20 @@
 			
 			passedTime *= timeScale;
 			
-			var time:int = 0;
-			
 			if (passedTime != 0 && _isPlaying && !_isPausePlayhead)
 			{
 				_time += passedTime;
-				time = _time * DragonBones.SECOND_TO_MICROSECOND;
-				_timeline.update(time);
+				_timeline.update(_time);
 				
 				if (autoFadeOutTime >= 0 && _fadeProgress >= 1 && _timeline._isCompleted)
 				{
 					fadeOut(autoFadeOutTime);
 				}
 			}
-			else
-			{
-				time = _time * DragonBones.SECOND_TO_MICROSECOND;
-			}
 			
 			if (_weightResult != 0)
 			{
+				var time:Number = _time;
 				if (!_clip.hasAsynchronyTimeline)
 				{
 					time = _timeline._currentTime;
@@ -683,8 +666,25 @@
 				
 				if (_fadeProgress >= 1 && _index == 0 && _armature.cacheFrameRate > 0) // 淡入完毕且只有一个动画且开启动画缓存
 				{
-					const cacheFrameIndex:uint = _timeline._currentTime * _clip.cacheTimeToFrameScale;
+					const cacheFrameIndex:uint = uint(_timeline._currentTime * _clip.cacheTimeToFrameScale);
 					_armature._cacheFrameIndex = cacheFrameIndex;
+					
+					if (_armature._animation._animationStateDirty)
+					{
+						_armature._animation._animationStateDirty = false;
+						
+						for (i = 0, l = _boneTimelines.length; i < l; ++i)
+						{
+							const boneTimeline:BoneTimelineState = _boneTimelines[i];
+							boneTimeline.bone._cacheFrames = (boneTimeline._timeline as BoneTimelineData).cachedFrames;
+						}
+						
+						for (i = 0, l = _slotTimelines.length; i < l; ++i)
+						{
+							const slotTimeline:SlotTimelineState = _slotTimelines[i];
+							slotTimeline.slot._cacheFrames = (slotTimeline._timeline as SlotTimelineData).cachedFrames;
+						}
+					}
 					
 					if (!_clip.cachedFrames[cacheFrameIndex] || _clip.hasBoneTimelineEvent)
 					{
@@ -973,7 +973,7 @@
 		 */
 		public function get totalTime():Number
 		{
-			return _duration / DragonBones.SECOND_TO_MICROSECOND;
+			return _duration;
 		}
 		
 		/**
@@ -983,7 +983,7 @@
 		 */
 		public function get currentTime():Number
 		{
-			return _timeline._currentTime / DragonBones.SECOND_TO_MICROSECOND;
+			return _timeline._currentTime;
 		}
 		public function set currentTime(value:Number):void
 		{
@@ -993,19 +993,17 @@
 			}
 			
 			_time = value;
-			
-			var time:int = _time * DragonBones.SECOND_TO_MICROSECOND;
-			var i:uint = 0, l:uint = 0;
-			
-			_timeline.setCurrentTime(time);
+			_timeline.setCurrentTime(_time);
 			
 			if (_weightResult != 0)
 			{
+				var time:Number = _time;
 				if (!_clip.hasAsynchronyTimeline)
 				{
 					time = _timeline._currentTime;
 				}
 				
+				var i:uint = 0, l:uint = 0;
 				for (i = 0, l = _boneTimelines.length; i < l; ++i)
 				{
 					_boneTimelines[i].setCurrentTime(time);

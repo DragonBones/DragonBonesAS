@@ -37,14 +37,14 @@ package dragonBones.objects
 		 * 开始的时间。 (以微秒为单位)
 		 * @version DragonBones 3.0
 		 */
-		public var position:uint;
+		public var position:Number;
 		
 		/**
 		 * @language zh_CN
 		 * 持续的时间。 (以微秒为单位)
 		 * @version DragonBones 3.0
 		 */
-		public var duration:uint;
+		public var duration:Number;
 		
 		/**
 		 * @language zh_CN
@@ -160,7 +160,7 @@ package dragonBones.objects
 			
 			const cacheFrameCount:uint = frameCount * scale * value;
 			
-			cacheTimeToFrameScale = cacheFrameCount / (duration + 1);
+			cacheTimeToFrameScale = cacheFrameCount / duration;
 			cachedFrames.fixed = false;
 			cachedFrames.length = 0; // Clear vector 
 			cachedFrames.length = cacheFrameCount;

@@ -177,8 +177,13 @@ package dragonBones.starling
 		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null):StarlingArmatureDisplayContainer
 		{
 			const armature:Armature = this.buildArmature(armatureName, dragonBonesName, skinName);
+			const armatureDisplay:StarlingArmatureDisplayContainer = armature? (armature.display as StarlingArmatureDisplayContainer): null;
+			if (armatureDisplay)
+			{
+				armatureDisplay.advanceTimeBySelf(true);
+			}
 			
-			return armature? (armature.display as StarlingArmatureDisplayContainer): null;
+			return armatureDisplay;
 		}
 	}
 }

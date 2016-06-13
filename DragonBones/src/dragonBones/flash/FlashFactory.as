@@ -135,8 +135,13 @@
 		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null):FlashArmatureDisplayContainer
 		{
 			const armature:Armature = this.buildArmature(armatureName, dragonBonesName, skinName);
+			const armatureDisplay:FlashArmatureDisplayContainer = armature? (armature.display as FlashArmatureDisplayContainer): null;
+			if (armatureDisplay)
+			{
+				armatureDisplay.advanceTimeBySelf(true);
+			}
 			
-			return armature? (armature.display as FlashArmatureDisplayContainer): null;
+			return armatureDisplay;
 		}
 	}
 }

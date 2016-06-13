@@ -7,7 +7,6 @@
 	import dragonBones.Bone;
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.flash.FlashTextureData;
 	import dragonBones.objects.DisplayData;
 	
 	import starling.display.BlendMode;
@@ -52,11 +51,7 @@
 			const disposeDisplayList:Vector.<Object> = new Vector.<Object>();
 			for each (var renderDisplay:Object in this._displayList)
 			{
-				if (renderDisplay is Armature)
-				{
-					(renderDisplay as Armature).returnToPool();
-				}
-				else if (disposeDisplayList.indexOf(renderDisplay) < 0)
+				if (disposeDisplayList.indexOf(renderDisplay) < 0)
 				{
 					disposeDisplayList.push(renderDisplay);
 				}
@@ -64,7 +59,14 @@
 			
 			for each (renderDisplay in disposeDisplayList)
 			{
-				this._disposeDisplay(renderDisplay);
+				if (renderDisplay is Armature)
+				{
+					(renderDisplay as Armature).returnToPool();
+				}
+				else
+				{
+					this._disposeDisplay(renderDisplay);
+				}
 			}
 			
 			super._onClear();
@@ -283,20 +285,15 @@
 							}
 							
 							meshDisplay.texture = currentTextureData.texture;
-							frameDisplay.readjustSize();
+							//meshDisplay.readjustSize();
+							meshDisplay.pivotX = 0;
+							meshDisplay.pivotY = 0;
 							
 							if (this._meshData.skinned)
 							{
 								const transformationMatrix:Matrix = meshDisplay.transformationMatrix;
 								transformationMatrix.identity();
 								meshDisplay.transformationMatrix = transformationMatrix;
-								meshDisplay.pivotX = 0;
-								meshDisplay.pivotY = 0;
-							}
-							else
-							{
-								//meshDisplay.pivotX = 0.5; // TODO
-								//meshDisplay.pivotY = 0.5;
 							}
 						}
 						else
@@ -356,7 +353,7 @@
 		 */
 		override protected function _updateMesh():void
 		{
-			const meshDisplay:Mesh = _renderDisplay as Mesh;
+			const meshDisplay:Mesh = this._meshDisplay as Mesh;
 			const meshStyle:MeshStyle = meshDisplay.style;
 			const hasFFD:Boolean = this._ffdVertices.length > 0;
 			

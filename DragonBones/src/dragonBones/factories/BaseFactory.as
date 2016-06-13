@@ -277,9 +277,17 @@
 			
 			if (displayIndex >= 0)
 			{
+				const displayList:Vector.<Object> = slot.displayList; // copy
+				if (displayList.length <=  displayIndex)
+				{
+					displayList.fixed = false;
+					displayList.length = displayIndex + 1;
+				}
+				
 				if (displayData.type == DragonBones.DISPLAY_TYPE_ARMATURE)
 				{
-					// TODO
+					const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName);
+					displayList[displayIndex] = childArmature;
 				}
 				else
 				{
@@ -292,13 +300,6 @@
 					
 					slot._replaceDisplayDataSet[displayIndex] = displayData;
 					
-					const displayList:Vector.<Object> = slot.displayList;
-					if (displayList.length <=  displayIndex)
-					{
-						displayList.fixed = false;
-						displayList.length = displayIndex + 1;
-					}
-					
 					if (displayData.meshData)
 					{
 						displayList[displayIndex] = slot.MeshDisplay;
@@ -307,11 +308,9 @@
 					{
 						displayList[displayIndex] = slot.rawDisplay;
 					}
-					
-					slot.displayList = displayList;
 				}
 				
-				
+				slot.displayList = displayList;
 				slot.invalidUpdate();
 			}
 		}

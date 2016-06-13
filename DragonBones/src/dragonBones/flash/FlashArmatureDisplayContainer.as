@@ -43,6 +43,19 @@ package dragonBones.flash
 			_time += passedTime;
 			this._armature.advanceTime(passedTime);
 		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function _onClear():void
+		{
+			advanceTimeBySelf(false);
+			
+			_time = 0;
+			
+			_armature = null;
+		}
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -51,22 +64,6 @@ package dragonBones.flash
 			const event:FlashEvent = new FlashEvent(eventObject.type, eventObject);
 			
 			this.dispatchEvent(event);
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function dispose():void
-		{
-			advanceTimeSelf(false);
-			
-			_time = 0;
-			
-			if (_armature)
-			{
-				_armature.returnToPool();
-				_armature = null;
-			}
 		}
 		
 		/**
@@ -96,7 +93,7 @@ package dragonBones.flash
 		/**
 		 * @inheritDoc
 		 */
-		public function advanceTimeSelf(on:Boolean):void
+		public function advanceTimeBySelf(on:Boolean):void
 		{
 			if (on)
 			{

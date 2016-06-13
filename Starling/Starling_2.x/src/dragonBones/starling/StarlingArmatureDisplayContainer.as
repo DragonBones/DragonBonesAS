@@ -39,6 +39,16 @@ package dragonBones.starling
 		/**
 		 * @inheritDoc
 		 */
+		public function _onClear():void
+		{
+			_armature = null;
+			
+			this.dispose();
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
 		public function _dispatchEvent(eventObject:EventObject):void
 		{
 			if (useDefaultStarlingEvent)
@@ -50,22 +60,6 @@ package dragonBones.starling
 				const event:StarlingEvent = new StarlingEvent(eventObject);
 				this.dispatchEvent(event);
 			}
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function dispose():void
-		{
-			advanceTimeSelf(false);
-			
-			if (_armature)
-			{
-				_armature.returnToPool();
-				_armature = null;
-			}
-			
-			super.dispose();
 		}
 		
 		/**
@@ -95,7 +89,7 @@ package dragonBones.starling
 		/**
 		 * @inheritDoc
 		 */
-		public function advanceTimeSelf(on:Boolean):void
+		public function advanceTimeBySelf(on:Boolean):void
 		{
 			if (on)
 			{

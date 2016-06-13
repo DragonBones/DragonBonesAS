@@ -94,6 +94,11 @@ package dragonBones
 		/**
 		 * @private
 		 */
+		private var _lockDispose:Boolean;
+		
+		/**
+		 * @private
+		 */
 		private var _lockEvent:Boolean;
 		
 		/**
@@ -142,12 +147,18 @@ package dragonBones
 				_animation = null;
 			}
 			
-			_display = null;
+			if (_display)
+			{
+				_display._onClear();
+				_display = null;
+			}
+			
 			_replaceTexture = null;
 			_parent = null;
 			_action = null;
 			
 			_delayDispose = false;
+			_lockDispose = false;
 			_lockEvent = false;
 			_slotsDirty = false;
 			
@@ -186,14 +197,6 @@ package dragonBones
 				_events.length = 0;
 				_events.fixed = true;
 			}
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function dispose():void
-		{
-			_delayDispose = true;
 		}
 		
 		/**
@@ -327,11 +330,26 @@ package dragonBones
 		}
 		
 		/**
+		 * dispose
+		 */
+		public function dispose():void
+		{
+			_delayDispose = true;
+			
+			if (!_lockDispose)
+			{
+				this.returnToPool();
+			}
+		}
+		
+		/**
 		 * Update the animation using this method typically in an ENTERFRAME Event or with a Timer.
 		 * @param The amount of second to move the playhead ahead.
 		 */
 		public function advanceTime(passedTime:Number):void
 		{
+			_lockDispose = true;
+			
 			const scaledPassedTime:Number = passedTime * _animation.timeScale;
 			
 			//
@@ -415,27 +433,15 @@ package dragonBones
 						break;
 					
 					case DragonBones.ACTION_TYPE_STOP:
-						const animationName:String = _action.data[0];
-						if (animationName)
-						{
-							const animationState:AnimationState = _animation.getState(animationName);
-							if (animationState)
-							{
-								animationState.stop();
-							}
-						}
-						else
-						{
-							_animation.stop();
-						}
+						_animation.stop(_action.data[0]);
 						break;
 					
 					case DragonBones.ACTION_TYPE_GOTO_AND_PLAY:
-						_animation.gotoAndPlayWithTime(_action.data[0], _action.data[1], _action.data[2]);
+						_animation.gotoAndPlayByTime(_action.data[0], _action.data[1], _action.data[2]);
 						break;
 					
 					case DragonBones.ACTION_TYPE_GOTO_AND_STOP:
-						_animation.gotoAndStopWithTime(_action.data[0], _action.data[1]);
+						_animation.gotoAndStopByTime(_action.data[0], _action.data[1]);
 						break;
 					
 					case DragonBones.ACTION_TYPE_FADE_IN:
@@ -443,23 +449,25 @@ package dragonBones
 						break;
 					
 					case DragonBones.ACTION_TYPE_FADE_OUT:
-						// TODO
+						// TODO fade out
 						break;
 				}
 				
 				_action = null;
 			}
 			
+			_lockDispose = false;
+			
 			if (_delayDispose)
 			{
-				this._onClear();
+				this.returnToPool();
 			}
 		}
 		
 		/**
 		 * Force update bones and slots. (When bone's animation play complete, it will not update.) 
 		 */
-		public function invalidUpdate(boneName:String = null):void
+		public function invalidUpdate(boneName:String = null, updateSlotDisplay:Boolean = false):void
 		{
 			if (boneName)
 			{
@@ -468,13 +476,32 @@ package dragonBones
 				if (bone)
 				{
 					bone.invalidUpdate();
+					
+					if (updateSlotDisplay)
+					{
+						for each (var slotA:Slot in _slots)
+						{
+							if (slotA.parent == bone)
+							{
+								slotA.invalidUpdate();
+							}
+						}
+					}
 				}
 			}
 			else
 			{
-				for each(var eachBone:Bone in _bones)
+				for each (var eachBone:Bone in _bones)
 				{
 					eachBone.invalidUpdate();
+				}
+				
+				if (updateSlotDisplay)
+				{
+					for each (var slotB:Slot in _slots)
+					{
+						slotB.invalidUpdate();
+					}
 				}
 			}
 		}

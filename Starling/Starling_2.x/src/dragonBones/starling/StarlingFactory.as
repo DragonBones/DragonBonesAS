@@ -11,7 +11,6 @@
 	import dragonBones.factories.BaseFactory;
 	import dragonBones.factories.BuildArmaturePackage;
 	import dragonBones.objects.DisplayData;
-	import dragonBones.objects.MeshData;
 	import dragonBones.objects.SlotData;
 	import dragonBones.objects.SlotDisplayDataSet;
 	import dragonBones.textures.TextureAtlasData;
@@ -20,7 +19,6 @@
 	import starling.display.Mesh;
 	import starling.rendering.IndexData;
 	import starling.rendering.VertexData;
-	import starling.textures.SubTexture;
 	import starling.textures.Texture;
 	
 	use namespace dragonBones_internal;
@@ -147,8 +145,13 @@
 		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null):StarlingArmatureDisplayContainer
 		{
 			const armature:Armature = this.buildArmature(armatureName, dragonBonesName, skinName);
+			const armatureDisplay:StarlingArmatureDisplayContainer = armature? (armature.display as StarlingArmatureDisplayContainer): null;
+			if (armatureDisplay)
+			{
+				armatureDisplay.advanceTimeBySelf(true);
+			}
 			
-			return armature? (armature.display as StarlingArmatureDisplayContainer): null;
+			return armatureDisplay;
 		}
 	}
 }

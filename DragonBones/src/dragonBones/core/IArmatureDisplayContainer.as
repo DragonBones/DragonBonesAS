@@ -14,17 +14,10 @@ package dragonBones.core
 	{
 		/**
 		 * @language zh_CN
-		 * 释放资源。
-		 * @version DragonBones 3.0
-		 */
-		function dispose():void;
-		
-		/**
-		 * @language zh_CN
 		 * @param on 开启自动更新
 		 * @version DragonBones 3.0
 		 */
-		function advanceTimeSelf(on:Boolean):void;
+		function advanceTimeBySelf(on:Boolean):void;
 		
 		/**
 		 * @language zh_CN

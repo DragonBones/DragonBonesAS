@@ -10,6 +10,11 @@ package dragonBones.events
 		/**
 		 * @private
 		 */
+		function _onClear():void;
+		
+		/**
+		 * @private
+		 */
 		function _dispatchEvent(value:EventObject):void;
 		
 		/**

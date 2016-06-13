@@ -27,7 +27,7 @@ package dragonBones.animation
 			_isStarted = false;
 		}
 		
-		override public function update(time:int):void
+		override public function update(time:Number):void
 		{
 			const prevPlayTimes:uint = this._currentPlayTimes;
 			

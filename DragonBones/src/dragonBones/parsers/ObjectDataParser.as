@@ -337,7 +337,6 @@
 				display.type = _getNumber(rawData, TYPE, DragonBones.DISPLAY_TYPE_IMAGE);
 			}
 			
-			const transformObject:Object = rawData[TRANSFORM];
 			
 			display.isRelativePivot = true;
 			if (PIVOT in rawData)
@@ -348,11 +347,15 @@
 			}
 			else
 			{
-				if (transformObject && ((PIVOT_X in transformObject) || (PIVOT_Y in transformObject)))
+				if (TRANSFORM in rawData)
 				{
-					display.isRelativePivot = false;
-					display.pivot.x = _getNumber(transformObject, PIVOT_X, 0);
-					display.pivot.y = _getNumber(transformObject, PIVOT_Y, 0);
+					const transformObject:Object = rawData[TRANSFORM];
+					if ((PIVOT_X in transformObject) || (PIVOT_Y in transformObject))
+					{
+						display.isRelativePivot = false;
+						display.pivot.x = _getNumber(transformObject, PIVOT_X, 0);
+						display.pivot.y = _getNumber(transformObject, PIVOT_Y, 0);
+					}
 				}
 				
 				if (display.isRelativePivot)
@@ -362,9 +365,9 @@
 				}
 			}
 			
-			if (transformObject)
+			if (TRANSFORM in rawData)
 			{
-				_parseTransform(transformObject, display.transform);
+				_parseTransform(rawData[TRANSFORM], display.transform);
 			}
 			
 			switch (display.type)
@@ -393,14 +396,13 @@
 			const rawVertices:Array = rawData[VERTICES];
 			const rawUVs:Array = rawData[UVS];
 			const rawTriangles:Array = rawData[TRIANGLES];
-			const rawWeights:Array = rawData[WEIGHTS];
 			
 			const numVertices:uint = uint(rawVertices.length / 2);
 			const numTriangles:uint = uint(rawTriangles.length / 3);
 			
 			const inverseBindPose:Vector.<Matrix> = new Vector.<Matrix>(this._armature.sortedBones.length, true);
 			
-			mesh.skinned = rawWeights && rawWeights.length;
+			mesh.skinned = (WEIGHTS in rawData) && (rawData[WEIGHTS] as Array).length > 0;
 			mesh.uvs.fixed = false;
 			mesh.uvs.length = numVertices * 2;
 			mesh.uvs.fixed = true;
@@ -470,6 +472,7 @@
 				
 				if (mesh.skinned)
 				{
+					const rawWeights:Array = rawData[WEIGHTS];
 					const numBones:uint = rawWeights[iW];
 					const indices:Vector.<uint> = mesh.boneIndices[vertexIndex] = new Vector.<uint>(numBones, true);
 					const weights:Vector.<Number> = mesh.weights[vertexIndex] = new Vector.<Number>(numBones, true);
@@ -527,9 +530,9 @@
 		{
 			const animation:AnimationData = BaseObject.borrowObject(AnimationData) as AnimationData;
 			animation.name = _getString(rawData, NAME, "__default") || "__default";
-			animation.frameCount = _getNumber(rawData, DURATION, 1);
-			animation.position = uint(_getNumber(rawData, POSITION, 0) * DragonBones.SECOND_TO_MICROSECOND / this._armature.frameRate);
-			animation.duration = uint(animation.frameCount * DragonBones.SECOND_TO_MICROSECOND / this._armature.frameRate);
+			animation.frameCount = Math.max(_getNumber(rawData, DURATION, 1), 1);
+			animation.position = _getNumber(rawData, POSITION, 0) / this._armature.frameRate;
+			animation.duration = animation.frameCount / this._armature.frameRate;
 			animation.playTimes = _getNumber(rawData, PLAY_TIMES, 1);
 			animation.fadeInTime = _getNumber(rawData, FADE_IN_TIME, 0);
 			
@@ -766,7 +769,7 @@
 		{
 			const frame:SlotFrameData = BaseObject.borrowObject(SlotFrameData) as SlotFrameData;
 			frame.displayIndex = _getNumber(rawData, DISPLAY_INDEX, 0);
-			//frame.zOrder = _getNumber(rawData, Z_ORDER, -1); // TODO
+			//frame.zOrder = _getNumber(rawData, Z_ORDER, -1); // TODO zorder
 			
 			_parseTweenFrame(rawData, frame, frameStart, frameCount);
 			
@@ -808,7 +811,7 @@
 			var y:Number = 0;
 			for (var i:uint = 0, l:uint = this._mesh.vertices.length ; i < l; i += 2)
 			{
-				if (!rawVertices || i < offset || i - offset >= rawVertices.length)
+				if (i < offset || i - offset >= rawVertices.length)
 				{
 					x = 0;
 					y = 0;
@@ -860,8 +863,8 @@
 		
 		protected function _parseFrame(rawData:Object, frame:FrameData, frameStart:uint, frameCount:uint):void
 		{
-			frame.position = uint(frameStart * DragonBones.SECOND_TO_MICROSECOND / this._armature.frameRate);
-			frame.duration = uint(frameCount * DragonBones.SECOND_TO_MICROSECOND / this._armature.frameRate);
+			frame.position = frameStart / this._armature.frameRate;
+			frame.duration = frameCount / this._armature.frameRate;
 		}
 		
 		/**
@@ -996,8 +999,8 @@
 						case DragonBones.ACTION_TYPE_FADE_IN:
 							actionDataB.data = [
 								_getParameter(actionObject, 1, null), // animationName
-								_getParameter(actionObject, 2, -1), // playTimes
-								_getParameter(actionObject, 3, 0) // fadeInTime
+								_getParameter(actionObject, 2, -1), // fadeInTime
+								_getParameter(actionObject, 3, -1) // playTimes
 							];
 							break;
 						
@@ -1190,7 +1193,7 @@
 					
 					return data;
 				}
-				else // TODO
+				else // TODO more veision
 				{
 					throw new Error("Nonsupport data version.");
 				}

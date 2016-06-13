@@ -212,7 +212,8 @@
 		 */
 		private function _computeIKA():void
 		{
-			/* //TODO
+			// TODO IK
+			/*
 			if (this._parent && inheritScale)
 			{
 			if (this._parent.global.skewX == this._parent.global.skewY)
@@ -243,7 +244,7 @@
 		 */
 		private function _computeIKB():void
 		{
-			//TODO
+			// TODO IK
 			const parentGlobal:Transform = this._parent.global;
 			const ikGlobal:Transform = _ik.global;
 			
@@ -322,7 +323,7 @@
 		 */
 		dragonBones_internal function _update(cacheFrameIndex:int):void
 		{
-			if (cacheFrameIndex >= 0)
+			if (cacheFrameIndex >= 0 && _cacheFrames)
 			{
 				const cacheFrame:Matrix = _cacheFrames[cacheFrameIndex];
 				
@@ -393,7 +394,7 @@
 						}
 					}
 					
-					if (cacheFrameIndex >= 0)
+					if (cacheFrameIndex >= 0 && _cacheFrames)
 					{
 						this.globalTransformMatrix = BoneTimelineData.cacheFrame(_cacheFrames, cacheFrameIndex, this.globalTransformMatrix);
 					}
@@ -550,7 +551,6 @@
 				return ancestor == this;
 			}
 			
-			throw new ArgumentError();
 			return false;
 		}
 		

@@ -8,8 +8,8 @@ package dragonBones.objects
 	 */
 	public class FrameData extends BaseObject
 	{
-		public var position:uint;
-		public var duration:uint;
+		public var position:Number;
+		public var duration:Number;
 		public var prev:FrameData;
 		public var next:FrameData;
 		
