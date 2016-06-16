@@ -121,6 +121,17 @@
 						}
 					}
 				}
+				else if (actionData.bone)
+				{
+					for each (var eachSlot:Slot in _armature.getSlots())
+					{
+						const eachChildArmature:Armature = eachSlot.childArmature;
+						if (eachChildArmature)
+						{
+							eachChildArmature._action = actionData;
+						}
+					}
+				}
 				else
 				{
 					_armature._action = actionData;
@@ -171,6 +182,8 @@
 		
 		protected function _setCurrentTime(value:Number):Boolean
 		{
+			var currentPlayTimes:uint = 0;
+			
 			if (_hasAsynchronyTimeline)
 			{
 				const playTimes:uint = _animationState.playTimes;
@@ -185,7 +198,7 @@
 				if (playTimes > 0 && (value >= totalTimes || value <= -totalTimes))
 				{	
 					_isCompleted = true;
-					_currentPlayTimes = playTimes;
+					currentPlayTimes = playTimes;
 					
 					if (value < 0)
 					{
@@ -202,18 +215,18 @@
 					
 					if (value < 0)
 					{
-						_currentPlayTimes = -value / _duration;
-						value = _duration - (value % _duration);
+						currentPlayTimes = -value / _duration;
+						value = _duration - (-value % _duration);
 					}
 					else
 					{
-						_currentPlayTimes = value / _duration;
+						currentPlayTimes = value / _duration;
 						value %= _duration;
 					}
 					
-					if (_currentPlayTimes > playTimes)
+					if (playTimes > 0 && currentPlayTimes > playTimes)
 					{
-						_currentPlayTimes = playTimes;
+						currentPlayTimes = playTimes;
 					}
 				}
 				
@@ -222,7 +235,7 @@
 			else
 			{
 				_isCompleted = _animationState._timeline._isCompleted;
-				_currentPlayTimes = _animationState._timeline._currentPlayTimes;
+				currentPlayTimes = _animationState._timeline._currentPlayTimes;
 			}
 			
 			if (_currentTime == value)
@@ -235,8 +248,9 @@
 				_isCompleted = true;
 			}
 			
-			_isReverse = _currentTime > value;
+			_isReverse = _currentTime > value && _currentPlayTimes == currentPlayTimes;
 			_currentTime = value;
+			_currentPlayTimes = currentPlayTimes;
 			
 			return true;
 		}
@@ -247,7 +261,7 @@
 			_timeOffset = this == _animationState._timeline? 0: _timeline.offset;
 		}
 		
-		public function setCurrentTime(value:uint):void
+		public function setCurrentTime(value:Number):void
 		{
 			_setCurrentTime(value);
 			
@@ -269,10 +283,10 @@
 					break;
 			}
 			
-			_currentFrame = null;  // For first event frame
+			_currentFrame = null;
 		}
 		
-		public function fadeIn(armature:Armature, animationState:AnimationState, timelineData:TimelineData):void
+		public function fadeIn(armature:Armature, animationState:AnimationState, timelineData:TimelineData, time:Number):void
 		{
 			_armature = armature;
 			_animationState = animationState;
@@ -292,7 +306,7 @@
 			
 			_onFadeIn();
 			
-			setCurrentTime(0);
+			setCurrentTime(time);
 		}
 		
 		public function fadeOut():void
@@ -301,6 +315,8 @@
 		
 		public function update(time:Number):void
 		{
+			const prevTime:Number = _currentTime;
+			
 			if (!_isCompleted && _setCurrentTime(time) && _keyFrameCount)
 			{
 				//const currentFrameIndex:uint = _keyFrameCount > 1? currentFrameIndex = _currentTime * _timeToFrameSccale: 0;
@@ -315,7 +331,19 @@
 				{
 					if (_keyFrameCount > 1)
 					{
-						var crossedFrame:FrameData = _currentFrame || currentFrame.prev;
+						var crossedFrame:FrameData = _currentFrame;
+						if (!crossedFrame)
+						{
+							if (prevTime <= currentFrame.position)
+							{
+								crossedFrame = currentFrame.prev;
+							}
+							else
+							{
+								crossedFrame = currentFrame;
+							}
+						}
+						
 						_currentFrame = currentFrame;
 						
 						if (_isReverse)

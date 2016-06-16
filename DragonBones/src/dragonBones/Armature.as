@@ -99,7 +99,7 @@ package dragonBones
 		/**
 		 * @private
 		 */
-		private var _lockEvent:Boolean;
+		private var _lockActionAndEvent:Boolean;
 		
 		/**
 		 * @private
@@ -159,7 +159,7 @@ package dragonBones
 			
 			_delayDispose = false;
 			_lockDispose = false;
-			_lockEvent = false;
+			_lockActionAndEvent = false;
 			_slotsDirty = false;
 			
 			if (_bones.length)
@@ -399,61 +399,64 @@ package dragonBones
 			}
 			
 			//
-			if (!_lockEvent && _events.length > 0)
+			if (!_lockActionAndEvent)
 			{
-				_lockEvent = true;
+				_lockActionAndEvent = true;
 				
-				for (i = 0, l = _events.length; i < l; ++i)
+				if (_events.length > 0)
 				{
-					const event:EventObject = _events[i];
-					
-					if (soundEventManager && event.type == EventObject.SOUND_EVENT)
+					for (i = 0, l = _events.length; i < l; ++i)
 					{
-						soundEventManager._dispatchEvent(event);
-					}
-					else
-					{
-						_display._dispatchEvent(event);
+						const event:EventObject = _events[i];
+						
+						if (soundEventManager && event.type == EventObject.SOUND_EVENT)
+						{
+							soundEventManager._dispatchEvent(event);
+						}
+						else
+						{
+							_display._dispatchEvent(event);
+						}
+						
+						event.returnToPool();
 					}
 					
-					event.returnToPool();
+					_events.length = 0;
 				}
 				
-				_events.length = 0;
-				
-				_lockEvent = false;
-			}
-			
-			if (_action)
-			{
-				switch (_action.type)
+				if (_action)
 				{
-					case DragonBones.ACTION_TYPE_PLAY:
-						_animation.play(_action.data[0], _action.data[1]);
-						break;
+					switch (_action.type)
+					{
+						case DragonBones.ACTION_TYPE_PLAY:
+							_animation.play(_action.data[0], _action.data[1]);
+							break;
+						
+						case DragonBones.ACTION_TYPE_STOP:
+							_animation.stop(_action.data[0]);
+							break;
+						
+						case DragonBones.ACTION_TYPE_GOTO_AND_PLAY:
+							_animation.gotoAndPlayByTime(_action.data[0], _action.data[1], _action.data[2]);
+							break;
+						
+						case DragonBones.ACTION_TYPE_GOTO_AND_STOP:
+							_animation.gotoAndStopByTime(_action.data[0], _action.data[1]);
+							break;
+						
+						case DragonBones.ACTION_TYPE_FADE_IN:
+							_animation.fadeIn(_action.data[0], _action.data[1], _action.data[2]);
+							break;
+						
+						case DragonBones.ACTION_TYPE_FADE_OUT:
+							// TODO fade out
+							break;
+					}
 					
-					case DragonBones.ACTION_TYPE_STOP:
-						_animation.stop(_action.data[0]);
-						break;
-					
-					case DragonBones.ACTION_TYPE_GOTO_AND_PLAY:
-						_animation.gotoAndPlayByTime(_action.data[0], _action.data[1], _action.data[2]);
-						break;
-					
-					case DragonBones.ACTION_TYPE_GOTO_AND_STOP:
-						_animation.gotoAndStopByTime(_action.data[0], _action.data[1]);
-						break;
-					
-					case DragonBones.ACTION_TYPE_FADE_IN:
-						_animation.fadeIn(_action.data[0], _action.data[1], _action.data[2]);
-						break;
-					
-					case DragonBones.ACTION_TYPE_FADE_OUT:
-						// TODO fade out
-						break;
+					_action = null;
 				}
 				
-				_action = null;
+				_lockActionAndEvent = false;
 			}
 			
 			_lockDispose = false;
@@ -533,11 +536,14 @@ package dragonBones
 		 */
 		public function getSlotByDisplay(display:Object):Slot
 		{
-			for each(var slot:Slot in _slots)
+			if (display)
 			{
-				if (slot.display == display)
+				for each(var slot:Slot in _slots)
 				{
-					return slot;
+					if (slot.display == display)
+					{
+						return slot;
+					}
 				}
 			}
 			

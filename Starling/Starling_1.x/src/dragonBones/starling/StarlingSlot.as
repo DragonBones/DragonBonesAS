@@ -341,8 +341,8 @@
 				
 				if (pivotX || pivotY)
 				{
-					displayMatrix.tx = this.globalTransformMatrix.tx - (displayMatrix.a * pivotX + displayMatrix.c * pivotY);
-					displayMatrix.ty = this.globalTransformMatrix.ty - (displayMatrix.b * pivotX + displayMatrix.d * pivotY);
+					displayMatrix.tx = this.globalTransformMatrix.tx - (this.globalTransformMatrix.a * pivotX + this.globalTransformMatrix.c * pivotY);
+					displayMatrix.ty = this.globalTransformMatrix.ty - (this.globalTransformMatrix.b * pivotX + this.globalTransformMatrix.d * pivotY);
 				}
 				else
 				{

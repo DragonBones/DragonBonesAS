@@ -1,4 +1,4 @@
-package dragonBones.animation
+﻿package dragonBones.animation
 {
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.dragonBones_internal;
@@ -24,19 +24,18 @@ package dragonBones.animation
 		 */
 		override protected function _onClear():void
 		{
+			super._onClear();
+			
 			_isStarted = false;
 		}
 		
 		override public function update(time:Number):void
 		{
 			const prevPlayTimes:uint = this._currentPlayTimes;
-			
-			super.update(time);
-			
 			const eventDispatcher:IEventDispatcher = this._armature.display;
 			var eventObject:EventObject = null;
 			
-			if (!_isStarted && this._currentTime > 0)
+			if (!_isStarted && time != 0)
 			{
 				_isStarted = true;
 				
@@ -48,6 +47,8 @@ package dragonBones.animation
 				}
 			}
 			
+			super.update(time);
+			
 			if (prevPlayTimes != this._currentPlayTimes)
 			{
 				//const eventType:String = _isCompleted? EventObject.COMPLETE: EventObject.LOOP_COMPLETE;
@@ -58,7 +59,7 @@ package dragonBones.animation
 				}
 				else
 				{
-					eventType = EventObject.LOOP_COMPLETE;
+					eventType = EventObject.LOOP_COMPLETE; // TODO buffer loop complete before cross frame event
 				}
 				
 				if (eventDispatcher.hasEvent(eventType))

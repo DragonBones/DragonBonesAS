@@ -423,7 +423,7 @@
 			{
 				_renderDisplay.transformationMatrix = this.globalTransformMatrix;
 				
-				if (pivotX || pivotY)
+				if (pivotX != 0 || pivotY != 0)
 				{
 					_renderDisplay.pivotX = pivotX;
 					_renderDisplay.pivotY = pivotY;
@@ -437,10 +437,10 @@
 				displayMatrix.c = this.globalTransformMatrix.c;
 				displayMatrix.d = this.globalTransformMatrix.d;
 				
-				if (pivotX || pivotY)
+				if (pivotX != 0 || pivotY != 0)
 				{
-					displayMatrix.tx = this.globalTransformMatrix.tx - (displayMatrix.a * pivotX + displayMatrix.c * pivotY);
-					displayMatrix.ty = this.globalTransformMatrix.ty - (displayMatrix.b * pivotX + displayMatrix.d * pivotY);
+					displayMatrix.tx = this.globalTransformMatrix.tx - (this.globalTransformMatrix.a * pivotX + this.globalTransformMatrix.c * pivotY);
+					displayMatrix.ty = this.globalTransformMatrix.ty - (this.globalTransformMatrix.b * pivotX + this.globalTransformMatrix.d * pivotY);
 				}
 				else
 				{

@@ -71,6 +71,11 @@
 		/**
 		 * @private
 		 */
+		dragonBones_internal var _blendIndex:int;
+		
+		/**
+		 * @private
+		 */
 		dragonBones_internal var _cacheFrames:Vector.<Matrix>;
 		
 		/**
@@ -131,6 +136,7 @@
 			length = 0;
 			
 			_transformDirty = 2; // Update
+			_blendIndex = 0; // Update
 			_cacheFrames = null;
 			_animationPose.identity();
 			
@@ -323,6 +329,8 @@
 		 */
 		dragonBones_internal function _update(cacheFrameIndex:int):void
 		{
+			_blendIndex = 0;
+			
 			if (cacheFrameIndex >= 0 && _cacheFrames)
 			{
 				const cacheFrame:Matrix = _cacheFrames[cacheFrameIndex];
@@ -396,7 +404,7 @@
 					
 					if (cacheFrameIndex >= 0 && _cacheFrames)
 					{
-						this.globalTransformMatrix = BoneTimelineData.cacheFrame(_cacheFrames, cacheFrameIndex, this.globalTransformMatrix);
+						this.globalTransformMatrix = BoneTimelineData.cacheFrame(_cacheFrames, cacheFrameIndex, this._globalTransformMatrix);
 					}
 				}
 			}
@@ -521,7 +529,8 @@
 		 * @see dragonBones.animation.AnimationState
 		 * @version DragonBones 3.0
 		 */
-		public function invalidUpdate():void
+		[inline]
+		final public function invalidUpdate():void
 		{
 			_transformDirty = 2;
 		}

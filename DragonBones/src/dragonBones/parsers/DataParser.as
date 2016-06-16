@@ -238,6 +238,7 @@ package dragonBones.parsers
 		protected var _animation:AnimationData = null;
 		protected var _timeline:TimelineData = null;
 		
+		protected var _armatureScale:Number = 1;
 		protected const _helpPoint:Point = new Point();
 		protected const _rawBones:Vector.<BoneData> = new Vector.<BoneData>();
 		
@@ -252,7 +253,7 @@ package dragonBones.parsers
 		/** 
 		 * @private 
 		 */
-		public function parseTextureAtlasData(rawData:*, textureAtlasData:TextureAtlasData, scale:Number = 0, rawScale:Number = 0):TextureAtlasData
+		public function parseDragonBonesData(rawData:*, scale:Number = 1):DragonBonesData
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 			return null;
@@ -261,7 +262,7 @@ package dragonBones.parsers
 		/** 
 		 * @private 
 		 */
-		public function parseDragonBonesData(rawData:*):DragonBonesData
+		public function parseTextureAtlasData(rawData:*, textureAtlasData:TextureAtlasData, scale:Number = 0, rawScale:Number = 0):TextureAtlasData
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 			return null;

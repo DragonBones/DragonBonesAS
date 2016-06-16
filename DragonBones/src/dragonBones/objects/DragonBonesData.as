@@ -43,7 +43,7 @@ package dragonBones.objects
 		/**
 		 * @private
 		 */
-		private const _armatures:Vector.<ArmatureData> = new Vector.<ArmatureData>();
+		private const _armatureNames:Vector.<String> = new Vector.<String>();
 		
 		/**
 		 * @private
@@ -69,9 +69,9 @@ package dragonBones.objects
 				delete armatures[i];
 			}
 			
-			if (_armatures.length)
+			if (_armatureNames.length)
 			{
-				_armatures.length = 0;
+				_armatureNames.length = 0;
 			}
 		}
 		
@@ -95,7 +95,7 @@ package dragonBones.objects
 			if (value && value.name && !armatures[value.name])
 			{
 				armatures[value.name] = value;
-				_armatures.push(value);
+				_armatureNames.push(value.name);
 			}
 			else
 			{
@@ -105,13 +105,13 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 不推荐使用的 API。
+		 * 所有骨架数据名称。
 		 * @see #armatures
-		 * @version DragonBones 3.0
+		 * @version DragonBones 4.5
 		 */
-		public function get armatureDataList():Vector.<ArmatureData>
+		public function get armatureNames():Vector.<String>
 		{
-			return _armatures;
+			return _armatureNames;
 		}
 	}
 }

@@ -225,7 +225,7 @@
 			
 			if (weight > 0)
 			{
-				if (this._animationState._index <= 1)
+				if (bone._blendIndex == 0)
 				{
 					_boneTransform.x = _transform.x * weight;
 					_boneTransform.y = _transform.y * weight;
@@ -243,6 +243,8 @@
 					_boneTransform.scaleX += (_transform.scaleX - 1) * weight;
 					_boneTransform.scaleY += (_transform.scaleY - 1) * weight;
 				}
+				
+				bone._blendIndex++;
 				
 				const fadeProgress:Number = this._animationState._fadeProgress;
 				if (fadeProgress < 1)

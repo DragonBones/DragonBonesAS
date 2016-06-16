@@ -148,11 +148,6 @@ package dragonBones.animation
 			{
 				_tweenProgress = 0;
 			}
-			
-			if (_tweenProgress > 1)
-			{
-				trace(this, _tweenProgress);
-			}
 		}
 		
 		protected function _updateExtensionKeyFrame(current:ExtensionFrameData, next:ExtensionFrameData, result:ExtensionFrameData):int

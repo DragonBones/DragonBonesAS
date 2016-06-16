@@ -121,7 +121,8 @@ package dragonBones.animation
 			if (weight > 0)
 			{
 				var i:uint = 0, l:uint = _ffdVertices.length;
-				if (this._animationState._index <= 1)
+				
+				if (slot._blendIndex <= 1)
 				{
 					for (i = 0, l = _ffdVertices.length; i < l; ++i)
 					{
@@ -135,6 +136,8 @@ package dragonBones.animation
 						_slotFFDVertices[i] += _ffdVertices[i] * weight;
 					}
 				}
+				
+				slot._blendIndex++;
 				
 				const fadeProgress:Number = this._animationState._fadeProgress;
 				if (fadeProgress < 1)

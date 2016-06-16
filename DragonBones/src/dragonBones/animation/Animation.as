@@ -47,6 +47,11 @@
 		/**
 		 * @private
 		 */
+		protected var _time:Number;
+		
+		/**
+		 * @private
+		 */
 		protected var _lastAnimationState:AnimationState;
 		
 		/**
@@ -84,6 +89,7 @@
 			_armature = null;
 			
 			_isPlaying = false;
+			_time = 0;
 			_lastAnimationState = null;
 			
 			for (var i:String in _animations)
@@ -239,7 +245,7 @@
 						
 						if (_lastAnimationState == animationState) // 要删除的动画状态如果是 _lastAnimationState, 更新 _lastAnimationState 到合适的索引
 						{
-							if (i - r >= 0)
+							if (i >= r)
 							{
 								_lastAnimationState = _animationStates[i - r];
 							}
@@ -371,12 +377,13 @@
 		 * @language zh_CN
 		 * 淡入播放指定名称的动画。
 		 * @param animationName 动画数据的名称。
-		 * @param playTimes 动画循环播放的次数。 [-1: 使用动画数据默认值, 0: 无限循环播放, [1~N]: 循环播放 N 次] (默认: -1)
-		 * @param fadeInTime 淡入的时间。 [-1: 使用动画数据默认值, [0~N]: N 秒淡入完毕] (以秒为单位, 默认: -1)
-		 * @param layer 动画状态混合的图层，图层高会优先获得混合权重。 (默认: 0)
-		 * @param group 动画状态混合的组，用于给动画状态编组，方便混合淡出控制。 (默认: null)
-		 * @param fadeOutMode 动画状态淡出的模式。 (默认: 同图层同组)
-		 * @param additiveBlending 动画状态以叠加的形式混合。 (默认: false)
+		 * @param playTimes 循环播放的次数。 [-1: 使用数据默认值, 0: 无限循环播放, [1~N]: 循环播放 N 次] (默认: -1)
+		 * @param fadeInTime 淡入的时间。 [-1: 使用数据默认值, [0~N]: N 秒淡入完毕] (以秒为单位, 默认: -1)
+		 * @param layer 混合的图层，图层高会优先获得混合权重。 (默认: 0)
+		 * @param group 混合的组，用于给动画状态编组，方便混合淡出控制。 (默认: null)
+		 * @param fadeOutMode 淡出的模式。 (默认: <code>AnimationFadeOutMode.SameLayerAndGroup</code>)
+		 * @param additiveBlending 以叠加的形式混合。 (默认: false)
+		 * @param displayControl 对显示对象的属性可控。 (默认: true)
 		 * @param pauseFadeOut 暂停需要淡出的动画。 (默认: true)
 		 * @param pauseFadeIn 暂停需要淡入的动画，直到淡入结束才开始播放。 (默认: true)
 		 * @return 返回控制这个动画数据的动画状态。
@@ -387,13 +394,14 @@
 		public function fadeIn(
 			animationName:String, fadeInTime:Number = -1, playTimes:int = -1,
 			layer:int = 0, group:String = null, fadeOutMode:int = AnimationFadeOutMode.SameLayerAndGroup,
-			additiveBlending:Boolean = false, 
+			additiveBlending:Boolean = false, displayControl:Boolean = true,
 			pauseFadeOut:Boolean = true, pauseFadeIn:Boolean = true
 		):AnimationState
 		{
 			const clipData:AnimationData = _animations[animationName];
 			if (!clipData)
 			{
+				_time = 0;
 				return null;
 			}
 			
@@ -415,13 +423,15 @@
 			_lastAnimationState._layer = layer;
 			_lastAnimationState._group = group;
 			_lastAnimationState.additiveBlending = additiveBlending;
+			_lastAnimationState.displayControl = displayControl;
 			_lastAnimationState._fadeIn(
 				_armature, clipData.animation || clipData, animationName, 
-				playTimes, clipData.position, clipData.duration, 1 / clipData.scale, fadeInTime, 
+				playTimes, clipData.position, clipData.duration, _time, 1 / clipData.scale, fadeInTime, 
 				pauseFadeIn
 			);
 			_animationStates.push(_lastAnimationState);
 			_animationStateDirty = true;
+			_time = 0;
 			
 			if (_animationStates.length > 1)
 			{
@@ -435,7 +445,7 @@
 				if (slot.inheritAnimation)
 				{
 					const childArmature:Armature = slot.childArmature;
-					if (childArmature)
+					if (childArmature && childArmature.animation.hasAnimation(animationName) && !childArmature.animation.getState(animationName))
 					{
 						childArmature.animation.fadeIn(animationName);
 					}
@@ -444,7 +454,7 @@
 			
 			if (fadeInTime == 0)
 			{
-				_armature.advanceTime(0);
+				//_armature.advanceTime(0.000001); // TODO
 			}
 			
 			return _lastAnimationState;
@@ -462,15 +472,9 @@
 		 */
 		public function gotoAndPlayByTime(animationName:String, time:Number = 0, playTimes:int = -1):AnimationState
 		{
-			const animationState:AnimationState = getState(animationName) || fadeIn(animationName, 0, playTimes, 0, null, AnimationFadeOutMode.All);
-			if (animationState)
-			{
-				animationState.currentTime = time;
-				animationState.play();
-				_armature.advanceTime(0);
-			}
+			_time = time;
 			
-			return animationState;
+			return fadeIn(animationName, 0, playTimes, 0, null, AnimationFadeOutMode.All);
 		}
 		
 		/**
@@ -485,15 +489,13 @@
 		 */
 		public function gotoAndPlayByFrame(animationName:String, frame:uint = 0, playTimes:int = -1):AnimationState
 		{
-			const animationState:AnimationState = getState(animationName) || fadeIn(animationName, 0, playTimes, 0, null, AnimationFadeOutMode.All);
-			if (animationState)
+			const clipData:AnimationData = _animations[animationName];
+			if (clipData)
 			{
-				animationState.currentTime = animationState.totalTime * frame / animationState.clip.frameCount;
-				animationState.play();
-				_armature.advanceTime(0);
+				_time = clipData.duration * frame / clipData.frameCount;
 			}
 			
-			return animationState;
+			return fadeIn(animationName, 0, playTimes, 0, null, AnimationFadeOutMode.All);
 		}
 		
 		/**
@@ -508,15 +510,13 @@
 		 */
 		public function gotoAndPlayByProgress(animationName:String, progress:Number = 0, playTimes:int = -1):AnimationState
 		{
-			const animationState:AnimationState = getState(animationName) || fadeIn(animationName, 0, playTimes, 0, null, AnimationFadeOutMode.All);
-			if (animationState)
+			const clipData:AnimationData = _animations[animationName];
+			if (clipData)
 			{
-				animationState.currentTime = animationState.totalTime * progress;
-				animationState.play();
-				_armature.advanceTime(0);
+				_time = clipData.duration * Math.max(progress, 0);
 			}
 			
-			return animationState;
+			return fadeIn(animationName, 0, playTimes, 0, null, AnimationFadeOutMode.All);
 		}
 		
 		/**
@@ -550,7 +550,7 @@
 		 */
 		public function gotoAndStopByFrame(animationName:String, frame:uint = 0):AnimationState
 		{
-			const animationState:AnimationState = gotoAndPlayByProgress(animationName, frame, 1);
+			const animationState:AnimationState = gotoAndPlayByFrame(animationName, frame, 1);
 			if (animationState)
 			{
 				animationState.stop();
@@ -581,18 +581,6 @@
 		
 		/**
 		 * @language zh_CN
-		 * 是否包含指定名称的动画数据。
-		 * @param animationName 动画数据的名称。
-		 * @see dragonBones.objects.AnimationData
-		 * @version DragonBones 3.0
-		 */
-		public function hasAnimation(animationName:String):Boolean
-		{
-			return _animations[animationName] != null;
-		}
-		
-		/**
-		 * @language zh_CN
 		 * 获得指定名称的动画状态。
 		 * @param animationName 动画状态的名称。
 		 * @see dragonBones.animation.AnimationState
@@ -610,6 +598,18 @@
 			}
 			
 			return null;
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 是否包含指定名称的动画数据。
+		 * @param animationName 动画数据的名称。
+		 * @see dragonBones.objects.AnimationData
+		 * @version DragonBones 3.0
+		 */
+		public function hasAnimation(animationName:String):Boolean
+		{
+			return _animations[animationName] != null;
 		}
 		
 		/**
@@ -677,7 +677,7 @@
 		 * @see #animations
 		 * @version DragonBones 4.5
 		 */
-		public function get animationList():Vector.<String>
+		public function get animationNames():Vector.<String>
 		{
 			return _animationNames;
 		}
@@ -764,6 +764,18 @@
 		public function gotoAndStop(animationName:String, time:Number = 0):AnimationState
 		{
 			return gotoAndStopByTime(animationName, time);
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 不推荐使用的 API。
+		 * 请选择以下 API。
+		 * @see #animationNames
+		 * @version DragonBones 3.0
+		 */
+		public function get animationList():Vector.<String>
+		{
+			return _animationNames;
 		}
 	}
 }

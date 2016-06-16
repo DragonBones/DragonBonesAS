@@ -55,6 +55,11 @@
 		/** 
 		 * @private 
 		 */
+		protected const _objectDataParser:ObjectDataParser = new ObjectDataParser();
+		
+		/** 
+		 * @private 
+		 */
 		protected const _dragonBonesDataMap:Object = {};
 		
 		/** 
@@ -375,7 +380,7 @@
 				}
 			}
 			
-			const dragonBonesData:DragonBonesData = ObjectDataParser.getInstance().parseDragonBonesData(rawData);
+			const dragonBonesData:DragonBonesData = _objectDataParser.parseDragonBonesData(rawData);
 			addDragonBonesData(dragonBonesData, dragonBonesName);
 			
 			if (isComplete)
@@ -404,7 +409,7 @@
 		public function parseTextureAtlasData(rawData:Object, textureAtlas:Object, name:String = null, scale:Number = 0, rawScale:Number = 0):TextureAtlasData
 		{
 			const textureAtlasData:TextureAtlasData = _generateTextureAtlasData(null, null);
-			ObjectDataParser.getInstance().parseTextureAtlasData(rawData, textureAtlasData, scale, rawScale);
+			_objectDataParser.parseTextureAtlasData(rawData, textureAtlasData, scale, rawScale);
 			
 			if (textureAtlas is Bitmap)
 			{

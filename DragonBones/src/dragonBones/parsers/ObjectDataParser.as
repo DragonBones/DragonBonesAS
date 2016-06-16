@@ -353,8 +353,8 @@
 					if ((PIVOT_X in transformObject) || (PIVOT_Y in transformObject))
 					{
 						display.isRelativePivot = false;
-						display.pivot.x = _getNumber(transformObject, PIVOT_X, 0);
-						display.pivot.y = _getNumber(transformObject, PIVOT_Y, 0);
+						display.pivot.x = _getNumber(transformObject, PIVOT_X, 0) * this._armatureScale;
+						display.pivot.y = _getNumber(transformObject, PIVOT_Y, 0) * this._armatureScale;
 					}
 				}
 				
@@ -465,8 +465,8 @@
 				const iN:uint = i + 1;
 				const vertexIndex:uint = uint(i / 2);
 				
-				var x:Number = mesh.vertices[i] = rawVertices[i];
-				var y:Number = mesh.vertices[iN] = rawVertices[iN];
+				var x:Number = mesh.vertices[i] = rawVertices[i] * this._armatureScale;
+				var y:Number = mesh.vertices[iN] = rawVertices[iN] * this._armatureScale;
 				mesh.uvs[i] = rawUVs[i];
 				mesh.uvs[iN] = rawUVs[iN];
 				
@@ -751,11 +751,18 @@
 				_parseTransform(rawData[TRANSFORM], frame.transform);
 			}
 			
+			const bone:BoneData = (this._timeline as BoneTimelineData).bone;
+			
 			if ((EVENT in rawData) || (SOUND in rawData))
 			{
-				const bone:BoneData = (this._timeline as BoneTimelineData).bone;
 				_parseEventData(rawData, frame.events, bone, null);
-				
+				this._animation.hasBoneTimelineEvent = true;
+			}
+			
+			if (ACTION in rawData)
+			{
+				const slot:SlotData = this._armature.getSlot(bone.name);
+				_parseActionData(rawData, frame.actions, bone, slot);
 				this._animation.hasBoneTimelineEvent = true;
 			}
 			
@@ -818,8 +825,8 @@
 				}
 				else
 				{
-					x = rawVertices[i - offset];
-					y = rawVertices[i + 1 - offset];
+					x = rawVertices[i - offset] * this._armatureScale;
+					y = rawVertices[i + 1 - offset] * this._armatureScale;
 				}
 				
 				if (this._mesh.skinned)
@@ -946,7 +953,7 @@
 			{
 				const actionDataA:ActionData = BaseObject.borrowObject(ActionData) as ActionData;
 				actionDataA.type = DragonBones.ACTION_TYPE_FADE_IN;
-				actionDataA.data = [actionsObject];
+				actionDataA.data = [actionsObject, -1, -1];
 				actionDataA.bone = bone;
 				actionDataA.slot = slot;
 				actions.push(actionDataA);
@@ -1062,8 +1069,8 @@
 		 */
 		protected function _parseTransform(rawData:Object, transform:Transform):void
 		{
-			transform.x = _getNumber(rawData, X, 0);
-			transform.y = _getNumber(rawData, Y, 0);
+			transform.x = _getNumber(rawData, X, 0) * this._armatureScale;
+			transform.y = _getNumber(rawData, Y, 0) * this._armatureScale;
 			transform.skewX = _getNumber(rawData, SKEW_X, 0) * DragonBones.ANGLE_TO_RADIAN;
 			transform.skewY = _getNumber(rawData, SKEW_Y, 0) * DragonBones.ANGLE_TO_RADIAN;
 			transform.scaleX = _getNumber(rawData, SCALE_X, 1);
@@ -1083,6 +1090,55 @@
 			color.redOffset = _getNumber(rawData, RED_OFFSET, 0);
 			color.greenOffset = _getNumber(rawData, GREEN_OFFSET, 0);
 			color.blueOffset = _getNumber(rawData, BLUE_OFFSET, 0);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function parseDragonBonesData(rawData:*, scale:Number = 1):DragonBonesData
+		{
+			if (rawData)
+			{
+				this._armatureScale = scale;
+				
+				if (rawData is String)
+				{
+					rawData = JSON.parse(rawData);
+				}
+				
+				const version:String = _getString(rawData, VERSION, null);
+				
+				if (version == DATA_VERSION)
+				{
+					const data:DragonBonesData = BaseObject.borrowObject(DragonBonesData) as DragonBonesData;
+					data.name = _getString(rawData, NAME, null);
+					data.frameRate = _getNumber(rawData, FRAME_RATE, 24);
+					
+					if (ARMATURE in rawData)
+					{
+						this._data = data;
+						
+						for each (var armatureObject:Object in rawData[ARMATURE])
+						{
+							data.addArmature(_parseArmature(armatureObject));
+						}
+						
+						this._data = null;
+					}
+					
+					return data;
+				}
+				else // TODO more veision
+				{
+					throw new Error("Nonsupport data version.");
+				}
+			}
+			else
+			{
+				throw new ArgumentError();
+			}
+			
+			return null;
 		}
 		
 		/**
@@ -1150,53 +1206,6 @@
 				}
 				
 				return textureAtlasData;
-			}
-			else
-			{
-				throw new ArgumentError();
-			}
-			
-			return null;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function parseDragonBonesData(rawData:*):DragonBonesData
-		{
-			if (rawData)
-			{
-				if (rawData is String)
-				{
-					rawData = JSON.parse(rawData);
-				}
-				
-				const version:String = _getString(rawData, VERSION, null);
-				
-				if (version == DATA_VERSION)
-				{
-					const data:DragonBonesData = BaseObject.borrowObject(DragonBonesData) as DragonBonesData;
-					data.name = _getString(rawData, NAME, null);
-					data.frameRate = _getNumber(rawData, FRAME_RATE, 24);
-					
-					if (ARMATURE in rawData)
-					{
-						this._data = data;
-						
-						for each (var armatureObject:Object in rawData[ARMATURE])
-						{
-							data.addArmature(_parseArmature(armatureObject));
-						}
-						
-						this._data = null;
-					}
-					
-					return data;
-				}
-				else // TODO more veision
-				{
-					throw new Error("Nonsupport data version.");
-				}
 			}
 			else
 			{

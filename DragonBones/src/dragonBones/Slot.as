@@ -59,6 +59,11 @@
 		dragonBones_internal var _zOrder:int;
 		
 		/**
+		 * @private
+		 */
+		dragonBones_internal var _blendIndex:int;
+		
+		/**
 		 * @private Factory
 		 */
 		dragonBones_internal var _displayDataSet:SlotDisplayDataSet;
@@ -179,6 +184,7 @@
 			_colorDirty = false;
 			_ffdDirty = false;
 			_zOrder = 0;
+			_blendIndex = 0;
 			_displayDataSet = null;
 			_meshData = null;
 			_cacheFrames = null;
@@ -571,6 +577,8 @@
 		 */
 		dragonBones_internal function _update(cacheFrameIndex:int):void
 		{
+			_blendIndex = 0;
+			
 			if (_displayDirty)
 			{
 				_displayDirty = false;
@@ -878,17 +886,17 @@
 			}
 			else
 			{
+				const replaceDisplayList:Vector.<Object> = displayList; // copy
 				if (displayListLength <= _displayIndex)
 				{
-					_displayList.fixed = false;
-					_displayList.length = _displayIndex + 1;
-					_displayList.fixed = true;
+					replaceDisplayList.fixed = false;
+					replaceDisplayList.length = _displayIndex + 1;
+					replaceDisplayList.fixed = true;
 				}
 				
-				_displayList[_displayIndex] = value;
+				replaceDisplayList[_displayIndex] = value;
+				displayList = replaceDisplayList;
 			}
-			
-			displayList = _displayList;
 		}
 		
 		/**
