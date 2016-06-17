@@ -311,15 +311,5 @@ package dragonBones.flash
 		{
 			_renderDisplay.transform.matrix = this.globalTransformMatrix;
 		}
-		
-		/**
-		 * @language zh_CN
-		 * 此时显示的显示对象。
-		 * @version DragonBones 3.0
-		 */
-		public function get renderDisplay():DisplayObject
-		{
-			return this._display as DisplayObject;
-		}
 	}
 }

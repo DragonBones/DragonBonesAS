@@ -4,7 +4,6 @@
 	import flash.geom.Rectangle;
 	
 	import dragonBones.Armature;
-	import dragonBones.Bone;
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DisplayData;
@@ -26,7 +25,7 @@
 		 */
 		dragonBones_internal static const EMPTY_TEXTURE:Texture = Texture.empty(1, 1);
 		
-		public var updateTransformEnabled:Boolean = true;
+		public var updateTransformEnabled:Boolean = false;
 		
 		private var _renderDisplay:DisplayObject = null;
 		
@@ -255,46 +254,35 @@
 						}
 						else
 						{
+							const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
+							
+							var width:Number = rect.width;
+							var height:Number = rect.height;
+							if (currentTextureData.rotated)
+							{
+								width = rect.height;
+								height = rect.width;
+							}
+							
 							var pivotX:Number = contentDisplayData.pivot.x;
 							var pivotY:Number = contentDisplayData.pivot.y;
 							
-							if (contentDisplayData)
+							if (contentDisplayData.isRelativePivot)
 							{
-								const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
-								
-								var width:Number = rect.width;
-								var height:Number = rect.height;
-								if (currentTextureData.rotated)
-								{
-									width = rect.height;
-									height = rect.width;
-								}
-								
-								pivotX = contentDisplayData.pivot.x;
-								pivotY = contentDisplayData.pivot.y;
-								
-								if (contentDisplayData.isRelativePivot)
-								{
-									pivotX = width * pivotX;
-									pivotY = height * pivotY;
-								}
-								
-								if (currentTextureData.frame)
-								{
-									pivotX -= currentTextureData.frame.x;
-									pivotY -= currentTextureData.frame.y;
-								}
-								
-								if (rawDisplayData && rawDisplayData != contentDisplayData)
-								{
-									pivotX += contentDisplayData.transform.x - rawDisplayData.transform.x;
-									pivotY += contentDisplayData.transform.y - rawDisplayData.transform.y;
-								}
+								pivotX = width * pivotX;
+								pivotY = height * pivotY;
 							}
-							else
+							
+							if (currentTextureData.frame)
 							{
-								pivotX = currentTextureData.region.width * 0.5;
-								pivotY = currentTextureData.region.height * 0.5;
+								pivotX -= currentTextureData.frame.x;
+								pivotY -= currentTextureData.frame.y;
+							}
+							
+							if (rawDisplayData && rawDisplayData != contentDisplayData)
+							{
+								pivotX += contentDisplayData.transform.x - rawDisplayData.transform.x;
+								pivotY += contentDisplayData.transform.y - rawDisplayData.transform.y;
 							}
 							
 							frameDisplay.texture = currentTexture;

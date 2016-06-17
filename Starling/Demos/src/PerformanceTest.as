@@ -40,13 +40,13 @@ import dragonBones.starling.StarlingArmatureDisplayContainer;
 
 class StarlingRender extends Sprite
 {
-	[Embed(source = "../assets/Dragon/Dragon.json", mimeType = "application/octet-stream")]
+	[Embed(source = "../assets/DragonBoy/DragonBoy.json", mimeType = "application/octet-stream")]
 	private static const DBDataA: Class;
 
-	[Embed(source = "../assets/Dragon/texture.json", mimeType = "application/octet-stream")]
+	[Embed(source = "../assets/DragonBoy/DragonBoy_texture_1.json", mimeType = "application/octet-stream")]
 	private static const TADataA1: Class;
 
-	[Embed(source = "../assets/Dragon/texture.png")]
+	[Embed(source = "../assets/DragonBoy/DragonBoy_texture_1.png")]
 	private static const TextureA1: Class;
 
 	private var _addingArmature: Boolean = false;
@@ -91,8 +91,6 @@ class StarlingRender extends Sprite
 
 	private function _enterFrameHandler(event: EnterFrameEvent): void
 	{
-		WorldClock.clock.advanceTime(-1);
-
 		if (_addingArmature)
 		{
 			_addArmature();
@@ -122,6 +120,8 @@ class StarlingRender extends Sprite
 			_removeArmature();
 			_resetPosition();
 		}
+		
+		WorldClock.clock.advanceTime(-1);
 	}
 
 	private function _touchHandler(event: TouchEvent): void
@@ -131,10 +131,9 @@ class StarlingRender extends Sprite
 		{
 			if (touch.phase == TouchPhase.BEGAN)
 			{
-				const touchX:Number = touch.globalX;
-				const lineX:Number = this.stage.stageWidth * 0.5;
-				_addingArmature = touchX > lineX;
-				_removingArmature = touchX < lineX;
+				const touchRight:Boolean = touch.globalX > this.stage.stageWidth * 0.5;
+				_addingArmature = touchRight;
+				_removingArmature = !touchRight;
 			}
 			else if (touch.phase == TouchPhase.ENDED)
 			{
@@ -146,7 +145,7 @@ class StarlingRender extends Sprite
 
 	private function _addArmature(): void
 	{
-		const armature: Armature = _factory.buildArmature(_dragonBonesData.armatureNames[0]);
+		const armature: Armature = _factory.buildArmature(_dragonBonesData.armatureNames[1]);
 		const armatureDisplay: StarlingArmatureDisplayContainer = armature.display as StarlingArmatureDisplayContainer;
 
 		armatureDisplay.scaleX = armatureDisplay.scaleY = 0.3;
@@ -179,6 +178,11 @@ class StarlingRender extends Sprite
 	private function _resetPosition(): void
 	{
 		const count: uint = _armatures.length;
+		if (!count)
+		{
+			return;
+		}
+		
 		const paddingH: uint = 50;
 		const paddingV: uint = 150;
 		const columnNum: uint = 10;

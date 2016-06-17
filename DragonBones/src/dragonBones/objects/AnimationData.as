@@ -1,4 +1,4 @@
-package dragonBones.objects
+﻿package dragonBones.objects
 {
 	/**
 	 * @language zh_CN
@@ -158,7 +158,7 @@ package dragonBones.objects
 				return;
 			}
 			
-			const cacheFrameCount:uint = frameCount * scale * value;
+			const cacheFrameCount:uint = Math.max(frameCount * scale * value, 1);
 			
 			cacheTimeToFrameScale = cacheFrameCount / duration;
 			cachedFrames.fixed = false;
