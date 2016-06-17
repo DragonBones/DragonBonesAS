@@ -99,11 +99,11 @@
 		/** 
 		 * @private
 		 */
-		protected function _getTextureData(textureAtlasName:String, textureName:String):TextureData
+		protected function _getTextureData(dragonBonesName:String, textureName:String):TextureData
 		{
 			var i:uint = 0, l:uint = 0;
 			var textureData:TextureData = null;
-			var textureAtlasDataList:Vector.<TextureAtlasData> = _textureAtlasDataMap[textureAtlasName];
+			var textureAtlasDataList:Vector.<TextureAtlasData> = _textureAtlasDataMap[dragonBonesName];
 			
 			if (textureAtlasDataList)
 			{
@@ -287,6 +287,11 @@
 				{
 					displayList.fixed = false;
 					displayList.length = displayIndex + 1;
+				}
+				
+				if (!displayData.textureData)
+				{
+					displayData.textureData = _getTextureData(dataPackage.dataName, displayData.name);
 				}
 				
 				if (displayData.type == DragonBones.DISPLAY_TYPE_ARMATURE)

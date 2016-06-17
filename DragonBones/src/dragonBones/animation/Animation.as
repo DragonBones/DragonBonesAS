@@ -454,7 +454,7 @@
 			
 			if (fadeInTime == 0)
 			{
-				//_armature.advanceTime(0.000001); // TODO
+				_armature._delayAdvanceTime = 0;
 			}
 			
 			return _lastAnimationState;

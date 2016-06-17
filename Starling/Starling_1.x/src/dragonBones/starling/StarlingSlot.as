@@ -255,34 +255,46 @@
 						}
 						else
 						{
-							const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
-							
-							var width:Number = rect.width;
-							var height:Number = rect.height;
-							if (currentTextureData.rotated)
-							{
-								width = rect.height;
-								height = rect.width;
-							}
-							
 							var pivotX:Number = contentDisplayData.pivot.x;
 							var pivotY:Number = contentDisplayData.pivot.y;
-							if (contentDisplayData.isRelativePivot)
-							{
-								pivotX = width * pivotX;
-								pivotY = height * pivotY;
-							}
 							
-							if (currentTextureData.frame)
+							if (contentDisplayData)
 							{
-								pivotX -= currentTextureData.frame.x;
-								pivotY -= currentTextureData.frame.y;
+								const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
+								
+								var width:Number = rect.width;
+								var height:Number = rect.height;
+								if (currentTextureData.rotated)
+								{
+									width = rect.height;
+									height = rect.width;
+								}
+								
+								pivotX = contentDisplayData.pivot.x;
+								pivotY = contentDisplayData.pivot.y;
+								
+								if (contentDisplayData.isRelativePivot)
+								{
+									pivotX = width * pivotX;
+									pivotY = height * pivotY;
+								}
+								
+								if (currentTextureData.frame)
+								{
+									pivotX -= currentTextureData.frame.x;
+									pivotY -= currentTextureData.frame.y;
+								}
+								
+								if (rawDisplayData && rawDisplayData != contentDisplayData)
+								{
+									pivotX += contentDisplayData.transform.x - rawDisplayData.transform.x;
+									pivotY += contentDisplayData.transform.y - rawDisplayData.transform.y;
+								}
 							}
-							
-							if (rawDisplayData && replaceDisplayData)
+							else
 							{
-								pivotX += replaceDisplayData.transform.x - rawDisplayData.transform.x;
-								pivotY += replaceDisplayData.transform.y - rawDisplayData.transform.y;
+								pivotX = currentTextureData.region.width * 0.5;
+								pivotY = currentTextureData.region.height * 0.5;
 							}
 							
 							frameDisplay.texture = currentTexture;

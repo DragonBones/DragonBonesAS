@@ -1,7 +1,6 @@
 package dragonBones
 {
 	import dragonBones.animation.Animation;
-	import dragonBones.animation.AnimationState;
 	import dragonBones.animation.IAnimateble;
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
@@ -50,6 +49,11 @@ package dragonBones
 		 * @private AnimationState
 		 */
 		dragonBones_internal var _cacheFrameIndex:int;
+		
+		/**
+		 * @private AnimationState
+		 */
+		dragonBones_internal var _delayAdvanceTime:Number;
 		
 		/**
 		 * @private Factory
@@ -138,6 +142,7 @@ package dragonBones
 			
 			_bonesDirty = false;
 			_cacheFrameIndex = -1;
+			_delayAdvanceTime = -1;
 			_armatureData = null;
 			_skinData = null;
 			
@@ -464,6 +469,12 @@ package dragonBones
 			if (_delayDispose)
 			{
 				this.returnToPool();
+			}
+			else if (_delayAdvanceTime >= 0)
+			{
+				const delayAdvanceTime:Number = _delayAdvanceTime;
+				_delayAdvanceTime = -1;
+				advanceTime(delayAdvanceTime);
 			}
 		}
 		

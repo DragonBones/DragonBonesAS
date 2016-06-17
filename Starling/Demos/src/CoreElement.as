@@ -64,9 +64,9 @@ class Game extends Sprite
 	private var _left: Boolean = false;
 	private var _right: Boolean = false;
 	private var _mecha: Mecha = null;
-	private var _bullets: Vector.<Bullet> = new Vector.<Bullet>();
 
 	private const _text: TextField = new TextField(800, 60, "Press W/A/S/D to move. Press Q/E/SPACE to switch weapens.\nMove mouse to aim. Click to fire.");
+	private const _bullets: Vector.<Bullet> = new Vector.<Bullet>();
 
 	public function Game()
 	{
@@ -177,6 +177,7 @@ class Game extends Sprite
 	private function _enterFrameHandler(event: EnterFrameEvent): void
 	{
 		_mecha.update();
+		
 		var i: int = _bullets.length;
 		while (i--)
 		{
@@ -257,9 +258,9 @@ class Mecha
 		_weaponL = _armature.getSlot("weapon_l").childArmature;
 		_armatureDisplay = _armature.display as StarlingArmatureDisplayContainer;
 		_armatureDisplay.x = 400;
-		_armatureDisplay.scaleX = _armatureDisplay.scaleY = 1;
 		_armatureDisplay.y = Game.GROUND;
-		
+		_armatureDisplay.scaleX = _armatureDisplay.scaleY = 1;
+
 		// mecha effects only controled by normalAnimation
 		_armature.getSlot("effects_1").displayController = NORMAL_ANIMATION_GROUP;
 		_armature.getSlot("effects_2").displayController = NORMAL_ANIMATION_GROUP;
@@ -495,6 +496,19 @@ class Mecha
 
 	private function _updatePosition(): void
 	{
+		if (_speedX != 0)
+		{
+			_armatureDisplay.x += _speedX;
+			if (_armatureDisplay.x < 0)
+			{
+				_armatureDisplay.x = 0;
+			}
+			else if (_armatureDisplay.x > Game.instance.stage.stageWidth)
+			{
+				_armatureDisplay.x = Game.instance.stage.stageWidth;
+			}
+		}
+
 		if (_isJumpingB)
 		{
 			if (_speedY < 5 && _speedY + Game.G >= 5)
@@ -503,23 +517,7 @@ class Mecha
 			}
 
 			_speedY += Game.G;
-		}
 
-		if (_speedX != 0)
-		{
-			_armatureDisplay.x += _speedX;
-			if (_armatureDisplay.x < 0)
-			{
-				_armatureDisplay.x = 0;
-			}
-			else if (_armatureDisplay.x > 800)
-			{
-				_armatureDisplay.x = 800;
-			}
-		}
-
-		if (_isJumpingB)
-		{
 			_armatureDisplay.y += _speedY;
 			if (_armatureDisplay.y > Game.GROUND)
 			{
@@ -529,7 +527,7 @@ class Mecha
 				_speedY = 0;
 				_speedX = 0;
 				_armature.animation.fadeIn("jump_4", -1, -1, 0, NORMAL_ANIMATION_GROUP);
-				if (_isJumpingA || _isSquating || _moveDir != 0)
+				if (_isJumpingA || _isSquating || _moveDir)
 				{
 					_updateAnimation();
 				}
@@ -604,7 +602,7 @@ class Mecha
 		}
 
 		_aimState.weight = Math.abs(_aimRadian / Math.PI * 2);
-		
+
 		//_armature.invalidUpdate("pelvis"); // Only Update bone Mask.
 		_armature.invalidUpdate();
 	}
