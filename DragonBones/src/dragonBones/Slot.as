@@ -694,7 +694,7 @@
 				for (var i:uint = 0, l:uint = _displayList.length; i < l; ++i)
 				{
 					const eachDisplay:Object = value[i];
-					if (eachDisplay && eachDisplay != _rawDisplay && _displayList.indexOf(eachDisplay) < 0)
+					if (eachDisplay && eachDisplay != _rawDisplay && (eachDisplay is Armature) && _displayList.indexOf(eachDisplay) < 0)
 					{
 						_initDisplay(eachDisplay);
 					}
