@@ -1,16 +1,20 @@
-DragonBones ActionScript Library
-======================
-http://dragonbones.github.com/  
+DragonBones ActionScript Runtime
+=========================
+* [DragonBones source code][10]
 
-Following steps show you how to use the source code:  
-1. Make sure you have got starling.swc.  
-2. Make sure you have installed some Flash IDE such as Flash Builder.  
-3. Create a ActionScript Library project and include the source code.  
-4. Import starling.swc into the project.  
-5. Build project and have fun.  
+# Supported engines
+* [Startling][2] / [DragonBones startling Library][11]
 
-There are some demos in [SkeletonAnimationDemos](https://github.com/DragonBones/SkeletonAnimationDemos) project shows how to use the library  
+# How to use
+1. Make sure you have installed some Flash IDE such as Flash Builder.
+2. Create a ActionScript Library project and include the [DragonBones source code][10].
+3. Import engine source code such as [Startling source code][111] and [DragonBones startling source code][11].
+4. Build project and have fun.
 
-**All things you need to download can be found [here](http://dragonbones.github.com/download.html)**  
+Copyright 2012-2016 The DragonBones Team
 
-Copyright 2012-2013 the DragonBones Team
+[1]: http://dragonbones.github.com/
+[2]: http://gamua.com/starling/
+[10]: ./DragonBones/
+[11]: ./Starling/
+[111]: https://github.com/Gamua/Starling-Framework/

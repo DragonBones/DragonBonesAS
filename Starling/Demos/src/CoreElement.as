@@ -94,7 +94,7 @@ class Game extends Sprite
 
 		_player = new Mecha();
 		
-		const text: TextField = new TextField(800, 60, "Press W/A/S/D to move. Press Q/E/SPACE to switch weapens.\nMove mouse to aim. Click to fire.");
+		const text: TextField = new TextField(800, 60, "Press W/A/S/D to move. Press Q/E/SPACE to switch weapens.\nMouse Move to aim. Click to fire.");
 		text.x = 0;
 		text.y = this.stage.stageHeight - 60;
 		text.autoSize = "center";
