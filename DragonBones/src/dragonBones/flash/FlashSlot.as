@@ -254,14 +254,25 @@ package dragonBones.flash
 						
 						if (currentTextureData.frame)
 						{
-							pivotX -= currentTextureData.frame.x;
-							pivotY -= currentTextureData.frame.y;
+							pivotX += currentTextureData.frame.x;
+							pivotY += currentTextureData.frame.y;
 						}
 						
 						if (rawDisplayData && replaceDisplayData)
 						{
 							pivotX += replaceDisplayData.transform.x - rawDisplayData.transform.x;
 							pivotY += replaceDisplayData.transform.y - rawDisplayData.transform.y;
+						}
+						
+						if (currentTextureData.rotated)
+						{
+							width = currentTextureData.region.height;
+							height = currentTextureData.region.width;
+						}
+						else
+						{
+							height = currentTextureData.region.height;
+							width = currentTextureData.region.width;
 						}
 						
 						const scale:Number = 1 / currentTextureData.parent.scale;

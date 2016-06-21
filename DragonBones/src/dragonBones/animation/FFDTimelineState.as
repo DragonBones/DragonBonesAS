@@ -122,7 +122,7 @@ package dragonBones.animation
 			{
 				var i:uint = 0, l:uint = _ffdVertices.length;
 				
-				if (slot._blendIndex <= 1)
+				if (slot._blendIndex == 0)
 				{
 					for (i = 0, l = _ffdVertices.length; i < l; ++i)
 					{

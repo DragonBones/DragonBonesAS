@@ -56,12 +56,12 @@
 		/**
 		 * @private
 		 */
-		dragonBones_internal var _zOrder:int;
+		dragonBones_internal var _blendIndex:int;
 		
 		/**
 		 * @private
 		 */
-		dragonBones_internal var _blendIndex:int;
+		dragonBones_internal var _zOrder:int;
 		
 		/**
 		 * @private Factory
@@ -183,8 +183,8 @@
 			
 			_colorDirty = false;
 			_ffdDirty = false;
-			_zOrder = 0;
 			_blendIndex = 0;
+			_zOrder = 0;
 			_displayDataSet = null;
 			_meshData = null;
 			_cacheFrames = null;

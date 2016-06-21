@@ -6,8 +6,10 @@
 	import starling.core.Starling;
 
 	import dragonBones.animation.WorldClock;
+	import flash.events.MouseEvent;
+	import flash.geom.Point;
 
-	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#cccccc")]
+	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#666666")]
 	public class HelloDragonBones extends Sprite
 	{
 		[Embed(source = "../assets/DragonBoy/DragonBoy.json", mimeType = "application/octet-stream")]
@@ -18,13 +20,21 @@
 
 		[Embed(source = "../assets/DragonBoy/DragonBoy_texture_1.png")]
 		public static const TextureA1: Class;
-
+		
+		private var _isMoved:Boolean = false;
+		private var _prevArmatureScale:Number = 1;
+		private var _currentArmatureScale:Number = 1;
+		private const _startPoint:Point = new Point();
+		
 		public function HelloDragonBones()
 		{
 			_flashInit();
 			_starlingInit();
 
 			this.addEventListener(Event.ENTER_FRAME, _enterFrameHandler);
+			this.stage.addEventListener(MouseEvent.MOUSE_UP, _mouseHandler);
+			this.stage.addEventListener(MouseEvent.MOUSE_DOWN, _mouseHandler);
+			this.stage.addEventListener(MouseEvent.MOUSE_MOVE, _mouseHandler);
 		}
 
 		private function _flashInit(): void
@@ -43,6 +53,52 @@
 		private function _enterFrameHandler(event: Event): void
 		{
 			WorldClock.clock.advanceTime(-1);
+		}
+
+		private function _mouseHandler(event: MouseEvent): void
+		{
+			switch (event.type)
+			{
+				case MouseEvent.MOUSE_UP:
+					if (_isMoved)
+					{
+						_isMoved = false;
+					}
+					else
+					{
+						const touchRight: Boolean = event.localX > stage.stageWidth * 0.5;
+
+						if (FlashRender.instance.dragonBonesData.armatureNames.length > 1 && !touchRight)
+						{
+							FlashRender.instance.changeArmature(_currentArmatureScale);
+						}
+						
+						if (StarlingRender.instance.dragonBonesData.armatureNames.length > 1 && !touchRight)
+						{
+							StarlingRender.instance.changeArmature(_currentArmatureScale);
+						}
+
+						FlashRender.instance.changeAnimation();
+						StarlingRender.instance.changeAnimation();
+					}
+					
+					break;
+				
+				case MouseEvent.MOUSE_DOWN:
+					_prevArmatureScale = _currentArmatureScale;
+					_startPoint.setTo(this.stage.mouseX, this.stage.mouseY);
+					break;
+				
+				case MouseEvent.MOUSE_MOVE:
+					if (event.buttonDown)
+					{
+						_isMoved = true;
+						_currentArmatureScale = Math.max((_startPoint.y - this.stage.mouseY) / 200 + _prevArmatureScale, 0.1);
+						FlashRender.instance.armatureScale = _currentArmatureScale;
+						StarlingRender.instance.armatureScale = _currentArmatureScale;
+					}
+					break;
+			}
 		}
 	}
 }
@@ -64,51 +120,52 @@ import dragonBones.flash.FlashArmatureDisplayContainer;
 
 class FlashRender extends flash.display.Sprite
 {
+	public static var instance: FlashRender = null;
+	
+	public var dragonBonesData: DragonBonesData = null;
+
 	private var _armatureIndex: uint = 0;
 	private var _animationIndex: uint = 0;
-	private var _dragonBonesData:DragonBonesData = null;
 	private var _armature: Armature = null;
 	private var _armatureDisplay: FlashArmatureDisplayContainer = null;
 	private const _factory: FlashFactory = new FlashFactory();
 
 	public function FlashRender()
 	{
+		instance = this;
+
 		this.addEventListener(flash.events.Event.ADDED_TO_STAGE, _addToStageHandler);
+	}
+
+	private var _armatureScale: Number = 1;
+	public function get armatureScale(): Number
+	{
+		return _armatureScale;
+	}
+	public function set armatureScale(value): void
+	{
+		_armatureScale = value;
+		_armatureDisplay.scaleX = _armatureDisplay.scaleY = _armatureScale;
 	}
 
 	private function _addToStageHandler(event: flash.events.Event): void
 	{
-		_dragonBonesData = _factory.parseDragonBonesData(
+		dragonBonesData = _factory.parseDragonBonesData(
 			JSON.parse(new HelloDragonBones.DBDataA())
 		);
 		_factory.parseTextureAtlasData(
 			JSON.parse(new HelloDragonBones.TADataA1()),
 			new HelloDragonBones.TextureA1()
 		);
-		
-		if (_dragonBonesData)
-		{
-			_changeArmature();
-			_changeAnimation();
-			
-			this.stage.addEventListener(
-				MouseEvent.CLICK,
-				function (event: MouseEvent): void
-				{
-					const touchRight:Boolean = event.localX > stage.stageWidth * 0.5;
-							
-					if (_dragonBonesData.armatureNames.length > 1 && !touchRight)
-					{
-						_changeArmature();
-					}
 
-					_changeAnimation();
-				}
-			);
+		if (dragonBonesData)
+		{
+			changeArmature(_armatureScale);
+			changeAnimation();
 		}
 	}
 
-	private function _changeArmature(): void
+	public function changeArmature(armatureScale:Number): void
 	{
 		// Remove prev Armature.
 		if (_armature)
@@ -121,15 +178,15 @@ class FlashRender extends flash.display.Sprite
 		}
 
 		// Get Next Armature name.
-		const armatureNames:Vector.<String> = _dragonBonesData.armatureNames;
+		const armatureNames: Vector.<String> = dragonBonesData.armatureNames;
 		_armatureIndex++;
 		if (_armatureIndex >= armatureNames.length)
 		{
 			_armatureIndex = 0;
 		}
 
-		const armatureName:String = armatureNames[_armatureIndex];
-	
+		const armatureName: String = armatureNames[_armatureIndex];
+
 		// a. Build Armature Display. (buildArmatureDisplay will advanceTime animation by Armature Display)
 		_armatureDisplay = _factory.buildArmatureDisplay(armatureName);
 		_armature = _armatureDisplay.armature;
@@ -142,21 +199,23 @@ class FlashRender extends flash.display.Sprite
 		// Add Armature Display.
 		_armatureDisplay.x = 200;
 		_armatureDisplay.y = 400;
-		_armatureDisplay.scaleX = _armatureDisplay.scaleY = 1;
+		this.armatureScale = armatureScale;
 		this.addChild(_armatureDisplay);
+		
+		_animationIndex = 0;
 	}
 
-	private function _changeAnimation(): void
+	public function changeAnimation(): void
 	{
 		// Get next Animation name.
-		const animationNames:Vector.<String> = _armatureDisplay.animation.animationNames;
+		const animationNames: Vector.<String> = _armatureDisplay.animation.animationNames;
 		_animationIndex++;
 		if (_animationIndex >= animationNames.length)
 		{
 			_animationIndex = 0;
 		}
 
-		const animationName:String = animationNames[_animationIndex];
+		const animationName: String = animationNames[_animationIndex];
 
 		// Play animation.
 		_armatureDisplay.animation.play(animationName);
@@ -172,69 +231,71 @@ import starling.events.Touch;
 import starling.events.TouchEvent;
 import starling.events.TouchPhase;
 import starling.events.Event;
+import starling.text.TextField;
 
 import dragonBones.starling.StarlingFactory;
 import dragonBones.starling.StarlingArmatureDisplayContainer;
 
 class StarlingRender extends starling.display.Sprite
 {
+	public static var instance: StarlingRender = null;
+	
+	public var dragonBonesData: DragonBonesData = null;
+
 	private var _armatureIndex: uint = 0;
 	private var _animationIndex: uint = 0;
-	private var _dragonBonesData:DragonBonesData = null;
 	private var _armature: Armature = null;
 	private var _armatureDisplay: StarlingArmatureDisplayContainer = null;
 	private const _factory: StarlingFactory = new StarlingFactory();
 
 	public function StarlingRender()
 	{
+		instance = this;
+
 		this.addEventListener(starling.events.Event.ADDED_TO_STAGE, _addToStageHandler);
+	}
+
+	private var _armatureScale: Number = 1;
+	public function get armatureScale(): Number
+	{
+		return _armatureScale;
+	}
+	public function set armatureScale(value): void
+	{
+		_armatureScale = value;
+		_armatureDisplay.scaleX = _armatureDisplay.scaleY = _armatureScale;
 	}
 
 	private function _addToStageHandler(event: starling.events.Event): void
 	{
 		// Load DragonBones Data.
-		_dragonBonesData = _factory.parseDragonBonesData(
+		dragonBonesData = _factory.parseDragonBonesData(
 			JSON.parse(new HelloDragonBones.DBDataA())
 		);
 		_factory.parseTextureAtlasData(
 			JSON.parse(new HelloDragonBones.TADataA1()),
 			new HelloDragonBones.TextureA1()
 		);
-		
-		if (_dragonBonesData)
-		{
-			_changeArmature();
-			_changeAnimation();
-			
-			this.stage.addEventListener(
-				TouchEvent.TOUCH,
-				function (event: TouchEvent): void
-				{
-					const touch: Touch = event.getTouch(stage);
-					if (touch)
-					{
-						if (touch.phase == TouchPhase.ENDED)
-						{
-							const touchRight:Boolean = touch.globalX > stage.stageWidth * 0.5;
-							
-							if (_dragonBonesData.armatureNames.length > 1 && !touchRight)
-							{
-								_changeArmature();
-							}
 
-							_changeAnimation();
-						}
-					}
-				}
-			);
+		if (dragonBonesData)
+		{
+			changeArmature(_armatureScale);
+			changeAnimation();
 		}
-		else 
+		else
 		{
 			throw new Error();
 		}
+		
+		const text:TextField = new TextField(this.stage.stageWidth, 60, "");
+		text.x = 0;
+		text.y = this.stage.stageHeight - 60;
+		text.autoSize = "center";
+		text.text = "Touch screen left to change Armature / right to change Animation.";
+		this.addChild(text);
 	}
 
-	private function _changeArmature(): void
+	public function changeArmature(armatureScale:Number): void
 	{
 		// Remove prev Armature.
 		if (_armature)
@@ -247,15 +308,15 @@ class StarlingRender extends starling.display.Sprite
 		}
 
 		// Get Next Armature name.
-		const armatureNames:Vector.<String> = _dragonBonesData.armatureNames;
+		const armatureNames: Vector.<String> = dragonBonesData.armatureNames;
 		_armatureIndex++;
 		if (_armatureIndex >= armatureNames.length)
 		{
 			_armatureIndex = 0;
 		}
 
-		const armatureName:String = armatureNames[_armatureIndex];
-	
+		const armatureName: String = armatureNames[_armatureIndex];
+
 		// a. Build Armature Display. (buildArmatureDisplay will advanceTime animation by Armature Display)
 		_armatureDisplay = _factory.buildArmatureDisplay(armatureName);
 		_armature = _armatureDisplay.armature;
@@ -268,21 +329,23 @@ class StarlingRender extends starling.display.Sprite
 		// Add Armature Display.
 		_armatureDisplay.x = 600;
 		_armatureDisplay.y = 400;
-		_armatureDisplay.scaleX = _armatureDisplay.scaleY = 1;
+		this.armatureScale = armatureScale;
 		this.addChild(_armatureDisplay);
+		
+		_animationIndex = 0;
 	}
 
-	private function _changeAnimation(): void
+	public function changeAnimation(): void
 	{
 		// Get next Animation name.
-		const animationNames:Vector.<String> = _armatureDisplay.animation.animationNames;
+		const animationNames: Vector.<String> = _armatureDisplay.animation.animationNames;
 		_animationIndex++;
 		if (_animationIndex >= animationNames.length)
 		{
 			_animationIndex = 0;
 		}
 
-		const animationName:String = animationNames[_animationIndex];
+		const animationName: String = animationNames[_animationIndex];
 
 		// Play animation.
 		_armatureDisplay.animation.play(animationName);

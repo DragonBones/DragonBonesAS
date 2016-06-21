@@ -4,7 +4,7 @@
 
 	import starling.core.Starling;
 
-	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#cccccc")]
+	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#666666")]
 	public class PerformanceTest extends Sprite
 	{
 		private var _starling: Starling = null;
@@ -54,7 +54,7 @@ class StarlingRender extends Sprite
 	private var _dragonBonesData: DragonBonesData = null;
 	private const _factory: StarlingFactory = new StarlingFactory();
 	private const _armatures: Vector.<Armature> = new Vector.<Armature>();
-	private const _text:TextField = new TextField(800, 60);
+	private const _text:TextField = null;
 
 	public function StarlingRender()
 	{
@@ -63,6 +63,12 @@ class StarlingRender extends Sprite
 
 	private function _addToStageHandler(event: Event): void
 	{
+		_text = new TextField(800, 60, "")
+		_text.x = 0;
+		_text.y = this.stage.stageHeight - 60;
+		_text.autoSize = "center";
+		this.addChild(_text);
+		
 		_dragonBonesData = _factory.parseDragonBonesData(
 			JSON.parse(new DBDataA())
 		);
@@ -71,22 +77,22 @@ class StarlingRender extends Sprite
 			new TextureA1()
 		);
 		
-		//
-		_text.x = 0;
-		_text.y = this.stage.stageHeight - 60;
-		_text.wordWrap = false;
-		_text.autoSize = "center";
-		this.addChild(_text);
+		if (_dragonBonesData)
+		{
+			this.addEventListener(EnterFrameEvent.ENTER_FRAME, _enterFrameHandler);
+			this.stage.addEventListener(TouchEvent.TOUCH, _touchHandler);
+			
+			//
+			for (var i:uint = 0; i < 100; ++i) {
+				_addArmature();
+			}
 
-		this.addEventListener(EnterFrameEvent.ENTER_FRAME, _enterFrameHandler);
-		this.stage.addEventListener(TouchEvent.TOUCH, _touchHandler);
-		
-        //
-        for (var i:uint = 0; i < 100; ++i) {
-            _addArmature();
-        }
-
-        _resetPosition();
+			_resetPosition();
+		}
+		else
+		{
+			throw new Error();
+		}
 	}
 
 	private function _enterFrameHandler(event: EnterFrameEvent): void
@@ -202,6 +208,6 @@ class StarlingRender extends Sprite
 
 	private function _updateText(): void
 	{
-		_text.text = "Count: " + _armatures.length + " \nTouch screen right to increase / left to decrease";
+		_text.text = "Count: " + _armatures.length + " \nTouch screen left to decrease count / right to increase count.";
 	}
 }

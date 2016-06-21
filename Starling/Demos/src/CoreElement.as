@@ -4,7 +4,7 @@
 
 	import starling.core.Starling;
 
-	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#cccccc")]
+	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#666666")]
 	public class CoreElement extends flash.display.Sprite
 	{
 		public function CoreElement()
@@ -53,9 +53,9 @@ class Game extends Sprite
 
 	[Embed(source = "../assets/CoreElement/CoreElement_texture_1.png")]
 	private static const TextureA1: Class;
+	
 	public static const GROUND: int = 500;
 	public static const G: Number = 0.6;
-
 	public static var instance: Game = null;
 
 	// Global factory
@@ -63,9 +63,7 @@ class Game extends Sprite
 
 	private var _left: Boolean = false;
 	private var _right: Boolean = false;
-	private var _mecha: Mecha = null;
-
-	private const _text: TextField = new TextField(800, 60, "Press W/A/S/D to move. Press Q/E/SPACE to switch weapens.\nMove mouse to aim. Click to fire.");
+	private var _player: Mecha = null;
 	private const _bullets: Vector.<Bullet> = new Vector.<Bullet>();
 
 	public function Game()
@@ -94,63 +92,64 @@ class Game extends Sprite
 		this.stage.addEventListener(KeyboardEvent.KEY_UP, _keyHandler);
 		this.stage.addEventListener(TouchEvent.TOUCH, _mouseHandler);
 
-		_mecha = new Mecha();
-
-		_text.x = 0;
-		_text.y = this.stage.stageHeight - 60;
-		_text.wordWrap = false;
-		_text.autoSize = "center";
-		this.addChild(_text);
+		_player = new Mecha();
+		
+		const text: TextField = new TextField(800, 60, "Press W/A/S/D to move. Press Q/E/SPACE to switch weapens.\nMove mouse to aim. Click to fire.");
+		text.x = 0;
+		text.y = this.stage.stageHeight - 60;
+		text.autoSize = "center";
+		this.addChild(text);
 	}
 
 	private function _keyHandler(event: KeyboardEvent): void
 	{
+		const isDown:Boolean = event.type == KeyboardEvent.KEY_DOWN;
 		switch (event.keyCode)
 		{
 			case 37:
 			case 65:
-				_left = event.type == KeyboardEvent.KEY_DOWN;
+				_left = isDown;
 				_updateMove(-1);
 				break;
 
 			case 39:
 			case 68:
-				_right = event.type == KeyboardEvent.KEY_DOWN;
+				_right = isDown;
 				_updateMove(1);
 				break;
 
 			case 38:
 			case 87:
-				if (event.type == KeyboardEvent.KEY_DOWN)
+				if (isDown)
 				{
-					_mecha.jump();
+					_player.jump();
 				}
 				break;
 
 			case 83:
 			case 40:
-				_mecha.squat(event.type == KeyboardEvent.KEY_DOWN);
+				_player.squat(isDown);
 				break;
 
 			case 81:
-				if (event.type == KeyboardEvent.KEY_UP)
+				if (isDown)
 				{
-					_mecha.switchWeaponR();
+					_player.switchWeaponR();
 				}
 				break;
 
 			case 69:
-				if (event.type == KeyboardEvent.KEY_UP)
+				if (isDown)
 				{
-					_mecha.switchWeaponL();
+					_player.switchWeaponL();
 				}
 				break;
 
 			case 32:
-				if (event.type == KeyboardEvent.KEY_UP)
+				if (isDown)
 				{
-					_mecha.switchWeaponR();
-					_mecha.switchWeaponL();
+					_player.switchWeaponR();
+					_player.switchWeaponL();
 				}
 				break;
 		}
@@ -161,22 +160,22 @@ class Game extends Sprite
 		const touch: Touch = event.getTouch(this.stage);
 		if (touch)
 		{
-			_mecha.aim(touch.getLocation(this.stage));
+			_player.aim(touch.getLocation(this.stage));
 
 			if (touch.phase == TouchPhase.BEGAN)
 			{
-				_mecha.attack(true);
+				_player.attack(true);
 			}
 			else if (touch.phase == TouchPhase.ENDED)
 			{
-				_mecha.attack(false);
+				_player.attack(false);
 			}
 		}
 	}
 
 	private function _enterFrameHandler(event: EnterFrameEvent): void
 	{
-		_mecha.update();
+		_player.update();
 		
 		var i: int = _bullets.length;
 		while (i--)
@@ -195,78 +194,74 @@ class Game extends Sprite
 	{
 		if (_left && _right)
 		{
-			_mecha.move(dir);
+			_player.move(dir);
 		}
 		else if (_left)
 		{
-			_mecha.move(-1);
+			_player.move(-1);
 		}
 		else if (_right)
 		{
-			_mecha.move(1);
+			_player.move(1);
 		}
 		else
 		{
-			_mecha.move(0);
+			_player.move(0);
 		}
 	}
 }
 
 class Mecha
 {
-	private static const NORMAL_ANIMATION_GROUP: String = "normalAnimationGroup";
-	private static const AIM_ANIMATION_GROUP: String = "aimAnimationGroup";
-	private static const ATTACK_ANIMATION_GROUP: String = "attackAnimationGroup";
+	private static const NORMAL_ANIMATION_GROUP: String = "normal";
+	private static const AIM_ANIMATION_GROUP: String = "aim";
+	private static const ATTACK_ANIMATION_GROUP: String = "attack";
 	private static const JUMP_SPEED: Number = 20;
 	private static const NORMALIZE_MOVE_SPEED: Number = 3.6;
 	private static const MAX_MOVE_SPEED_FRONT: Number = NORMALIZE_MOVE_SPEED * 1.4;
 	private static const MAX_MOVE_SPEED_BACK: Number = NORMALIZE_MOVE_SPEED * 1.0;
-
 	private static const WEAPON_R_LIST: Array = ["weapon_1502b_r", "weapon_1005", "weapon_1005b", "weapon_1005c", "weapon_1005d", "weapon_1005e"];
 	private static const WEAPON_L_LIST: Array = ["weapon_1502b_l", "weapon_1005", "weapon_1005b", "weapon_1005c", "weapon_1005d"];
 
 	private var _isJumpingA: Boolean = false;
 	private var _isJumpingB: Boolean = false;
 	private var _isSquating: Boolean = false;
-	private var _isAttacking: Boolean = false;
-	private var _isFiring: Boolean = false;
+	private var _isAttackingA: Boolean = false;
+	private var _isAttackingB: Boolean = false;
 	private var _weaponRIndex: uint = 0;
 	private var _weaponLIndex: uint = 0;
+	private var _faceDir: int = 1;
 	private var _aimDir: int = 0;
 	private var _moveDir: int = 0;
-	private var _faceDir: int = 1;
 	private var _aimRadian: Number = 0;
 	private var _speedX: Number = 0;
 	private var _speedY: Number = 0;
-
 	private var _armature: Armature = null;
 	private var _armatureDisplay: StarlingArmatureDisplayContainer = null;
-
 	private var _weaponR: Armature = null;
 	private var _weaponL: Armature = null;
-
 	private var _aimState: AnimationState = null;
 	private var _walkState: AnimationState = null;
 	private var _attackState: AnimationState = null;
-
 	private const _target: Point = new Point();
 
 	public function Mecha()
 	{
 		_armature = Game.instance.factory.buildArmature("mecha_1502b");
-		_weaponR = _armature.getSlot("weapon_r").childArmature;
-		_weaponL = _armature.getSlot("weapon_l").childArmature;
 		_armatureDisplay = _armature.display as StarlingArmatureDisplayContainer;
 		_armatureDisplay.x = 400;
 		_armatureDisplay.y = Game.GROUND;
 		_armatureDisplay.scaleX = _armatureDisplay.scaleY = 1;
+		_armature.addEventListener(EventObject.FADE_IN_COMPLETE, _animationEventHandler);
+		_armature.addEventListener(EventObject.FADE_OUT_COMPLETE, _animationEventHandler);
 
-		// mecha effects only controled by normalAnimation
+		// Mecha effects only controled by normalAnimation.
 		_armature.getSlot("effects_1").displayController = NORMAL_ANIMATION_GROUP;
 		_armature.getSlot("effects_2").displayController = NORMAL_ANIMATION_GROUP;
 
-		_armature.addEventListener(EventObject.FADE_IN_COMPLETE, _animationEventHandler);
-		_armature.addEventListener(EventObject.FADE_OUT_COMPLETE, _animationEventHandler);
+		// Get weapon childArmature.
+		_weaponR = _armature.getSlot("weapon_r").childArmature;
+		_weaponL = _armature.getSlot("weapon_l").childArmature;
 		_weaponR.addEventListener(EventObject.FRAME_EVENT, _frameEventHandler);
 		_weaponL.addEventListener(EventObject.FRAME_EVENT, _frameEventHandler);
 
@@ -280,7 +275,7 @@ class Mecha
 	{
 		_updatePosition();
 		_updateAim();
-		_updateFire();
+		_updateAttack();
 	}
 
 	public function move(dir: int): void
@@ -306,35 +301,25 @@ class Mecha
 		_walkState = null;
 	}
 
-	public function squat(isDown: Boolean): void
+	public function squat(isSquating: Boolean): void
 	{
-		if (_isSquating == isDown)
+		if (_isSquating == isSquating)
 		{
 			return;
 		}
 
-		_isSquating = isDown;
+		_isSquating = isSquating;
 		_updateAnimation();
-	}
-
-	public function aim(target: Point): void
-	{
-		if (_aimDir == 0)
-		{
-			_aimDir = 10;
-		}
-
-		_target.copyFrom(target);
 	}
 
 	public function attack(isAttacking: Boolean): void
 	{
-		if (_isAttacking == isAttacking)
+		if (_isAttackingA == isAttacking)
 		{
 			return;
 		}
 
-		_isAttacking = isAttacking;
+		_isAttackingA = isAttacking;
 	}
 
 	public function switchWeaponR(): void
@@ -369,6 +354,16 @@ class Mecha
 		_weaponL.addEventListener(EventObject.FRAME_EVENT, _frameEventHandler);
 	}
 
+	public function aim(target: Point): void
+	{
+		if (_aimDir == 0)
+		{
+			_aimDir = 10;
+		}
+
+		_target.copyFrom(target);
+	}
+
 	private function _animationEventHandler(event: Event): void
 	{
 		const eventObject: EventObject = event.data as EventObject;
@@ -390,7 +385,7 @@ class Mecha
 			case EventObject.FADE_OUT_COMPLETE:
 				if (eventObject.animationState.name == "attack_01")
 				{
-					_isFiring = false;
+					_isAttackingB = false;
 					_attackState = null;
 				}
 				break;
@@ -475,25 +470,6 @@ class Mecha
 		}
 	}
 
-	private function _updateFire(): void
-	{
-		if (!_isAttacking || _isFiring)
-		{
-			return;
-		}
-
-		_isFiring = true;
-
-		//Animation Mixing.
-		_attackState = _armature.animation.fadeIn(
-			"attack_01", -1, -1,
-			0, ATTACK_ANIMATION_GROUP, AnimationFadeOutMode.SameGroup
-		);
-
-		_attackState.autoFadeOutTime = _attackState.fadeTotalTime;
-		_attackState.addBoneMask("pelvis");
-	}
-
 	private function _updatePosition(): void
 	{
 		if (_speedX != 0)
@@ -509,7 +485,7 @@ class Mecha
 			}
 		}
 
-		if (_isJumpingB)
+		if (_speedY != 0)
 		{
 			if (_speedY < 5 && _speedY + Game.G >= 5)
 			{
@@ -527,7 +503,7 @@ class Mecha
 				_speedY = 0;
 				_speedX = 0;
 				_armature.animation.fadeIn("jump_4", -1, -1, 0, NORMAL_ANIMATION_GROUP);
-				if (_isJumpingA || _isSquating || _moveDir)
+				if (_isSquating || _moveDir)
 				{
 					_updateAnimation();
 				}
@@ -606,6 +582,25 @@ class Mecha
 		//_armature.invalidUpdate("pelvis"); // Only Update bone Mask.
 		_armature.invalidUpdate();
 	}
+
+	private function _updateAttack(): void
+	{
+		if (!_isAttackingA || _isAttackingB)
+		{
+			return;
+		}
+
+		_isAttackingB = true;
+
+		//Animation Mixing.
+		_attackState = _armature.animation.fadeIn(
+			"attack_01", -1, -1,
+			0, ATTACK_ANIMATION_GROUP, AnimationFadeOutMode.SameGroup
+		);
+
+		_attackState.autoFadeOutTime = _attackState.fadeTotalTime;
+		_attackState.addBoneMask("pelvis");
+	}
 }
 
 class Bullet
@@ -613,9 +608,9 @@ class Bullet
 	private var _speedX: Number = 0;
 	private var _speedY: Number = 0;
 
-	private var _effect: Armature = null;
 	private var _armature: Armature = null;
 	private var _armatureDisplay: StarlingArmatureDisplayContainer = null;
+	private var _effect: Armature = null;
 
 	public function Bullet(armatureName: String, effectArmatureName: String, radian: Number, speed: Number, position: Point)
 	{
@@ -624,28 +619,29 @@ class Bullet
 
 		_armature = Game.instance.factory.buildArmature(armatureName);
 		_armatureDisplay = _armature.display as StarlingArmatureDisplayContainer;
-		_armatureDisplay.rotation = radian;
 		_armatureDisplay.x = position.x;
 		_armatureDisplay.y = position.y;
+		_armatureDisplay.rotation = radian;
 		_armature.animation.play("idle");
 
 		if (effectArmatureName)
 		{
 			_effect = Game.instance.factory.buildArmature(effectArmatureName);
 			const effectDisplay: StarlingArmatureDisplayContainer = _effect.display as StarlingArmatureDisplayContainer;
-			WorldClock.clock.add(_effect);
-			Game.instance.addChild(effectDisplay);
-
 			effectDisplay.rotation = radian;
 			effectDisplay.x = position.x;
 			effectDisplay.y = position.y;
-			effectDisplay.scaleY = 1 + Math.random() * 0.5;
 			effectDisplay.scaleX = 1 + Math.random() * 1;
+			effectDisplay.scaleY = 1 + Math.random() * 0.5;
 			if (Math.random() < 0.5)
 			{
 				effectDisplay.scaleY *= -1;
 			}
+			
 			_effect.animation.play("idle");
+			
+			WorldClock.clock.add(_effect);
+			Game.instance.addChild(effectDisplay);
 		}
 
 		WorldClock.clock.add(_armature);

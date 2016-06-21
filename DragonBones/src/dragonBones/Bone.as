@@ -136,7 +136,7 @@
 			length = 0;
 			
 			_transformDirty = 2; // Update
-			_blendIndex = 0; // Update
+			_blendIndex = 0;
 			_cacheFrames = null;
 			_animationPose.identity();
 			

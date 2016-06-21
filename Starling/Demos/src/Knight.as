@@ -4,7 +4,7 @@
 
 	import starling.core.Starling;
 
-	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#cccccc")]
+	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#666666")]
 	public class Knight extends flash.display.Sprite
 	{
 		public function Knight()
@@ -55,7 +55,6 @@ class Game extends Sprite
 	private static const TextureA1: Class;
 	public static const GROUND: int = 500;
 	public static const G: Number = 0.6;
-
 	public static var instance: Game = null;
 
 	// Global factory
@@ -63,9 +62,7 @@ class Game extends Sprite
 
 	private var _left: Boolean = false;
 	private var _right: Boolean = false;
-	private var _knight: Hero = null;
-
-	private const _text: TextField = new TextField(800, 60, "Press W/A/S/D to move. Press SPACE to switch weapen. Press Q/E to upgrade weapen.\nClick to attack.");
+	private var _player: Hero = null;
 	private const _bullets: Vector.<Bullet> = new Vector.<Bullet>();
 
 	public function Game()
@@ -94,81 +91,18 @@ class Game extends Sprite
 		this.stage.addEventListener(KeyboardEvent.KEY_UP, _keyHandler);
 		this.stage.addEventListener(TouchEvent.TOUCH, _mouseHandler);
 
-		_knight = new Hero();
-
-		_text.x = 0;
-		_text.y = this.stage.stageHeight - 60;
-		_text.wordWrap = false;
-		_text.autoSize = "center";
-		this.addChild(_text);
-	}
-
-	private function _keyHandler(event: KeyboardEvent): void
-	{
-		switch (event.keyCode)
-		{
-			case 37:
-			case 65:
-				_left = event.type == KeyboardEvent.KEY_DOWN;
-				_updateMove(-1);
-				break;
-
-			case 39:
-			case 68:
-				_right = event.type == KeyboardEvent.KEY_DOWN;
-				_updateMove(1);
-				break;
-
-			case 38:
-			case 87:
-				if (event.type == KeyboardEvent.KEY_DOWN)
-				{
-					_knight.jump();
-				}
-				break;
-
-			case 83:
-			case 40:
-				break;
-
-			case 81:
-				if (event.type == KeyboardEvent.KEY_UP)
-				{
-					_knight.upgradeWeapon(-1);
-				}
-				break;
-
-			case 69:
-				if (event.type == KeyboardEvent.KEY_UP)
-				{
-					_knight.upgradeWeapon(1);
-				}
-				break;
-
-			case 32:
-				if (event.type == KeyboardEvent.KEY_UP)
-				{
-					_knight.switchWeapon();
-				}
-				break;
-		}
-	}
-
-	private function _mouseHandler(event: TouchEvent): void
-	{
-		const touch: Touch = event.getTouch(this.stage);
-		if (touch)
-		{
-			if (touch.phase == TouchPhase.BEGAN)
-			{
-				_knight.attack();
-			}
-		}
+		_player = new Hero();
+		
+		const text: TextField = new TextField(800, 60, "Press W/A/S/D to move. Press SPACE to switch weapen. Press Q/E to upgrade weapen.\nClick to attack.");
+		text.x = 0;
+		text.y = this.stage.stageHeight - 60;
+		text.autoSize = "center";
+		this.addChild(text);
 	}
 
 	private function _enterFrameHandler(event: EnterFrameEvent): void
 	{
-		_knight.update();
+		_player.update();
 		
 		var i: int = _bullets.length;
 		while (i--)
@@ -183,36 +117,96 @@ class Game extends Sprite
 		WorldClock.clock.advanceTime(0.015);
 	}
 
+	private function _keyHandler(event: KeyboardEvent): void
+	{
+		const isDown:Boolean = event.type == KeyboardEvent.KEY_DOWN;
+		switch (event.keyCode)
+		{
+			case 37:
+			case 65:
+				_left = isDown;
+				_updateMove(-1);
+				break;
+
+			case 39:
+			case 68:
+				_right = isDown;
+				_updateMove(1);
+				break;
+
+			case 38:
+			case 87:
+				if (isDown)
+				{
+					_player.jump();
+				}
+				break;
+
+			case 83:
+			case 40:
+				break;
+
+			case 81:
+				if (isDown)
+				{
+					_player.upgradeWeapon(-1);
+				}
+				break;
+
+			case 69:
+				if (isDown)
+				{
+					_player.upgradeWeapon(1);
+				}
+				break;
+
+			case 32:
+				if (isDown)
+				{
+					_player.switchWeapon();
+				}
+				break;
+		}
+	}
+
+	private function _mouseHandler(event: TouchEvent): void
+	{
+		const touch: Touch = event.getTouch(this.stage);
+		if (touch)
+		{
+			if (touch.phase == TouchPhase.BEGAN)
+			{
+				_player.attack();
+			}
+		}
+	}
+
 	private function _updateMove(dir: int): void
 	{
 		if (_left && _right)
 		{
-			_knight.move(dir);
+			_player.move(dir);
 		}
 		else if (_left)
 		{
-			_knight.move(-1);
+			_player.move(-1);
 		}
 		else if (_right)
 		{
-			_knight.move(1);
+			_player.move(1);
 		}
 		else
 		{
-			_knight.move(0);
+			_player.move(0);
 		}
 	}
 }
 
 class Hero
 {
-	private static const NORMAL_ANIMATION_GROUP: String = "normalAnimationGroup";
-	private static const AIM_ANIMATION_GROUP: String = "aimAnimationGroup";
-	private static const ATTACK_ANIMATION_GROUP: String = "attackAnimationGroup";
 	private static const MAX_WEAPON_LEVEL: uint = 3;
-	private static const JUMP_SPEED: Number = 15;
+	private static const JUMP_SPEED: Number = -15;
 	private static const MOVE_SPEED: Number = 4;
-
 	private static const WEAPON_LIST: Array = ["sword", "pike", "axe", "bow"];
 
 	private var _isJumping: Boolean = false;
@@ -228,7 +222,6 @@ class Hero
 
 	private var _armature: Armature = null;
 	private var _armatureDisplay: StarlingArmatureDisplayContainer = null;
-
 	private var _armArmature: Armature = null;
 
 	public function Hero()
@@ -282,7 +275,7 @@ class Hero
 		}
 
 		_isJumping = true;
-		_speedY = -JUMP_SPEED;
+		_speedY = JUMP_SPEED;
 		_armature.animation.fadeIn("jump");
 	}
 	
@@ -311,7 +304,7 @@ class Hero
 
 		_weaponName = WEAPON_LIST[_weaponIndex];
 
-		_armArmature.animation.play("ready_" + _weaponName);
+		_armArmature.animation.fadeIn("ready_" + _weaponName);
 	}
 
 	public function upgradeWeapon(dir: int): void
@@ -338,7 +331,6 @@ class Hero
 				_armArmature.getSlot("weapon")
 			);
 		}
-		
 	}
 	
 	private static const _localPoint: Point = new Point();
@@ -480,9 +472,9 @@ class Bullet
 
 		_armature = Game.instance.factory.buildArmature(armatureName);
 		_armatureDisplay = _armature.display as StarlingArmatureDisplayContainer;
-		_armatureDisplay.rotation = radian;
 		_armatureDisplay.x = position.x;
 		_armatureDisplay.y = position.y;
+		_armatureDisplay.rotation = radian;
 		_armature.animation.play("idle");
 		
 		WorldClock.clock.add(_armature);

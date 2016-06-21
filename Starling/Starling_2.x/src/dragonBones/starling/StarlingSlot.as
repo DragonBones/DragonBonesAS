@@ -317,12 +317,6 @@
 								pivotY = height * pivotY;
 							}
 							
-							if (currentTextureData.frame)
-							{
-								pivotX -= currentTextureData.frame.x;
-								pivotY -= currentTextureData.frame.y;
-							}
-							
 							if (rawDisplayData && rawDisplayData != contentDisplayData)
 							{
 								pivotX += contentDisplayData.transform.x - rawDisplayData.transform.x;
