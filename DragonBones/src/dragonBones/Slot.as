@@ -419,7 +419,7 @@
 			// update origin
 			if (_displayDataSet && _displayIndex >= 0 && _displayIndex < _displayDataSet.displays.length)
 			{
-				this.origin.copy(_displayDataSet.displays[_displayIndex].transform);
+				this.origin.copyFrom(_displayDataSet.displays[_displayIndex].transform);
 				_originDirty = true;
 			}
 			
@@ -459,7 +459,7 @@
 		 */
 		protected function _updateLocalTransformMatrix():void
 		{
-			this.global.copy(this.origin).add(this.offset).toMatrix(_localMatrix);
+			this.global.copyFrom(this.origin).add(this.offset).toMatrix(_localMatrix);
 		}
 		
 		/**

@@ -27,6 +27,7 @@ package dragonBones.events
 		public var bone:Bone;
 		public var slot:Slot;
 		public var animationState:AnimationState;
+		public var userData:*;
 		
 		public function EventObject()
 		{
@@ -42,6 +43,7 @@ package dragonBones.events
 			bone = null;
 			slot = null;
 			animationState = null;
+			userData = null;
 		}
 	}
 }

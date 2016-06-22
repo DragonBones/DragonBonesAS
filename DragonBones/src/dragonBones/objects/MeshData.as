@@ -10,7 +10,7 @@ package dragonBones.objects
 	public final class MeshData extends BaseObject
 	{
 		public var skinned:Boolean;
-		public var slotPose:Matrix;
+		public const slotPose:Matrix = new Matrix();
 		
 		public const uvs:Vector.<Number> = new Vector.<Number>(0, true); // vertices * 2
 		public const vertices:Vector.<Number> = new Vector.<Number>(0, true); // vertices * 2
@@ -34,7 +34,7 @@ package dragonBones.objects
 		override protected function _onClear():void
 		{
 			skinned = false;
-			slotPose = null;
+			slotPose.identity();
 			
 			if (uvs.length)
 			{

@@ -27,7 +27,7 @@ package dragonBones.objects
 		 */
 		override protected function _onClear():void
 		{
-			scale = 0;
+			scale = 1;
 			offset = 0;
 			
 			if (frames.length)

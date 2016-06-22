@@ -12,13 +12,13 @@
 	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#666666")]
 	public class HelloDragonBones extends Sprite
 	{
-		[Embed(source = "../assets/TestC/002/taidiyounian.json", mimeType = "application/octet-stream")]
+		[Embed(source = "../assets/DragonBoy/DragonBoy.json", mimeType = "application/octet-stream")]
 		public static const DBDataA: Class;
 
-		[Embed(source = "../assets/TestC/002/texture.json", mimeType = "application/octet-stream")]
+		[Embed(source = "../assets/DragonBoy/DragonBoy_texture_1.json", mimeType = "application/octet-stream")]
 		public static const TADataA1: Class;
 
-		[Embed(source = "../assets/TestC/002/texture.png")]
+		[Embed(source = "../assets/DragonBoy/DragonBoy_texture_1.png")]
 		public static const TextureA1: Class;
 		
 		private var _isMoved:Boolean = false;

@@ -63,7 +63,7 @@
 			
 			const currentFrame:BoneFrameData = this._currentFrame as BoneFrameData;
 			
-			_currentTransform.copy(currentFrame.transform);
+			_currentTransform.copyFrom(currentFrame.transform);
 			
 			_tweenTransform = TWEEN_TYPE_ONCE;
 			_tweenRotate = TWEEN_TYPE_ONCE;

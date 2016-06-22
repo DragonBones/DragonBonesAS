@@ -1,6 +1,7 @@
 package dragonBones.objects
 {
 	import dragonBones.core.BaseObject;
+	import dragonBones.core.DragonBones;
 	
 	/**
 	 * @private
@@ -22,7 +23,7 @@ package dragonBones.objects
 		 */
 		override protected function _onClear():void
 		{
-			type = 0;
+			type = DragonBones.ACTION_TYPE_PLAY;
 			data = null;
 			bone = null;
 			slot = null;

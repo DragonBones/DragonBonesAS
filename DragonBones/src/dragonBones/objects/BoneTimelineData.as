@@ -43,5 +43,13 @@ package dragonBones.objects
 				cachedFrames.fixed = true;
 			}
 		}
+		
+		public function cacheFrames(cacheFrameCount:uint):void
+		{
+			cachedFrames.fixed = false;
+			cachedFrames.length = 0;
+			cachedFrames.length = cacheFrameCount;
+			cachedFrames.fixed = true;
+		}
 	}
 }

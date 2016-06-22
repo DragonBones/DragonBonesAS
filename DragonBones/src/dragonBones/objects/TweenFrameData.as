@@ -9,7 +9,7 @@ package dragonBones.objects
 	{
 		public static function samplingCurve(curve:Array, frameCount:uint):Vector.<Number>
 		{
-			if (!curve || !frameCount)
+			if (curve.length == 0 || frameCount == 0)
 			{
 				return null;
 			}

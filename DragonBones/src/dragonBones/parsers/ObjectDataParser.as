@@ -66,7 +66,7 @@
 				}
 				else 
 				{
-					return value;
+					return value; // Boolean(value);
 				}
 			}
 			
@@ -82,7 +82,7 @@
 			if (key in rawData)
 			{
 				const value:* = rawData[key];
-				return value == null? defaultValue: value;
+				return value == null? defaultValue: value; // Number(value);
 			}
 			
 			return defaultValue;
@@ -96,7 +96,7 @@
 		{
 			if (key in rawData)
 			{
-				return rawData[key];
+				return rawData[key]; // String(rawData[key]);
 			}
 			
 			return defaultValue;
@@ -132,6 +132,15 @@
 			const armature:ArmatureData = BaseObject.borrowObject(ArmatureData) as ArmatureData;
 			armature.name = _getString(rawData, NAME, null);
 			armature.frameRate = _getNumber(rawData, FRAME_RATE, this._data.frameRate);
+			
+			if (TYPE in rawData && rawData[TYPE] is String) 
+			{
+				armature.type = _getArmatureType(rawData[TYPE]);
+			} 
+			else 
+			{
+				armature.type = _getNumber(rawData, TYPE, DragonBones.ARMATURE_TYPE_ARMATURE);
+			}
 			
 			this._armature = armature;
 			this._rawBones.length = 0;
@@ -302,16 +311,15 @@
 				const displayObjectSet:Array = rawData[DISPLAY];
 				const displayDataSet:Vector.<DisplayData> = slotDisplayDataSet.displays;
 				displayDataSet.fixed = false;
-				displayDataSet.length = displayObjectSet.length;
-				displayDataSet.fixed = true;
 				
 				this._slotDisplayDataSet = slotDisplayDataSet;
 				
-				var displayIndex:uint = 0;
 				for each (var displayObject:Object in displayObjectSet)
 				{
-					displayDataSet[displayIndex++] = _parseDisplay(displayObject);
+					displayDataSet.push(_parseDisplay(displayObject));
 				}
+				
+				displayDataSet.fixed = true;
 				
 				this._slotDisplayDataSet = null;
 			}
@@ -431,7 +439,6 @@
 				if (SLOT_POSE in rawData)
 				{
 					const rawSlotPose:Array = rawData[SLOT_POSE];
-					mesh.slotPose = new Matrix();
 					mesh.slotPose.a = rawSlotPose[0];
 					mesh.slotPose.b = rawSlotPose[1];
 					mesh.slotPose.c = rawSlotPose[2];
@@ -463,7 +470,7 @@
 			for (i = 0, l = rawVertices.length; i < l; i += 2)
 			{
 				const iN:uint = i + 1;
-				const vertexIndex:uint = uint(i / 2);
+				const vertexIndex:uint = i / 2;
 				
 				var x:Number = mesh.vertices[i] = rawVertices[i] * this._armatureScale;
 				var y:Number = mesh.vertices[iN] = rawVertices[iN] * this._armatureScale;
@@ -601,7 +608,7 @@
 					slotFrame.displayIndex = slot.displayIndex;
 					//slotFrame.zOrder = -2;
 					
-					if (slotFrame.color == SlotFrameData.DEFAULT_COLOR)
+					if (slot.color == SlotData.DEFAULT_COLOR)
 					{
 						slotFrame.color = SlotFrameData.DEFAULT_COLOR;
 					}
@@ -647,7 +654,7 @@
 			{
 				if (!prevFrame)
 				{
-					originTransform.copy(frame.transform);
+					originTransform.copyFrom(frame.transform);
 					frame.transform.identity();
 				}
 				else if (prevFrame != frame)
@@ -694,7 +701,7 @@
 			timeline.slot = timeline.skin.getSlot(_getString(rawData, SLOT, null)); // NAME;
 			
 			const meshName:String = _getString(rawData, NAME, null);
-			for (var i:uint = 0, l:uint = timeline.slot.displays.length ; i < l; ++i)
+			for (var i:uint = 0, l:uint = timeline.slot.displays.length; i < l; ++i)
 			{
 				const displayData:DisplayData = timeline.slot.displays[i];
 				if (displayData.meshData && displayData.name == meshName)
@@ -809,8 +816,7 @@
 			
 			_parseTweenFrame(rawData, frame, frameStart, frameCount);
 			
-			frame.tweens.fixed = false;
-			frame.tweens.length = 0;
+			frame.tweens.fixed = false
 			
 			const rawVertices:Array = rawData[VERTICES];
 			const offset:uint = _getNumber(rawData, OFFSET, 0);
@@ -838,7 +844,8 @@
 					const boneIndices:Vector.<uint> = this._mesh.boneIndices[i / 2];
 					for (var iB:uint = 0, lB:uint = boneIndices.length; iB < lB; ++iB)
 					{
-						Transform.transformPoint(this._mesh.inverseBindPose[boneIndices[iB]], x, y, _helpPoint, true);
+						const boneIndex:uint = boneIndices[iB];
+						Transform.transformPoint(this._mesh.inverseBindPose[boneIndex], x, y, _helpPoint, true);
 						frame.tweens.push(_helpPoint.x, _helpPoint.y);
 					}
 				}

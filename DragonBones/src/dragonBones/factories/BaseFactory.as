@@ -201,7 +201,7 @@
 				bone.inheritRotation = boneData.inheritRotation; 
 				bone.inheritScale = boneData.inheritScale; 
 				bone.length = boneData.length;
-				bone.origin.copy(boneData.transform);
+				bone.origin.copyFrom(boneData.transform);
 				
 				if (boneData.parent)
 				{

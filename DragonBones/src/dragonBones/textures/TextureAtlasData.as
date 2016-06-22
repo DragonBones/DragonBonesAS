@@ -6,10 +6,6 @@
 	/**
 	 * @language zh_CN
 	 * 贴图集数据。
-	 * @see dragonBones.objects.ArmatureData
-	 * @see dragonBones.Bone
-	 * @see dragonBones.animation.Animation
-	 * @see dragonBones.events
 	 * @version DragonBones 3.0
 	 */
 	public class TextureAtlasData extends BaseObject
@@ -22,7 +18,7 @@
 		/**
 		 * @language zh_CN
 		 * 贴图集缩放系数。
-		 * @version DragonBones 4.5
+		 * @version DragonBones 3.0
 		 */
 		public var scale:Number;
 		
@@ -34,14 +30,14 @@
 		/**
 		 * @language zh_CN
 		 * 贴图集名称。
-		 * @version DragonBones 4.5
+		 * @version DragonBones 3.0
 		 */
 		public var name:String;
 		
 		/**
 		 * @language zh_CN
 		 * 贴图集图片路径。
-		 * @version DragonBones 4.5
+		 * @version DragonBones 3.0
 		 */
 		public var imagePath:String;
 		
@@ -69,7 +65,6 @@
 		override protected function _onClear():void
 		{
 			autoSearch = false;
-			modifyScale = 1;
 			scale = 1;
 			name = null;
 			imagePath = null;

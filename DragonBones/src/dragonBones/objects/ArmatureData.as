@@ -10,6 +10,11 @@ package dragonBones.objects
 	 */
 	public final class ArmatureData extends BaseObject
 	{
+		private static function _onSortSlots(a:SlotData, b:SlotData):int
+		{
+			return a.zOrder > b.zOrder? 1: -1;
+		}
+		
 		/**
 		 * @language zh_CN
 		 * 动画帧率。
@@ -145,11 +150,6 @@ package dragonBones.objects
 			}
 		}
 		
-		private function _onSortSlots(a:SlotData, b:SlotData):int
-		{
-			return a.zOrder > b.zOrder? 1: -1;
-		}
-		
 		private function _sortBones():void
 		{
 			const total:uint = _sortedBones.length;
@@ -162,8 +162,7 @@ package dragonBones.objects
 			var index:uint = 0;
 			var count:uint = 0;
 			
-			_sortedBones.length = 0; // clear
-			_sortedBones.length = total;
+			_sortedBones.length = 0;
 			
 			while(count < total)
 			{
@@ -192,15 +191,14 @@ package dragonBones.objects
 				if (bone.ik && bone.chain > 0 && bone.chainIndex == bone.chain)
 				{
 					_sortedBones.splice(_sortedBones.indexOf(bone.parent) + 1, 0, bone); // ik, parent, bone, children
-					count++;
 				}
 				else
 				{
-					_sortedBones[count++] = bone;
+					_sortedBones.push(bone);
 				}
+				
+				count++;
 			}
-			
-			_sortedBones.length = total; // Modify splice
 		}
 		
 		private function _sortSlots():void
@@ -305,7 +303,6 @@ package dragonBones.objects
 			if (value && value.name && !skins[value.name])
 			{
 				skins[value.name] = value;
-				
 				if (!_defaultSkin)
 				{
 					_defaultSkin = value;

@@ -5,7 +5,7 @@ package dragonBones.geom
 	
 	/**
 	 * @language zh_CN
-	 * 坐标系变换。
+	 * 2D 变换。
 	 * @version DragonBones 3.0
 	 */
 	public final class Transform
@@ -46,14 +46,14 @@ package dragonBones.geom
 		
 		/**
 		 * @language zh_CN
-		 * 水平位移。 (以像素为单位)
+		 * 水平位移。
 		 * @version DragonBones 3.0
 		 */
 		public var x:Number = 0;
 		
 		/**
 		 * @language zh_CN
-		 * 垂直位移。 (以像素为单位)
+		 * 垂直位移。
 		 * @version DragonBones 3.0
 		 */
 		public var y:Number = 0;
@@ -74,14 +74,14 @@ package dragonBones.geom
 		
 		/**
 		 * @language zh_CN
-		 * 水平缩放。 (1: 100%)
+		 * 水平缩放。
 		 * @version DragonBones 3.0
 		 */
 		public var scaleX:Number = 1;
 		
 		/**
 		 * @language zh_CN
-		 * 垂直缩放。 (1: 100%)
+		 * 垂直缩放。
 		 * @version DragonBones 3.0
 		 */
 		public var scaleY:Number = 1;
@@ -105,7 +105,7 @@ package dragonBones.geom
 		 * @private
 		 */
 		[inline]
-		final public function copy(value:Transform):Transform
+		final public function copyFrom(value:Transform):Transform
 		{
 			x = value.x;
 			y = value.y;
@@ -124,7 +124,7 @@ package dragonBones.geom
 		final public function clone():Transform
 		{
 			const value:Transform = new Transform();
-			value.copy(this);
+			value.copyFrom(this);
 			
 			return value;
 		}
@@ -137,17 +137,6 @@ package dragonBones.geom
 		{
 			x = y = skewX = skewY = 0;
 			scaleX = scaleY = 1;
-			
-			return this;
-		}
-		
-		/**
-		 * @private
-		 */
-		[inline]
-		final public function clear():Transform
-		{
-			x = y = skewX = skewY = scaleX = scaleY = 0;
 			
 			return this;
 		}
@@ -240,7 +229,9 @@ package dragonBones.geom
 		}
 		
 		/**
-		 * @private
+		 * @language zh_CN
+		 * 转换为矩阵。
+		 * @version DragonBones 3.0
 		 */
 		[inline]
 		final public function toMatrix(matrix:Matrix):void

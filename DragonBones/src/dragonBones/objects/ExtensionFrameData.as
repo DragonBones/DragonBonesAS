@@ -1,5 +1,7 @@
 package dragonBones.objects
 {
+	import dragonBones.core.DragonBones;
+	
 	/**
 	 * @private
 	 */
@@ -21,7 +23,7 @@ package dragonBones.objects
 		{
 			super._onClear();
 			
-			type = 0;
+			type = DragonBones.EXTENSION_TYPE_FFD;
 			
 			if (tweens.length)
 			{

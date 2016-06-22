@@ -158,7 +158,7 @@
 				return;
 			}
 			
-			const cacheFrameCount:uint = Math.max(frameCount * scale * value, 1);
+			const cacheFrameCount:uint = Math.max(Math.floor(frameCount * scale * value), 1);
 			
 			cacheTimeToFrameScale = cacheFrameCount / duration;
 			cachedFrames.fixed = false;
@@ -168,18 +168,12 @@
 			
 			for each (var boneTimeline:BoneTimelineData in boneTimelines)
 			{
-				boneTimeline.cachedFrames.fixed = false;
-				boneTimeline.cachedFrames.length = 0;
-				boneTimeline.cachedFrames.length = cacheFrameCount;
-				boneTimeline.cachedFrames.fixed = true;
+				boneTimeline.cacheFrames(cacheFrameCount);
 			}
 			
 			for each (var slotTimeline:SlotTimelineData in slotTimelines)
 			{
-				slotTimeline.cachedFrames.fixed = false;
-				slotTimeline.cachedFrames.length = 0;
-				slotTimeline.cachedFrames.length = cacheFrameCount;
-				slotTimeline.cachedFrames.fixed = true;
+				slotTimeline.cacheFrames(cacheFrameCount);
 			}
 		}
 		
