@@ -3,7 +3,6 @@
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
 	
-	import dragonBones.Armature;
 	import dragonBones.Bone;
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
@@ -48,27 +47,6 @@
 		 */
 		override protected function _onClear():void
 		{
-			const disposeDisplayList:Vector.<Object> = new Vector.<Object>();
-			for each (var renderDisplay:Object in this._displayList)
-			{
-				if (disposeDisplayList.indexOf(renderDisplay) < 0)
-				{
-					disposeDisplayList.push(renderDisplay);
-				}
-			}
-			
-			for each (renderDisplay in disposeDisplayList)
-			{
-				if (renderDisplay is Armature)
-				{
-					(renderDisplay as Armature).returnToPool();
-				}
-				else
-				{
-					this._disposeDisplay(renderDisplay);
-				}
-			}
-			
 			super._onClear();
 			
 			updateTransformEnabled = false;

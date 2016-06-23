@@ -178,6 +178,27 @@
 		{
 			super._onClear();
 			
+			const disposeDisplayList:Vector.<Object> = new Vector.<Object>();
+			for each (var eachDisplay:Object in this._displayList)
+			{
+				if (disposeDisplayList.indexOf(eachDisplay) < 0)
+				{
+					disposeDisplayList.push(eachDisplay);
+				}
+			}
+			
+			for each (eachDisplay in disposeDisplayList)
+			{
+				if (eachDisplay is Armature)
+				{
+					(eachDisplay as Armature).returnToPool();
+				}
+				else
+				{
+					this._disposeDisplay(eachDisplay);
+				}
+			}
+			
 			inheritAnimation = true;
 			displayController = null;
 			
@@ -554,7 +575,7 @@
 					_ffdVertices.fixed = true;
 					_ffdDirty = true;
 				}
-				else if (_meshBones.length)
+				else
 				{
 					_meshBones.fixed = false;
 					_meshBones.length = 0;
@@ -694,7 +715,7 @@
 				for (var i:uint = 0, l:uint = _displayList.length; i < l; ++i)
 				{
 					const eachDisplay:Object = value[i];
-					if (eachDisplay && eachDisplay != _rawDisplay && (eachDisplay is Armature) && _displayList.indexOf(eachDisplay) < 0)
+					if (eachDisplay && eachDisplay != _rawDisplay && !(eachDisplay is Armature) && _displayList.indexOf(eachDisplay) < 0)
 					{
 						_initDisplay(eachDisplay);
 					}

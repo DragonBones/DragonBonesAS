@@ -172,8 +172,6 @@
 							animationState.fadeOut(fadeOutTime, pauseFadeOut);
 						}
 					}
-					
-				default:
 					break;
 			}
 		}
@@ -213,8 +211,8 @@
 				if (animationState._isFadeOutComplete) // 如果动画状态淡出完毕, 则删除动画状态
 				{
 					animationState.returnToPool();
-					_animationStateDirty = true;
 					_animationStates.length = 0;
+					_animationStateDirty = true;
 					_lastAnimationState = null;
 				}
 				else
@@ -445,7 +443,11 @@
 				if (slot.inheritAnimation)
 				{
 					const childArmature:Armature = slot.childArmature;
-					if (childArmature && childArmature.animation.hasAnimation(animationName) && !childArmature.animation.getState(animationName))
+					if (
+						childArmature && 
+						childArmature.animation.hasAnimation(animationName) && 
+						!childArmature.animation.getState(animationName)
+					)
 					{
 						childArmature.animation.fadeIn(animationName);
 					}

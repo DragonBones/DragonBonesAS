@@ -468,7 +468,6 @@
 			for (i = 0, l = bones.length; i < l; ++i)
 			{
 				const bone:Bone = bones[i];
-				
 				const boneTimelineName:String = bone.name;
 				const boneTimelineData:BoneTimelineData = _clip.getBoneTimeline(boneTimelineName);
 				
@@ -783,7 +782,7 @@
 			}
 			
 			displayControl = false;
-			fadeTotalTime = _fadeProgress > 0.000002? fadeOutTime / _fadeProgress: 0;
+			fadeTotalTime = _fadeProgress > 0.000001? fadeOutTime / _fadeProgress: 0;
 			_fadeTime = fadeTotalTime * (1 - _fadeProgress);
 		}
 		

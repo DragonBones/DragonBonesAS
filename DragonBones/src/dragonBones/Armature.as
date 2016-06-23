@@ -78,17 +78,17 @@ package dragonBones
 		/**
 		 * @private Slot
 		 */
-		dragonBones_internal var _replaceTexture:Object;
-		
-		/**
-		 * @private Slot
-		 */
 		dragonBones_internal var _parent:Slot;
 		
 		/**
 		 * @private AnimationTimelineState
 		 */
 		dragonBones_internal var _action:ActionData;
+		
+		/**
+		 * @private Slot
+		 */
+		dragonBones_internal var _replaceTexture:Object;
 		
 		/**
 		 * @private
@@ -158,9 +158,9 @@ package dragonBones
 				_display = null;
 			}
 			
-			_replaceTexture = null;
 			_parent = null;
 			_action = null;
+			_replaceTexture = null;
 			
 			_delayDispose = false;
 			_lockDispose = false;
@@ -195,7 +195,7 @@ package dragonBones
 			{
 				for each (var event:EventObject in _events)
 				{
-					slot.returnToPool();
+					event.returnToPool();
 				}
 				
 				_events.fixed = false;
@@ -219,8 +219,8 @@ package dragonBones
 			var index:uint = 0;
 			var count:uint = 0;
 			
-			_bones.length = 0; // clear
-			_bones.length = total;
+			_bones.length = 0;
+			
 			while(count < total)
 			{
 				const bone:Bone = sortHelper[index++];
@@ -248,15 +248,14 @@ package dragonBones
 				if (bone.ik && bone.ikChain > 0 && bone.ikChainIndex == bone.ikChain)
 				{
 					_bones.splice(_bones.indexOf(bone.parent) + 1, 0, bone); // ik, parent, bone, children
-					count++;
 				}
 				else
 				{
-					_bones[count++] = bone;
+					_bones.push(bone);
 				}
+				
+				count++;
 			}
-			
-			_bones.length = total; // Modify splice
 		}
 		
 		/**
@@ -486,7 +485,6 @@ package dragonBones
 			if (boneName)
 			{
 				const bone:Bone = getBone(boneName);
-				
 				if (bone)
 				{
 					bone.invalidUpdate();
@@ -780,12 +778,10 @@ package dragonBones
 		}
 		public function set cacheFrameRate(value:uint):void
 		{
-			if (_armatureData.cacheFrameRate == value)
+			if (_armatureData.cacheFrameRate != value)
 			{
-				return;
+				_armatureData.cacheFrames(value);
 			}
-			
-			_armatureData.cacheFrames(value);
 		}
 		
 		/**

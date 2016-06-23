@@ -19,24 +19,9 @@
 	 */
 	public class TimelineState extends BaseObject
 	{
-		/**
-		 * @private AnimationState
-		 */
 		dragonBones_internal var _isCompleted:Boolean;
-		
-		/**
-		 * @private AnimationState
-		 */
 		dragonBones_internal var _currentPlayTimes:uint;
-		
-		/**
-		 * @private AnimationState
-		 */
 		dragonBones_internal var _currentTime:Number;
-		
-		/**
-		 * @private AnimationState
-		 */
 		dragonBones_internal var _timeline:TimelineData;
 		
 		protected var _isReverse:Boolean;
@@ -319,7 +304,7 @@
 			
 			if (!_isCompleted && _setCurrentTime(time) && _keyFrameCount)
 			{
-				//const currentFrameIndex:uint = _keyFrameCount > 1? currentFrameIndex = _currentTime * _timeToFrameSccale: 0;
+				//const currentFrameIndex:uint = _keyFrameCount > 1? _currentTime * _timeToFrameSccale: 0;
 				var currentFrameIndex:uint = 0;
 				if (_keyFrameCount > 1)
 				{

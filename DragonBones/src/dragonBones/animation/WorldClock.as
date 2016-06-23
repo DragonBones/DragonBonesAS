@@ -78,11 +78,11 @@
 				time += passedTime;
 			}
 			
-			var i: uint = 0, r: uint = 0, l: uint = _animatebles.length;
-			var animateble:IAnimateble = null;
-			
-			if (passedTime && l)
+			if (passedTime)
 			{
+				var i: uint = 0, r: uint = 0, l: uint = _animatebles.length;
+				var animateble:IAnimateble = null;
+				
 				for (; i < l; ++i) 
 				{
 					animateble = _animatebles[i];

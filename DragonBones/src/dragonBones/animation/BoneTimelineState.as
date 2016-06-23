@@ -55,8 +55,6 @@
 			_boneTransform = bone._animationPose;
 		}
 		
-		private static const PI_D:Number = Math.PI * 2;
-		
 		override protected function _onArriveAtFrame(isUpdate:Boolean):void
 		{
 			super._onArriveAtFrame(isUpdate);
@@ -90,13 +88,13 @@
 					{
 						if (tweenRotate > 0 ? nextTransform.skewY >= _currentTransform.skewY : nextTransform.skewY <= _currentTransform.skewY) {
 							const rotate:int = tweenRotate > 0? tweenRotate - 1: tweenRotate + 1;
-							_durationTransform.skewX = nextTransform.skewX - _currentTransform.skewX + PI_D * rotate;
-							_durationTransform.skewY = nextTransform.skewY - _currentTransform.skewY + PI_D * rotate;
+							_durationTransform.skewX = nextTransform.skewX - _currentTransform.skewX + DragonBones.PI_D * rotate;
+							_durationTransform.skewY = nextTransform.skewY - _currentTransform.skewY + DragonBones.PI_D * rotate;
 						} 
 						else
 						{
-							_durationTransform.skewX = nextTransform.skewX - _currentTransform.skewX + PI_D * tweenRotate;
-							_durationTransform.skewY = nextTransform.skewY - _currentTransform.skewY + PI_D * tweenRotate;
+							_durationTransform.skewX = nextTransform.skewX - _currentTransform.skewX + DragonBones.PI_D * tweenRotate;
+							_durationTransform.skewY = nextTransform.skewY - _currentTransform.skewY + DragonBones.PI_D * tweenRotate;
 						}
 					}
 					else
