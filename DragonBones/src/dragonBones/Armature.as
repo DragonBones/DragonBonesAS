@@ -281,17 +281,17 @@
 					if(bone.isIKConstraint){
 						var ikCon:IKConstraint = _ikList[i-1];
 						if(ikCon.bones[0].name == bone.name){
-							bone.update(_isFading);
+							bone.update(isFading);
 							bone.rotationIK = bone.global.rotation;
 							if(ikCon.bones.length>1){
-								ikCon.bones[1].update(_isFading);
+								ikCon.bones[1].update(isFading);
 								ikCon.bones[1].rotationIK = ikCon.bones[1].global.rotation;
 							}
 							ikCon.compute();
 						}
 						bone.adjustGlobalTransformMatrixByIK();
 					}else{
-						bone.update(_isFading);
+						bone.update(isFading);
 						bone.rotationIK = bone.global.rotation;
 					}
 				}
