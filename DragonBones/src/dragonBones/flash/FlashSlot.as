@@ -3,7 +3,6 @@ package dragonBones.flash
 	import flash.display.BitmapData;
 	import flash.display.BlendMode;
 	import flash.display.DisplayObject;
-	import flash.display.DisplayObjectContainer;
 	import flash.display.Shape;
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
@@ -72,7 +71,7 @@ package dragonBones.flash
 		 */
 		override protected function _addDisplay():void
 		{
-			const container:DisplayObjectContainer = this._armature.display as DisplayObjectContainer;
+			const container:FlashArmatureDisplayContainer = this._armature.display as FlashArmatureDisplayContainer;
 			container.addChild(_renderDisplay);
 		}
 		
@@ -81,7 +80,7 @@ package dragonBones.flash
 		 */
 		override protected function _replaceDisplay(prevDisplay:Object):void
 		{
-			const container:DisplayObjectContainer = this._armature.display as DisplayObjectContainer;
+			const container:FlashArmatureDisplayContainer = this._armature.display as FlashArmatureDisplayContainer;
 			const displayObject:DisplayObject = prevDisplay as DisplayObject;
 			container.addChild(_renderDisplay);
 			container.swapChildren(_renderDisplay, displayObject);
@@ -108,7 +107,7 @@ package dragonBones.flash
 		 */
 		override dragonBones_internal function _getDisplayZIndex():int
 		{
-			const container:DisplayObjectContainer = this._armature.display as DisplayObjectContainer;
+			const container:FlashArmatureDisplayContainer = this._armature.display as FlashArmatureDisplayContainer;
 			return container.getChildIndex(_renderDisplay);
 		}
 		
@@ -117,7 +116,7 @@ package dragonBones.flash
 		 */
 		override dragonBones_internal function _setDisplayZIndex(value:int):void
 		{
-			const container:DisplayObjectContainer = this._armature.display as DisplayObjectContainer;
+			const container:FlashArmatureDisplayContainer = this._armature.display as FlashArmatureDisplayContainer;
 			const index:int = container.getChildIndex(_renderDisplay);
 			if (index == value)
 			{

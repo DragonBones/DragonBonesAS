@@ -407,7 +407,14 @@
 			
 			if (fadeInTime != fadeInTime || fadeInTime < 0)
 			{
-				fadeInTime = clipData.fadeInTime;
+				if (_lastAnimationState)
+				{
+					fadeInTime = clipData.fadeInTime;
+				}
+				else
+				{
+					fadeInTime = 0;
+				}
 			}
 			
 			if (playTimes < 0)

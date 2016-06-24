@@ -135,7 +135,9 @@
 			}
 			else
 			{
-				return new objectConstructor();
+				const object:BaseObject = new objectConstructor();
+				object._onClear();
+				return object;
 			}
 		}
 		
@@ -156,7 +158,7 @@
 				throw new Error(DragonBones.ABSTRACT_CLASS_ERROR);
 			}
 			
-			_onClear();
+			//_onClear();
 		}
 		
 		/**

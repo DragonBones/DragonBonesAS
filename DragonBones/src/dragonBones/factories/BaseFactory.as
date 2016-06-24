@@ -136,7 +136,7 @@
 				}
 			}
 			
-			return textureData;
+			return null;
 		}
 		
 		/** 
@@ -230,7 +230,6 @@
 			const defaultSkin:SkinData = dataPackage.armature.defaultSkin;
 			const slotDisplayDataSetMap:Object = {};
 			
-			var slotName:String = null;
 			var slotDisplayDataSet:SlotDisplayDataSet = null;
 			
 			for each (slotDisplayDataSet in defaultSkin.slots)
@@ -739,15 +738,13 @@
 		 */
 		public function replaceSlotDisplay(dragonBonesName:String, armatureName:String, slotName:String, displayName:String, slot:Slot, displayIndex:int = -1):void
 		{
-			var displayData:DisplayData = null;
-			
 			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
 			if (_fillBuildArmaturePackage(dragonBonesName, armatureName, null, dataPackage))
 			{
 				const slotDisplayDataSet:SlotDisplayDataSet = dataPackage.skin.getSlot(slotName);
 				if (slotDisplayDataSet)
 				{
-					for each (displayData in slotDisplayDataSet.displays)
+					for each (var displayData:DisplayData in slotDisplayDataSet.displays)
 					{
 						if (displayData.name == displayName)
 						{

@@ -98,11 +98,11 @@ package dragonBones.flash
 			if (on)
 			{
 				_time = new Date().getTime() * 0.001;
-				this.addEventListener(Event.EXIT_FRAME, _advanceTimeHandler);
+				this.addEventListener(Event.ENTER_FRAME, _advanceTimeHandler);
 			}
 			else
 			{
-				this.removeEventListener(Event.EXIT_FRAME, _advanceTimeHandler);
+				this.removeEventListener(Event.ENTER_FRAME, _advanceTimeHandler);
 			}
 		}
 		

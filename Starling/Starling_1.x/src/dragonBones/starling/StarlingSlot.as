@@ -9,7 +9,6 @@
 	
 	import starling.display.BlendMode;
 	import starling.display.DisplayObject;
-	import starling.display.DisplayObjectContainer;
 	import starling.display.Image;
 	import starling.display.Quad;
 	import starling.textures.SubTexture;
@@ -70,7 +69,7 @@
 		 */
 		override protected function _addDisplay():void
 		{
-			const container:DisplayObjectContainer = this._armature.display as DisplayObjectContainer;
+			const container:StarlingArmatureDisplayContainer = this._armature.display as StarlingArmatureDisplayContainer;
 			container.addChild(_renderDisplay);
 		}
 		
@@ -79,7 +78,7 @@
 		 */
 		override protected function _replaceDisplay(value:Object):void
 		{
-			const container:DisplayObjectContainer = this._armature.display as DisplayObjectContainer;
+			const container:StarlingArmatureDisplayContainer = this._armature.display as StarlingArmatureDisplayContainer;
 			const prevDisplay:DisplayObject = value as DisplayObject;
 			container.addChild(_renderDisplay);
 			container.swapChildren(_renderDisplay, prevDisplay);
@@ -108,7 +107,7 @@
 		 */
 		override dragonBones_internal function _getDisplayZIndex():int
 		{
-			const container:DisplayObjectContainer = this._armature.display as DisplayObjectContainer;
+			const container:StarlingArmatureDisplayContainer = this._armature.display as StarlingArmatureDisplayContainer;
 			return container.getChildIndex(_renderDisplay);
 		}
 		
@@ -117,7 +116,7 @@
 		 */
 		override dragonBones_internal function _setDisplayZIndex(value:int):void
 		{
-			const container:DisplayObjectContainer = this._armature.display as DisplayObjectContainer;
+			const container:StarlingArmatureDisplayContainer = this._armature.display as StarlingArmatureDisplayContainer;
 			const index:int = container.getChildIndex(_renderDisplay);
 			if (index == value)
 			{

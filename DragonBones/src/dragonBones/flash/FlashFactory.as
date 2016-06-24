@@ -42,7 +42,7 @@
 			}
 			else
 			{
-				textureAtlasData = new FlashTextureAtlasData();
+				textureAtlasData = BaseObject.borrowObject(FlashTextureAtlasData) as FlashTextureAtlasData;
 			}
 			
 			return textureAtlasData;

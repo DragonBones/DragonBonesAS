@@ -84,7 +84,7 @@
 		{
 			const slot:StarlingSlot = BaseObject.borrowObject(StarlingSlot) as StarlingSlot;
 			const slotData:SlotData = slotDisplayDataSet.slot;
-			const displayList:Vector.<Object> = new Vector.<Object>(slotDisplayDataSet.displays.length, true);
+			const displayList:Vector.<Object> = new Vector.<Object>();
 			
 			slot.name = slotData.name;
 			slot._rawDisplay = new Image(null);
@@ -93,7 +93,6 @@
 			slot._vertexData = new VertexData();
 			slot._meshDisplay = new Mesh(slot._vertexData, slot._indexData);
 			
-			var displayIndex:uint = 0;
 			for each (var displayData:DisplayData in slotDisplayDataSet.displays)
 			{
 				switch (displayData.type)
@@ -104,7 +103,7 @@
 							displayData.textureData = this._getTextureData(dataPackage.dataName, displayData.name);
 						}
 						
-						displayList[displayIndex] = slot._rawDisplay;
+						displayList.push(slot._rawDisplay);
 						break;
 					
 					case DragonBones.DISPLAY_TYPE_MESH:
@@ -113,7 +112,7 @@
 							displayData.textureData = this._getTextureData(dataPackage.dataName, displayData.name);
 						}
 						
-						displayList[displayIndex] = slot._meshDisplay;
+						displayList.push(slot._meshDisplay);
 						break;
 					
 					case DragonBones.DISPLAY_TYPE_ARMATURE:
@@ -123,15 +122,13 @@
 							childArmature.animation.play();
 						}
 						
-						displayList[displayIndex] = childArmature;
+						displayList.push(childArmature);
 						break;
 					
 					default:
-						displayList[displayIndex] = null;
+						displayList.push(null);
 						break;
 				}
-				
-				displayIndex++;
 			}
 			
 			slot._setDisplayList(displayList);
