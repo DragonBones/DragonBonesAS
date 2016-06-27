@@ -335,7 +335,7 @@
 			{
 				for (i = 0; i < l; i += 2)
 				{
-					iH = uint(i / 2);
+					iH = i / 2;
 					
 					const boneIndices:Vector.<uint> = this._meshData.boneIndices[iH];
 					const boneVertices:Vector.<Number> = this._meshData.boneVertices[iH];

@@ -26,6 +26,11 @@
 		public function FlashFactory()
 		{
 			super(this);
+			
+			if (!Armature.soundEventManager) 
+			{
+				Armature.soundEventManager = new FlashArmatureDisplayContainer();
+			}
 		}
 		
 		/**

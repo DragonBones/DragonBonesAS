@@ -765,7 +765,7 @@
 			else
 			{
 				_isFadeOut = true;
-				if (fadeOutTime == 0)
+				if (fadeOutTime == 0 || _fadeProgress <= 0)
 				{
 					_fadeProgress = 0.000001;
 				}

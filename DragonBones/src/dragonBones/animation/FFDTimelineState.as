@@ -62,6 +62,15 @@ package dragonBones.animation
 			_ffdVertices.fixed = false;
 			_ffdVertices.length = _slotFFDVertices.length;
 			_ffdVertices.fixed = true;
+			
+			var i:uint = 0, l:uint = 0;
+			for (i = 0, l = this._durationFFDFrame.tweens.length; i < l; ++i) {
+				_durationFFDFrame.tweens[i] = 0;
+			}
+			
+			for (i = 0, l = this._ffdVertices.length; i < l; ++i) {
+				_ffdVertices[i] = 0;
+			}
 		}
 		
 		override protected function _onArriveAtFrame(isUpdate:Boolean):void
@@ -95,7 +104,7 @@ package dragonBones.animation
 		{
 			super._onUpdateFrame(isUpdate);
 			
-			if (_tweenFFD != TWEEN_TYPE_NONE && this._animationState._fadeProgress >= 1)
+			if (_tweenFFD != TWEEN_TYPE_NONE)
 			{
 				if (_tweenFFD == TWEEN_TYPE_ONCE)
 				{

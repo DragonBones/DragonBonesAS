@@ -571,6 +571,11 @@
 						_ffdVertices.length = _meshData.vertices.length;
 					}
 					
+					for (i = 0, l = _ffdVertices.length; i < l; ++i) 
+					{
+						_ffdVertices[i] = 0;
+					}
+					
 					_meshBones.fixed = true;
 					_ffdVertices.fixed = true;
 					_ffdDirty = true;

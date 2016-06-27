@@ -10,8 +10,6 @@ package dragonBones.starling
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.factories.BaseFactory;
 	import dragonBones.factories.BuildArmaturePackage;
-	import dragonBones.flash.FlashArmatureDisplayContainer;
-	import dragonBones.flash.FlashSlot;
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.MeshData;
 	import dragonBones.objects.SlotData;
@@ -31,6 +29,11 @@ package dragonBones.starling
 		public function StarlingFactory()
 		{
 			super(this);
+			
+			if (!Armature.soundEventManager) 
+			{
+				Armature.soundEventManager = new StarlingArmatureDisplayContainer();
+			}
 		}
 		
 		/**

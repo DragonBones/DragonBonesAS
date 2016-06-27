@@ -167,6 +167,12 @@ class FlashRender extends flash.display.Sprite
 
 	public function changeArmature(armatureScale:Number): void
 	{
+		const armatureNames: Vector.<String> = dragonBonesData.armatureNames;
+		if (armatureNames.length == 0)
+		{
+			return;
+		}
+		
 		// Remove prev Armature.
 		if (_armature)
 		{
@@ -178,7 +184,6 @@ class FlashRender extends flash.display.Sprite
 		}
 
 		// Get Next Armature name.
-		const armatureNames: Vector.<String> = dragonBonesData.armatureNames;
 		_armatureIndex++;
 		if (_armatureIndex >= armatureNames.length)
 		{
@@ -207,8 +212,13 @@ class FlashRender extends flash.display.Sprite
 
 	public function changeAnimation(): void
 	{
-		// Get next Animation name.
 		const animationNames: Vector.<String> = _armatureDisplay.animation.animationNames;
+		if (animationNames.length == 0)
+		{
+			return;
+		}
+		
+		// Get next Animation name.
 		_animationIndex++;
 		if (_animationIndex >= animationNames.length)
 		{
@@ -297,6 +307,12 @@ class StarlingRender extends starling.display.Sprite
 
 	public function changeArmature(armatureScale:Number): void
 	{
+		const armatureNames: Vector.<String> = dragonBonesData.armatureNames;
+		if (armatureNames.length == 0)
+		{
+			return;
+		}
+		
 		// Remove prev Armature.
 		if (_armature)
 		{
@@ -308,7 +324,6 @@ class StarlingRender extends starling.display.Sprite
 		}
 
 		// Get Next Armature name.
-		const armatureNames: Vector.<String> = dragonBonesData.armatureNames;
 		_armatureIndex++;
 		if (_armatureIndex >= armatureNames.length)
 		{
@@ -337,8 +352,13 @@ class StarlingRender extends starling.display.Sprite
 
 	public function changeAnimation(): void
 	{
-		// Get next Animation name.
 		const animationNames: Vector.<String> = _armatureDisplay.animation.animationNames;
+		if (animationNames.length == 0)
+		{
+			return;
+		}
+		
+		// Get next Animation name.
 		_animationIndex++;
 		if (_animationIndex >= animationNames.length)
 		{

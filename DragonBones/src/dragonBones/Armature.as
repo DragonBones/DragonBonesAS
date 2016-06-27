@@ -31,7 +31,7 @@ package dragonBones
 		 * 声音事件管理器，声音事件统一由声音事件管理器派发。
 		 * @version DragonBones 3.0
 		 */
-		public static const soundEventManager:IEventDispatcher = null;
+		public static var soundEventManager:IEventDispatcher = null;
 		
 		/**
 		 * @language zh_CN

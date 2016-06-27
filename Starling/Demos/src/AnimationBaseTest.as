@@ -47,7 +47,6 @@ class StarlingRender extends Sprite
 	public static const TextureA1: Class;
 
 	private var _isTouched:Boolean = false;
-	private var _armature: Armature = null;
 	private var _armatureDisplay: StarlingArmatureDisplayContainer = null;
 	private const _factory: StarlingFactory = new StarlingFactory();
 
@@ -70,7 +69,6 @@ class StarlingRender extends Sprite
 		if (dragonBonesData)
 		{
 			_armatureDisplay = _factory.buildArmatureDisplay(dragonBonesData.armatureNames[0]);
-			_armature = _armatureDisplay.armature;
 
 			_armatureDisplay.x = 400;
 			_armatureDisplay.y = 300;
@@ -78,16 +76,16 @@ class StarlingRender extends Sprite
 			this.addChild(_armatureDisplay);
 
 			// Test animation event
-			_armature.addEventListener(EventObject.START, _animationEventHandler);
-			_armature.addEventListener(EventObject.LOOP_COMPLETE, _animationEventHandler);
-			_armature.addEventListener(EventObject.COMPLETE, _animationEventHandler);
-			_armature.addEventListener(EventObject.FADE_IN, _animationEventHandler);
-			_armature.addEventListener(EventObject.FADE_IN_COMPLETE, _animationEventHandler);
-			_armature.addEventListener(EventObject.FADE_OUT, _animationEventHandler);
-			_armature.addEventListener(EventObject.FADE_OUT_COMPLETE, _animationEventHandler);
+			_armatureDisplay.addEventListener(EventObject.START, _animationEventHandler);
+			_armatureDisplay.addEventListener(EventObject.LOOP_COMPLETE, _animationEventHandler);
+			_armatureDisplay.addEventListener(EventObject.COMPLETE, _animationEventHandler);
+			_armatureDisplay.addEventListener(EventObject.FADE_IN, _animationEventHandler);
+			_armatureDisplay.addEventListener(EventObject.FADE_IN_COMPLETE, _animationEventHandler);
+			_armatureDisplay.addEventListener(EventObject.FADE_OUT, _animationEventHandler);
+			_armatureDisplay.addEventListener(EventObject.FADE_OUT_COMPLETE, _animationEventHandler);
 
 			// Test frame event
-			_armature.addEventListener(EventObject.FRAME_EVENT, _animationEventHandler);
+			_armatureDisplay.addEventListener(EventObject.FRAME_EVENT, _animationEventHandler);
 
 			// Test animation API
 			this.stage.addEventListener(
@@ -104,14 +102,14 @@ class StarlingRender extends Sprite
 							case TouchPhase.BEGAN:
 								_isTouched = true;
 							
-								//_armature.animation.gotoAndPlayByTime("idle", 0.5, 1);
-								//_armature.animation.gotoAndStopByTime("idle", 1);
+								//_armatureDisplay.animation.gotoAndPlayByTime("idle", 0.5, 1);
+								//_armatureDisplay.animation.gotoAndStopByTime("idle", 1);
 							
-								//_armature.animation.gotoAndPlayByFrame("idle", 25, 2);
-								//_armature.animation.gotoAndStopByFrame("idle", 50);
+								//_armatureDisplay.animation.gotoAndPlayByFrame("idle", 25, 2);
+								//_armatureDisplay.animation.gotoAndStopByFrame("idle", 50);
 							
-								_armature.animation.gotoAndPlayByProgress("idle", progress, 3);
-								//_armature.animation.gotoAndStopByProgress("idle", progress);
+								_armatureDisplay.animation.gotoAndPlayByProgress("idle", progress, 3);
+								//_armatureDisplay.animation.gotoAndStopByProgress("idle", progress);
 								break;
 							
 							case TouchPhase.ENDED:
@@ -119,9 +117,9 @@ class StarlingRender extends Sprite
 								break;
 							
 							case TouchPhase.MOVED:
-								if (_isTouched && _armature.animation.getState("idle") && !_armature.animation.getState("idle").isPlaying)
+								if (_isTouched && _armatureDisplay.animation.getState("idle") && !_armatureDisplay.animation.getState("idle").isPlaying)
 								{
-									_armature.animation.gotoAndStopByProgress("idle", progress);
+									_armatureDisplay.animation.gotoAndStopByProgress("idle", progress);
 								}
 								break;
 						}

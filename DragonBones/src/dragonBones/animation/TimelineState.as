@@ -200,12 +200,12 @@
 					
 					if (value < 0)
 					{
-						currentPlayTimes = -value / _duration;
+						currentPlayTimes = uint(-value / _duration);
 						value = _duration - (-value % _duration);
 					}
 					else
 					{
-						currentPlayTimes = value / _duration;
+						currentPlayTimes = uint(value / _duration);
 						value %= _duration;
 					}
 					
