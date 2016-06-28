@@ -357,7 +357,7 @@ package dragonBones
 			const scaledPassedTime:Number = passedTime * _animation.timeScale;
 			
 			//
-			_animation._advanceTime(passedTime);
+			_animation._advanceTime(scaledPassedTime);
 			
 			//
 			if (_bonesDirty)

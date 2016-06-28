@@ -23,7 +23,7 @@
 		 */
 		dragonBones_internal static const EMPTY_TEXTURE:Texture = Texture.empty(1, 1);
 		
-		public var updateTransformEnabled:Boolean = false;
+		public var transformEnabled:Boolean = false;
 		
 		private var _renderDisplay:DisplayObject = null;
 		
@@ -292,7 +292,7 @@
 			const pivotX:Number = _renderDisplay.pivotX;
 			const pivotY:Number = _renderDisplay.pivotY;
 			
-			if (updateTransformEnabled)
+			if (transformEnabled)
 			{
 				_renderDisplay.transformationMatrix = this.globalTransformMatrix;
 				

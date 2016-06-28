@@ -127,11 +127,7 @@ package dragonBones.animation
 		
 		override protected function _onUpdateFrame(isUpdate:Boolean):void
 		{
-			if (!this._currentFrame.duration)
-			{
-				_tweenProgress = 0;
-			}
-			else if (_tweenEasing != DragonBones.NO_TWEEN)
+			if (_tweenEasing != DragonBones.NO_TWEEN && this._currentFrame.duration > 0)
 			{
 				_tweenProgress = (this._currentTime - this._currentFrame.position + this._position) / this._currentFrame.duration;
 				if (_tweenEasing != 0)

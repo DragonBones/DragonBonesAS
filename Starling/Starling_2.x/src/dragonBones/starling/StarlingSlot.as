@@ -23,7 +23,7 @@
 	
 	public final class StarlingSlot extends Slot
 	{
-		public var updateTransformEnabled:Boolean;
+		public var transformEnabled:Boolean;
 		
 		/**
 		 * @private
@@ -48,7 +48,7 @@
 		{
 			super._onClear();
 			
-			updateTransformEnabled = false;
+			transformEnabled = false;
 			
 			_indexData = null;
 			_vertexData = null;
@@ -391,7 +391,7 @@
 			const pivotX:Number = _renderDisplay.pivotX;
 			const pivotY:Number = _renderDisplay.pivotY;
 			
-			if (updateTransformEnabled)
+			if (transformEnabled)
 			{
 				_renderDisplay.transformationMatrix = this.globalTransformMatrix;
 				

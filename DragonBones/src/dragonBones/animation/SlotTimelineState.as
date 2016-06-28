@@ -94,17 +94,17 @@
 				slot._updateMeshData(true);
 			}
 			
-			if (slot.displayIndex >= 0)
+			if (currentFrame.displayIndex >= 0)
 			{
 				_tweenColor = TWEEN_TYPE_NONE;
 				
-				const nextFrame:SlotFrameData = this._currentFrame.next as SlotFrameData;
 				const currentColor:ColorTransform = currentFrame.color;
 				
 				if (this._keyFrameCount > 1 && (this._tweenEasing != DragonBones.NO_TWEEN || this._curve))
 				{
+					const nextFrame:SlotFrameData = this._currentFrame.next as SlotFrameData;
 					const nextColor:ColorTransform = nextFrame.color;
-					if (currentColor != nextColor)
+					if (currentColor != nextColor && nextFrame.displayIndex >= 0)
 					{
 						_durationColor.alphaMultiplier = nextColor.alphaMultiplier - currentColor.alphaMultiplier;
 						_durationColor.redMultiplier = nextColor.redMultiplier - currentColor.redMultiplier;
@@ -133,15 +133,24 @@
 				
 				if (_tweenColor == TWEEN_TYPE_NONE)
 				{
+					_durationColor.alphaMultiplier = currentColor.alphaMultiplier - _slotColor.alphaMultiplier;
+					_durationColor.redMultiplier = currentColor.redMultiplier - _slotColor.redMultiplier;
+					_durationColor.greenMultiplier = currentColor.greenMultiplier - _slotColor.greenMultiplier;
+					_durationColor.blueMultiplier = currentColor.blueMultiplier - _slotColor.blueMultiplier;
+					_durationColor.alphaOffset = currentColor.alphaOffset - _slotColor.alphaOffset;
+					_durationColor.redOffset = currentColor.redOffset - _slotColor.redOffset;
+					_durationColor.greenOffset = currentColor.greenOffset - _slotColor.greenOffset;
+					_durationColor.blueOffset = currentColor.blueOffset - _slotColor.blueOffset;
+					
 					if (
-						currentColor.alphaMultiplier - _slotColor.alphaMultiplier != 0 ||
-						currentColor.redMultiplier - _slotColor.redMultiplier != 0 ||
-						currentColor.greenMultiplier - _slotColor.greenMultiplier != 0 ||
-						currentColor.blueMultiplier - _slotColor.blueMultiplier != 0 ||
-						currentColor.alphaOffset - _slotColor.alphaOffset != 0 ||
-						currentColor.redOffset - _slotColor.redOffset != 0 ||
-						currentColor.greenOffset - _slotColor.greenOffset != 0 ||
-						currentColor.blueOffset - _slotColor.blueOffset != 0
+						_durationColor.alphaMultiplier != 0 ||
+						_durationColor.redMultiplier != 0 ||
+						_durationColor.greenMultiplier != 0 ||
+						_durationColor.blueMultiplier != 0 ||
+						_durationColor.alphaOffset != 0 ||
+						_durationColor.redOffset != 0 ||
+						_durationColor.greenOffset != 0 ||
+						_durationColor.blueOffset != 0
 					)
 					{
 						_tweenColor = TWEEN_TYPE_ONCE;
