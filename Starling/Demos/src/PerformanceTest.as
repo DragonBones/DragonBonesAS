@@ -52,9 +52,9 @@ class StarlingRender extends Sprite
 	private var _addingArmature: Boolean = false;
 	private var _removingArmature: Boolean = false;
 	private var _dragonBonesData: DragonBonesData = null;
+	private var _text:TextField = null;
 	private const _factory: StarlingFactory = new StarlingFactory();
 	private const _armatures: Vector.<Armature> = new Vector.<Armature>();
-	private const _text:TextField = null;
 
 	public function StarlingRender()
 	{
@@ -63,7 +63,7 @@ class StarlingRender extends Sprite
 
 	private function _addToStageHandler(event: Event): void
 	{
-		_text = new TextField(800, 60, "")
+		_text = new TextField(800, 60, "");
 		_text.x = 0;
 		_text.y = this.stage.stageHeight - 60;
 		_text.autoSize = "center";

@@ -1,7 +1,6 @@
 ﻿package dragonBones
 {
 	import flash.geom.Matrix;
-	import flash.geom.Point;
 	
 	import dragonBones.core.TransformObject;
 	import dragonBones.core.dragonBones_internal;
@@ -130,7 +129,7 @@
 			inheritScale = false;
 			ikBendPositive = false;
 			ikWeight = 0;
-			length = 0;
+			this.length = 0;
 			
 			_transformDirty = 2; // Update
 			_blendIndex = 0;
@@ -220,8 +219,8 @@
 			*/
 			
 			const ikGlobal:Transform = _ik.global;
-			const x:Number = this.globalTransformMatrix.a * length;
-			const y:Number = this.globalTransformMatrix.b * length;
+			const x:Number = this.globalTransformMatrix.a * this.length;
+			const y:Number = this.globalTransformMatrix.b * this.length;
 			
 			const ikRadian:Number = 
 				(
@@ -242,8 +241,8 @@
 			const parentGlobal:Transform = this._parent.global;
 			const ikGlobal:Transform = _ik.global;
 			
-			const x:Number = this.globalTransformMatrix.a * length;
-			const y:Number = this.globalTransformMatrix.b * length;
+			const x:Number = this.globalTransformMatrix.a * this.length;
+			const y:Number = this.globalTransformMatrix.b * this.length;
 			
 			const lLL:Number = x * x + y * y;
 			const lL:Number = Math.sqrt(lLL);

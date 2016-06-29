@@ -160,7 +160,7 @@
 			
 			const cacheFrameCount:uint = Math.max(Math.floor(frameCount * scale * value), 1);
 			
-			cacheTimeToFrameScale = cacheFrameCount / duration;
+			cacheTimeToFrameScale = cacheFrameCount / (duration + 0.000001);
 			cachedFrames.fixed = false;
 			cachedFrames.length = 0; // Clear vector 
 			cachedFrames.length = cacheFrameCount;

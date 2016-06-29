@@ -221,8 +221,8 @@
 			{
 				const rawDisplayData:DisplayData = this._displayIndex < this._displayDataSet.displays.length? this._displayDataSet.displays[this._displayIndex]: null;
 				const replaceDisplayData:DisplayData = this._displayIndex < this._replaceDisplayDataSet.length? this._replaceDisplayDataSet[this._displayIndex]: null;
-				const contentDisplayData:DisplayData = replaceDisplayData || rawDisplayData;
-				const currentTextureData:StarlingTextureData = contentDisplayData.textureData as StarlingTextureData;
+				const currentDisplayData:DisplayData = replaceDisplayData || rawDisplayData;
+				const currentTextureData:StarlingTextureData = currentDisplayData.textureData as StarlingTextureData;
 				
 				if (currentTextureData)
 				{
@@ -285,19 +285,19 @@
 								height = rect.width;
 							}
 							
-							var pivotX:Number = contentDisplayData.pivot.x;
-							var pivotY:Number = contentDisplayData.pivot.y;
+							var pivotX:Number = currentDisplayData.pivot.x;
+							var pivotY:Number = currentDisplayData.pivot.y;
 							
-							if (contentDisplayData.isRelativePivot)
+							if (currentDisplayData.isRelativePivot)
 							{
 								pivotX = width * pivotX;
 								pivotY = height * pivotY;
 							}
 							
-							if (rawDisplayData && rawDisplayData != contentDisplayData)
+							if (rawDisplayData && rawDisplayData != currentDisplayData)
 							{
-								pivotX += contentDisplayData.transform.x - rawDisplayData.transform.x;
-								pivotY += contentDisplayData.transform.y - rawDisplayData.transform.y;
+								pivotX += currentDisplayData.transform.x - rawDisplayData.transform.x;
+								pivotY += currentDisplayData.transform.y - rawDisplayData.transform.y;
 							}
 							
 							frameDisplay.texture = currentTextureData.texture;

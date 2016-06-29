@@ -95,7 +95,7 @@ package dragonBones.core
 		{
 			userData = null;
 			name = null;
-			globalTransformMatrix = null; // _globalTransformMatrix or chaheMatrix
+			globalTransformMatrix = _globalTransformMatrix;
 			global.identity();
 			origin.identity();
 			offset.identity();

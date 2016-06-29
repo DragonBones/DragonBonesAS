@@ -68,18 +68,25 @@
 					{
 						const touchRight: Boolean = event.localX > stage.stageWidth * 0.5;
 
-						if (FlashRender.instance.dragonBonesData.armatureNames.length > 1 && !touchRight)
+						if (FlashRender.instance)
 						{
-							FlashRender.instance.changeArmature(_currentArmatureScale);
+							if (FlashRender.instance && FlashRender.instance.dragonBonesData.armatureNames.length > 1 && !touchRight)
+							{
+								FlashRender.instance.changeArmature(_currentArmatureScale);
+							}
+							
+							FlashRender.instance.changeAnimation();
 						}
 						
-						if (StarlingRender.instance.dragonBonesData.armatureNames.length > 1 && !touchRight)
+						if (StarlingRender.instance)
 						{
-							StarlingRender.instance.changeArmature(_currentArmatureScale);
+							if (StarlingRender.instance && StarlingRender.instance.dragonBonesData.armatureNames.length > 1 && !touchRight)
+							{
+								StarlingRender.instance.changeArmature(_currentArmatureScale);
+							}
+							
+							StarlingRender.instance.changeAnimation();
 						}
-
-						FlashRender.instance.changeAnimation();
-						StarlingRender.instance.changeAnimation();
 					}
 					
 					break;
@@ -94,8 +101,15 @@
 					{
 						_isMoved = true;
 						_currentArmatureScale = Math.max((_startPoint.y - this.stage.mouseY) / 200 + _prevArmatureScale, 0.1);
-						FlashRender.instance.armatureScale = _currentArmatureScale;
-						StarlingRender.instance.armatureScale = _currentArmatureScale;
+						if (FlashRender.instance)
+						{
+							FlashRender.instance.armatureScale = _currentArmatureScale;
+						}
+						
+						if (StarlingRender.instance)
+						{
+							StarlingRender.instance.armatureScale = _currentArmatureScale;
+						}
 					}
 					break;
 			}

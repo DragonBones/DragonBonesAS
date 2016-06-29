@@ -203,7 +203,7 @@
 			bone.inheritTranslation = _getBoolean(rawData, INHERIT_TRANSLATION, true);
 			bone.inheritRotation = _getBoolean(rawData, INHERIT_ROTATION, true);
 			bone.inheritScale = _getBoolean(rawData, INHERIT_SCALE, true);
-			bone.length = _getNumber(rawData, LENGTH, 0);
+			bone.length = _getNumber(rawData, LENGTH, 0) * this._armatureScale;
 			
 			if (TRANSFORM in rawData)
 			{
