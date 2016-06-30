@@ -17,11 +17,11 @@ package dragonBones
 	/**
 	 * @language zh_CN
 	 * 骨架，是龙骨骨骼动画系统的核心，由显示容器、骨骼、插槽、动画、事件系统构成。
-     * @see dragonBones.objects.ArmatureData
-     * @see dragonBones.Bone
-     * @see dragonBones.Slot
-     * @see dragonBones.animation.Animation
-     * @see dragonBones.core.IArmatureDisplayContainer
+	 * @see dragonBones.objects.ArmatureData
+	 * @see dragonBones.Bone
+	 * @see dragonBones.Slot
+	 * @see dragonBones.animation.Animation
+	 * @see dragonBones.core.IArmatureDisplayContainer
 	 * @version DragonBones 3.0
 	 */
 	public final class Armature extends BaseObject implements IAnimateble
@@ -722,7 +722,7 @@ package dragonBones
 		/**
 		 * @language zh_CN
 		 * 获得骨架数据。
-    	 * @see dragonBones.objects.ArmatureData
+		 * @see dragonBones.objects.ArmatureData
 		 * @version DragonBones 4.5
 		 */
 		public function get armatureData():ArmatureData
@@ -743,7 +743,7 @@ package dragonBones
 		/**
 		 * @language zh_CN
 		 * 获得父插槽实例。
-    	 * @see dragonBones.Slot
+		 * @see dragonBones.Slot
 		 * @version DragonBones 4.5
 		 */
 		public function get parent():Slot
@@ -754,7 +754,7 @@ package dragonBones
 		/**
 		 * @language zh_CN
 		 * 获得动画控制器实例。
-    	 * @see dragonBones.animation.Animation
+		 * @see dragonBones.animation.Animation
 		 * @version DragonBones 3.0
 		 */
 		public function get animation():Animation	

@@ -16,12 +16,12 @@
 	/**
 	 * @language zh_CN
 	 * 插槽，附着在骨骼上，控制显示对象的显示状态和属性。
-     * 一个骨骼上可以包含多个插槽。
-     * 一个插槽中可以包含多个显示对象，同一时间只能显示其中的一个显示对象，但可以在动画播放的过程中切换显示对象实现帧动画。
-     * 显示对象可以是普通的图片纹理，也可以是子骨架的显示容器，网格显示对象，还可以是自定义的其他显示对象。
-     * @see dragonBones.Armature
-     * @see dragonBones.Bone
-     * @see dragonBones.objects.SlotData
+	 * 一个骨骼上可以包含多个插槽。
+	 * 一个插槽中可以包含多个显示对象，同一时间只能显示其中的一个显示对象，但可以在动画播放的过程中切换显示对象实现帧动画。
+	 * 显示对象可以是普通的图片纹理，也可以是子骨架的显示容器，网格显示对象，还可以是自定义的其他显示对象。
+	 * @see dragonBones.Armature
+	 * @see dragonBones.Bone
+	 * @see dragonBones.objects.SlotData
 	 * @version DragonBones 3.0
 	 */
 	public class Slot extends TransformObject
@@ -419,7 +419,7 @@
 			}
 			
 			const currentDisplay:Object = _display || _rawDisplay;
-		
+			
 			if (currentDisplay != prevDisplay)
 			{
 				_onUpdateDisplay();
@@ -633,7 +633,7 @@
 				if (_ffdDirty || (_meshData.skinned && _isMeshBonesUpdate()))
 				{
 					_ffdDirty = false;
-			
+					
 					_updateMesh();
 				}
 				

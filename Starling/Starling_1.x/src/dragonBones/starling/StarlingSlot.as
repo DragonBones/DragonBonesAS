@@ -217,7 +217,7 @@
 						const textureAtlasTexture:Texture = (currentTextureData.parent as StarlingTextureAtlasData).texture;
 						if (textureAtlasTexture)
 						{
-							currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, currentTextureData.frame, currentTextureData.rotated);
+							currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, null, currentTextureData.rotated);
 						}
 					}
 					
@@ -248,6 +248,12 @@
 							{
 								pivotX = width * pivotX;
 								pivotY = height * pivotY;
+							}
+							
+							if (currentTextureData.frame)
+							{
+								pivotX += currentTextureData.frame.x;
+								pivotY += currentTextureData.frame.y;
 							}
 							
 							if (rawDisplayData && rawDisplayData != currentDisplayData)

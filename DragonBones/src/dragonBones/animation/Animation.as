@@ -11,8 +11,8 @@
 	/**
 	 * @language zh_CN
 	 * 动画控制器，用来播放动画数据，管理动画状态。
-     * @see dragonBones.objects.AnimationData
-     * @see dragonBones.animation.AnimationState
+	 * @see dragonBones.objects.AnimationData
+	 * @see dragonBones.animation.AnimationState
 	 * @version DragonBones 3.0
 	 */
 	public class Animation extends BaseObject

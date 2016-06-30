@@ -124,7 +124,7 @@
 		}
 		
 		/** 
-         * 检查是否包含指定的 IAnimatable 实例
+		 * 检查是否包含指定的 IAnimatable 实例
 		 * @param value 指定的 IAnimatable 实例。
 		 * @return 如果包含则返回 <code>true</code> ，反之返回 <code>false</code> 。
 		 * @version DragonBones 3.0
@@ -136,7 +136,7 @@
 		
 		/**
 		 * @language zh_CN
-         * 添加指定的 IAnimatable 实例。
+		 * 添加指定的 IAnimatable 实例。
 		 * @param value IAnimatable 实例。
 		 * @version DragonBones 3.0
 		 */
@@ -150,7 +150,7 @@
 		
 		/**
 		 * @language zh_CN
-         * 移除指定的 IAnimatable 实例。
+		 * 移除指定的 IAnimatable 实例。
 		 * @param value IAnimatable 实例。
 		 * @version DragonBones 3.0
 		 */

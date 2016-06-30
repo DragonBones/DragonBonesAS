@@ -13,9 +13,9 @@
 	 * @language zh_CN
 	 * 骨骼，一个骨架中可以包含多个骨骼，骨骼以树状结构构成骨架。
 	 * 骨骼在骨骼动画体系中是最重要的逻辑单元之一，负责动画中的平移旋转缩放的实现。
-     * @see dragonBones.objects.BoneData
-     * @see dragonBones.Armature
-     * @see dragonBones.Slot
+	 * @see dragonBones.objects.BoneData
+	 * @see dragonBones.Armature
+	 * @see dragonBones.Slot
 	 * @version DragonBones 3.0
 	 */
 	public final class Bone extends TransformObject
