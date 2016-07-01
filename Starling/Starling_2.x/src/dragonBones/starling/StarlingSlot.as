@@ -83,7 +83,7 @@
 		 */
 		override protected function _addDisplay():void
 		{
-			const container:StarlingArmatureDisplayContainer = this._armature.display as StarlingArmatureDisplayContainer;
+			const container:StarlingArmatureDisplayContainer = this._armature._display as StarlingArmatureDisplayContainer;
 			container.addChild(_renderDisplay);
 		}
 		
@@ -121,7 +121,7 @@
 		 */
 		override dragonBones_internal function _getDisplayZIndex():int
 		{
-			const container:StarlingArmatureDisplayContainer = this._armature.display as StarlingArmatureDisplayContainer;
+			const container:StarlingArmatureDisplayContainer = this._armature._display as StarlingArmatureDisplayContainer;
 			return container.getChildIndex(_renderDisplay);
 		}
 		

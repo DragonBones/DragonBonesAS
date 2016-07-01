@@ -357,7 +357,11 @@
 			}
 			else if (!_lastAnimationState)
 			{
-				animationState = fadeIn(_armature.armatureData.defaultAnimation.name, 0, -1, 0, null, AnimationFadeOutMode.All);
+				const defaultAnimation:AnimationData = _armature.armatureData.defaultAnimation;
+				if (defaultAnimation)
+				{
+					animationState = fadeIn(defaultAnimation.name, 0, -1, 0, null, AnimationFadeOutMode.All);
+				}
 			}
 			else if (!_isPlaying)
 			{

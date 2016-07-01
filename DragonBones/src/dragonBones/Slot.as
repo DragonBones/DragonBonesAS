@@ -650,7 +650,7 @@
 				_updateLocalTransformMatrix();
 			}
 			
-			if (cacheFrameIndex >= 0 && _cacheFrames)
+			if (cacheFrameIndex >= 0)
 			{
 				const cacheFrame:Matrix = _cacheFrames[cacheFrameIndex];
 				
@@ -693,7 +693,7 @@
 				{
 					_updateGlobalTransformMatrix();
 					
-					if (cacheFrameIndex >= 0 && _cacheFrames)
+					if (cacheFrameIndex >= 0)
 					{
 						this.globalTransformMatrix = SlotTimelineData.cacheFrame(_cacheFrames, cacheFrameIndex, this._globalTransformMatrix);
 					}

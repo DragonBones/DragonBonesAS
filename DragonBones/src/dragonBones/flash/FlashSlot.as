@@ -71,7 +71,7 @@ package dragonBones.flash
 		 */
 		override protected function _addDisplay():void
 		{
-			const container:FlashArmatureDisplayContainer = this._armature.display as FlashArmatureDisplayContainer;
+			const container:FlashArmatureDisplayContainer = this._armature._display as FlashArmatureDisplayContainer;
 			container.addChild(_renderDisplay);
 		}
 		
@@ -107,7 +107,7 @@ package dragonBones.flash
 		 */
 		override dragonBones_internal function _getDisplayZIndex():int
 		{
-			const container:FlashArmatureDisplayContainer = this._armature.display as FlashArmatureDisplayContainer;
+			const container:FlashArmatureDisplayContainer = this._armature._display as FlashArmatureDisplayContainer;
 			return container.getChildIndex(_renderDisplay);
 		}
 		

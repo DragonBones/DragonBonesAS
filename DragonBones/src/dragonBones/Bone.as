@@ -431,7 +431,7 @@
 		{
 			_blendIndex = 0;
 			
-			if (cacheFrameIndex >= 0 && _cacheFrames)
+			if (cacheFrameIndex >= 0)
 			{
 				const cacheFrame:Matrix = _cacheFrames[cacheFrameIndex];
 				
@@ -502,7 +502,7 @@
 						}
 					}
 					
-					if (cacheFrameIndex >= 0 && _cacheFrames)
+					if (cacheFrameIndex >= 0)
 					{
 						this.globalTransformMatrix = BoneTimelineData.cacheFrame(_cacheFrames, cacheFrameIndex, this._globalTransformMatrix);
 					}

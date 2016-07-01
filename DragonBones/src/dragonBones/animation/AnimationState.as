@@ -330,7 +330,7 @@
 			{
 				_fadeProgress = fadeProgress;
 				
-				const eventDispatcher:IEventDispatcher = _armature.display;
+				const eventDispatcher:IEventDispatcher = _armature._display;
 				var event:EventObject = null;
 				
 				if (_fadeTime <= passedTime)
