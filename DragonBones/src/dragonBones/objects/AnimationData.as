@@ -3,7 +3,6 @@
 	/**
 	 * @language zh_CN
 	 * 动画数据。
-	 * @see dragonBones.animation.AnimationState
 	 * @version DragonBones 3.0
 	 */
 	public final class AnimationData extends TimelineData
@@ -27,21 +26,21 @@
 		
 		/**
 		 * @language zh_CN
-		 * 循环播放的次数。
+		 * 循环播放的次数。 [0: 无限循环播放, [1~N]: 循环播放 N 次]
 		 * @version DragonBones 3.0
 		 */
 		public var playTimes:uint;
 		
 		/**
 		 * @language zh_CN
-		 * 开始的时间。 (以微秒为单位)
+		 * 开始的时间。 (以秒为单位)
 		 * @version DragonBones 3.0
 		 */
 		public var position:Number;
 		
 		/**
 		 * @language zh_CN
-		 * 持续的时间。 (以微秒为单位)
+		 * 持续的时间。 (以秒为单位)
 		 * @version DragonBones 3.0
 		 */
 		public var duration:Number;
@@ -60,7 +59,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 动画名称。
+		 * 数据名称。
 		 * @version DragonBones 3.0
 		 */
 		public var name:String;

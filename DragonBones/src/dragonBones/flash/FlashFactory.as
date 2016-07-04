@@ -27,9 +27,9 @@
 		{
 			super(this);
 			
-			if (!Armature.soundEventManager) 
+			if (!Armature._soundEventManager) 
 			{
-				Armature.soundEventManager = new FlashArmatureDisplayContainer();
+				Armature._soundEventManager = new FlashArmatureDisplayContainer();
 			}
 		}
 		
@@ -147,6 +147,14 @@
 			}
 			
 			return armatureDisplay;
+		}
+		
+		/**
+		 * 
+		 */
+		public function get soundEventManager(): FlashArmatureDisplayContainer
+		{
+			return Armature._soundEventManager as FlashArmatureDisplayContainer;
 		}
 	}
 }

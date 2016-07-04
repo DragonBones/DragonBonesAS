@@ -36,8 +36,9 @@
 	
 	/**
 	 * @language zh_CN
-	 * 建造骨架的基础工厂。
+	 * 创建骨架的基础工厂。
 	 * @see dragonBones.objects.DragonBonesData
+	 * @see dragonBones.textures.TextureAtlasData
 	 * @see dragonBones.objects.ArmatureData
 	 * @see dragonBones.Armature
 	 * @version DragonBones 3.0
@@ -46,8 +47,10 @@
 	{
 		/**
 		 * @language zh_CN
-		 * 是否自动索引，如果开启自动索引，创建一个骨架时可以从多个 DragonBonesData 中寻找资源，通常用于共享导出时使用。 [<code>true</code>: 开启, <code>false</code>: 不开启] (默认: <code>false</code>)
-		 * @see dragonBones.objects.DragonBonesData
+		 * 是否开启共享搜索。 [true: 开启, false: 不开启] (默认: false)
+		 * 如果开启，创建一个骨架时，可以从多个龙骨数据中寻找骨架数据，或贴图集数据中寻找贴图数据。 (通常在有共享导出的数据时开启)
+		 * @see dragonBones.objects.DragonBonesData#autoSearch
+		 * @see dragonBones.objects.TextureAtlasData#autoSearch
 		 * @version DragonBones 4.5
 		 */
 		public var autoSearch:Boolean = false;
@@ -353,10 +356,10 @@
 		
 		/**
 		 * @language zh_CN
-		 * 解析龙骨数据，并将解析后的数据添加到工厂。
-		 * @param rawData 需要解析的原始数据。 (JSON 或 合并后的 PNG 和 SWF 文件)
-		 * @param dragonBonesName 为解析后的数据提供一个名称，以便可以通过这个名称来访问数据，如果不提供，则使用数据中的名称。 (默认: <code>null</code>)
-		 * @return DragonBonesData
+		 * 解析并添加龙骨数据。
+		 * @param rawData 需要解析的原始数据。 (JSON)
+		 * @param dragonBonesName 为数据指定一个名称，以便可以通过这个名称来获取数据，如果不提供，则使用数据中的名称。 (默认: null)
+		 * @return DragonBonesData 龙骨数据
 		 * @see #getDragonBonesData()
 		 * @see #addDragonBonesData()
 		 * @see #removeDragonBonesData()
@@ -398,11 +401,11 @@
 		
 		/**
 		 * @language zh_CN
-		 * 解析贴图集数据，并将解析后的数据添加到工厂。
-		 * @param rawData 需要解析的原始贴图集数据。 (JSON 或 XML 文件)
-		 * @param textureAtlas 贴图集。 (BitmapData 或 ATF 或 DisplayObject)
-		 * @param name 为解析后的数据提供一个名称，以便可以通过这个名称来访问数据，如果不提供，则使用数据中的名称。 (默认: <code>null</code>)
-		 * @param scale 为贴图集设置一个缩放值。 (默认: <code>0</code> 不缩放)
+		 * 解析并添加贴图集数据。
+		 * @param rawData 需要解析的原始数据。 (JSON)
+		 * @param textureAtlas 贴图集数据。 (BitmapData 或 ATF 或 DisplayObject)
+		 * @param name 为数据指定一个名称，以便可以通过这个名称来访问数据，如果不提供，则使用数据中的名称。 (默认: null)
+		 * @param scale 为贴图集设置一个缩放值。 (默认: 0 不缩放)
 		 * @return 贴图集数据
 		 * @see #getTextureAtlasData()
 		 * @see #addTextureAtlasData()
@@ -433,8 +436,8 @@
 		
 		/**
 		 * @language zh_CN
-		 * 获得指定名称的 DragonBonesData。
-		 * @param name 指定的名称。
+		 * 获取指定名称的龙骨数据。
+		 * @param name 数据名称
 		 * @return DragonBonesData
 		 * @see #parseDragonBonesData()
 		 * @see #addDragonBonesData()
@@ -449,9 +452,9 @@
 		
 		/**
 		 * @language zh_CN
-		 * 将 DragonBonesData 添加到工厂。
-		 * @param data DragonBonesData。
-		 * @param dragonBonesName 为数据提供一个名称，以便可以通过这个名称来访问数据，如果不提供，则使用数据中的名称。 (默认: <code>null</code>)
+		 * 添加龙骨数据。
+		 * @param data 龙骨数据。
+		 * @param dragonBonesName 为数据指定一个名称，以便可以通过这个名称来访问数据，如果不提供，则使用数据中的名称。 (默认: null)
 		 * @see #parseDragonBonesData()
 		 * @see #getDragonBonesData()
 		 * @see #removeDragonBonesData()
@@ -487,9 +490,9 @@
 		
 		/**
 		 * @language zh_CN
-		 * 将指定名称的 DragonBonesData 从工厂中移除。
-		 * @param dragonBonesName 指定的名称。
-		 * @param dispose 是否释放数据。 [<code>false</code>: 开启, <code>true</code>: 不开启] (默认: <code>true</code>)
+		 * 移除龙骨数据。
+		 * @param dragonBonesName 数据名称
+		 * @param disposeData 是否释放数据。 [false: 释放, true: 不释放] (默认: true)
 		 * @see #parseDragonBonesData()
 		 * @see #getDragonBonesData()
 		 * @see #addDragonBonesData()
@@ -512,9 +515,9 @@
 		
 		/**
 		 * @language zh_CN
-		 * 获得指定名称的贴图集数据列表。
-		 * @param dragonBonesName 指定的名称。
-		 * @return 贴图集数据列表
+		 * 获取指定名称的贴图集数据列表。
+		 * @param dragonBonesName 数据名称。
+		 * @return 贴图集数据列表。
 		 * @see #parseTextureAtlasData()
 		 * @see #addTextureAtlasData()
 		 * @see #removeTextureAtlasData()
@@ -528,9 +531,9 @@
 		
 		/**
 		 * @language zh_CN
-		 * 将贴图集数据添加到工厂。
+		 * 添加贴图集数据。
 		 * @param data 贴图集数据。
-		 * @param dragonBonesName 为数据提供一个名称，以便可以通过这个名称来访问数据，如果不提供，则使用数据中的名称。 (默认: <code>null</code>)
+		 * @param dragonBonesName 为数据指定一个名称，以便可以通过这个名称来访问数据，如果不提供，则使用数据中的名称。 (默认: null)
 		 * @see #parseTextureAtlasData()
 		 * @see #getTextureAtlasData()
 		 * @see #removeTextureAtlasData()
@@ -563,9 +566,9 @@
 		
 		/**
 		 * @language zh_CN
-		 * 将指定名称的贴图集数据从工厂中移除。
-		 * @param dragonBonesName 指定的名称。
-		 * @param dispose 是否释放数据。 [<code>true</code>: 释放, <code>false</code>: 不释放] (默认: <code>true</code>)
+		 * 移除贴图集数据。
+		 * @param dragonBonesName 数据名称。
+		 * @param disposeData 是否释放数据。 [false: 释放, true: 不释放] (默认: true)
 		 * @see #parseTextureAtlasData()
 		 * @see #getTextureAtlasData()
 		 * @see #addTextureAtlasData()
@@ -592,9 +595,7 @@
 		/**
 		 * @language zh_CN
 		 * 清除所有的数据。
-		 * @param disposeData 是否释放骨架和贴图数据。 [<code>true</code>: 释放, <code>false</code>: 不释放] (默认: <code>true</code>)
-		 * @see dragonBones.objects.DragonBonesData
-		 * @see dragonBones.textures.TextureAtlasData
+		 * @param disposeData 是否释放数据。 [false: 释放, true: 不释放] (默认: true)
 		 * @version DragonBones 4.5
 		 */
 		public function clear(disposeData:Boolean = true):void
@@ -615,7 +616,7 @@
 			{
 				if (disposeData)
 				{
-					const textureAtlasDataList:Vector.<TextureAtlasData> = _dragonBonesDataMap[i];
+					const textureAtlasDataList:Vector.<TextureAtlasData> = _textureAtlasDataMap[i];
 					for each (var textureAtlasData:TextureAtlasData in textureAtlasDataList)
 					{
 						textureAtlasData.returnToPool();
@@ -630,11 +631,11 @@
 		 * @language zh_CN
 		 * 创建一个指定名称的骨架。
 		 * @param armatureName 骨架数据名称。
-		 * @param dragonBonesName DragonBonesData 名称，如果不提供此名称，将检索所有数据，如果多个数据中包含同名的骨架数据，可能无法创建出准确的骨架。 (默认: <code>null</code>)
-		 * @param skinName 皮肤名称。 (默认: <code>null</code>)
-		 * @return 创建的骨架
+		 * @param dragonBonesName 龙骨数据名称，如果不提供此名称，将检索所有的龙骨数据，如果多个数据中包含同名的骨架数据，可能无法创建出准确的骨架。 (默认: null)
+		 * @param skinName 皮肤名称。 (默认: null)
+		 * @return 骨架。
 		 * @see dragonBones.Armature
-		 * @version DragonBones 4.5
+		 * @version DragonBones 3.0
 		 */
 		public function buildArmature(armatureName:String, dragonBonesName:String = null, skinName:String = null):Armature
 		{
@@ -658,10 +659,10 @@
 		 * 将指定骨架的动画替换成其他骨架的动画。 (通常这些骨架应该具有相同的骨架结构)
 		 * @param toArmature 指定的骨架。
 		 * @param fromArmatreName 其他骨架的名称。
-		 * @param fromSkinName 其他骨架的皮肤名称。 (默认: <code>null</code>)
-		 * @param fromDragonBonesDataName 其他骨架所在的 DragonBonesData 名称。 (默认: <code>null</code>)
-		 * @param ifRemoveOriginalAnimationList 是否移除原有的动画。 [<code>true</code>: 移除, <code>false</code>: 不移除] (默认: <code>true</code>)
-		 * @return 是否替换成功  [<code>true</code>: 成功, <code>false</code>: 不成功]
+		 * @param fromSkinName 其他骨架的皮肤名称。 (默认: null)
+		 * @param fromDragonBonesDataName 其他骨架属于的龙骨数据名称。 (默认: null)
+		 * @param ifRemoveOriginalAnimationList 是否移除原有的动画。 [true: 移除, false: 不移除] (默认: true)
+		 * @return 是否替换成功。 [true: 成功, false: 不成功]
 		 * @see dragonBones.Armature
 		 * @version DragonBones 4.5
 		 */
@@ -728,13 +729,13 @@
 		/**
 		 * @language zh_CN
 		 * 将指定插槽的显示对象替换为指定资源创造出的显示对象。
-		 * @param dragonBonesName 指定的 DragonBonesData 名称。
+		 * @param dragonBonesName 指定的龙骨数据名称。
 		 * @param armatureName 指定的骨架名称。
 		 * @param slotName 指定的插槽名称。
 		 * @param displayName 指定的显示对象名称。
 		 * @param slot 指定的插槽实例。
 		 * @param displayIndex 要替换的显示对象的索引，如果未指定索引则替换当前正在显示的显示对象。 (默认: -1)
-		 * @version DragonBones 3.0
+		 * @version DragonBones 4.5
 		 */
 		public function replaceSlotDisplay(dragonBonesName:String, armatureName:String, slotName:String, displayName:String, slot:Slot, displayIndex:int = -1):void
 		{
@@ -763,7 +764,7 @@
 		 * @param armatureName 指定的骨架名称。
 		 * @param slotName 指定的插槽名称。
 		 * @param slot 指定的插槽实例。
-		 * @version DragonBones 3.0
+		 * @version DragonBones 4.5
 		 */
 		public function replaceSlotDisplayList(dragonBonesName:String, armatureName:String, slotName:String, slot:Slot):void
 		{
@@ -780,17 +781,6 @@
 					}
 				}
 			}
-		}
-		
-		/**
-		 * @language zh_CN
-		 * 不推荐使用的 API。
-		 * @see #clear();
-		 * @version DragonBones 3.0
-		 */
-		public function dispose():void
-		{
-			clear();
 		}
 	}
 }

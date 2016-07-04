@@ -60,14 +60,14 @@ package dragonBones.geom
 		
 		/**
 		 * @language zh_CN
-		 * 水平斜切。 (以弧度为单位)
+		 * 水平倾斜。 (以弧度为单位)
 		 * @version DragonBones 3.0
 		 */
 		public var skewX:Number = 0;
 		
 		/**
 		 * @language zh_CN
-		 * 垂直斜切。 (以弧度为单位)
+		 * 垂直倾斜。 (以弧度为单位)
 		 * @version DragonBones 3.0
 		 */
 		public var skewY:Number = 0;
@@ -94,7 +94,7 @@ package dragonBones.geom
 		}
 		
 		/**
-		 * To string
+		 * @private
 		 */
 		public function toString():String 
 		{

@@ -552,7 +552,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 获得此骨骼所有的子骨骼。
+		 * 获取此骨骼所有的子骨骼。
 		 * @version DragonBones 3.0
 		 */
 		public function getBones():Vector.<Bone>
@@ -572,7 +572,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 获得此骨骼所有的插槽。
+		 * 获取此骨骼所有的插槽。
 		 * @see dragonBones.Slot
 		 * @version DragonBones 3.0
 		 */

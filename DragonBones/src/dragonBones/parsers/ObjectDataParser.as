@@ -1192,7 +1192,7 @@
 						const textureData:TextureData = textureAtlasData.generateTexture();
 						textureData.name = _getString(textureObject, NAME, null);
 						textureData.rotated = _getBoolean(textureObject, ROTATED, false);
-						textureData.region.x = _getNumber(textureObject, X, 0) * scale ;
+						textureData.region.x = _getNumber(textureObject, X, 0) * scale;
 						textureData.region.y = _getNumber(textureObject, Y, 0) * scale;
 						textureData.region.width = _getNumber(textureObject, WIDTH, 0) * scale;
 						textureData.region.height = _getNumber(textureObject, HEIGHT, 0) * scale;

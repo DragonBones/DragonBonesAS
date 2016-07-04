@@ -27,11 +27,9 @@ package dragonBones
 	public final class Armature extends BaseObject implements IAnimateble
 	{
 		/**
-		 * @language zh_CN
-		 * 声音事件管理器，声音事件统一由声音事件管理器派发。
-		 * @version DragonBones 3.0
+		 * @private RenderFactory
 		 */
-		public static var soundEventManager:IEventDispatcher = null;
+		dragonBones_internal static var _soundEventManager:IEventDispatcher = null;
 		
 		/**
 		 * @language zh_CN
@@ -413,9 +411,9 @@ package dragonBones
 					{
 						const event:EventObject = _events[i];
 						
-						if (soundEventManager && event.type == EventObject.SOUND_EVENT)
+						if (_soundEventManager && event.type == EventObject.SOUND_EVENT)
 						{
-							soundEventManager._dispatchEvent(event);
+							_soundEventManager._dispatchEvent(event);
 						}
 						else
 						{
@@ -688,7 +686,7 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 获得该骨架所有骨骼的列表，注意这里返回的是直接引用。
+		 * 获取该骨架所有骨骼的列表，注意这里返回的是直接引用。
 		 * @see dragonBones.Bone
 		 * @version DragonBones 3.0
 		 */
@@ -699,7 +697,7 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 获得此骨架所有插槽的列表，注意这里返回的是直接引用。
+		 * 获取此骨架所有插槽的列表，注意这里返回的是直接引用。
 		 * @see dragonBones.Slot
 		 * @version DragonBones 3.0
 		 */
@@ -721,7 +719,7 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 获得骨架数据。
+		 * 获取骨架数据。
 		 * @see dragonBones.objects.ArmatureData
 		 * @version DragonBones 4.5
 		 */
@@ -732,7 +730,7 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 获得显示容器，插槽的显示对象都会以此显示容器为父级，根据渲染平台的不同，类型会不同，通常是 DisplayObjectContainer 类型。
+		 * 获取显示容器，插槽的显示对象都会以此显示容器为父级，根据渲染平台的不同，类型会不同，通常是 DisplayObjectContainer 类型。
 		 * @version DragonBones 3.0
 		 */
 		public function get display():IArmatureDisplayContainer
@@ -742,7 +740,7 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 获得父插槽实例。
+		 * 获取父插槽实例。
 		 * @see dragonBones.Slot
 		 * @version DragonBones 4.5
 		 */
@@ -753,7 +751,7 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 获得动画控制器实例。
+		 * 获取动画控制器实例。
 		 * @see dragonBones.animation.Animation
 		 * @version DragonBones 3.0
 		 */
@@ -786,7 +784,7 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 添加事件。
+		 * 是否添加了指定事件。
 		 * @param type 事件类型。
 		 * @version DragonBones 3.0
 		 */
@@ -797,7 +795,7 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 添加事件。
+		 * 添加指定事件。
 		 * @param type 事件类型。
 		 * @param listener 事件监听。
 		 * @version DragonBones 3.0
@@ -809,7 +807,7 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 移除事件。
+		 * 移除指定事件。
 		 * @param type 事件类型。
 		 * @param listener 事件监听。
 		 * @version DragonBones 3.0

@@ -381,7 +381,7 @@
 		 * @param animationName 动画数据的名称。
 		 * @param playTimes 循环播放的次数。 [-1: 使用数据默认值, 0: 无限循环播放, [1~N]: 循环播放 N 次] (默认: -1)
 		 * @param fadeInTime 淡入的时间。 [-1: 使用数据默认值, [0~N]: N 秒淡入完毕] (以秒为单位, 默认: -1)
-		 * @param layer 混合的图层，图层高会优先获得混合权重。 (默认: 0)
+		 * @param layer 混合的图层，图层高会优先获取混合权重。 (默认: 0)
 		 * @param group 混合的组，用于给动画状态编组，方便混合淡出控制。 (默认: null)
 		 * @param fadeOutMode 淡出的模式。 (默认: <code>AnimationFadeOutMode.SameLayerAndGroup</code>)
 		 * @param additiveBlending 以叠加的形式混合。 (默认: false)
@@ -594,7 +594,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 获得指定名称的动画状态。
+		 * 获取指定名称的动画状态。
 		 * @param animationName 动画状态的名称。
 		 * @see dragonBones.animation.AnimationState
 		 * @version DragonBones 3.0

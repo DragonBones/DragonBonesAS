@@ -11,9 +11,17 @@
 	public class TextureAtlasData extends BaseObject
 	{
 		/**
-		 * @private
+		 * @language zh_CN
+		 * 是否开启共享搜索。 [true: 开启, false: 不开启] (默认: false)
+		 * @see dragonBones.objects.ArmatureData
+		 * @version DragonBones 4.5
 		 */
 		public var autoSearch:Boolean;
+		
+		/**
+		 * @private
+		 */
+		public var modifyScale:Number;
 		
 		/**
 		 * @language zh_CN
@@ -21,11 +29,6 @@
 		 * @version DragonBones 3.0
 		 */
 		public var scale:Number;
-		
-		/**
-		 * @private
-		 */
-		public var modifyScale:Number;
 		
 		/**
 		 * @language zh_CN
@@ -65,6 +68,7 @@
 		override protected function _onClear():void
 		{
 			autoSearch = false;
+			modifyScale = 1;
 			scale = 1;
 			name = null;
 			imagePath = null;

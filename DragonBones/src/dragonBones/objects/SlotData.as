@@ -43,14 +43,14 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 插槽名称。
+		 * 数据名称。
 		 * @version DragonBones 3.0
 		 */
 		public var name:String;
 		
 		/**
 		 * @language zh_CN
-		 * 父骨骼。
+		 * 父骨骼数据。
 		 * @see dragonBones.objects.BoneData
 		 * @version DragonBones 3.0
 		 */

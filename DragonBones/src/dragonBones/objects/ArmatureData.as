@@ -36,14 +36,14 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 骨架名称。
+		 * 数据名称。
 		 * @version DragonBones 3.0
 		 */
 		public var name:String;
 		
 		/**
 		 * @language zh_CN
-		 * 所包含的骨骼数据。
+		 * 所有的骨骼数据。
 		 * @see dragonBones.objects.BoneData
 		 * @version DragonBones 3.0
 		 */
@@ -51,7 +51,7 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 所包含的插槽数据。
+		 * 所有的插槽数据。
 		 * @see dragonBones.objects.SlotData
 		 * @version DragonBones 3.0
 		 */
@@ -59,7 +59,7 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 所包含的皮肤数据。
+		 * 所有的皮肤数据。
 		 * @see dragonBones.objects.SkinData
 		 * @version DragonBones 3.0
 		 */
@@ -67,7 +67,7 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 所包含的动画数据。
+		 * 所有的动画数据。
 		 * @see dragonBones.objects.AnimationData
 		 * @version DragonBones 3.0
 		 */
@@ -336,8 +336,8 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 获得指定名称的骨骼。
-		 * @param name 骨骼名称
+		 * 获取指定名称的骨骼数据。
+		 * @param name 骨骼数据名称。
 		 * @see dragonBones.objects.BoneData
 		 * @version DragonBones 3.0
 		 */
@@ -348,8 +348,8 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 获得指定名称的插槽。
-		 * @param name 插槽名称
+		 * 获取指定名称的插槽数据。
+		 * @param name 插槽数据名称。
 		 * @see dragonBones.objects.SlotData
 		 * @version DragonBones 3.0
 		 */
@@ -360,8 +360,8 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 获得指定名称的皮肤。
-		 * @param name 皮肤名称
+		 * 获取指定名称的皮肤数据。
+		 * @param name 皮肤数据名称。
 		 * @see dragonBones.objects.SkinData
 		 * @version DragonBones 3.0
 		 */
@@ -372,8 +372,8 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 获得指定名称的动画。
-		 * @param name 动画名称
+		 * 获取指定名称的动画数据。
+		 * @param name 动画数据名称。
 		 * @see dragonBones.objects.AnimationData
 		 * @version DragonBones 3.0
 		 */
@@ -414,7 +414,7 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 获得默认的皮肤。
+		 * 获取默认的皮肤数据。
 		 * @see dragonBones.objects.SkinData
 		 * @version DragonBones 4.5
 		 */
@@ -425,7 +425,7 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 获得默认的动画。
+		 * 获取默认的动画数据。
 		 * @see dragonBones.objects.AnimationData
 		 * @version DragonBones 4.5
 		 */

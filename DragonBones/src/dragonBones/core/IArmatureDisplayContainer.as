@@ -21,7 +21,7 @@ package dragonBones.core
 		
 		/**
 		 * @language zh_CN
-		 * 获得使用这个显示容器的骨架。
+		 * 获取使用这个显示容器的骨架。
 		 * @see dragonBones.Armature
 		 * @version DragonBones 3.0
 		 */
@@ -29,7 +29,7 @@ package dragonBones.core
 		
 		/**
 		 * @language zh_CN
-		 * 获得使用这个显示容器的骨架的动画控制器。
+		 * 获取使用这个显示容器的骨架的动画控制器。
 		 * @see dragonBones.animation.Animation
 		 * @version DragonBones 3.0
 		 */

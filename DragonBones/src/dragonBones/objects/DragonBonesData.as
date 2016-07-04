@@ -12,8 +12,7 @@ package dragonBones.objects
 	{
 		/**
 		 * @language zh_CN
-		 * 是否自动搜索。 [<code>true</code>: 启用, <code>false</code>: 不启用] (默认: <code>false</code>)
-		 * @see dragonBones.objects.ArmatureData
+		 * 是否开启共享搜索。 [true: 开启, false: 不开启] (默认: false)
 		 * @version DragonBones 4.5
 		 */
 		public var autoSearch:Boolean;
@@ -34,7 +33,7 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 所有骨架数据。
+		 * 所有的骨架数据。
 		 * @see dragonBones.objects.ArmatureData
 		 * @version DragonBones 3.0
 		 */
@@ -77,8 +76,8 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 获得指定名称的骨架。
-		 * @param name 骨架名称
+		 * 获取指定名称的骨架数据。
+		 * @param name 骨架数据名称。
 		 * @see dragonBones.objects.ArmatureData
 		 * @version DragonBones 3.0
 		 */
@@ -105,9 +104,9 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 所有骨架数据名称。
+		 * 所有骨架的数据名称。
 		 * @see #armatures
-		 * @version DragonBones 4.5
+		 * @version DragonBones 3.0
 		 */
 		public function get armatureNames():Vector.<String>
 		{

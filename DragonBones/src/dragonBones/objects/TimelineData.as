@@ -8,8 +8,19 @@ package dragonBones.objects
 	 */
 	public class TimelineData extends BaseObject
 	{
+		/**
+		 * @private
+		 */
 		public var scale:Number;
+		
+		/**
+		 * @private
+		 */
 		public var offset:Number;
+		
+		/**
+		 * @private
+		 */
 		public const frames:Vector.<FrameData> = new Vector.<FrameData>(0, true);
 		
 		public function TimelineData(self:TimelineData)

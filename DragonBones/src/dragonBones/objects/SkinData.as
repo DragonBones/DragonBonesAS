@@ -11,7 +11,7 @@ package dragonBones.objects
 	{
 		/**
 		 * @language zh_CN
-		 * 皮肤名称。
+		 * 数据名称。
 		 * @version DragonBones 3.0
 		 */
 		public var name:String;

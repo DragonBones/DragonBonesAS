@@ -26,6 +26,9 @@ package dragonBones.objects
 			super(this);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function _onClear():void
 		{
 			isRelativePivot = false;
