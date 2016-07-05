@@ -30,11 +30,17 @@ package dragonBones.starling
 		
 		public var texture:Texture = null;
 		
+		/**
+		 * @private
+		 */
 		public function StarlingTextureAtlasData()
 		{
 			super(this);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function _onClear():void
 		{
 			super._onClear();
@@ -46,6 +52,9 @@ package dragonBones.starling
 			}
 		}
 		
+		/**
+		 * @private
+		 */
 		override public function generateTexture():TextureData
 		{
 			return BaseObject.borrowObject(StarlingTextureData) as StarlingTextureData;

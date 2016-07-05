@@ -3,7 +3,7 @@ package dragonBones.events
 	/**
 	 * @language zh_CN
 	 * 事件接口。
-	 * @version DragonBones 3.0
+	 * @version DragonBones 4.5
 	 */
 	public interface IEventDispatcher
 	{
@@ -22,7 +22,7 @@ package dragonBones.events
 		 * 是否包含指定类型的事件。
 		 * @param type 事件类型。
 		 * @return  [true: 包含, false: 不包含]
-		 * @version DragonBones 3.0
+		 * @version DragonBones 4.5
 		 */
 		function hasEvent(type:String):Boolean;
 		
@@ -31,7 +31,7 @@ package dragonBones.events
 		 * 添加事件。
 		 * @param type 事件类型。
 		 * @param listener 事件回调。
-		 * @version DragonBones 3.0
+		 * @version DragonBones 4.5
 		 */
 		function addEvent(type:String, listener:Function):void;
 		
@@ -40,7 +40,7 @@ package dragonBones.events
 		 * 移除事件。
 		 * @param type 事件类型。
 		 * @param listener 事件回调。
-		 * @version DragonBones 3.0
+		 * @version DragonBones 4.5
 		 */
 		function removeEvent(type:String, listener:Function):void;
 	}

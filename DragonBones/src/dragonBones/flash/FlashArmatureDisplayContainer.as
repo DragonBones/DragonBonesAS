@@ -109,6 +109,17 @@ package dragonBones.flash
 		/**
 		 * @inheritDoc
 		 */
+		public function dispose():void
+		{
+			if (_armature)
+			{
+				_armature.dispose();
+			}
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
 		public function get armature():Armature
 		{
 			return _armature;

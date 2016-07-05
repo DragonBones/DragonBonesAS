@@ -50,7 +50,7 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 父骨骼数据。
+		 * 所属的父骨骼数据。
 		 * @see dragonBones.objects.BoneData
 		 * @version DragonBones 3.0
 		 */

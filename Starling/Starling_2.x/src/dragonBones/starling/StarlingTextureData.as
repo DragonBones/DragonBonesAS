@@ -4,6 +4,9 @@ package dragonBones.starling
 	
 	import starling.textures.Texture;
 	
+	/**
+	 * @private
+	 */
 	public final class StarlingTextureData extends TextureData
 	{
 		public var texture:Texture = null;
@@ -13,6 +16,9 @@ package dragonBones.starling
 			super(this);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function _onClear():void
 		{
 			super._onClear();

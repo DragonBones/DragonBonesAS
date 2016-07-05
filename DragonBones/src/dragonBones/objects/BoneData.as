@@ -60,7 +60,7 @@ package dragonBones.objects
 		
 		/**
 		 * @language zh_CN
-		 * 父骨骼数据。
+		 * 所属的父骨骼数据。
 		 * @version DragonBones 3.0
 		 */
 		public var parent:BoneData;

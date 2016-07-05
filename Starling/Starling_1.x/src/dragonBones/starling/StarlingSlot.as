@@ -16,6 +16,11 @@
 	
 	use namespace dragonBones_internal;
 	
+	/**
+	 * @language zh_CN
+	 * Starling 插槽。
+	 * @version DragonBones 3.0
+	 */
 	public final class StarlingSlot extends Slot
 	{
 		/**
@@ -23,10 +28,15 @@
 		 */
 		dragonBones_internal static const EMPTY_TEXTURE:Texture = Texture.empty(1, 1);
 		
-		public var transformEnabled:Boolean = false;
+		public var transformUpdateEnabled:Boolean = false;
 		
 		private var _renderDisplay:DisplayObject = null;
 		
+		/**
+		 * @language zh_CN
+		 * 创建一个空的插槽。
+		 * @version DragonBones 3.0
+		 */
 		public function StarlingSlot()
 		{
 			super(this);
@@ -298,7 +308,7 @@
 			const pivotX:Number = _renderDisplay.pivotX;
 			const pivotY:Number = _renderDisplay.pivotY;
 			
-			if (transformEnabled)
+			if (transformUpdateEnabled)
 			{
 				_renderDisplay.transformationMatrix = this.globalTransformMatrix;
 				

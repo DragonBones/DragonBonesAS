@@ -21,6 +21,11 @@
 	
 	use namespace dragonBones_internal;
 	
+	/**
+	 * @language zh_CN
+	 * Starling 插槽。
+	 * @version DragonBones 3.0
+	 */
 	public final class StarlingSlot extends Slot
 	{
 		public var transformEnabled:Boolean;
@@ -36,6 +41,11 @@
 		
 		private var _renderDisplay:DisplayObject;
 		
+		/**
+		 * @language zh_CN
+		 * 创建一个空的插槽。
+		 * @version DragonBones 3.0
+		 */
 		public function StarlingSlot()
 		{
 			super(this);

@@ -11,7 +11,7 @@
 	
 	/**
 	 * @language zh_CN
-	 * 骨骼，一个骨架中可以包含多个骨骼，骨骼以树状结构构成骨架。
+	 * 骨骼，一个骨架中可以包含多个骨骼，骨骼以树状结构组成骨架。
 	 * 骨骼在骨骼动画体系中是最重要的逻辑单元之一，负责动画中的平移旋转缩放的实现。
 	 * @see dragonBones.objects.BoneData
 	 * @see dragonBones.Armature
@@ -22,28 +22,28 @@
 	{
 		/**
 		 * @language zh_CN
-		 * 是否继承父骨骼的平移。 (默认: true)
+		 * 是否继承父骨骼的平移。 [true: 继承, false: 不继承] (默认: true)
 		 * @version DragonBones 3.0
 		 */
 		public var inheritTranslation:Boolean;
 		
 		/**
 		 * @language zh_CN
-		 * 是否继承父骨骼的旋转。 (默认: true)
+		 * 是否继承父骨骼的旋转。 [true: 继承, false: 不继承] (默认: true)
 		 * @version DragonBones 3.0
 		 */
 		public var inheritRotation:Boolean;
 		
 		/**
 		 * @language zh_CN
-		 * 是否继承父骨骼的缩放。 (默认: true)
+		 * 是否继承父骨骼的缩放。 [true: 继承, false: 不继承] (默认: true)
 		 * @version DragonBones 4.5
 		 */
 		public var inheritScale:Boolean;
 		
 		/**
 		 * @language zh_CN
-		 * IK 约束时骨骼方向是否为顺时针方向。 (默认: true)
+		 * IK 约束时骨骼方向是否为顺时针方向。 [true: 顺时针, false: 逆时针]  (默认: true)
 		 * @version DragonBones 4.5
 		 */
 		public var ikBendPositive:Boolean;
@@ -57,7 +57,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 骨骼长度。 (默认: 0，仅在被 IK 约束时才有意义)
+		 * 骨骼长度。 (默认: 0)
 		 * @version DragonBones 4.5
 		 */
 		public var length:Number;
@@ -120,6 +120,9 @@
 			super(this);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function _onClear():void
 		{
 			super._onClear();
@@ -206,6 +209,9 @@
 			}
 		}
 		
+		/**
+		 * @private
+		 */
 		private function _computeIKA():void
 		{
 			// TODO IK
@@ -235,6 +241,9 @@
 			this.global.toMatrix(this.globalTransformMatrix);
 		}
 		
+		/**
+		 * @private
+		 */
 		private function _computeIKB():void
 		{
 			// TODO IK
@@ -512,8 +521,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 使此骨骼在下一帧更新坐标变换。 (当骨骼没有动画状态或动画状态播放完成时，骨骼将不在更新)
-		 * @see dragonBones.animation.AnimationState
+		 * 下一帧更新变换。 (当骨骼没有动画状态或动画状态播放完成时，骨骼将不在更新)
 		 * @version DragonBones 3.0
 		 */
 		[inline]
@@ -525,7 +533,7 @@
 		/**
 		 * @language zh_CN
 		 * 是否包含某个指定的骨骼或插槽。
-		 * @return 如果包含返回 <code>true</code>，反之返回 <code>false</code>。
+		 * @return [true: 包含，false: 不包含]
 		 * @see dragonBones.core.TransformObject
 		 * @version DragonBones 3.0
 		 */
@@ -552,7 +560,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 获取此骨骼所有的子骨骼。
+		 * 所有的子骨骼。
 		 * @version DragonBones 3.0
 		 */
 		public function getBones():Vector.<Bone>
@@ -572,7 +580,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 获取此骨骼所有的插槽。
+		 * 所有的插槽。
 		 * @see dragonBones.Slot
 		 * @version DragonBones 3.0
 		 */
@@ -619,7 +627,8 @@
 		
 		/**
 		 * @language zh_CN
-		 * 控制此骨骼所有插槽的显示。 (默认: <code>true</code>)
+		 * 控制此骨骼所有插槽的显示。 (默认: true)
+		 * @see dragonBones.Slot
 		 * @version DragonBones 3.0
 		 */
 		public function get visible():Boolean

@@ -31,14 +31,14 @@ package dragonBones.core
 		
 		/**
 		 * @language zh_CN
-		 * 在骨架坐标系的最终坐标变换的矩阵。
+		 * 相对于骨架坐标系的矩阵。
 		 * @version DragonBones 3.0
 		 */
 		public var globalTransformMatrix:Matrix;
 		
 		/**
 		 * @language zh_CN
-		 * 在骨架坐标系的最终坐标变换。
+		 * 相对于骨架坐标系的变换。
 		 * @see dragonBones.geom.Transform
 		 * @version DragonBones 3.0
 		 */
@@ -46,7 +46,7 @@ package dragonBones.core
 		
 		/**
 		 * @language zh_CN
-		 * 绑定到父骨骼或骨架坐标系的坐标变换。
+		 * 相对于骨架或父骨骼坐标系的绑定变换。
 		 * @see dragonBones.geom.Transform
 		 * @version DragonBones 3.0
 		 */
@@ -54,7 +54,7 @@ package dragonBones.core
 		
 		/**
 		 * @language zh_CN
-		 * 在父骨骼或骨架坐标系的坐标变换的偏移。
+		 * 相对于骨架或父骨骼坐标系的偏移变换。
 		 * @see dragonBones.geom.Transform
 		 * @version DragonBones 3.0
 		 */

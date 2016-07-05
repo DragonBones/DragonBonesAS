@@ -28,14 +28,14 @@
 	{
 		/**
 		 * @language zh_CN
-		 * 显示的子骨架是否继承主骨架的动画。 (默认: <code>true</code>，仅在显示对象中包含子骨架时才有效)
+		 * 子骨架是否继承父骨架的动画。 [true: 继承, false: 不继承] (默认: true，仅在显示对象中包含子骨架时有效)
 		 * @version DragonBones 4.5
 		 */
 		public var inheritAnimation:Boolean;
 		
 		/**
 		 * @language zh_CN
-		 * 显示对象所受到控制对象，应设置为 AnimationState 的 name 或 group。 (默认: <code>null</code> 受所有的动画状态控制)
+		 * 显示对象受到控制的对象，应设置为动画状态的名称或组名称。 (默认: null，受所有的动画状态控制)
 		 * @see dragonBones.animation.AnimationState#displayControl
 		 * @see dragonBones.animation.AnimationState#name
 		 * @see dragonBones.animation.AnimationState#group
@@ -800,7 +800,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 
+		 * 在下一帧更新显示对象的状态。
 		 * @version DragonBones 4.5
 		 */
 		public function invalidUpdate():void

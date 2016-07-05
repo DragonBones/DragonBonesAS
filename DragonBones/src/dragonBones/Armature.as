@@ -16,7 +16,7 @@ package dragonBones
 	
 	/**
 	 * @language zh_CN
-	 * 骨架，是龙骨骨骼动画系统的核心，由显示容器、骨骼、插槽、动画、事件系统构成。
+	 * 骨架，是骨骼动画系统的核心，由显示容器、骨骼、插槽、动画、事件系统构成。
 	 * @see dragonBones.objects.ArmatureData
 	 * @see dragonBones.Bone
 	 * @see dragonBones.Slot
@@ -345,8 +345,13 @@ package dragonBones
 		}
 		
 		/**
-		 * Update the animation using this method typically in an ENTERFRAME Event or with a Timer.
-		 * @param The amount of second to move the playhead ahead.
+		 * @language zh_CN
+		 * 更新骨架和动画。 (可以使用时钟实例或显示容器来更新)
+		 * @param passedTime 两帧之前的时间间隔。 (以秒为单位)
+		 * @see dragonBones.animation.IAnimateble
+		 * @see dragonBones.animation.WorldClock
+		 * @see dragonBones.core.IArmatureDisplayContainer
+		 * @version DragonBones 3.0
 		 */
 		public function advanceTime(passedTime:Number):void
 		{
@@ -476,7 +481,13 @@ package dragonBones
 		}
 		
 		/**
-		 * Force update bones and slots. (When bone's animation play complete, it will not update.) 
+		 * @language zh_CN
+		 * 更新骨骼和插槽的变换。 (当骨骼没有动画状态或动画状态播放完成时，骨骼将不在更新)
+		 * @param boneName 指定的骨骼名称。 (默认: null, 所有骨骼)
+		 * @param updateSlotDisplay 是否更新插槽的显示对象。 (默认: false, 不更新)
+		 * @see dragonBones.Bone
+		 * @see dragonBones.Slot
+		 * @version DragonBones 3.0
 		 */
 		public function invalidUpdate(boneName:String = null, updateSlotDisplay:Boolean = false):void
 		{
@@ -517,10 +528,12 @@ package dragonBones
 		}
 		
 		/**
-		 * Retrieves a Slot by name
-		 * @param The name of the Bone to retrieve.
-		 * @return A Slot instance or null if no Slot with that name exist.
+		 * @language zh_CN
+		 * 获取指定名称的插槽。
+		 * @param name 插槽的名称。
+		 * @return 插槽。
 		 * @see dragonBones.Slot
+		 * @version DragonBones 3.0
 		 */
 		public function getSlot(name:String):Slot
 		{
@@ -536,10 +549,12 @@ package dragonBones
 		}
 		
 		/**
-		 * Gets the Slot associated with this DisplayObject.
-		 * @param Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
-		 * @return A Slot instance or null if no Slot with that DisplayObject exist.
+		 * @language zh_CN
+		 * 通过显示对象获取插槽。
+		 * @param display 显示对象。
+		 * @return 包含这个显示对象的插槽。
 		 * @see dragonBones.Slot
+		 * @version DragonBones 3.0
 		 */
 		public function getSlotByDisplay(display:Object):Slot
 		{
@@ -558,14 +573,16 @@ package dragonBones
 		}
 		
 		/**
-		 * Add a slot to a bone as child.
-		 * @param slot A Slot instance
-		 * @param boneName bone name
-		 * @see dragonBones.core.DBObject
+		 * @language zh_CN
+		 * 将一个指定的插槽添加到骨架中。
+		 * @param value 需要添加的插槽。
+		 * @param parentName 需要添加到的父骨骼名称。
+		 * @see dragonBones.Slot
+		 * @version DragonBones 3.0
 		 */
-		public function addSlot(value:Slot, boneName:String):void
+		public function addSlot(value:Slot, parentName:String):void
 		{
-			const bone:Bone = getBone(boneName);
+			const bone:Bone = getBone(parentName);
 			if (bone)
 			{
 				value._setArmature(this);
@@ -578,9 +595,11 @@ package dragonBones
 		}
 		
 		/**
-		 * Remove a Slot instance from this Armature instance.
-		 * @param The Slot instance to remove.
+		 * @language zh_CN
+		 * 将一个指定的插槽从骨架中移除。
+		 * @param bone 需要移除的插槽
 		 * @see dragonBones.Slot
+		 * @version DragonBones 3.0
 		 */
 		public function removeSlot(value:Slot):void
 		{
@@ -596,10 +615,12 @@ package dragonBones
 		}
 		
 		/**
-		 * Retrieves a Bone by name
-		 * @param The name of the Bone to retrieve.
-		 * @return A Bone instance or null if no Bone with that name exist.
+		 * @language zh_CN
+		 * 获取指定名称的骨骼。
+		 * @param name 骨骼的名称。
+		 * @return 骨骼。
 		 * @see dragonBones.Bone
+		 * @version DragonBones 3.0
 		 */
 		public function getBone(name:String):Bone
 		{
@@ -613,12 +634,13 @@ package dragonBones
 			
 			return null;
 		}
-		
 		/**
-		 * Gets the Bone associated with this DisplayObject.
-		 * @param Instance type of this object varies from flash.display.DisplayObject to startling.display.DisplayObject and subclasses.
-		 * @return A Bone instance or null if no Bone with that DisplayObject exist..
+		 * @language zh_CN
+		 * 通过显示对象获取骨骼。
+		 * @param display 显示对象。
+		 * @return 包含这个显示对象的骨骼。
 		 * @see dragonBones.Bone
+		 * @version DragonBones 3.0
 		 */
 		public function getBoneByDisplay(display:Object):Bone
 		{
@@ -630,9 +652,9 @@ package dragonBones
 		/**
 		 * @language zh_CN
 		 * 将一个指定的骨骼添加到骨架中。
-		 * @param bone 需要添加的骨骼。
-		 * @param parentName 需要添加到指定的父骨骼的名称，如果未指定名称则添加到骨架根部。 (默认: <code>null</code>)
-		 * @see	dragonBones.Bone
+		 * @param value 需要添加的骨骼。
+		 * @param parentName 需要添加到的父骨骼名称，如果未指定名称则添加到骨架根部。 (默认: null)
+		 * @see dragonBones.Bone
 		 * @version DragonBones 3.0
 		 */
 		public function addBone(value:Bone, parentName:String = null):void
@@ -652,8 +674,8 @@ package dragonBones
 		/**
 		 * @language zh_CN
 		 * 将一个指定的骨骼从骨架中移除。
-		 * @param bone 需要移除的骨骼
-		 * @see	dragonBones.Bone
+		 * @param value 需要移除的骨骼
+		 * @see dragonBones.Bone
 		 * @version DragonBones 3.0
 		 */
 		public function removeBone(value:Bone):void
@@ -672,7 +694,6 @@ package dragonBones
 		/**
 		 * @language zh_CN
 		 * 替换骨架的主贴图，根据渲染引擎的不同，提供不同的贴图数据。
-		 * @see dragonBones.Bone
 		 * @version DragonBones 4.5
 		 */
 		public function setReplaceTexture(texture:Object):void
@@ -686,7 +707,7 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 获取该骨架所有骨骼的列表，注意这里返回的是直接引用。
+		 * 获取所有骨骼。
 		 * @see dragonBones.Bone
 		 * @version DragonBones 3.0
 		 */
@@ -697,7 +718,7 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 获取此骨架所有插槽的列表，注意这里返回的是直接引用。
+		 * 获取所有插槽。
 		 * @see dragonBones.Slot
 		 * @version DragonBones 3.0
 		 */
@@ -740,7 +761,7 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 获取父插槽实例。
+		 * 获取父插槽。 (当此骨架是某个骨架的子骨架时，可以通过此属性向上查找从属关系)
 		 * @see dragonBones.Slot
 		 * @version DragonBones 4.5
 		 */
@@ -751,7 +772,7 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 获取动画控制器实例。
+		 * 获取动画控制器。
 		 * @see dragonBones.animation.Animation
 		 * @version DragonBones 3.0
 		 */
@@ -762,13 +783,13 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 动画缓存的帧率，当设置一个大于 0 的帧率时，将会开启动画缓存机制。
+		 * 动画缓存的帧率，当设置一个大于 0 的帧率时，将会开启动画缓存。
 		 * 通过将动画数据缓存在内存中来提高运行性能，会有一定的内存开销。
-		 * 帧率不宜设置的过高，通常跟动画的帧率相当且低于程序的帧率。
+		 * 帧率不宜设置的过高，通常跟动画的帧率相当且低于程序运行的帧率。
 		 * 开启动画缓存后，某些功能将会失效，比如 Bone 和 Slot 的 offset 属性等。
 		 * @see dragonBones.objects.DragonBonesData#frameRate
 		 * @see dragonBones.objects.ArmatureData#frameRate
-		 * @version DragonBones 4.0
+		 * @version DragonBones 4.5
 		 */
 		public function get cacheFrameRate():uint
 		{
@@ -784,8 +805,9 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 是否添加了指定事件。
+		 * 是否包含指定类型的事件。
 		 * @param type 事件类型。
+		 * @return  [true: 包含, false: 不包含]
 		 * @version DragonBones 3.0
 		 */
 		public function hasEventListener(type:String):void
@@ -797,7 +819,7 @@ package dragonBones
 		 * @language zh_CN
 		 * 添加指定事件。
 		 * @param type 事件类型。
-		 * @param listener 事件监听。
+		 * @param listener 事件回调。
 		 * @version DragonBones 3.0
 		 */
 		public function addEventListener(type:String, listener:Function):void
@@ -809,7 +831,7 @@ package dragonBones
 		 * @language zh_CN
 		 * 移除指定事件。
 		 * @param type 事件类型。
-		 * @param listener 事件监听。
+		 * @param listener 事件回调。
 		 * @version DragonBones 3.0
 		 */
 		public function removeEventListener(type:String, listener:Function):void

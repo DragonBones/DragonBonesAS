@@ -9,12 +9,16 @@ package dragonBones.flash
 	public final class FlashTextureAtlasData extends TextureAtlasData
 	{
 		public var texture:BitmapData;
-		
+		/**
+		 * @private
+		 */
 		public function FlashTextureAtlasData()
 		{
 			super(this);
 		}
-		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function _onClear():void
 		{
 			super._onClear();
@@ -25,7 +29,9 @@ package dragonBones.flash
 				texture = null;
 			}
 		}
-		
+		/**
+		 * @private
+		 */
 		override public function generateTexture():TextureData
 		{
 			return BaseObject.borrowObject(FlashTextureData) as FlashTextureData;

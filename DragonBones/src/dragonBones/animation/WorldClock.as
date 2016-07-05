@@ -28,7 +28,7 @@
 		/**
 		 * @language zh_CN
 		 * 时间流逝的速度，用于实现动画的变速播放。 
-		 * [(-N~0): 倒转播放, 0: 停止播放, (0~1): 慢速播放, 1: 正常播放, (1~N): 快速播放] (默认: 1)
+		 * [0: 停止播放, (0~1): 慢速播放, 1: 正常播放, (1~N): 快速播放] (默认: 1)
 		 * @version DragonBones 3.0
 		 */
 		public var timeScale:Number = 1;
@@ -52,7 +52,7 @@
 		/**
 		 * @language zh_CN
 		 * 为所有的 IAnimatable 实例向前播放一个指定的时间。 (通常这个方法需要在 ENTER_FRAME 事件的响应函数中被调用)
-		 * @param passedTime 前进的时间。 (以秒为单位，默认: -1，自动计算当前帧与上一帧的时间差)
+		 * @param passedTime 前进的时间。 (以秒为单位，当设置为 -1 时将自动计算当前帧与上一帧的时间差)
 		 * @version DragonBones 3.0
 		 */
 		public function advanceTime(passedTime:Number):void
@@ -124,9 +124,9 @@
 		}
 		
 		/** 
-		 * 检查是否包含指定的 IAnimatable 实例
+		 * 是否包含指定的 IAnimatable 实例
 		 * @param value 指定的 IAnimatable 实例。
-		 * @return 如果包含则返回 <code>true</code> ，反之返回 <code>false</code> 。
+		 * @return  [true: 包含，false: 不包含]。
 		 * @version DragonBones 3.0
 		 */
 		public function contains(value:IAnimateble):Boolean
@@ -165,7 +165,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 移除所有的 IAnimatable 实例。
+		 * 清除所有的 IAnimatable 实例。
 		 * @version DragonBones 3.0
 		 */
 		public function clear():void

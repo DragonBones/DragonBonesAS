@@ -23,12 +23,19 @@
 	
 	use namespace dragonBones_internal;
 	
+	/**
+	 * @language zh_CN
+	 * Starling 工厂。
+	 * @version DragonBones 3.0
+	 */
 	public final class StarlingFactory extends BaseFactory
 	{
 		public var generateMipMaps:Boolean = true;
-		
-		private var _armatureDisplayClass:Class = null;
-		
+		/**
+		 * @language zh_CN
+		 * 创建一个工厂。
+		 * @version DragonBones 3.0
+		 */
 		public function StarlingFactory()
 		{
 			super(this);
@@ -69,7 +76,7 @@
 		override protected function _generateArmature(dataPackage:BuildArmaturePackage):Armature
 		{
 			const armature:Armature = BaseObject.borrowObject(Armature) as Armature;
-			const armatureDisplayContainer:StarlingArmatureDisplayContainer = _armatureDisplayClass? new _armatureDisplayClass(): new StarlingArmatureDisplayContainer();
+			const armatureDisplayContainer:StarlingArmatureDisplayContainer = new StarlingArmatureDisplayContainer();
 			
 			armature._armatureData = dataPackage.armature;
 			armature._skinData = dataPackage.skin;
@@ -80,8 +87,6 @@
 			armature._animation._armature = armature;
 			
 			armature.animation.animations = dataPackage.armature.animations;
-			
-			_armatureDisplayClass = null;
 			
 			return armature;
 		}
@@ -146,12 +151,17 @@
 		}
 		
 		/**
-		 * 
+		 * @language zh_CN
+		 * 创建一个指定名称的骨架，并使用骨架的显示容器来更新骨架动画。
+		 * @param armatureName 骨架数据名称。
+		 * @param dragonBonesName 龙骨数据名称，如果不提供此名称，将检索所有的龙骨数据，如果多个数据中包含同名的骨架数据，可能无法创建出准确的骨架。 (默认: null)
+		 * @param skinName 皮肤名称。 (默认: null)
+		 * @return 骨架的显示容器。
+		 * @see dragonBones.core.IArmatureDisplayContainer
+		 * @version DragonBones 4.5
 		 */
-		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null, displayClass:Class = null):StarlingArmatureDisplayContainer
+		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null):StarlingArmatureDisplayContainer
 		{
-			_armatureDisplayClass = displayClass;
-			
 			const armature:Armature = this.buildArmature(armatureName, dragonBonesName, skinName);
 			const armatureDisplay:StarlingArmatureDisplayContainer = armature? (armature.display as StarlingArmatureDisplayContainer): null;
 			if (armatureDisplay)
@@ -163,7 +173,9 @@
 		}
 		
 		/**
-		 * 
+		 * @language zh_CN
+		 * 获取全局声音事件管理器。
+		 * @version DragonBones 4.5
 		 */
 		public function get soundEventManager(): StarlingArmatureDisplayContainer
 		{

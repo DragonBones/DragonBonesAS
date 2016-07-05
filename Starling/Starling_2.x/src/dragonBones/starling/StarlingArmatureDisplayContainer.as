@@ -11,6 +11,9 @@ package dragonBones.starling
 	
 	use namespace dragonBones_internal;
 	
+	/**
+	 * @inheritDoc
+	 */
 	public final class StarlingArmatureDisplayContainer extends Sprite implements IArmatureDisplayContainer
 	{
 		public static const useDefaultStarlingEvent:Boolean = false;
@@ -99,6 +102,19 @@ package dragonBones.starling
 			{
 				this.removeEventListener(EnterFrameEvent.ENTER_FRAME, _advanceTimeHandler);
 			}
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function dispose():void
+		{
+			if (_armature)
+			{
+				_armature.dispose();
+			}
+			
+			super.dispose();
 		}
 		
 		/**

@@ -321,6 +321,8 @@
 		/**
 		 * @language zh_CN
 		 * 暂停播放动画。
+		 * @param animationName 动画状态的名称。 (默认: null, 如果指定名称则只暂停该动画状态)
+		 * @see dragonBones.animation.AnimationState
 		 * @version DragonBones 3.0
 		 */
 		public function stop(animationName:String = null):void
@@ -385,7 +387,7 @@
 		 * @param group 混合的组，用于给动画状态编组，方便混合淡出控制。 (默认: null)
 		 * @param fadeOutMode 淡出的模式。 (默认: <code>AnimationFadeOutMode.SameLayerAndGroup</code>)
 		 * @param additiveBlending 以叠加的形式混合。 (默认: false)
-		 * @param displayControl 对显示对象的属性可控。 (默认: true)
+		 * @param displayControl 是否对显示对象属性可控。 (默认: true)
 		 * @param pauseFadeOut 暂停需要淡出的动画。 (默认: true)
 		 * @param pauseFadeIn 暂停需要淡入的动画，直到淡入结束才开始播放。 (默认: true)
 		 * @return 返回控制这个动画数据的动画状态。
@@ -686,7 +688,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 当前包含的动画数据名称列表
+		 * 所有动画数据名称。
 		 * @see #animations
 		 * @version DragonBones 4.5
 		 */
@@ -697,7 +699,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 当前包含的动画数据。
+		 * 所有的动画数据。
 		 * @see dragonBones.objects.AnimationData
 		 * @version DragonBones 4.5
 		 */
@@ -734,8 +736,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 不推荐使用的 API。
-		 * 请选择以下 API。
+		 * 不推荐使用。
 		 * @see #play()
 		 * @see #fadeIn()
 		 * @see #gotoAndPlayByTime()
@@ -767,8 +768,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 不推荐使用的 API。
-		 * 请选择以下 API。
+		 * 不推荐使用。
 		 * @see #gotoAndStopByTime()
 		 * @see #gotoAndStopByFrame()
 		 * @see #gotoAndStopByProgress()
@@ -781,8 +781,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 不推荐使用的 API。
-		 * 请选择以下 API。
+		 * 不推荐使用。
 		 * @see #animationNames
 		 * @version DragonBones 3.0
 		 */

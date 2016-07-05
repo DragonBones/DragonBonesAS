@@ -15,7 +15,7 @@ package dragonBones.flash
 	
 	/**
 	 * @language zh_CN
-	 * 基于 Flash 传统显示列表的渲染插槽。
+	 * 基于 Flash 传统显示列表的插槽。
 	 * @version DragonBones 3.0
 	 */
 	public class FlashSlot extends Slot

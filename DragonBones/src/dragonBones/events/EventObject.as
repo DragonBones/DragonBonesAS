@@ -13,16 +13,61 @@ package dragonBones.events
 	 */
 	public class EventObject extends BaseObject
 	{
+		/**
+		 * @language zh_CN
+		 * 动画开始。
+		 * @version DragonBones 4.5
+		 */
 		public static const START:String = "start";
+		/**
+		 * @language zh_CN
+		 * 动画循环播放一次完成。
+		 * @version DragonBones 4.5
+		 */
 		public static const LOOP_COMPLETE:String = "loopComplete";
+		/**
+		 * @language zh_CN
+		 * 动画播放完成。
+		 * @version DragonBones 4.5
+		 */
 		public static const COMPLETE:String = "complete";
 		
+		/**
+		 * @language zh_CN
+		 * 动画淡入开始。
+		 * @version DragonBones 4.5
+		 */
 		public static const FADE_IN:String = "fadeIn";
+		/**
+		 * @language zh_CN
+		 * 动画淡入完成。
+		 * @version DragonBones 4.5
+		 */
 		public static const FADE_IN_COMPLETE:String = "fadeInComplete";
+		/**
+		 * @language zh_CN
+		 * 动画淡出开始。
+		 * @version DragonBones 4.5
+		 */
 		public static const FADE_OUT:String = "fadeOut";
+		/**
+		 * @language zh_CN
+		 * 动画淡出完成。
+		 * @version DragonBones 4.5
+		 */
 		public static const FADE_OUT_COMPLETE:String = "fadeOutComplete";
 		
+		/**
+		 * @language zh_CN
+		 * 动画帧事件。
+		 * @version DragonBones 4.5
+		 */
 		public static const FRAME_EVENT:String = "frameEvent";
+		/**
+		 * @language zh_CN
+		 * 动画声音事件。
+		 * @version DragonBones 4.5
+		 */
 		public static const SOUND_EVENT:String = "soundEvent";
 		
 		/**

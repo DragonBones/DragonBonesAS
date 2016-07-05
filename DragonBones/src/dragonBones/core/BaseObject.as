@@ -123,7 +123,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * Borrow object
+		 * 从对象池中创建指定对象。
 		 * @version DragonBones 4.5
 		 */
 		public static function borrowObject(objectConstructor:Class):BaseObject
@@ -170,7 +170,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * Return to pool
+		 * 清除数据并返还对象池。
 		 * @version DragonBones 4.5
 		 */
 		final public function returnToPool():void

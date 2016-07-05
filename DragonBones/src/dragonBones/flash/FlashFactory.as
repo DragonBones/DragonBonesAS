@@ -19,10 +19,17 @@
 	use namespace dragonBones_internal;
 	
 	/**
-	 * 
+	 * @language zh_CN
+	 * 基于 Flash 传统显示列表的工厂。
+	 * @version DragonBones 3.0
 	 */
 	public class FlashFactory extends BaseFactory
-	{	
+	{
+		/**
+		 * @language zh_CN
+		 * 创建一个工厂。
+		 * @version DragonBones 3.0
+		 */
 		public function FlashFactory()
 		{
 			super(this);
@@ -135,7 +142,14 @@
 		}
 		
 		/**
-		 * 
+		 * @language zh_CN
+		 * 创建一个指定名称的骨架，并使用骨架的显示容器来更新骨架动画。
+		 * @param armatureName 骨架数据名称。
+		 * @param dragonBonesName 龙骨数据名称，如果不提供此名称，将检索所有的龙骨数据，如果多个数据中包含同名的骨架数据，可能无法创建出准确的骨架。 (默认: null)
+		 * @param skinName 皮肤名称。 (默认: null)
+		 * @return 骨架的显示容器。
+		 * @see dragonBones.core.IArmatureDisplayContainer
+		 * @version DragonBones 4.5
 		 */
 		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null):FlashArmatureDisplayContainer
 		{
@@ -150,7 +164,9 @@
 		}
 		
 		/**
-		 * 
+		 * @language zh_CN
+		 * 获取全局声音事件管理器。
+		 * @version DragonBones 3.0
 		 */
 		public function get soundEventManager(): FlashArmatureDisplayContainer
 		{
