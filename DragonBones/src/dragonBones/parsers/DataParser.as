@@ -361,7 +361,9 @@ package dragonBones.parsers
 							frame.transform.add(timeline.originTransform);
 							_helpTransform.toMatrix(_helpMatrix);
 							Transform.transformPoint(_helpMatrix, frame.transform.x, frame.transform.y, _helpPoint);
-							frame.transform.rotation += frame.transform.rotation - frame.parent.transform.rotation;
+							frame.transform.x = _helpPoint.x;
+							frame.transform.y = _helpPoint.y;
+							frame.transform.rotation += frame.transform.rotation - _helpTransform.rotation;
 						}
 					}
 					
