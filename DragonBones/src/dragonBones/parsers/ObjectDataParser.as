@@ -82,7 +82,12 @@
 			if (key in rawData)
 			{
 				const value:* = rawData[key];
-				return value == null? defaultValue: value; // Number(value);
+				if (value == null || value == "NaN")
+				{
+					return defaultValue;
+				}
+
+				return value; // Number(value);
 			}
 			
 			return defaultValue;
@@ -190,6 +195,11 @@
 			this._armature = null;
 			this._rawBones.length = 0;
 			
+			if (this._isParentCooriinate && _getBoolean(rawData, IS_GLOBAL, true)) 
+			{
+				_globalToLocal(armature);
+			}
+			
 			return armature;
 		}
 		
@@ -208,6 +218,12 @@
 			if (TRANSFORM in rawData)
 			{
 				_parseTransform(rawData[TRANSFORM], bone.transform);
+			}
+			
+			if (this._isParentCooriinate) 
+			{
+				bone.inheritRotation = true;
+				bone.inheritScale = false;
 			}
 			
 			return bone;
@@ -272,6 +288,18 @@
 				slot.blendMode = _getNumber(rawData, BLEND_MODE, DragonBones.BLEND_MODE_NORMAL);
 			}
 			
+			if (this._isParentCooriinate) {
+				if (COLOR_TRANSFORM in rawData) 
+				{
+					slot.color = SlotData.generateColor();
+					_parseColorTransform(rawData[COLOR_TRANSFORM], slot.color);
+				} 
+				else 
+				{
+					slot.color = SlotData.DEFAULT_COLOR;
+				}
+			}
+			
 			return slot;
 		}
 		
@@ -289,6 +317,11 @@
 				
 				for each (var slotObject:Object in rawData[SLOT])
 				{
+					if (this._isParentCooriinate) 
+					{
+						this._armature.addSlot(_parseSlot(slotObject));
+					}
+
 					skin.addSlot(_parseSlotDisplaySet(slotObject));
 				}
 				
@@ -353,24 +386,17 @@
 				display.pivot.x = _getNumber(pivotObject, X, 0);
 				display.pivot.y = _getNumber(pivotObject, Y, 0);
 			}
+			else if (this._isParentCooriinate)
+			{
+				const transformObject:Object = rawData[TRANSFORM];
+				display.isRelativePivot = false;
+				display.pivot.x = _getNumber(transformObject, PIVOT_X, 0) * this._armatureScale;
+				display.pivot.y = _getNumber(transformObject, PIVOT_Y, 0) * this._armatureScale;
+			}
 			else
 			{
-				if (TRANSFORM in rawData)
-				{
-					const transformObject:Object = rawData[TRANSFORM];
-					if ((PIVOT_X in transformObject) || (PIVOT_Y in transformObject))
-					{
-						display.isRelativePivot = false;
-						display.pivot.x = _getNumber(transformObject, PIVOT_X, 0) * this._armatureScale;
-						display.pivot.y = _getNumber(transformObject, PIVOT_Y, 0) * this._armatureScale;
-					}
-				}
-				
-				if (display.isRelativePivot)
-				{
-					display.pivot.x = 0.5;
-					display.pivot.y = 0.5;
-				}
+				display.pivot.x = 0.5;
+				display.pivot.y = 0.5;
 			}
 			
 			if (TRANSFORM in rawData)
@@ -584,6 +610,30 @@
 				}
 			}
 			
+			if (this._isParentCooriinate) 
+			{
+				this._isAutoTween = _getBoolean(rawData, AUTO_TWEEN, true);
+				this._animationTweenEasing = _getNumber(rawData, TWEEN_EASING, 0) || 0;
+				animation.playTimes = _getNumber(rawData, LOOP, 1);
+				
+				if (TIMELINE in rawData) 
+				{
+					const timelines:Array = rawData[TIMELINE];
+					for (var i:uint = 0, l:uint = timelines.length; i < l; ++i) {
+						animation.addBoneTimeline(_parseBoneTimeline(timelines[i]));
+					}
+					
+					for (i = 0, l = timelines.length; i < l; ++i) {
+						animation.addSlotTimeline(_parseSlotTimeline(timelines[i]));
+					}
+				}
+			} 
+			else 
+			{
+				this._isAutoTween = false;
+				this._animationTweenEasing = 0;
+			}
+			
 			for each (var bone:BoneData in this._armature.bones)
 			{
 				if (!animation.getBoneTimeline(bone.name))  // Add default bone timeline for cache if do not have one.
@@ -629,6 +679,11 @@
 					slotTimeline.frames[0] = slotFrame;
 					slotTimeline.frames.fixed = true;
 					animation.addSlotTimeline(slotTimeline);
+					
+					if (this._isParentCooriinate) 
+					{
+						slotFrame.displayIndex = -1;
+					}
 				}
 			}
 			
@@ -797,7 +852,14 @@
 				frame.color = SlotFrameData.DEFAULT_COLOR;
 			}
 			
-			if (ACTION in rawData)
+			if (this._isParentCooriinate) 
+			{
+				if (_getBoolean(rawData, HIDE, false)) 
+				{
+					frame.displayIndex = -1;
+				}
+			} 
+			else if (ACTION in rawData)
 			{
 				const slot:SlotData = (this._timeline as SlotTimelineData).slot;
 				_parseActionData(rawData, frame.actions, slot.parent, slot);
@@ -867,7 +929,14 @@
 		{
 			_parseFrame(rawData, frame, frameStart, frameCount);
 			
-			frame.tweenEasing = _getNumber(rawData, TWEEN_EASING, DragonBones.NO_TWEEN);
+			if (TWEEN_EASING in rawData)
+			{
+				frame.tweenEasing = _getNumber(rawData, TWEEN_EASING, DragonBones.NO_TWEEN);
+			}
+			else if (this._isParentCooriinate) 
+			{
+				frame.tweenEasing = this._isAutoTween ? this._animationTweenEasing : DragonBones.NO_TWEEN;
+			}
 			
 			if (CURVE in rawData)
 			{
@@ -925,6 +994,14 @@
 								{
 									prevFrame.next = frame;
 									frame.prev = prevFrame;
+									
+									if (this._isParentCooriinate) 
+									{
+										if (prevFrame is TweenFrameData && frameObject[DISPLAY_INDEX] == -1) 
+										{
+											(prevFrame as TweenFrameData).tweenEasing = DragonBones.NO_TWEEN;
+										}
+									}
 								}
 								
 								prevFrame = frame;
@@ -938,6 +1015,14 @@
 						frame = timeline.frames[0];
 						prevFrame.next = frame;
 						frame.prev = prevFrame;
+						
+						if (this._isParentCooriinate) 
+						{
+							if (prevFrame is TweenFrameData && rawFrames[0][DISPLAY_INDEX] == -1) 
+							{
+								(prevFrame as TweenFrameData).tweenEasing = DragonBones.NO_TWEEN;
+							}
+						}
 					}
 					
 					timeline.frames.fixed = true;
@@ -1106,16 +1191,16 @@
 		{
 			if (rawData)
 			{
-				this._armatureScale = scale;
-				
 				if (rawData is String)
 				{
 					rawData = JSON.parse(rawData);
 				}
 				
 				const version:String = _getString(rawData, VERSION, null);
+				this._isParentCooriinate = version == DATA_VERSION_2_3 || version == DATA_VERSION_3_0;
+				this._armatureScale = scale;
 				
-				if (version == DATA_VERSION)
+				if (version == DATA_VERSION || this._isParentCooriinate)
 				{
 					const data:DragonBonesData = BaseObject.borrowObject(DragonBonesData) as DragonBonesData;
 					data.name = _getString(rawData, NAME, null);
@@ -1135,7 +1220,7 @@
 					
 					return data;
 				}
-				else // TODO more veision
+				else
 				{
 					throw new Error("Nonsupport data version.");
 				}

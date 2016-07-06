@@ -317,24 +317,18 @@
 					if (_keyFrameCount > 1)
 					{
 						var crossedFrame:FrameData = _currentFrame;
-						if (!crossedFrame)
-						{
-							if (prevTime <= currentFrame.position)
-							{
-								crossedFrame = currentFrame.prev;
-							}
-							else
-							{
-								crossedFrame = currentFrame;
-							}
-						}
-						
 						_currentFrame = currentFrame;
 						
 						if (_isReverse)
 						{
 							while (crossedFrame != currentFrame)
 							{
+								if (!crossedFrame)
+								{
+									const prevFrameIndexA:uint = uint(prevTime * this._timeToFrameSccale);
+									crossedFrame = this._timeline.frames[prevFrameIndexA];
+								}
+								
 								_onCrossFrame(crossedFrame);
 								crossedFrame = crossedFrame.prev;
 							}
@@ -343,7 +337,16 @@
 						{
 							while (crossedFrame != currentFrame)
 							{
-								crossedFrame = crossedFrame.next;
+								if (crossedFrame)
+								{
+									crossedFrame = crossedFrame.next;
+								}
+								else
+								{
+									const prevFrameIndexB:uint = uint(prevTime * this._timeToFrameSccale);
+									crossedFrame = this._timeline.frames[prevFrameIndexB];
+								}
+								
 								_onCrossFrame(crossedFrame);
 							}
 						}

@@ -410,27 +410,6 @@ package dragonBones
 			{
 				_lockActionAndEvent = true;
 				
-				if (_events.length > 0)
-				{
-					for (i = 0, l = _events.length; i < l; ++i)
-					{
-						const event:EventObject = _events[i];
-						
-						if (_soundEventManager && event.type == EventObject.SOUND_EVENT)
-						{
-							_soundEventManager._dispatchEvent(event);
-						}
-						else
-						{
-							_display._dispatchEvent(event);
-						}
-						
-						event.returnToPool();
-					}
-					
-					_events.length = 0;
-				}
-				
 				if (_action)
 				{
 					switch (_action.type)
@@ -461,6 +440,27 @@ package dragonBones
 					}
 					
 					_action = null;
+				}
+				
+				if (_events.length > 0)
+				{
+					for (i = 0, l = _events.length; i < l; ++i)
+					{
+						const event:EventObject = _events[i];
+						
+						if (_soundEventManager && event.type == EventObject.SOUND_EVENT)
+						{
+							_soundEventManager._dispatchEvent(event);
+						}
+						else
+						{
+							_display._dispatchEvent(event);
+						}
+						
+						event.returnToPool();
+					}
+					
+					_events.length = 0;
 				}
 				
 				_lockActionAndEvent = false;

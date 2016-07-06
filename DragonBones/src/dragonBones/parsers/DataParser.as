@@ -1,11 +1,17 @@
 package dragonBones.parsers
 {
+	import flash.geom.Matrix;
 	import flash.geom.Point;
 	
+	import dragonBones.animation.TweenTimelineState;
 	import dragonBones.core.DragonBones;
+	import dragonBones.core.dragonBones_internal;
+	import dragonBones.geom.Transform;
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.BoneData;
+	import dragonBones.objects.BoneFrameData;
+	import dragonBones.objects.BoneTimelineData;
 	import dragonBones.objects.DragonBonesData;
 	import dragonBones.objects.MeshData;
 	import dragonBones.objects.SkinData;
@@ -13,12 +19,15 @@ package dragonBones.parsers
 	import dragonBones.objects.TimelineData;
 	import dragonBones.textures.TextureAtlasData;
 	
+	use namespace dragonBones_internal;
+	
 	/**
 	 * @private
 	 */
 	public class DataParser
 	{
-		protected static const PARENT_COORDINATE_DATA_VERSION:String = "3.0";
+		protected static const DATA_VERSION_2_3:String = "2.3";
+		protected static const DATA_VERSION_3_0:String = "3.0";
 		protected static const DATA_VERSION_4_0:String = "4.0";
 		protected static const DATA_VERSION:String = "4.5";
 		
@@ -110,8 +119,13 @@ package dragonBones.parsers
 		protected static const TWEEN:String = "tween";
 		protected static const KEY:String = "key";
 		
+		protected static const COLOR_TRANSFORM:String = "colorTransform";
+		protected static const TIMELINE:String = "timeline";
 		protected static const PIVOT_X:String = "pX";
 		protected static const PIVOT_Y:String = "pY";
+		protected static const LOOP:String = "loop";
+		protected static const AUTO_TWEEN:String = "autoTween";
+		protected static const HIDE:String = "hide";
 		
 		protected static const RECTANGLE:String = "rectangle";
 		protected static const ELLIPSE:String = "ellipse";
@@ -238,8 +252,13 @@ package dragonBones.parsers
 		protected var _animation:AnimationData = null;
 		protected var _timeline:TimelineData = null;
 		
+		protected var _isParentCooriinate: Boolean = false;
+		protected var _isAutoTween: Boolean = false;
+		protected var _animationTweenEasing: Number = 0;
 		protected var _armatureScale:Number = 1;
 		protected const _helpPoint:Point = new Point();
+		protected const _helpTransform:Transform = new Transform();
+		protected const _helpMatrix:Matrix = new Matrix();
 		protected const _rawBones:Vector.<BoneData> = new Vector.<BoneData>();
 		
 		public function DataParser(self:DataParser)
@@ -266,6 +285,106 @@ package dragonBones.parsers
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 			return null;
+		}
+		
+		private function _getTimelineFrameMatrix(animation:AnimationData, timeline:BoneTimelineData, position:Number, transform:Transform):void 
+		{
+			const frameIndex:uint = uint(position * animation.frameCount / animation.duration);
+			if (timeline.frames.length == 1 || frameIndex >= timeline.frames.length) 
+			{
+				transform.copyFrom((timeline.frames[0] as BoneFrameData).transform);
+			} 
+			else 
+			{
+				const frame:BoneFrameData = timeline.frames[frameIndex] as BoneFrameData;
+				var tweenProgress:Number = 0;
+				
+				if (frame.duration > 0 && frame.tweenEasing != DragonBones.NO_TWEEN) 
+				{
+					tweenProgress = (position - frame.position) / frame.duration;
+					if (frame.tweenEasing != 0) 
+					{
+						tweenProgress = TweenTimelineState._getEasingValue(tweenProgress, frame.tweenEasing);
+					}
+				}
+				else if (frame.curve) 
+				{
+					tweenProgress = (position - frame.position) / frame.duration;
+					tweenProgress = TweenTimelineState._getCurveEasingValue(tweenProgress, frame.curve);
+				}
+				
+				transform.copyFrom((frame.next as BoneFrameData).transform);
+				transform.minus(frame.transform);
+				
+				transform.x = frame.transform.x + transform.x * tweenProgress;
+				transform.y = frame.transform.y + transform.y * tweenProgress;
+				transform.skewX = frame.transform.skewX + transform.skewX * tweenProgress;
+				transform.skewY = frame.transform.skewY + transform.skewY * tweenProgress;
+				transform.scaleX = frame.transform.scaleX + transform.scaleX * tweenProgress;
+				transform.scaleY = frame.transform.scaleY + transform.scaleY * tweenProgress;
+				transform.add(timeline.originTransform);
+			}
+		}
+		
+		protected function _globalToLocal(armature: ArmatureData):void 
+		{
+			const bones:Vector.<BoneData> = armature.sortedBones.reverse();
+			var i:uint = 0, l:uint = 0; 
+			
+			for (i = 0, l = bones.length; i < l; ++i)
+			{
+				const bone:BoneData = bones[i];
+				
+				if (bone.parent) 
+				{
+					bone.parent.transform.toMatrix(_helpMatrix);
+					Transform.transformPoint(_helpMatrix, bone.transform.x, bone.transform.y, _helpPoint);
+					bone.transform.x = _helpPoint.x;
+					bone.transform.y = _helpPoint.y;
+					bone.transform.rotation += bone.transform.rotation - bone.parent.transform.rotation;
+				}
+			}
+			
+			var frame:BoneFrameData = null;
+			for each (var animation:AnimationData in armature.animations) 
+			{
+				for each (var timeline:BoneTimelineData in animation.boneTimelines) 
+				{
+					if (timeline.bone.parent) 
+					{
+						const parentTimeline:BoneTimelineData = animation.getBoneTimeline(timeline.bone.parent.name);
+						
+						for (i = 0, l = timeline.frames.length; i < l; ++i) 
+						{
+							frame = timeline.frames[i] as BoneFrameData;
+							_getTimelineFrameMatrix(animation, parentTimeline, frame.position, _helpTransform);
+							frame.transform.add(timeline.originTransform);
+							_helpTransform.toMatrix(_helpMatrix);
+							Transform.transformPoint(_helpMatrix, frame.transform.x, frame.transform.y, _helpPoint);
+							frame.transform.rotation += frame.transform.rotation - frame.parent.transform.rotation;
+						}
+					}
+					
+					_helpTransform.copyFrom(timeline.originTransform);
+					
+					for (i = 0, l = timeline.frames.length; i < l; ++i) 
+					{
+						frame = timeline.frames[i] as BoneFrameData;
+						frame.transform.add(_helpTransform);
+						frame.transform.minus(timeline.bone.transform);
+						
+						if (i == 0) 
+						{
+							timeline.originTransform.copyFrom(frame.transform);
+							frame.transform.identity();
+						} 
+						else 
+						{
+							frame.transform.minus(timeline.originTransform);
+						}
+					}
+				}
+			}
 		}
 	}
 }

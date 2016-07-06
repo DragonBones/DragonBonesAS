@@ -16,7 +16,7 @@ package dragonBones.animation
 		protected static const TWEEN_TYPE_ONCE:int = 1;
 		protected static const TWEEN_TYPE_ALWAYS:int = 2;
 		
-		protected static function _getEasingValue(progress:Number, easing:Number):Number
+		dragonBones_internal static function _getEasingValue(progress:Number, easing:Number):Number
 		{
 			var value:Number = 1;
 			if (easing > 2)
@@ -51,7 +51,7 @@ package dragonBones.animation
 			return (value - progress) * easing + progress;
 		}
 		
-		protected static function _getCurveEasingValue(progress:Number, sampling:Vector.<Number>):Number
+		dragonBones_internal static function _getCurveEasingValue(progress:Number, sampling:Vector.<Number>):Number
 		{
 			var x:Number = 0;
 			var y:Number = 0;
