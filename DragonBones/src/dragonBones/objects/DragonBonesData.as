@@ -12,7 +12,7 @@ package dragonBones.objects
 	{
 		/**
 		 * @language zh_CN
-		 * 是否开启共享搜索。 [true: 开启, false: 不开启] (默认: false)
+		 * 是否开启共享搜索。 [true: 开启, false: 不开启]
 		 * @version DragonBones 4.5
 		 */
 		public var autoSearch:Boolean;

@@ -16,7 +16,7 @@
 
 	/**
 	 * @language zh_CN
-	 * 动画状态，播放动画时自动产生，可以对单个动画的播放进行最细致的控制和调节。
+	 * 动画状态，播放动画时产生，可以对单个动画的播放进行更细致的控制和调节。
 	 * @see dragonBones.animation.Animation
 	 * @see dragonBones.objects.AnimationData
 	 * @version DragonBones 3.0
@@ -25,7 +25,7 @@
 	{
 		/**
 		 * @language zh_CN
-		 * 是否对插槽的颜色，显示序列索引，深度排序，行为等拥有控制的权限。 (默认: true)
+		 * 是否对插槽的颜色，显示序列索引，深度排序，行为等拥有控制的权限。
 		 * @see dragonBones.Slot#displayController
 		 * @version DragonBones 3.0
 		 */
@@ -33,7 +33,7 @@
 		
 		/**
 		 * @language zh_CN
-		 * 是否以叠加的方式混合动画。 (默认: false)
+		 * 是否以叠加的方式混合动画。
 		 * @version DragonBones 3.0
 		 */
 		public var additiveBlending:Boolean;
@@ -47,21 +47,24 @@
 		
 		/**
 		 * @language zh_CN
-		 * 播放速度。 [(-N~0): 倒转播放, 0: 停止播放, (0~1): 慢速播放, 1: 正常播放, (1~N): 快速播放] (默认: 1)
+		 * 播放速度。 [(-N~0): 倒转播放, 0: 停止播放, (0~1): 慢速播放, 1: 正常播放, (1~N): 快速播放]
+         * @default 1
 		 * @version DragonBones 3.0
 		 */
 		public var timeScale:Number;
 		
 		/**
 		 * @language zh_CN
-		 * 进行动画混合时的权重。 (默认: 1)
+		 * 进行动画混合时的权重。
+         * @default 1
 		 * @version DragonBones 3.0
 		 */
 		public var weight:Number;
 		
 		/**
 		 * @language zh_CN
-		 * 自动淡出时需要的时间。 (以秒为单位，默认: -1)
+         * 自动淡出时需要的时间，当设置一个大于等于 0 的值，动画状态将会在播放完成后自动淡出。 (以秒为单位)
+         * @default -1
 		 * @version DragonBones 3.0
 		 */
 		public var autoFadeOutTime:Number;
@@ -741,8 +744,8 @@
 		/**
 		 * @language zh_CN
 		 * 淡出动画。
-		 * @param fadeTotalTime 淡出时间。 (以秒为单位)
-		 * @param pausePlayhead 淡出时是否暂停动画。 [<code>true</code>: 暂停, <code>false</code>: 不暂停] (默认: <code>true</code>)
+		 * @param fadeOutTime 淡出时间。 (以秒为单位)
+		 * @param pausePlayhead 淡出时是否暂停动画。 [true: 暂停, false: 不暂停]
 		 * @version DragonBones 3.0
 		 */
 		public function fadeOut(fadeOutTime:Number, pausePlayhead:Boolean = true):void
@@ -802,7 +805,7 @@
 		 * @language zh_CN
 		 * 添加指定的骨骼遮罩。
 		 * @param boneName 指定的骨骼名称。
-		 * @param recursive 是否为该骨骼的子骨骼遮罩。 (默认: <code>true</code>)
+		 * @param recursive 是否为该骨骼的子骨骼添加遮罩。
 		 * @version DragonBones 3.0
 		 */
 		public function addBoneMask(name:String, recursive:Boolean = true):void
@@ -848,7 +851,7 @@
 		 * @language zh_CN
 		 * 删除指定的骨骼遮罩。
 		 * @param boneName 指定的骨骼名称。
-		 * @param recursive 是否删除该骨骼的子骨骼遮罩。 (默认: <code>true</code>)
+		 * @param recursive 是否删除该骨骼的子骨骼遮罩。
 		 * @version DragonBones 3.0
 		 */
 		public function removeBoneMask(name:String, recursive:Boolean = true):void
@@ -900,7 +903,7 @@
 		/**
 		 * @language zh_CN
 		 * 动画图层。
-		 * @see dragonBones.animation.Animation#fadeIn
+		 * @see dragonBones.animation.Animation#fadeIn()
 		 * @version DragonBones 3.0
 		 */
 		public function get layer():int
@@ -911,7 +914,7 @@
 		/**
 		 * @language zh_CN
 		 * 动画组。
-		 * @see dragonBones.animation.Animation#fadeIn
+		 * @see dragonBones.animation.Animation#fadeIn()
 		 * @version DragonBones 3.0
 		 */
 		public function get group():String

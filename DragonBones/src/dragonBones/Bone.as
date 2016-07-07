@@ -22,42 +22,42 @@
 	{
 		/**
 		 * @language zh_CN
-		 * 是否继承父骨骼的平移。 [true: 继承, false: 不继承] (默认: true)
+		 * 是否继承父骨骼的平移。 [true: 继承, false: 不继承]
 		 * @version DragonBones 3.0
 		 */
 		public var inheritTranslation:Boolean;
 		
 		/**
 		 * @language zh_CN
-		 * 是否继承父骨骼的旋转。 [true: 继承, false: 不继承] (默认: true)
+		 * 是否继承父骨骼的旋转。 [true: 继承, false: 不继承]
 		 * @version DragonBones 3.0
 		 */
 		public var inheritRotation:Boolean;
 		
 		/**
 		 * @language zh_CN
-		 * 是否继承父骨骼的缩放。 [true: 继承, false: 不继承] (默认: true)
+		 * 是否继承父骨骼的缩放。 [true: 继承, false: 不继承]
 		 * @version DragonBones 4.5
 		 */
 		public var inheritScale:Boolean;
 		
 		/**
 		 * @language zh_CN
-		 * IK 约束时骨骼方向是否为顺时针方向。 [true: 顺时针, false: 逆时针]  (默认: true)
+		 * IK 约束时骨骼方向是否为顺时针方向。 [true: 顺时针, false: 逆时针]
 		 * @version DragonBones 4.5
 		 */
 		public var ikBendPositive:Boolean;
 		
 		/**
 		 * @language zh_CN
-		 * IK 约束的权重。 (默认: 1)
+		 * IK 约束的权重。
 		 * @version DragonBones 4.5
 		 */
 		public var ikWeight:Number;
 		
 		/**
 		 * @language zh_CN
-		 * 骨骼长度。 (默认: 0)
+		 * 骨骼长度。
 		 * @version DragonBones 4.5
 		 */
 		public var length:Number;
@@ -627,7 +627,8 @@
 		
 		/**
 		 * @language zh_CN
-		 * 控制此骨骼所有插槽的显示。 (默认: true)
+		 * 控制此骨骼所有插槽的显示。
+         * @default true
 		 * @see dragonBones.Slot
 		 * @version DragonBones 3.0
 		 */

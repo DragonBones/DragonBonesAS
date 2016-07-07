@@ -28,14 +28,16 @@
 	{
 		/**
 		 * @language zh_CN
-		 * 子骨架是否继承父骨架的动画。 [true: 继承, false: 不继承] (默认: true，仅在显示对象中包含子骨架时有效)
+         * 子骨架是否继承父骨架的动画。 [true: 继承, false: 不继承]
+         * @default true
 		 * @version DragonBones 4.5
 		 */
 		public var inheritAnimation:Boolean;
 		
 		/**
 		 * @language zh_CN
-		 * 显示对象受到控制的对象，应设置为动画状态的名称或组名称。 (默认: null，受所有的动画状态控制)
+         * 显示对象受到控制的对象，应设置为动画状态的名称或组名称，设置为 null 则表示受所有的动画状态控制。
+         * @default null
 		 * @see dragonBones.animation.AnimationState#displayControl
 		 * @see dragonBones.animation.AnimationState#name
 		 * @see dragonBones.animation.AnimationState#group

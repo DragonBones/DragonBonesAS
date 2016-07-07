@@ -483,8 +483,8 @@ package dragonBones
 		/**
 		 * @language zh_CN
 		 * 更新骨骼和插槽的变换。 (当骨骼没有动画状态或动画状态播放完成时，骨骼将不在更新)
-		 * @param boneName 指定的骨骼名称。 (默认: null, 所有骨骼)
-		 * @param updateSlotDisplay 是否更新插槽的显示对象。 (默认: false, 不更新)
+         * @param boneName 指定的骨骼名称，如果未设置，将更新所有骨骼。
+		 * @param updateSlotDisplay 是否更新插槽的显示对象。
 		 * @see dragonBones.Bone
 		 * @see dragonBones.Slot
 		 * @version DragonBones 3.0
@@ -653,7 +653,7 @@ package dragonBones
 		 * @language zh_CN
 		 * 将一个指定的骨骼添加到骨架中。
 		 * @param value 需要添加的骨骼。
-		 * @param parentName 需要添加到的父骨骼名称，如果未指定名称则添加到骨架根部。 (默认: null)
+         * @param parentName 需要添加到父骨骼的名称，如果未设置，则添加到骨架根部。
 		 * @see dragonBones.Bone
 		 * @version DragonBones 3.0
 		 */

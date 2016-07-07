@@ -55,6 +55,6 @@ package dragonBones.core
 		public static const ABSTRACT_CLASS_ERROR:String = "Abstract class can not be instantiated.";
 		public static const ABSTRACT_METHOD_ERROR:String = "Abstract method needs to be implemented in subclass.";
 		
-		public static const VERSION:String = "4.5";
+		public static const VERSION:String = "4.7";
 	}
 }

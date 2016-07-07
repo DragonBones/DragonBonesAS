@@ -154,8 +154,8 @@
 		 * @language zh_CN
 		 * 创建一个指定名称的骨架，并使用骨架的显示容器来更新骨架动画。
 		 * @param armatureName 骨架数据名称。
-		 * @param dragonBonesName 龙骨数据名称，如果不提供此名称，将检索所有的龙骨数据，如果多个数据中包含同名的骨架数据，可能无法创建出准确的骨架。 (默认: null)
-		 * @param skinName 皮肤名称。 (默认: null)
+		 * @param dragonBonesName 龙骨数据名称，如果未设置，将检索所有的龙骨数据，当多个数据中包含同名的骨架数据时，可能无法创建出准确的骨架。
+		 * @param skinName 皮肤名称，如果未设置，则使用默认皮肤。
 		 * @return 骨架的显示容器。
 		 * @see dragonBones.core.IArmatureDisplayContainer
 		 * @version DragonBones 4.5
