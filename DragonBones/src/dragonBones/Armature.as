@@ -4,7 +4,7 @@ package dragonBones
 	import dragonBones.animation.IAnimateble;
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
-	import dragonBones.core.IArmatureDisplayContainer;
+	import dragonBones.core.IArmatureDisplay;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.EventObject;
 	import dragonBones.events.IEventDispatcher;
@@ -71,7 +71,7 @@ package dragonBones
 		/**
 		 * @private Factory
 		 */
-		dragonBones_internal var _display:IArmatureDisplayContainer;
+		dragonBones_internal var _display:IArmatureDisplay;
 		
 		/**
 		 * @private Slot
@@ -86,7 +86,7 @@ package dragonBones
 		/**
 		 * @private Slot
 		 */
-		dragonBones_internal var _replaceTexture:Object;
+		dragonBones_internal var _replacedTexture:Object;
 		
 		/**
 		 * @private
@@ -158,7 +158,7 @@ package dragonBones
 			
 			_parent = null;
 			_action = null;
-			_replaceTexture = null;
+			_replacedTexture = null;
 			
 			_delayDispose = false;
 			_lockDispose = false;
@@ -696,9 +696,9 @@ package dragonBones
 		 * 替换骨架的主贴图，根据渲染引擎的不同，提供不同的贴图数据。
 		 * @version DragonBones 4.5
 		 */
-		public function setReplaceTexture(texture:Object):void
+		public function replaceTexture(texture:Object):void
 		{
-			_replaceTexture = texture;
+			_replacedTexture = texture;
 			for each (var slot:Slot in _slots)
 			{
 				slot.invalidUpdate();
@@ -754,7 +754,7 @@ package dragonBones
 		 * 获取显示容器，插槽的显示对象都会以此显示容器为父级，根据渲染平台的不同，类型会不同，通常是 DisplayObjectContainer 类型。
 		 * @version DragonBones 3.0
 		 */
-		public function get display():IArmatureDisplayContainer
+		public function get display():IArmatureDisplay
 		{
 			return _display;
 		}

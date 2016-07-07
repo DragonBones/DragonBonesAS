@@ -1,25 +1,22 @@
-package dragonBones.flash
+package dragonBones.starling
 {
-	import flash.display.Sprite;
-	import flash.events.Event;
-	
 	import dragonBones.Armature;
 	import dragonBones.animation.Animation;
-	import dragonBones.core.IArmatureDisplayContainer;
+	import dragonBones.core.IArmatureDisplay;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.EventObject;
+	
+	import starling.display.Sprite;
+	import starling.events.EnterFrameEvent;
 	
 	use namespace dragonBones_internal;
 	
 	/**
 	 * @inheritDoc
 	 */
-	public class FlashArmatureDisplayContainer extends Sprite implements IArmatureDisplayContainer
+	public final class StarlingArmatureDisplay extends Sprite implements IArmatureDisplay
 	{
-		/**
-		 * @private
-		 */
-		private var _time:Number;
+		public static const useDefaultStarlingEvent:Boolean = false;
 		
 		/**
 		 * @private
@@ -29,7 +26,7 @@ package dragonBones.flash
 		/**
 		 * @private
 		 */
-		public function FlashArmatureDisplayContainer()
+		public function StarlingArmatureDisplay()
 		{
 			super();
 		}
@@ -37,11 +34,9 @@ package dragonBones.flash
 		/**
 		 * @private
 		 */
-		private function _advanceTimeHandler(event:Event):void
+		private function _advanceTimeHandler(event:EnterFrameEvent):void
 		{
-			const passedTime:Number = new Date().getTime() * 0.001 - _time;
-			_time += passedTime;
-			this._armature.advanceTime(passedTime);
+			this._armature.advanceTime(event.passedTime);
 		}
 		
 		/**
@@ -49,11 +44,9 @@ package dragonBones.flash
 		 */
 		public function _onClear():void
 		{
-			advanceTimeBySelf(false);
-			
-			_time = 0;
-			
 			_armature = null;
+			
+			this.dispose();
 		}
 		
 		/**
@@ -61,9 +54,15 @@ package dragonBones.flash
 		 */
 		public function _dispatchEvent(eventObject:EventObject):void
 		{
-			const event:FlashEvent = new FlashEvent(eventObject.type, eventObject);
-			
-			this.dispatchEvent(event);
+			if (useDefaultStarlingEvent)
+			{
+				this.dispatchEventWith(eventObject.type, false, eventObject);
+			}
+			else
+			{
+				const event:StarlingEvent = new StarlingEvent(eventObject);
+				this.dispatchEvent(event);
+			}
 		}
 		
 		/**
@@ -97,24 +96,25 @@ package dragonBones.flash
 		{
 			if (on)
 			{
-				_time = new Date().getTime() * 0.001;
-				this.addEventListener(Event.ENTER_FRAME, _advanceTimeHandler);
+				this.addEventListener(EnterFrameEvent.ENTER_FRAME, _advanceTimeHandler);
 			}
 			else
 			{
-				this.removeEventListener(Event.ENTER_FRAME, _advanceTimeHandler);
+				this.removeEventListener(EnterFrameEvent.ENTER_FRAME, _advanceTimeHandler);
 			}
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		public function dispose():void
+		override public function dispose():void
 		{
 			if (_armature)
 			{
 				_armature.dispose();
 			}
+			
+			super.dispose();
 		}
 		
 		/**

@@ -101,7 +101,7 @@
 		/**
 		 * @private Factory
 		 */
-		dragonBones_internal const _replaceDisplayDataSet:Vector.<DisplayData> = new Vector.<DisplayData>(0, true);
+		dragonBones_internal const _replacedDisplayDataSet:Vector.<DisplayData> = new Vector.<DisplayData>(0, true);
 		
 		/**
 		 * @private
@@ -220,11 +220,11 @@
 				_ffdVertices.fixed = true;
 			}
 			
-			if (_replaceDisplayDataSet.length)
+			if (_replacedDisplayDataSet.length)
 			{
-				_replaceDisplayDataSet.fixed = false;
-				_replaceDisplayDataSet.length = 0;
-				_replaceDisplayDataSet.fixed = true;
+				_replacedDisplayDataSet.fixed = false;
+				_replacedDisplayDataSet.length = 0;
+				_replacedDisplayDataSet.fixed = true;
 			}
 			
 			_displayDirty = false;

@@ -31,7 +31,7 @@ import dragonBones.animation.AnimationFadeOutMode;
 import dragonBones.animation.WorldClock;
 import dragonBones.events.EventObject;
 import dragonBones.starling.StarlingFactory;
-import dragonBones.starling.StarlingArmatureDisplayContainer;
+import dragonBones.starling.StarlingArmatureDisplay;
 
 import starling.display.Sprite;
 import starling.events.Event;
@@ -237,7 +237,7 @@ class Mecha
 	private var _speedX: Number = 0;
 	private var _speedY: Number = 0;
 	private var _armature: Armature = null;
-	private var _armatureDisplay: StarlingArmatureDisplayContainer = null;
+	private var _armatureDisplay: StarlingArmatureDisplay = null;
 	private var _weaponR: Armature = null;
 	private var _weaponL: Armature = null;
 	private var _aimState: AnimationState = null;
@@ -248,7 +248,7 @@ class Mecha
 	public function Mecha()
 	{
 		_armature = Game.instance.factory.buildArmature("mecha_1502b");
-		_armatureDisplay = _armature.display as StarlingArmatureDisplayContainer;
+		_armatureDisplay = _armature.display as StarlingArmatureDisplay;
 		_armatureDisplay.x = 400;
 		_armatureDisplay.y = Game.GROUND;
 		_armatureDisplay.scaleX = _armatureDisplay.scaleY = 1;
@@ -405,7 +405,7 @@ class Mecha
 			_localPoint.x = firePointBone.global.x;
 			_localPoint.y = firePointBone.global.y;
 
-			(eventObject.armature.display as StarlingArmatureDisplayContainer).localToGlobal(_localPoint, _globalPoint);
+			(eventObject.armature.display as StarlingArmatureDisplay).localToGlobal(_localPoint, _globalPoint);
 
 			_fire(_globalPoint);
 		}
@@ -609,7 +609,7 @@ class Bullet
 	private var _speedY: Number = 0;
 
 	private var _armature: Armature = null;
-	private var _armatureDisplay: StarlingArmatureDisplayContainer = null;
+	private var _armatureDisplay: StarlingArmatureDisplay = null;
 	private var _effect: Armature = null;
 
 	public function Bullet(armatureName: String, effectArmatureName: String, radian: Number, speed: Number, position: Point)
@@ -618,7 +618,7 @@ class Bullet
 		_speedY = Math.sin(radian) * speed;
 
 		_armature = Game.instance.factory.buildArmature(armatureName);
-		_armatureDisplay = _armature.display as StarlingArmatureDisplayContainer;
+		_armatureDisplay = _armature.display as StarlingArmatureDisplay;
 		_armatureDisplay.x = position.x;
 		_armatureDisplay.y = position.y;
 		_armatureDisplay.rotation = radian;
@@ -627,7 +627,7 @@ class Bullet
 		if (effectArmatureName)
 		{
 			_effect = Game.instance.factory.buildArmature(effectArmatureName);
-			const effectDisplay: StarlingArmatureDisplayContainer = _effect.display as StarlingArmatureDisplayContainer;
+			const effectDisplay: StarlingArmatureDisplay = _effect.display as StarlingArmatureDisplay;
 			effectDisplay.rotation = radian;
 			effectDisplay.x = position.x;
 			effectDisplay.y = position.y;
@@ -665,7 +665,7 @@ class Bullet
 			if (_effect)
 			{
 				WorldClock.clock.remove(_effect);
-				Game.instance.removeChild(_effect.display as StarlingArmatureDisplayContainer);
+				Game.instance.removeChild(_effect.display as StarlingArmatureDisplay);
 				_effect.dispose();
 			}
 

@@ -264,9 +264,9 @@
 				slot._setBlendMode(slotData.blendMode);
 				slot._setColor(slotData.color);
 				
-				slot._replaceDisplayDataSet.fixed = false;
-				slot._replaceDisplayDataSet.length = slot._displayDataSet.displays.length;
-				slot._replaceDisplayDataSet.fixed = true;
+				slot._replacedDisplayDataSet.fixed = false;
+				slot._replacedDisplayDataSet.length = slot._displayDataSet.displays.length;
+				slot._replacedDisplayDataSet.fixed = true;
 				
 				armature.addSlot(slot, slotData.parent.name);
 			}
@@ -303,14 +303,14 @@
 				}
 				else
 				{
-					if (slot._replaceDisplayDataSet.length <= displayIndex)
+					if (slot._replacedDisplayDataSet.length <= displayIndex)
 					{
-						slot._replaceDisplayDataSet.fixed = false;
-						slot._replaceDisplayDataSet.length = displayIndex + 1;
-						slot._replaceDisplayDataSet.fixed = true;
+						slot._replacedDisplayDataSet.fixed = false;
+						slot._replacedDisplayDataSet.length = displayIndex + 1;
+						slot._replacedDisplayDataSet.fixed = true;
 					}
 					
-					slot._replaceDisplayDataSet[displayIndex] = displayData;
+					slot._replacedDisplayDataSet[displayIndex] = displayData;
 					
 					if (displayData.meshData)
 					{

@@ -79,7 +79,7 @@
 		 */
 		override protected function _addDisplay():void
 		{
-			const container:StarlingArmatureDisplayContainer = this._armature._display as StarlingArmatureDisplayContainer;
+			const container:StarlingArmatureDisplay = this._armature._display as StarlingArmatureDisplay;
 			container.addChild(_renderDisplay);
 		}
 		
@@ -88,7 +88,7 @@
 		 */
 		override protected function _replaceDisplay(value:Object):void
 		{
-			const container:StarlingArmatureDisplayContainer = this._armature.display as StarlingArmatureDisplayContainer;
+			const container:StarlingArmatureDisplay = this._armature.display as StarlingArmatureDisplay;
 			const prevDisplay:DisplayObject = value as DisplayObject;
 			container.addChild(_renderDisplay);
 			container.swapChildren(_renderDisplay, prevDisplay);
@@ -117,7 +117,7 @@
 		 */
 		override dragonBones_internal function _getDisplayZIndex():int
 		{
-			const container:StarlingArmatureDisplayContainer = this._armature._display as StarlingArmatureDisplayContainer;
+			const container:StarlingArmatureDisplay = this._armature._display as StarlingArmatureDisplay;
 			return container.getChildIndex(_renderDisplay);
 		}
 		
@@ -126,7 +126,7 @@
 		 */
 		override dragonBones_internal function _setDisplayZIndex(value:int):void
 		{
-			const container:StarlingArmatureDisplayContainer = this._armature.display as StarlingArmatureDisplayContainer;
+			const container:StarlingArmatureDisplay = this._armature.display as StarlingArmatureDisplay;
 			const index:int = container.getChildIndex(_renderDisplay);
 			if (index == value)
 			{
@@ -216,8 +216,8 @@
 			if (this._display && this._displayIndex >= 0)
 			{
 				const rawDisplayData:DisplayData = this._displayIndex < this._displayDataSet.displays.length? this._displayDataSet.displays[this._displayIndex]: null;
-				const replaceDisplayData:DisplayData = this._displayIndex < this._replaceDisplayDataSet.length? this._replaceDisplayDataSet[this._displayIndex]: null;
-				const currentDisplayData:DisplayData = replaceDisplayData || rawDisplayData;
+				const replacedDisplayData:DisplayData = this._displayIndex < this._replacedDisplayDataSet.length? this._replacedDisplayDataSet[this._displayIndex]: null;
+				const currentDisplayData:DisplayData = replacedDisplayData || rawDisplayData;
 				const currentTextureData:StarlingTextureData = currentDisplayData.textureData as StarlingTextureData;
 				
 				if (currentTextureData)
@@ -231,7 +231,7 @@
 						}
 					}
 					
-					const currentTexture:Texture = (this._armature._replaceTexture as Texture) || currentTextureData.texture;
+					const currentTexture:Texture = (this._armature._replacedTexture as Texture) || currentTextureData.texture;
 					
 					if (currentTexture)
 					{

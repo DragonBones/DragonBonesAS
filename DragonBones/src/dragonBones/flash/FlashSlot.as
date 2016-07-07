@@ -71,7 +71,7 @@ package dragonBones.flash
 		 */
 		override protected function _addDisplay():void
 		{
-			const container:FlashArmatureDisplayContainer = this._armature._display as FlashArmatureDisplayContainer;
+			const container:FlashArmatureDisplay = this._armature._display as FlashArmatureDisplay;
 			container.addChild(_renderDisplay);
 		}
 		
@@ -80,7 +80,7 @@ package dragonBones.flash
 		 */
 		override protected function _replaceDisplay(prevDisplay:Object):void
 		{
-			const container:FlashArmatureDisplayContainer = this._armature.display as FlashArmatureDisplayContainer;
+			const container:FlashArmatureDisplay = this._armature.display as FlashArmatureDisplay;
 			const displayObject:DisplayObject = prevDisplay as DisplayObject;
 			container.addChild(_renderDisplay);
 			container.swapChildren(_renderDisplay, displayObject);
@@ -107,7 +107,7 @@ package dragonBones.flash
 		 */
 		override dragonBones_internal function _getDisplayZIndex():int
 		{
-			const container:FlashArmatureDisplayContainer = this._armature._display as FlashArmatureDisplayContainer;
+			const container:FlashArmatureDisplay = this._armature._display as FlashArmatureDisplay;
 			return container.getChildIndex(_renderDisplay);
 		}
 		
@@ -116,7 +116,7 @@ package dragonBones.flash
 		 */
 		override dragonBones_internal function _setDisplayZIndex(value:int):void
 		{
-			const container:FlashArmatureDisplayContainer = this._armature.display as FlashArmatureDisplayContainer;
+			const container:FlashArmatureDisplay = this._armature.display as FlashArmatureDisplay;
 			const index:int = container.getChildIndex(_renderDisplay);
 			if (index == value)
 			{
@@ -198,13 +198,13 @@ package dragonBones.flash
 			if (this._display && this._displayIndex >= 0)
 			{
 				const rawDisplayData:DisplayData = this._displayIndex < this._displayDataSet.displays.length? this._displayDataSet.displays[this._displayIndex]: null;
-				const replaceDisplayData:DisplayData = this._displayIndex < this._replaceDisplayDataSet.length? this._replaceDisplayDataSet[this._displayIndex]: null;
-				const contentDisplayData:DisplayData = replaceDisplayData || rawDisplayData;
+				const replacedDisplayData:DisplayData = this._displayIndex < this._replacedDisplayDataSet.length? this._replacedDisplayDataSet[this._displayIndex]: null;
+				const contentDisplayData:DisplayData = replacedDisplayData || rawDisplayData;
 				const currentTextureData:FlashTextureData = contentDisplayData.textureData as FlashTextureData;
 				if (currentTextureData)
 				{
 					const currentTexture:BitmapData = 
-						(this._armature._replaceTexture as BitmapData) 
+						(this._armature._replacedTexture as BitmapData) 
 						|| (currentTextureData.parent as FlashTextureAtlasData).texture 
 						|| currentTextureData.texture;
 					
@@ -235,10 +235,10 @@ package dragonBones.flash
 							pivotY += currentTextureData.frame.y;
 						}
 						
-						if (rawDisplayData && replaceDisplayData)
+						if (rawDisplayData && replacedDisplayData)
 						{
-							pivotX += replaceDisplayData.transform.x - rawDisplayData.transform.x;
-							pivotY += replaceDisplayData.transform.y - rawDisplayData.transform.y;
+							pivotX += replacedDisplayData.transform.x - rawDisplayData.transform.x;
+							pivotY += replacedDisplayData.transform.y - rawDisplayData.transform.y;
 						}
 						
 						if (currentTextureData.rotated)

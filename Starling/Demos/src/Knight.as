@@ -31,7 +31,7 @@ import dragonBones.animation.AnimationFadeOutMode;
 import dragonBones.animation.WorldClock;
 import dragonBones.events.EventObject;
 import dragonBones.starling.StarlingFactory;
-import dragonBones.starling.StarlingArmatureDisplayContainer;
+import dragonBones.starling.StarlingArmatureDisplay;
 
 import starling.display.Sprite;
 import starling.events.Event;
@@ -221,13 +221,13 @@ class Hero
 	private var _speedY: Number = 0;
 
 	private var _armature: Armature = null;
-	private var _armatureDisplay: StarlingArmatureDisplayContainer = null;
+	private var _armatureDisplay: StarlingArmatureDisplay = null;
 	private var _armArmature: Armature = null;
 
 	public function Hero()
 	{
 		_armature = Game.instance.factory.buildArmature("knight");
-		_armatureDisplay = _armature.display as StarlingArmatureDisplayContainer;
+		_armatureDisplay = _armature.display as StarlingArmatureDisplay;
 		_armatureDisplay.x = 400;
 		_armatureDisplay.y = Game.GROUND;
 		_armatureDisplay.scaleX = _armatureDisplay.scaleY = 1;
@@ -361,16 +361,16 @@ class Hero
 					_localPoint.x = firePointBone.global.x;
 					_localPoint.y = firePointBone.global.y;
 
-					(eventObject.armature.display as StarlingArmatureDisplayContainer).localToGlobal(_localPoint, _globalPoint);
+					(eventObject.armature.display as StarlingArmatureDisplay).localToGlobal(_localPoint, _globalPoint);
 					
 					var radian:Number = 0;
 					if(_faceDir > 0)
 					{
-						radian = firePointBone.global.rotation + (eventObject.armature.display as StarlingArmatureDisplayContainer).rotation;
+						radian = firePointBone.global.rotation + (eventObject.armature.display as StarlingArmatureDisplay).rotation;
 					}
 					else
 					{
-						radian = Math.PI - (firePointBone.global.rotation + (eventObject.armature.display as StarlingArmatureDisplayContainer).rotation);
+						radian = Math.PI - (firePointBone.global.rotation + (eventObject.armature.display as StarlingArmatureDisplay).rotation);
 					}
 					
 					switch (_weaponsLevel[_weaponIndex])
@@ -463,7 +463,7 @@ class Bullet
 	private var _speedY: Number = 0;
 
 	private var _armature: Armature = null;
-	private var _armatureDisplay: StarlingArmatureDisplayContainer = null;
+	private var _armatureDisplay: StarlingArmatureDisplay = null;
 
 	public function Bullet(armatureName: String, radian: Number, speed: Number, position: Point)
 	{
@@ -471,7 +471,7 @@ class Bullet
 		_speedY = Math.sin(radian) * speed;
 
 		_armature = Game.instance.factory.buildArmature(armatureName);
-		_armatureDisplay = _armature.display as StarlingArmatureDisplayContainer;
+		_armatureDisplay = _armature.display as StarlingArmatureDisplay;
 		_armatureDisplay.x = position.x;
 		_armatureDisplay.y = position.y;
 		_armatureDisplay.rotation = radian;

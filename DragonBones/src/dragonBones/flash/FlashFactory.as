@@ -36,7 +36,7 @@
 			
 			if (!Armature._soundEventManager) 
 			{
-				Armature._soundEventManager = new FlashArmatureDisplayContainer();
+				Armature._soundEventManager = new FlashArmatureDisplay();
 			}
 		}
 		
@@ -66,7 +66,7 @@
 		override protected function _generateArmature(dataPackage:BuildArmaturePackage):Armature
 		{
 			const armature:Armature = BaseObject.borrowObject(Armature) as Armature;
-			const armatureDisplayContainer:FlashArmatureDisplayContainer = new FlashArmatureDisplayContainer();
+			const armatureDisplayContainer:FlashArmatureDisplay = new FlashArmatureDisplay();
 			
 			armature._armatureData = dataPackage.armature;
 			armature._skinData = dataPackage.skin;
@@ -151,10 +151,10 @@
 		 * @see dragonBones.core.IArmatureDisplayContainer
 		 * @version DragonBones 4.5
 		 */
-		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null):FlashArmatureDisplayContainer
+		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null):FlashArmatureDisplay
 		{
 			const armature:Armature = this.buildArmature(armatureName, dragonBonesName, skinName);
-			const armatureDisplay:FlashArmatureDisplayContainer = armature? (armature.display as FlashArmatureDisplayContainer): null;
+			const armatureDisplay:FlashArmatureDisplay = armature? (armature.display as FlashArmatureDisplay): null;
 			if (armatureDisplay)
 			{
 				armatureDisplay.advanceTimeBySelf(true);
@@ -168,9 +168,9 @@
 		 * 获取全局声音事件管理器。
 		 * @version DragonBones 3.0
 		 */
-		public function get soundEventManager(): FlashArmatureDisplayContainer
+		public function get soundEventManager(): FlashArmatureDisplay
 		{
-			return Armature._soundEventManager as FlashArmatureDisplayContainer;
+			return Armature._soundEventManager as FlashArmatureDisplay;
 		}
 	}
 }

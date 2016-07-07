@@ -2,7 +2,7 @@ package dragonBones.starling
 {
 	import dragonBones.Armature;
 	import dragonBones.animation.Animation;
-	import dragonBones.core.IArmatureDisplayContainer;
+	import dragonBones.core.IArmatureDisplay;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.EventObject;
 	
@@ -14,7 +14,7 @@ package dragonBones.starling
 	/**
 	 * @inheritDoc
 	 */
-	public final class StarlingArmatureDisplayContainer extends Sprite implements IArmatureDisplayContainer
+	public final class StarlingArmatureDisplay extends Sprite implements IArmatureDisplay
 	{
 		public static const useDefaultStarlingEvent:Boolean = false;
 		
@@ -26,7 +26,7 @@ package dragonBones.starling
 		/**
 		 * @private
 		 */
-		public function StarlingArmatureDisplayContainer()
+		public function StarlingArmatureDisplay()
 		{
 			super();
 		}

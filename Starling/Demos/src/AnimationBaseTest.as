@@ -32,7 +32,7 @@ import dragonBones.Armature;
 import dragonBones.animation.WorldClock;
 import dragonBones.objects.DragonBonesData;
 import dragonBones.starling.StarlingFactory;
-import dragonBones.starling.StarlingArmatureDisplayContainer;
+import dragonBones.starling.StarlingArmatureDisplay;
 import dragonBones.events.EventObject;
 
 class StarlingRender extends Sprite
@@ -47,7 +47,7 @@ class StarlingRender extends Sprite
 	public static const TextureA1: Class;
 
 	private var _isTouched:Boolean = false;
-	private var _armatureDisplay: StarlingArmatureDisplayContainer = null;
+	private var _armatureDisplay: StarlingArmatureDisplay = null;
 	private const _factory: StarlingFactory = new StarlingFactory();
 
 	public function StarlingRender()

@@ -36,7 +36,7 @@ import dragonBones.Armature;
 import dragonBones.animation.WorldClock;
 import dragonBones.starling.StarlingFactory;
 import dragonBones.objects.DragonBonesData;
-import dragonBones.starling.StarlingArmatureDisplayContainer;
+import dragonBones.starling.StarlingArmatureDisplay;
 
 class StarlingRender extends Sprite
 {
@@ -152,7 +152,7 @@ class StarlingRender extends Sprite
 	private function _addArmature(): void
 	{
 		const armature: Armature = _factory.buildArmature(_dragonBonesData.armatureNames[1]);
-		const armatureDisplay: StarlingArmatureDisplayContainer = armature.display as StarlingArmatureDisplayContainer;
+		const armatureDisplay: StarlingArmatureDisplay = armature.display as StarlingArmatureDisplay;
 
 		armatureDisplay.scaleX = armatureDisplay.scaleY = 0.3;
 		this.addChild(armatureDisplay);
@@ -173,7 +173,7 @@ class StarlingRender extends Sprite
 		}
 
 		const armature: Armature = _armatures.pop();
-		const armatureDisplay: StarlingArmatureDisplayContainer = armature.display as StarlingArmatureDisplayContainer;
+		const armatureDisplay: StarlingArmatureDisplay = armature.display as StarlingArmatureDisplay;
 		this.removeChild(armatureDisplay);
 		WorldClock.clock.remove(armature);
 		armature.dispose();
@@ -198,7 +198,7 @@ class StarlingRender extends Sprite
 		for (var i: uint = 0, l: uint = _armatures.length; i < l; ++i)
 		{
 			const armature: Armature = _armatures[i];
-			const armatureDisplay: StarlingArmatureDisplayContainer = armature.display as StarlingArmatureDisplayContainer;
+			const armatureDisplay: StarlingArmatureDisplay = armature.display as StarlingArmatureDisplay;
 			const lineY: uint = Math.floor(i / columnNum);
 
 			armatureDisplay.x = (i % columnNum) * dX + paddingH;

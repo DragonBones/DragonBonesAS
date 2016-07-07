@@ -42,7 +42,7 @@
 			
 			if (!Armature._soundEventManager) 
 			{
-				Armature._soundEventManager = new StarlingArmatureDisplayContainer();
+				Armature._soundEventManager = new StarlingArmatureDisplay();
 			}
 		}
 		
@@ -76,14 +76,14 @@
 		override protected function _generateArmature(dataPackage:BuildArmaturePackage):Armature
 		{
 			const armature:Armature = BaseObject.borrowObject(Armature) as Armature;
-			const armatureDisplayContainer:StarlingArmatureDisplayContainer = new StarlingArmatureDisplayContainer();
+			const armatureDisplay:StarlingArmatureDisplay = new StarlingArmatureDisplay();
 			
 			armature._armatureData = dataPackage.armature;
 			armature._skinData = dataPackage.skin;
 			armature._animation = BaseObject.borrowObject(Animation) as Animation;
-			armature._display = armatureDisplayContainer;
+			armature._display = armatureDisplay;
 			
-			armatureDisplayContainer._armature = armature;
+			armatureDisplay._armature = armature;
 			armature._animation._armature = armature;
 			
 			armature.animation.animations = dataPackage.armature.animations;
@@ -160,10 +160,10 @@
 		 * @see dragonBones.core.IArmatureDisplayContainer
 		 * @version DragonBones 4.5
 		 */
-		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null):StarlingArmatureDisplayContainer
+		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null):StarlingArmatureDisplay
 		{
 			const armature:Armature = this.buildArmature(armatureName, dragonBonesName, skinName);
-			const armatureDisplay:StarlingArmatureDisplayContainer = armature? (armature.display as StarlingArmatureDisplayContainer): null;
+			const armatureDisplay:StarlingArmatureDisplay = armature? (armature.display as StarlingArmatureDisplay): null;
 			if (armatureDisplay)
 			{
 				armatureDisplay.advanceTimeBySelf(true);
@@ -177,9 +177,9 @@
 		 * 获取全局声音事件管理器。
 		 * @version DragonBones 4.5
 		 */
-		public function get soundEventManager(): StarlingArmatureDisplayContainer
+		public function get soundEventManager(): StarlingArmatureDisplay
 		{
-			return Armature._soundEventManager as StarlingArmatureDisplayContainer;
+			return Armature._soundEventManager as StarlingArmatureDisplay;
 		}
 	}
 }

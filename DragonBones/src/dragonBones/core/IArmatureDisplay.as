@@ -10,7 +10,7 @@ package dragonBones.core
 	 * @see dragonBones.Armature#display
 	 * @version DragonBones 4.5
 	 */
-	public interface IArmatureDisplayContainer extends IEventDispatcher
+	public interface IArmatureDisplay extends IEventDispatcher
 	{
 		/**
 		 * @language zh_CN

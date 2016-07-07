@@ -12,13 +12,13 @@
 	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#666666")]
 	public class HelloDragonBones extends Sprite
 	{
-		[Embed(source = "../assets/SwordsMan/SwordsMan.json", mimeType = "application/octet-stream")]
+		[Embed(source = "../assets/DragonBoy/DragonBoy.json", mimeType = "application/octet-stream")]
 		public static const DBDataA: Class;
 
-		[Embed(source = "../assets/SwordsMan/SwordsMan_texture_1.json", mimeType = "application/octet-stream")]
+		[Embed(source = "../assets/DragonBoy/DragonBoy_texture_1.json", mimeType = "application/octet-stream")]
 		public static const TADataA1: Class;
 
-		[Embed(source = "../assets/SwordsMan/SwordsMan_texture_1.png")]
+		[Embed(source = "../assets/DragonBoy/DragonBoy_texture_1.png")]
 		public static const TextureA1: Class;
 		
 		private var _isMoved:Boolean = false;
@@ -130,7 +130,7 @@ import flash.events.MouseEvent;
 import flash.display.DisplayObject;
 
 import dragonBones.flash.FlashFactory;
-import dragonBones.flash.FlashArmatureDisplayContainer;
+import dragonBones.flash.FlashArmatureDisplay;
 
 class FlashRender extends flash.display.Sprite
 {
@@ -141,7 +141,7 @@ class FlashRender extends flash.display.Sprite
 	private var _armatureIndex: uint = 0;
 	private var _animationIndex: uint = 0;
 	private var _armature: Armature = null;
-	private var _armatureDisplay: FlashArmatureDisplayContainer = null;
+	private var _armatureDisplay: FlashArmatureDisplay = null;
 	private const _factory: FlashFactory = new FlashFactory();
 
 	public function FlashRender()
@@ -212,7 +212,7 @@ class FlashRender extends flash.display.Sprite
 
 		// b. Build Armature. (buildArmature will advanceTime animation by WorldClock)
 		/*_armature = _factory.buildArmature(armatureName);
-		_armatureDisplay = _armature.display as StarlingArmatureDisplayContainer;
+		_armatureDisplay = _armature.display as StarlingArmatureDisplay;
 		WorldClock.clock.add(_armature);*/
 
 		// Add Armature Display.
@@ -258,7 +258,7 @@ import starling.events.Event;
 import starling.text.TextField;
 
 import dragonBones.starling.StarlingFactory;
-import dragonBones.starling.StarlingArmatureDisplayContainer;
+import dragonBones.starling.StarlingArmatureDisplay;
 
 class StarlingRender extends starling.display.Sprite
 {
@@ -269,7 +269,7 @@ class StarlingRender extends starling.display.Sprite
 	private var _armatureIndex: uint = 0;
 	private var _animationIndex: uint = 0;
 	private var _armature: Armature = null;
-	private var _armatureDisplay: StarlingArmatureDisplayContainer = null;
+	private var _armatureDisplay: StarlingArmatureDisplay = null;
 	private const _factory: StarlingFactory = new StarlingFactory();
 
 	public function StarlingRender()
@@ -352,7 +352,7 @@ class StarlingRender extends starling.display.Sprite
 
 		// b. Build Armature. (buildArmature will advanceTime animation by WorldClock)
 		/*_armature = _factory.buildArmature(armatureName);
-		_armatureDisplay = _armature.display as StarlingArmatureDisplayContainer;
+		_armatureDisplay = _armature.display as StarlingArmatureDisplay;
 		WorldClock.clock.add(_armature);*/
 
 		// Add Armature Display.
