@@ -1,5 +1,3 @@
-DragonBones Starling Library
-=========================
-* [Demos][1]
+# DragonBones Starling Library
 
-[1]: ./Demos/
+## [Demos](./Demos/)
