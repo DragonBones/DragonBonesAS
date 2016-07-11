@@ -25,9 +25,6 @@ import flash.geom.Point;
 
 import dragonBones.Armature;
 import dragonBones.Bone;
-import dragonBones.animation.Animation;
-import dragonBones.animation.AnimationState;
-import dragonBones.animation.AnimationFadeOutMode;
 import dragonBones.animation.WorldClock;
 import dragonBones.events.EventObject;
 import dragonBones.starling.StarlingFactory;
@@ -41,7 +38,6 @@ import starling.events.Touch;
 import starling.events.TouchEvent;
 import starling.events.TouchPhase;
 import starling.text.TextField;
-import dragonBones.starling.StarlingEvent;
 
 class Game extends Sprite
 {

@@ -268,8 +268,8 @@
 							
 							if (rawDisplayData && rawDisplayData != currentDisplayData)
 							{
-								pivotX += currentDisplayData.transform.x - rawDisplayData.transform.x;
-								pivotY += currentDisplayData.transform.y - rawDisplayData.transform.y;
+								pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
+								pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
 							}
 							
 							frameDisplay.texture = currentTexture;

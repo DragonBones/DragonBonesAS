@@ -127,7 +127,6 @@ import dragonBones.objects.DragonBonesData;
 import flash.display.Sprite;
 import flash.events.Event;
 import flash.events.MouseEvent;
-import flash.display.DisplayObject;
 
 import dragonBones.flash.FlashFactory;
 import dragonBones.flash.FlashArmatureDisplay;

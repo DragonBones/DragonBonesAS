@@ -235,10 +235,10 @@ package dragonBones.flash
 							pivotY += currentTextureData.frame.y;
 						}
 						
-						if (rawDisplayData && replacedDisplayData)
+						if (rawDisplayData && rawDisplayData != contentDisplayData)
 						{
-							pivotX += replacedDisplayData.transform.x - rawDisplayData.transform.x;
-							pivotY += replacedDisplayData.transform.y - rawDisplayData.transform.y;
+							pivotX += rawDisplayData.transform.x - contentDisplayData.transform.x;
+							pivotY += rawDisplayData.transform.y - contentDisplayData.transform.y;
 						}
 						
 						if (currentTextureData.rotated)

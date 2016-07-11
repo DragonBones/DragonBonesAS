@@ -22,14 +22,11 @@
 
 // Starling render
 import starling.display.Sprite;
-import starling.display.DisplayObject;
 import starling.events.Touch;
 import starling.events.TouchEvent;
 import starling.events.TouchPhase;
 import starling.events.Event;
 
-import dragonBones.Armature;
-import dragonBones.animation.WorldClock;
 import dragonBones.objects.DragonBonesData;
 import dragonBones.starling.StarlingFactory;
 import dragonBones.starling.StarlingArmatureDisplay;
