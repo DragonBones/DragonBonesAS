@@ -886,7 +886,7 @@
 			var y:Number = 0;
 			for (var i:uint = 0, l:uint = this._mesh.vertices.length ; i < l; i += 2)
 			{
-				if (i < offset || i - offset >= rawVertices.length)
+				if (!rawVertices || i < offset || i - offset >= rawVertices.length)
 				{
 					x = 0;
 					y = 0;
