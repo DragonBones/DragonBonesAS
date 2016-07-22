@@ -49,11 +49,6 @@ package dragonBones
 		dragonBones_internal var _cacheFrameIndex:int;
 		
 		/**
-		 * @private AnimationState
-		 */
-		dragonBones_internal var _delayAdvanceTime:Number;
-		
-		/**
 		 * @private Factory
 		 */
 		dragonBones_internal var _armatureData:ArmatureData;
@@ -101,11 +96,6 @@ package dragonBones
 		/**
 		 * @private
 		 */
-		private var _lockActionAndEvent:Boolean;
-		
-		/**
-		 * @private
-		 */
 		private var _slotsDirty:Boolean;
 		
 		/**
@@ -140,7 +130,6 @@ package dragonBones
 			
 			_bonesDirty = false;
 			_cacheFrameIndex = -1;
-			_delayAdvanceTime = -1;
 			_armatureData = null;
 			_skinData = null;
 			
@@ -162,7 +151,6 @@ package dragonBones
 			
 			_delayDispose = false;
 			_lockDispose = false;
-			_lockActionAndEvent = false;
 			_slotsDirty = false;
 			
 			if (_bones.length)
@@ -332,7 +320,9 @@ package dragonBones
 		}
 		
 		/**
-		 * dispose
+		 * @language zh_CN
+		 * 释放骨架。 (会回收到内存池)
+		 * @version DragonBones 3.0
 		 */
 		public function dispose():void
 		{
@@ -350,66 +340,64 @@ package dragonBones
 		 * @param passedTime 两帧之前的时间间隔。 (以秒为单位)
 		 * @see dragonBones.animation.IAnimateble
 		 * @see dragonBones.animation.WorldClock
-		 * @see dragonBones.core.IArmatureDisplayContainer
+		 * @see dragonBones.core.IArmatureDisplay
 		 * @version DragonBones 3.0
 		 */
 		public function advanceTime(passedTime:Number):void
 		{
-			_lockDispose = true;
-			
-			const scaledPassedTime:Number = passedTime * _animation.timeScale;
-			
-			//
-			_animation._advanceTime(scaledPassedTime);
-			
-			//
-			if (_bonesDirty)
+			if (!_lockDispose)
 			{
-				_bonesDirty = false;
-				_sortBones();
-				_bones.fixed = true;
-			}
-			
-			if (_slotsDirty)
-			{
-				_slotsDirty = false;
-				_sortSlots();
-				_slots.fixed = true;
-			}
-			
-			//
-			var i:uint = 0, l:uint = 0;
-			
-			for (i = 0, l = _bones.length; i < l; ++i)
-			{
-				_bones[i]._update(_cacheFrameIndex);
-			}
-			
-			for (i = 0, l = _slots.length; i < l; ++i)
-			{
-				const slot:Slot = _slots[i];
+				_lockDispose = true;
 				
-				slot._update(_cacheFrameIndex);
+				const scaledPassedTime:Number = passedTime * _animation.timeScale;
 				
-				const childArmature:Armature = slot.childArmature;
-				if (childArmature)
+				//
+				_animation._advanceTime(scaledPassedTime);
+				
+				//
+				if (_bonesDirty)
 				{
-					if (slot.inheritAnimation) // Animation's time scale will impact to childArmature
+					_bonesDirty = false;
+					_sortBones();
+					_bones.fixed = true;
+				}
+				
+				if (_slotsDirty)
+				{
+					_slotsDirty = false;
+					_sortSlots();
+					_slots.fixed = true;
+				}
+				
+				//
+				var i:uint = 0, l:uint = 0;
+				
+				for (i = 0, l = _bones.length; i < l; ++i)
+				{
+					_bones[i]._update(_cacheFrameIndex);
+				}
+				
+				for (i = 0, l = _slots.length; i < l; ++i)
+				{
+					const slot:Slot = _slots[i];
+					
+					slot._update(_cacheFrameIndex);
+					
+					const childArmature:Armature = slot.childArmature;
+					if (childArmature)
 					{
-						childArmature.advanceTime(scaledPassedTime);
-					}
-					else
-					{
-						childArmature.advanceTime(passedTime);
+						if (slot.inheritAnimation) // Animation's time scale will impact to childArmature
+						{
+							childArmature.advanceTime(scaledPassedTime);
+						}
+						else
+						{
+							childArmature.advanceTime(passedTime);
+						}
 					}
 				}
-			}
-			
-			//
-			if (!_lockActionAndEvent)
-			{
-				_lockActionAndEvent = true;
 				
+				//
 				if (_action)
 				{
 					switch (_action.type)
@@ -463,20 +451,12 @@ package dragonBones
 					_events.length = 0;
 				}
 				
-				_lockActionAndEvent = false;
+				_lockDispose = false;
 			}
-			
-			_lockDispose = false;
 			
 			if (_delayDispose)
 			{
 				this.returnToPool();
-			}
-			else if (_delayAdvanceTime >= 0)
-			{
-				const delayAdvanceTime:Number = _delayAdvanceTime;
-				_delayAdvanceTime = -1;
-				advanceTime(delayAdvanceTime);
 			}
 		}
 		
@@ -751,6 +731,17 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
+		 * 获取动画控制器。
+		 * @see dragonBones.animation.Animation
+		 * @version DragonBones 3.0
+		 */
+		public function get animation():Animation	
+		{
+			return _animation;
+		}
+		
+		/**
+		 * @language zh_CN
 		 * 获取显示容器，插槽的显示对象都会以此显示容器为父级，根据渲染平台的不同，类型会不同，通常是 DisplayObjectContainer 类型。
 		 * @version DragonBones 3.0
 		 */
@@ -772,17 +763,6 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 获取动画控制器。
-		 * @see dragonBones.animation.Animation
-		 * @version DragonBones 3.0
-		 */
-		public function get animation():Animation	
-		{
-			return _animation;
-		}
-		
-		/**
-		 * @language zh_CN
 		 * 动画缓存的帧率，当设置一个大于 0 的帧率时，将会开启动画缓存。
 		 * 通过将动画数据缓存在内存中来提高运行性能，会有一定的内存开销。
 		 * 帧率不宜设置的过高，通常跟动画的帧率相当且低于程序运行的帧率。
@@ -800,6 +780,17 @@ package dragonBones
 			if (_armatureData.cacheFrameRate != value)
 			{
 				_armatureData.cacheFrames(value);
+				
+				// Set child armature frameRate.
+				for (var i:uint = 0, l:uint = _slots.length; i < l; ++i) 
+				{
+					const slot:Slot = _slots[i];
+					const childArmature:Armature = slot.childArmature;
+					if (childArmature) 
+					{
+						childArmature.cacheFrameRate = value;
+					}
+				}
 			}
 		}
 		

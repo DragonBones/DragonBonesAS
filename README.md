@@ -3,7 +3,7 @@
 * Highly suggest use [DragonBones Pro](http://dragonbones.github.io/) to create aniamtion.
 
 ## Supported engines
-* [Starling](http://dragonbones.github.com/) / [DragonBones Starling Library](./Starling/)
+* [Starling](http://dragonbones.github.com/) / [DragonBones Starling library](./Starling/)
 
 ## How to use
 1. Make sure you have installed some Flash IDE such as Flash Builder.

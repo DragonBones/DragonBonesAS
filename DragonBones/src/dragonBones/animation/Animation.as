@@ -18,9 +18,17 @@
 	public class Animation extends BaseObject
 	{
 		/**
+		 * @private
+		 */
+		protected static function _sortAnimationState(a:AnimationState, b:AnimationState):int
+		{
+			return a.layer > b.layer? 1: -1;
+		}
+		
+		/**
 		 * @language zh_CN
 		 * 动画的播放速度。 [(-N~0): 倒转播放, 0: 停止播放, (0~1): 慢速播放, 1: 正常播放, (1~N): 快速播放]
-         * @default 1
+		 * @default 1
 		 * @version DragonBones 3.0
 		 */
 		public var timeScale:Number;
@@ -111,14 +119,6 @@
 			}
 			
 			_animationStates.length = 0;
-		}
-		
-		/**
-		 * @private
-		 */
-		protected function _sortAnimationState(a:AnimationState, b:AnimationState):int
-		{
-			return a.layer > b.layer? 1: -1;
 		}
 		
 		/**
@@ -231,18 +231,18 @@
 				var prevLayer:int = _animationStates[0]._layer;
 				var weightLeft:Number = 1;
 				var layerTotalWeight:Number = 0;
-				var layerIndex:uint = 1; // 多个动画状态索引从 1 开始
+				var layerIndex:uint = 1;
 				
 				for (var i:uint = 0, r:uint = 0; i < animationStateCount; ++i)
 				{
 					animationState = _animationStates[i];
-					if (animationState._isFadeOutComplete) // 如果动画状态淡出完毕, 则删除动画状态
+					if (animationState._isFadeOutComplete)
 					{
 						r++;
 						animationState.returnToPool();
 						_animationStateDirty = true;
 						
-						if (_lastAnimationState == animationState) // 要删除的动画状态如果是 _lastAnimationState, 更新 _lastAnimationState 到合适的索引
+						if (_lastAnimationState == animationState)
 						{
 							if (i >= r)
 							{
@@ -284,7 +284,7 @@
 						
 						animationState._advanceTime(passedTime, weightLeft, layerIndex);
 						
-						if (animationState._weightResult != 0) // 仅拥有权重的动画状态才分配索引
+						if (animationState._weightResult != 0)
 						{
 							layerTotalWeight += animationState._weightResult;
 							layerIndex++;
@@ -322,7 +322,7 @@
 		/**
 		 * @language zh_CN
 		 * 暂停播放动画。
-         * @param animationName 动画状态的名称，如果未设置，则暂停所有动画状态。
+		 * @param animationName 动画状态的名称，如果未设置，则暂停所有动画状态。
 		 * @see dragonBones.animation.AnimationState
 		 * @version DragonBones 3.0
 		 */
@@ -345,8 +345,8 @@
 		/**
 		 * @language zh_CN
 		 * 播放动画。
-         * @param animationName 动画数据的名称，如果未设置，则播放默认动画，或将暂停状态切换为播放状态，或重新播放上一个正在播放的动画。 
-         * @param playTimes 动画需要播放的次数。 [-1: 使用动画数据默认值, 0: 无限循环播放, [1~N]: 循环播放 N 次]
+		 * @param animationName 动画数据的名称，如果未设置，则播放默认动画，或将暂停状态切换为播放状态，或重新播放上一个正在播放的动画。 
+		 * @param playTimes 动画需要播放的次数。 [-1: 使用动画数据默认值, 0: 无限循环播放, [1~N]: 循环播放 N 次]
 		 * @return 返回控制这个动画数据的动画状态。
 		 * @see dragonBones.animation.AnimationState
 		 * @version DragonBones 3.0
@@ -468,10 +468,7 @@
 				}
 			}
 			
-			if (fadeInTime == 0)
-			{
-				_armature._delayAdvanceTime = 0;
-			}
+			_armature.advanceTime(0);
 			
 			return _lastAnimationState;
 		}
@@ -480,7 +477,7 @@
 		 * @language zh_CN
 		 * 指定名称的动画从指定时间开始播放。
 		 * @param animationName 动画数据的名称。
-		 * @param time 指定时间。 (以秒为单位)
+		 * @param time 时间。 (以秒为单位)
 		 * @param playTimes 动画循环播放的次数。 [-1: 使用动画数据默认值, 0: 无限循环播放, [1~N]: 循环播放 N 次]
 		 * @return 返回控制这个动画数据的动画状态。
 		 * @see dragonBones.animation.AnimationState
@@ -497,7 +494,7 @@
 		 * @language zh_CN
 		 * 指定名称的动画从指定帧开始播放。
 		 * @param animationName 动画数据的名称。
-		 * @param frame 指定帧。
+		 * @param frame 帧。
 		 * @param playTimes 动画循环播放的次数。[-1: 使用动画数据默认值, 0: 无限循环播放, [1~N]: 循环播放 N 次]
 		 * @return 返回控制这个动画数据的动画状态。
 		 * @see dragonBones.animation.AnimationState
@@ -539,7 +536,7 @@
 		 * @language zh_CN
 		 * 播放指定名称的动画到指定的时间并停止。
 		 * @param animationName 动画数据的名称。
-		 * @param time 指定的时间。 (以秒为单位)
+		 * @param time 时间。 (以秒为单位)
 		 * @return 返回控制这个动画数据的动画状态。
 		 * @see dragonBones.animation.AnimationState
 		 * @version DragonBones 4.5
@@ -549,6 +546,7 @@
 			const animationState:AnimationState = gotoAndPlayByTime(animationName, time, 1);
 			if (animationState)
 			{
+				_isPlaying = false;
 				animationState.stop();
 			}
 			
@@ -569,6 +567,7 @@
 			const animationState:AnimationState = gotoAndPlayByFrame(animationName, frame, 1);
 			if (animationState)
 			{
+				_isPlaying = false;
 				animationState.stop();
 			}
 			
@@ -579,7 +578,7 @@
 		 * @language zh_CN
 		 * 播放指定名称的动画到指定的进度并停止。
 		 * @param animationName 动画数据的名称。
-		 * @param progress 指定的进度。 [0~1]
+		 * @param progress 进度。 [0~1]
 		 * @return 返回控制这个动画数据的动画状态。
 		 * @see dragonBones.animation.AnimationState
 		 * @version DragonBones 4.5
@@ -589,6 +588,7 @@
 			const animationState:AnimationState = gotoAndPlayByProgress(animationName, progress, 1);
 			if (animationState)
 			{
+				_isPlaying = false;
 				animationState.stop();
 			}
 			
@@ -736,8 +736,7 @@
 		}
 		
 		/**
-		 * @language zh_CN
-		 * 不推荐使用。
+		 * @deprecated
 		 * @see #play()
 		 * @see #fadeIn()
 		 * @see #gotoAndPlayByTime()
@@ -768,8 +767,7 @@
 		}
 		
 		/**
-		 * @language zh_CN
-		 * 不推荐使用。
+		 * @deprecated
 		 * @see #gotoAndStopByTime()
 		 * @see #gotoAndStopByFrame()
 		 * @see #gotoAndStopByProgress()
@@ -782,9 +780,9 @@
 		}
 		
 		/**
-		 * @language zh_CN
-		 * 不推荐使用。
+		 * @deprecated
 		 * @see #animationNames
+		 * @see #animations
 		 * @version DragonBones 3.0
 		 */
 		public function get animationList():Vector.<String>

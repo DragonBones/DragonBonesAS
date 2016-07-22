@@ -13,9 +13,6 @@ package dragonBones.objects
 		public var prev:FrameData;
 		public var next:FrameData;
 		
-		public const actions:Vector.<ActionData> = new Vector.<ActionData>(0, true);
-		public const events:Vector.<EventData> = new Vector.<EventData>(0, true);
-		
 		public function FrameData(self:FrameData)
 		{
 			super(this);
@@ -35,30 +32,6 @@ package dragonBones.objects
 			duration = 0;
 			prev = null;
 			next = null;
-			
-			if (actions.length)
-			{
-				for each (var actionData:ActionData in actions)
-				{
-					actionData.returnToPool();
-				}
-				
-				actions.fixed = false;
-				actions.length = 0;
-				actions.fixed = true;
-			}
-			
-			if (events.length)
-			{
-				for each (var eventData:EventData in events)
-				{
-					eventData.returnToPool();
-				}
-				
-				events.fixed = false;
-				events.length = 0;
-				events.fixed = true;
-			}
 		}
 	}
 }

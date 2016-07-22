@@ -42,6 +42,11 @@ package dragonBones.objects
 		public var name:String;
 		
 		/**
+		 * @private
+		 */
+		public var parent:DragonBonesData;
+		
+		/**
 		 * @language zh_CN
 		 * 所有的骨骼数据。
 		 * @see dragonBones.objects.BoneData
@@ -98,6 +103,7 @@ package dragonBones.objects
 			cacheFrameRate = 0;
 			type = 0;
 			name = null;
+			parent = null;
 			
 			var i:String = null;
 			

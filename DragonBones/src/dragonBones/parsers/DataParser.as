@@ -1,18 +1,23 @@
-package dragonBones.parsers
+﻿package dragonBones.parsers
 {
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	
 	import dragonBones.animation.TweenTimelineState;
+	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.geom.Transform;
+	import dragonBones.objects.ActionData;
 	import dragonBones.objects.AnimationData;
+	import dragonBones.objects.AnimationFrameData;
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.BoneData;
 	import dragonBones.objects.BoneFrameData;
 	import dragonBones.objects.BoneTimelineData;
 	import dragonBones.objects.DragonBonesData;
+	import dragonBones.objects.EventData;
+	import dragonBones.objects.FrameData;
 	import dragonBones.objects.MeshData;
 	import dragonBones.objects.SkinData;
 	import dragonBones.objects.SlotDisplayDataSet;
@@ -33,7 +38,7 @@ package dragonBones.parsers
 		
 		protected static const TEXTURE_ATLAS:String = "TextureAtlas";
 		protected static const SUB_TEXTURE:String = "SubTexture";
-		protected static const FORMAT:String = "format";;
+		protected static const FORMAT:String = "format";
 		protected static const IMAGE_PATH:String = "imagePath";
 		protected static const WIDTH:String = "width";
 		protected static const HEIGHT:String = "height";
@@ -252,9 +257,9 @@ package dragonBones.parsers
 		protected var _animation:AnimationData = null;
 		protected var _timeline:TimelineData = null;
 		
-		protected var _isParentCooriinate: Boolean = false;
-		protected var _isAutoTween: Boolean = false;
-		protected var _animationTweenEasing: Number = 0;
+		protected var _isParentCooriinate:Boolean = false;
+		protected var _isAutoTween:Boolean = false;
+		protected var _animationTweenEasing:Number = 0;
 		protected var _armatureScale:Number = 1;
 		protected const _helpPoint:Point = new Point();
 		protected const _helpTransform:Transform = new Transform();
@@ -326,7 +331,98 @@ package dragonBones.parsers
 			}
 		}
 		
-		protected function _globalToLocal(armature: ArmatureData):void 
+		protected function _mergeFrameToAnimationTimeline(frame:FrameData, actions:Vector.<ActionData>, events:Vector.<EventData>):void 
+		{
+			const frameStart:uint = uint(frame.position * this._armature.frameRate); // uint()
+			const frames:Vector.<FrameData> = this._animation.frames;
+			
+			if (frames.length == 0) {
+				const startFrame:AnimationFrameData = BaseObject.borrowObject(AnimationFrameData) as AnimationFrameData; // Add start frame.
+				startFrame.position = 0;
+				
+				if (this._animation.frameCount > 1) {
+					frames.length = this._animation.frameCount + 1; // One more count for zero duration frame.
+					
+					const endFrame:AnimationFrameData = BaseObject.borrowObject(AnimationFrameData) as AnimationFrameData; // Add end frame to keep animation timeline has two different frames atleast.
+					endFrame.position = this._animation.frameCount / this._armature.frameRate;
+					
+					frames[0] = startFrame;
+					frames[this._animation.frameCount] = endFrame;
+				}
+			}
+			
+			var i:uint = 0, l:uint = 0;
+			var insertedFrame:AnimationFrameData = null;
+			const replacedFrame:AnimationFrameData = frames[frameStart] as AnimationFrameData;
+			
+			if (replacedFrame && (frameStart == 0 || frames[frameStart - 1] == replacedFrame.prev)) // Key frame.
+			{
+				insertedFrame = replacedFrame;
+			} 
+			else 
+			{
+				insertedFrame = BaseObject.borrowObject(AnimationFrameData) as AnimationFrameData; // Create frame.
+				insertedFrame.position = frameStart / this._armature.frameRate;
+				frames[frameStart] = insertedFrame;
+				
+				for (i = frameStart + 1, l = frames.length; i < l; ++i) // Clear replaced frame.
+				{
+					if (replacedFrame && frames[i] == replacedFrame) 
+					{
+						frames[i] = null;
+					}
+				}
+			}
+			
+			if (actions) // Merge actions.
+			{
+				for (i = 0, l = actions.length; i < l; ++i) 
+				{
+					insertedFrame.actions.push(actions[i]);
+				}
+			}
+			
+			if (events) // Merge events.
+			{
+				for (i = 0, l = events.length; i < l; ++i) 
+				{
+					insertedFrame.events.push(events[i]);
+				}
+			}
+			
+			// Modify frame link and duration.
+			var prevFrame:AnimationFrameData = null;
+			var nextFrame:AnimationFrameData = null;
+			for (i = 0, l = frames.length; i < l; ++i) 
+			{
+				const currentFrame:AnimationFrameData = frames[i] as AnimationFrameData;
+				if (currentFrame && nextFrame != currentFrame) 
+				{
+					nextFrame = currentFrame;
+					
+					if (prevFrame) 
+					{
+						nextFrame.prev = prevFrame;
+						prevFrame.next = nextFrame;
+						prevFrame.duration = nextFrame.position - prevFrame.position;
+					}
+					
+					prevFrame = nextFrame;
+				} 
+				else 
+				{
+					frames[i] = prevFrame;
+				}
+			}
+			
+			nextFrame.duration = this._animation.duration - nextFrame.position;
+			
+			nextFrame = frames[0] as AnimationFrameData;
+			prevFrame.next = nextFrame;
+			nextFrame.prev = prevFrame;
+		}
+		
+		protected function _globalToLocal(armature:ArmatureData):void 
 		{
 			const bones:Vector.<BoneData> = armature.sortedBones.reverse();
 			var i:uint = 0, l:uint = 0; 

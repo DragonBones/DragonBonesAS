@@ -126,6 +126,7 @@ package dragonBones.animation
 		{
 			super.update(time);
 			
+			// Blend animation.
 			const weight:Number = this._animationState._weightResult;
 			if (weight > 0)
 			{

@@ -306,6 +306,10 @@
 			parentGlobal.skewX += ikRadianA;
 			parentGlobal.skewY += ikRadianA;
 			parentGlobal.toMatrix(this._parent.globalTransformMatrix);
+			this._parent._transformDirty = 1;
+			
+			this.global.x = parentGlobal.x + Math.cos(parentGlobal.skewY) * lP;
+			this.global.y = parentGlobal.y + Math.sin(parentGlobal.skewY) * lP;
 			
 			const ikRadianB:Number = 
 				(
@@ -315,8 +319,7 @@
 			
 			this.global.skewX += ikRadianB;
 			this.global.skewY += ikRadianB;
-			this.global.x = parentGlobal.x + Math.cos(parentGlobal.skewY) * lP;
-			this.global.y = parentGlobal.y + Math.sin(parentGlobal.skewY) * lP;
+			
 			this.global.toMatrix(this.globalTransformMatrix);
 		}
 		

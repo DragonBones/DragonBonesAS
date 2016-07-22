@@ -1,14 +1,9 @@
 ﻿package dragonBones.animation
 {
 	import dragonBones.Armature;
-	import dragonBones.Slot;
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.events.EventObject;
-	import dragonBones.events.IEventDispatcher;
-	import dragonBones.objects.ActionData;
-	import dragonBones.objects.EventData;
 	import dragonBones.objects.FrameData;
 	import dragonBones.objects.TimelineData;
 	
@@ -26,14 +21,14 @@
 		
 		protected var _isReverse:Boolean;
 		protected var _hasAsynchronyTimeline:Boolean;
+		protected var _frameRate:uint;
 		protected var _keyFrameCount:uint;
 		protected var _frameCount:uint;
 		protected var _position:Number;
 		protected var _duration:Number;
-		protected var _clipDutation:Number;
+		protected var _animationDutation:Number;
 		protected var _timeScale:Number;
 		protected var _timeOffset:Number;
-		protected var _timeToFrameSccale:Number;
 		protected var _currentFrame:FrameData;
 		protected var _armature:Armature;
 		protected var _animationState:AnimationState;
@@ -60,110 +55,26 @@
 			
 			_isReverse = false;
 			_hasAsynchronyTimeline = false;
+			_frameRate = 0;
 			_keyFrameCount =0;
 			_frameCount = 0;
 			_position = 0;
 			_duration = 0;
-			_clipDutation = 0;
+			_animationDutation = 0;
 			_timeScale = 1;
 			_timeOffset = 0;
-			_timeToFrameSccale = 0;
 			_currentFrame = null;
 			_armature = null;
 			_animationState = null;
 		}
 		
-		protected function _onFadeIn():void
-		{
-		}
+		protected function _onFadeIn():void {}
 		
-		protected function _onUpdateFrame(isUpdate:Boolean):void
-		{
-		}
+		protected function _onUpdateFrame(isUpdate:Boolean):void {}
 		
-		protected function _onArriveAtFrame(isUpdate:Boolean):void
-		{
-		}
+		protected function _onArriveAtFrame(isUpdate:Boolean):void {}
 		
-		protected function _onCrossFrame(frame:FrameData):void
-		{
-			var i:uint = 0, l:uint = 0;
-			
-			const actions:Vector.<ActionData> = frame.actions;
-			for (i = 0, l = actions.length; i < l; ++i)
-			{
-				const actionData:ActionData = actions[i];
-				
-				if (actionData.slot)
-				{
-					const slot:Slot = _armature.getSlot(actionData.slot.name);
-					if (slot)
-					{
-						const childArmature:Armature = slot.childArmature;
-						if (childArmature)
-						{
-							childArmature._action = actionData;
-						}
-					}
-				}
-				else if (actionData.bone)
-				{
-					for each (var eachSlot:Slot in _armature.getSlots())
-					{
-						const eachChildArmature:Armature = eachSlot.childArmature;
-						if (eachChildArmature)
-						{
-							eachChildArmature._action = actionData;
-						}
-					}
-				}
-				else
-				{
-					_armature._action = actionData;
-				}
-			}
-			
-			const eventDispatcher:IEventDispatcher = _armature.display;
-			const events:Vector.<EventData> = frame.events;
-			
-			for (i = 0, l = events.length; i < l; ++i)
-			{
-				const eventData:EventData = events[i];
-				
-				var eventType:String = null;
-				switch (eventData.type)
-				{
-					case DragonBones.EVENT_TYPE_FRAME:
-						eventType = EventObject.FRAME_EVENT;
-						break;
-					
-					case DragonBones.EVENT_TYPE_SOUND:
-						eventType = EventObject.SOUND_EVENT;
-						break;
-				}
-				
-				if (eventDispatcher.hasEvent(eventType))
-				{
-					const eventObject:EventObject = BaseObject.borrowObject(EventObject) as EventObject;
-					eventObject.animationState = _animationState;
-					
-					if (eventData.bone)
-					{
-						eventObject.bone = _armature.getBone(eventData.bone.name);
-					}
-					
-					if (eventData.slot)
-					{
-						eventObject.slot = _armature.getSlot(eventData.slot.name);
-					}
-					
-					eventObject.name = eventData.name;
-					eventObject.data = eventData.data;
-					
-					_armature._bufferEvent(eventObject, eventType);
-				}
-			}
-		}
+		protected function _onCrossFrame(frame:FrameData):void {}
 		
 		protected function _setCurrentTime(value:Number):Boolean
 		{
@@ -177,7 +88,7 @@
 				value *= _timeScale;
 				if (_timeOffset != 0)
 				{
-					value += _timeOffset * _clipDutation;
+					value += _timeOffset * _animationDutation;
 				}
 				
 				if (playTimes > 0 && (value >= totalTimes || value <= -totalTimes))
@@ -262,7 +173,7 @@
 					break;
 				
 				default:
-					_currentFrame = _timeline.frames[uint(_currentTime * _timeToFrameSccale)];
+					_currentFrame = _timeline.frames[uint(_currentTime * _frameRate)];
 					_onArriveAtFrame(false);
 					_onUpdateFrame(false);
 					break;
@@ -279,24 +190,22 @@
 			
 			const isMainTimeline:Boolean = this == _animationState._timeline;
 			
-			_hasAsynchronyTimeline = isMainTimeline || _animationState.clip.hasAsynchronyTimeline;
+			_hasAsynchronyTimeline = isMainTimeline || _animationState.animationData.hasAsynchronyTimeline;
+			_frameRate = _armature.armatureData.frameRate;
 			_keyFrameCount = _timeline.frames.length;
-			_frameCount = _animationState.clip.frameCount;
+			_frameCount = _animationState.animationData.frameCount;
 			_position = _animationState._position;
 			_duration = _animationState._duration;
-			_clipDutation = _animationState._clipDutation;
+			_animationDutation = _animationState.animationData.duration;
 			_timeScale = isMainTimeline? 1: (1 / _timeline.scale);
 			_timeOffset = isMainTimeline? 0: _timeline.offset;
-			_timeToFrameSccale = _frameCount / _clipDutation;
 			
 			_onFadeIn();
 			
 			setCurrentTime(time);
 		}
 		
-		public function fadeOut():void
-		{
-		}
+		public function fadeOut():void {}
 		
 		public function update(time:Number):void
 		{
@@ -308,7 +217,7 @@
 				var currentFrameIndex:uint = 0;
 				if (_keyFrameCount > 1)
 				{
-					currentFrameIndex = uint(_currentTime * _timeToFrameSccale);
+					currentFrameIndex = uint(_currentTime * _frameRate);
 				}
 				
 				const currentFrame:FrameData = _timeline.frames[currentFrameIndex];
@@ -319,34 +228,29 @@
 						var crossedFrame:FrameData = _currentFrame;
 						_currentFrame = currentFrame;
 						
-						if (_isReverse)
+						if (!crossedFrame) 
 						{
-							while (crossedFrame != currentFrame)
+							const prevFrameIndex:uint = uint(prevTime * _frameRate);
+							crossedFrame = _timeline.frames[prevFrameIndex];
+							if (!_isReverse && prevTime <= crossedFrame.position) 
 							{
-								if (!crossedFrame)
-								{
-									const prevFrameIndexA:uint = uint(prevTime * this._timeToFrameSccale);
-									crossedFrame = this._timeline.frames[prevFrameIndexA];
-								}
-								
-								_onCrossFrame(crossedFrame);
 								crossedFrame = crossedFrame.prev;
 							}
 						}
-						else
+						
+						if (_isReverse) 
 						{
-							while (crossedFrame != currentFrame)
+							while (crossedFrame != currentFrame) 
 							{
-								if (crossedFrame)
-								{
-									crossedFrame = crossedFrame.next;
-								}
-								else
-								{
-									const prevFrameIndexB:uint = uint(prevTime * this._timeToFrameSccale);
-									crossedFrame = this._timeline.frames[prevFrameIndexB];
-								}
-								
+								_onCrossFrame(crossedFrame);
+								crossedFrame = crossedFrame.prev;
+							}
+						} 
+						else 
+						{
+							while (crossedFrame != currentFrame) 
+							{
+								crossedFrame = crossedFrame.next;
 								_onCrossFrame(crossedFrame);
 							}
 						}

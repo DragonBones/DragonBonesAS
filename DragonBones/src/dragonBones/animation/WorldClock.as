@@ -89,11 +89,6 @@
 					if (animateble) 
 					{
 						animateble.advanceTime(passedTime);
-						
-						if (r > 0) 
-						{
-							_animatebles[i - r] = animateble;
-						}
 					} 
 					else 
 					{
@@ -103,6 +98,7 @@
 				
 				if (r > 0) 
 				{
+					r = 0;
 					l = _animatebles.length;
 					
 					for (; i < l; ++i) 

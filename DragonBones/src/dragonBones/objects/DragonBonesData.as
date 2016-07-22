@@ -95,6 +95,8 @@ package dragonBones.objects
 			{
 				armatures[value.name] = value;
 				_armatureNames.push(value.name);
+				
+				value.parent = this;
 			}
 			else
 			{

@@ -72,7 +72,7 @@
 				const nextFrame:BoneFrameData = this._currentFrame.next as BoneFrameData;
 				const nextTransform:Transform = nextFrame.transform;
 				
-				// Transform
+				// Transform.
 				_durationTransform.x = nextTransform.x - _currentTransform.x;
 				_durationTransform.y = nextTransform.y - _currentTransform.y;
 				if (_durationTransform.x != 0 || _durationTransform.y != 0)
@@ -80,7 +80,7 @@
 					_tweenTransform = TWEEN_TYPE_ALWAYS;
 				}
 				
-				// Rotate
+				// Rotate.
 				const tweenRotate:Number = currentFrame.tweenRotate;
 				if (tweenRotate == tweenRotate)
 				{
@@ -114,7 +114,7 @@
 					_durationTransform.skewY = 0;
 				}
 				
-				// Scale
+				// Scale.
 				if (currentFrame.tweenScale)
 				{
 					_durationTransform.scaleX = nextTransform.scaleX - _currentTransform.scaleX;
@@ -154,12 +154,12 @@
 						_tweenTransform = TWEEN_TYPE_NONE;
 					}
 					
-					if (this._animationState.additiveBlending) // Additive blending
+					if (this._animationState.additiveBlending) // Additive blending.
 					{
 						_transform.x = _currentTransform.x + _durationTransform.x * this._tweenProgress;
 						_transform.y = _currentTransform.y + _durationTransform.y * this._tweenProgress;
 					}
-					else // Normal blending
+					else // Normal blending.
 					{
 						_transform.x = _originTransform.x + _currentTransform.x + _durationTransform.x * this._tweenProgress;
 						_transform.y = _originTransform.y + _currentTransform.y + _durationTransform.y * this._tweenProgress;
@@ -173,12 +173,12 @@
 						_tweenRotate = TWEEN_TYPE_NONE;
 					}
 					
-					if (this._animationState.additiveBlending) // Additive blending
+					if (this._animationState.additiveBlending) // Additive blending.
 					{
 						_transform.skewX = _currentTransform.skewX + _durationTransform.skewX * this._tweenProgress;
 						_transform.skewY = _currentTransform.skewY + _durationTransform.skewY * this._tweenProgress;
 					}
-					else // Normal blending
+					else // Normal blending.
 					{
 						_transform.skewX = _originTransform.skewX + _currentTransform.skewX + _durationTransform.skewX * this._tweenProgress;
 						_transform.skewY = _originTransform.skewY + _currentTransform.skewY + _durationTransform.skewY * this._tweenProgress;
@@ -192,12 +192,12 @@
 						_tweenScale = TWEEN_TYPE_NONE;
 					}
 					
-					if (this._animationState.additiveBlending) // Additive blending
+					if (this._animationState.additiveBlending) // Additive blending.
 					{
 						_transform.scaleX = _currentTransform.scaleX + _durationTransform.scaleX * this._tweenProgress;
 						_transform.scaleY = _currentTransform.scaleY + _durationTransform.scaleY * this._tweenProgress;
 					}
-					else // Normal blending
+					else // Normal blending.
 					{
 						_transform.scaleX = _originTransform.scaleX * (_currentTransform.scaleX + _durationTransform.scaleX * this._tweenProgress);
 						_transform.scaleY = _originTransform.scaleY * (_currentTransform.scaleY + _durationTransform.scaleY * this._tweenProgress);
@@ -218,7 +218,7 @@
 		{
 			super.update(time);
 			
-			// Blend animation state
+			// Blend animation state.
 			const weight:Number = this._animationState._weightResult;
 			
 			if (weight > 0)

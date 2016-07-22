@@ -13,11 +13,6 @@
 		public var hasAsynchronyTimeline:Boolean;
 		
 		/**
-		 * @private
-		 */
-		public var hasBoneTimelineEvent:Boolean;
-		
-		/**
 		 * @language zh_CN
 		 * 持续的帧数。
 		 * @version DragonBones 3.0
@@ -105,7 +100,6 @@
 			super._onClear();
 			
 			hasAsynchronyTimeline = false;
-			hasBoneTimelineEvent = false;
 			frameCount = 0;
 			playTimes = 0;
 			position = 0;

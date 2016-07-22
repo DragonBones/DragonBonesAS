@@ -170,6 +170,24 @@ package dragonBones.starling
 		
 		/**
 		 * @language zh_CN
+		 * 获取带有指定贴图的显示对象。
+		 * @param textureName 指定的贴图名称。
+		 * @param dragonBonesName 指定的龙骨数据名称，如果未设置，将检索所有的龙骨数据。
+		 * @version DragonBones 3.0
+		 */
+		public function getTextureDisplay(textureName:String, dragonBonesName:String = null):Image 
+		{
+			const textureData:StarlingTextureData = this._getTextureData(dragonBonesName, textureName) as StarlingTextureData;
+			if (textureData) 
+			{
+				return new Image(textureData.texture);
+			}
+
+			return null;
+		}
+		
+		/**
+		 * @language zh_CN
 		 * 获取全局声音事件管理器。
 		 * @version DragonBones 4.5
 		 */

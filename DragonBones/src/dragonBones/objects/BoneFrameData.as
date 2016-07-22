@@ -9,7 +9,6 @@ package dragonBones.objects
 	{
 		public var tweenScale:Boolean;
 		public var tweenRotate:Number;
-		public var parent:BoneData;
 		public const transform:Transform = new Transform();
 		
 		public function BoneFrameData()
@@ -26,7 +25,6 @@ package dragonBones.objects
 			
 			tweenScale = false;
 			tweenRotate = 0;
-			parent = null;
 			transform.identity();
 		}
 	}

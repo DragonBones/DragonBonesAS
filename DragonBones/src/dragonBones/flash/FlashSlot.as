@@ -283,6 +283,8 @@ package dragonBones.flash
 			}
 			
 			frameDisplay.visible = false;
+			frameDisplay.x = 0;
+			frameDisplay.y = 0;
 		}
 		
 		/**

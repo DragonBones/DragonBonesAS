@@ -359,7 +359,7 @@
 		 * 解析并添加龙骨数据。
 		 * @param rawData 需要解析的原始数据。 (JSON)
 		 * @param dragonBonesName 为数据指定一个名称，以便可以通过这个名称来获取数据，如果未设置，则使用数据中的名称。
-		 * @return DragonBonesData 龙骨数据
+		 * @return DragonBonesData
 		 * @see #getDragonBonesData()
 		 * @see #addDragonBonesData()
 		 * @see #removeDragonBonesData()
@@ -403,7 +403,7 @@
 		 * @language zh_CN
 		 * 解析并添加贴图集数据。
 		 * @param rawData 需要解析的原始数据。 (JSON)
-		 * @param textureAtlas 贴图集数据。 (BitmapData 或 ATF 或 DisplayObject)
+		 * @param textureAtlas 贴图集数据。 (JSON)
 		 * @param name 为数据指定一个名称，以便可以通过这个名称来访问数据，如果未设置，则使用数据中的名称。
 		 * @param scale 为贴图集设置一个缩放值。
 		 * @return 贴图集数据
@@ -631,7 +631,7 @@
 		 * @language zh_CN
 		 * 创建一个指定名称的骨架。
 		 * @param armatureName 骨架数据名称。
-		 * @param dragonBonesName 龙骨数据名称，如果未设置，将检索所有的龙骨数据，当多个数据中包含同名的骨架数据时，可能无法创建出准确的骨架。
+		 * @param dragonBonesName 龙骨数据名称，如果未设置，将检索所有的龙骨数据，当多个龙骨数据中包含同名的骨架数据时，可能无法创建出准确的骨架。
 		 * @param skinName 皮肤名称，如果未设置，则使用默认皮肤。
 		 * @return 骨架。
 		 * @see dragonBones.Armature
@@ -660,7 +660,7 @@
 		 * @param toArmature 指定的骨架。
 		 * @param fromArmatreName 其他骨架的名称。
 		 * @param fromSkinName 其他骨架的皮肤名称，如果未设置，则使用默认皮肤。
-         * @param fromDragonBonesDataName 其他骨架属于的龙骨数据名称，如果未设置，则检索所有龙骨数据寻找其他骨架。
+         * @param fromDragonBonesDataName 其他骨架属于的龙骨数据名称，如果未设置，则检索所有龙骨数据。
 		 * @param ifRemoveOriginalAnimationList 是否移除原有的动画。 [true: 移除, false: 不移除]
 		 * @return 是否替换成功。 [true: 成功, false: 不成功]
 		 * @see dragonBones.Armature

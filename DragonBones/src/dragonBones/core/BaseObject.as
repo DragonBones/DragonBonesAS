@@ -11,29 +11,11 @@
 	 */
 	public class BaseObject
 	{
-		/**
-		 * @private
-		 */
 		private static var _hashCode:uint = 0;
-		
-		/**
-		 * @private
-		 */
 		private static var _defaultMaxCount:uint = 5000;
-		
-		/**
-		 * @private
-		 */
 		private static const _maxCountMap:Dictionary = new Dictionary();
-		
-		/**
-		 * @private
-		 */
 		private static const _poolsMap:Dictionary = new Dictionary();
 		
-		/**
-		 * @private
-		 */
 		private static function _returnObject(object:BaseObject):void
 		{
 			//const objectConstructor:Class = getDefinitionByName(getQualifiedClassName(object));
@@ -57,6 +39,8 @@
 		/**
 		 * @language zh_CN
 		 * 设置每种对象池的最大缓存数量。
+		 * @param objectConstructor 对象类。
+		 * @param maxCount 最大缓存数量。 (设置为 0 则不缓存)
 		 * @version DragonBones 4.5
 		 */
 		public static function setMaxCount(objectConstructor:Class, maxCount:uint):void
@@ -157,16 +141,12 @@
 			{
 				throw new Error(DragonBones.ABSTRACT_CLASS_ERROR);
 			}
-			
-			//_onClear();
 		}
 		
 		/**
 		 * @private
 		 */
-		protected function _onClear():void
-		{
-		}
+		protected function _onClear():void {}
 		
 		/**
 		 * @language zh_CN

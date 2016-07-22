@@ -181,9 +181,9 @@
 			super._onClear();
 			
 			const disposeDisplayList:Vector.<Object> = new Vector.<Object>();
-			for each (var eachDisplay:Object in this._displayList)
+			for each (var eachDisplay:Object in _displayList)
 			{
-				if (disposeDisplayList.indexOf(eachDisplay) < 0)
+				if (eachDisplay != _rawDisplay && eachDisplay != _meshDisplay &&  disposeDisplayList.indexOf(eachDisplay) < 0)
 				{
 					disposeDisplayList.push(eachDisplay);
 				}
@@ -197,8 +197,18 @@
 				}
 				else
 				{
-					this._disposeDisplay(eachDisplay);
+					_disposeDisplay(eachDisplay);
 				}
+			}
+			
+			if (_meshDisplay && _meshDisplay != _rawDisplay)
+			{
+				_disposeDisplay(_meshDisplay);
+			}
+			
+			if (_rawDisplay)
+			{
+				_disposeDisplay(_rawDisplay);
 			}
 			
 			inheritAnimation = true;
@@ -213,7 +223,14 @@
 			_cacheFrames = null;
 			_rawDisplay = null;
 			_meshDisplay = null;
-			//_colorTransform;
+			_colorTransform.alphaMultiplier = 1;
+			_colorTransform.redMultiplier = 1;
+			_colorTransform.greenMultiplier = 1;
+			_colorTransform.blueMultiplier = 1;
+			_colorTransform.alphaOffset = 0;
+			_colorTransform.redOffset = 0;
+			_colorTransform.greenOffset = 0;
+			_colorTransform.blueOffset = 0;
 			
 			if (_ffdVertices.length)
 			{
@@ -439,14 +456,14 @@
 				_colorDirty = true;
 			}
 			
-			// update origin
+			// Update origin.
 			if (_displayDataSet && _displayIndex >= 0 && _displayIndex < _displayDataSet.displays.length)
 			{
 				this.origin.copyFrom(_displayDataSet.displays[_displayIndex].transform);
 				_originDirty = true;
 			}
 			
-			// update meshData
+			// Update meshData.
 			_updateMeshData(false);
 			
 			if (currentDisplay == _rawDisplay || currentDisplay == _meshDisplay)
@@ -454,12 +471,12 @@
 				_updateFrame();
 			}
 			
-			// update child armature
+			// Update child armature.
 			if (_childArmature != prevChildArmature)
 			{
 				if (prevChildArmature)
 				{
-					prevChildArmature._parent = null; // Update child armature parent
+					prevChildArmature._parent = null; // Update child armature parent.
 					if (inheritAnimation)
 					{
 						prevChildArmature.animation.reset();
@@ -468,9 +485,16 @@
 				
 				if (_childArmature)
 				{
-					_childArmature._parent = this; // Update child armature parent
+					_childArmature._parent = this; // Update child armature parent.
 					if (inheritAnimation)
 					{
+						// Set child armature frameRate.
+						const cacheFrameRate:uint = this._armature.cacheFrameRate;
+						if (cacheFrameRate) 
+						{
+							this._childArmature.cacheFrameRate = cacheFrameRate;
+						}
+						
 						_childArmature.animation.play();
 					}
 				}
@@ -512,7 +536,7 @@
 			
 			this._armature = value;
 			
-			_onUpdateDisplay(); // Update renderDisplay
+			_onUpdateDisplay(); // Update renderDisplay.
 			
 			if (this._armature)
 			{

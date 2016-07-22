@@ -290,6 +290,8 @@
 			frameDisplay.readjustSize();
 			frameDisplay.pivotX = 0;
 			frameDisplay.pivotY = 0;
+			frameDisplay.x = 0;
+			frameDisplay.y = 0;
 		}
 		
 		/**
