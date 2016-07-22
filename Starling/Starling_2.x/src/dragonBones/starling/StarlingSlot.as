@@ -28,7 +28,7 @@
 	 */
 	public final class StarlingSlot extends Slot
 	{
-		public var transformEnabled:Boolean;
+		public var transformUpdateEnabled:Boolean;
 		
 		/**
 		 * @private
@@ -58,10 +58,19 @@
 		{
 			super._onClear();
 			
-			transformEnabled = false;
+			transformUpdateEnabled = false;
 			
-			_indexData = null;
-			_vertexData = null;
+			if (_indexData)
+			{
+				_indexData.clear();
+				_indexData = null;
+			}
+			
+			if (_vertexData)
+			{
+				_vertexData.clear();
+				_vertexData = null;
+			}
 			
 			_renderDisplay = null;
 		}
@@ -236,13 +245,10 @@
 				
 				if (currentTextureData)
 				{
-					if (!currentTextureData.texture)
+					const textureAtlasTexture:Texture = (currentTextureData.parent as StarlingTextureAtlasData).texture;
+					if (!currentTextureData.texture && textureAtlasTexture)
 					{
-						const textureAtlasTexture:Texture = (currentTextureData.parent as StarlingTextureAtlasData).texture;
-						if (textureAtlasTexture)
-						{
-							currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, null, currentTextureData.rotated);
-						}
+						currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, null, currentTextureData.rotated);
 					}
 					
 					const texture:Texture = (this._armature._replacedTexture as Texture) || currentTextureData.texture;
@@ -271,7 +277,7 @@
 								meshStyle.setVertexPosition(iH, this._meshData.vertices[i], this._meshData.vertices[i + 1]);
 							}
 							
-							meshDisplay.texture = currentTextureData.texture;
+							meshDisplay.texture = texture;
 							//meshDisplay.readjustSize();
 							meshDisplay.pivotX = 0;
 							meshDisplay.pivotY = 0;
@@ -316,7 +322,7 @@
 								pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
 							}
 							
-							frameDisplay.texture = currentTextureData.texture;
+							frameDisplay.texture = texture;
 							frameDisplay.readjustSize();
 							frameDisplay.pivotX = pivotX;
 							frameDisplay.pivotY = pivotY;
@@ -409,7 +415,7 @@
 			const pivotX:Number = _renderDisplay.pivotX;
 			const pivotY:Number = _renderDisplay.pivotY;
 			
-			if (transformEnabled)
+			if (transformUpdateEnabled)
 			{
 				_renderDisplay.transformationMatrix = this.globalTransformMatrix;
 				

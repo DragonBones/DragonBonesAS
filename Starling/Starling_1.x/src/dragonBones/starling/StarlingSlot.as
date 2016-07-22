@@ -231,9 +231,8 @@
 						}
 					}
 					
-					const currentTexture:Texture = (this._armature._replacedTexture as Texture) || currentTextureData.texture;
-					
-					if (currentTexture)
+					const texture:Texture = (this._armature._replacedTexture as Texture) || currentTextureData.texture;
+					if (texture)
 					{
 						if (this._meshData && this._display == this._meshDisplay)
 						{
@@ -272,7 +271,7 @@
 								pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
 							}
 							
-							frameDisplay.texture = currentTexture;
+							frameDisplay.texture = texture;
 							frameDisplay.readjustSize();
 							frameDisplay.pivotX = pivotX;
 							frameDisplay.pivotY = pivotY;

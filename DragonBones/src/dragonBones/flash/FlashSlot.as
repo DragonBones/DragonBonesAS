@@ -3,10 +3,12 @@ package dragonBones.flash
 	import flash.display.BitmapData;
 	import flash.display.BlendMode;
 	import flash.display.DisplayObject;
+	import flash.display.GraphicsTrianglePath;
 	import flash.display.Shape;
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
 	
+	import dragonBones.Bone;
 	import dragonBones.Slot;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DisplayData;
@@ -22,7 +24,10 @@ package dragonBones.flash
 	{
 		private static const _helpMatrix:Matrix = new Matrix();
 		
-		private var _renderDisplay:DisplayObject = null;
+		private var _renderDisplay:DisplayObject;
+		
+		private var _meshTexture:BitmapData;
+		private var _pach:GraphicsTrianglePath;
 		
 		/**
 		 * @language zh_CN
@@ -42,6 +47,8 @@ package dragonBones.flash
 			super._onClear();
 			
 			_renderDisplay = null;
+			_meshTexture = null;
+			_pach = null;
 		}
 		
 		// Abstract method
@@ -203,78 +210,139 @@ package dragonBones.flash
 				const currentTextureData:FlashTextureData = contentDisplayData.textureData as FlashTextureData;
 				if (currentTextureData)
 				{
-					const currentTexture:BitmapData = 
-						(this._armature._replacedTexture as BitmapData) 
-						|| (currentTextureData.parent as FlashTextureAtlasData).texture 
-						|| currentTextureData.texture;
+					const textureAtlasTexture:BitmapData = (currentTextureData.parent as FlashTextureAtlasData).texture;
+					const texture:BitmapData = 
+						(this._armature._replacedTexture as BitmapData) ||
+						textureAtlasTexture ||
+						currentTextureData.texture;
 					
-					if (currentTexture)
+					if (texture)
 					{
-						const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
-						
-						var width:Number = rect.width;
-						var height:Number = rect.height;
-						if (currentTextureData.rotated)
+						if (this._meshData && this._display == this._meshDisplay)
 						{
-							width = rect.height;
-							height = rect.width;
-						}
-						
-						var pivotX:Number = contentDisplayData.pivot.x;
-						var pivotY:Number = contentDisplayData.pivot.y;
-						
-						if (contentDisplayData.isRelativePivot)
-						{
-							pivotX = width * pivotX;
-							pivotY = height * pivotY;
-						}
-						
-						if (currentTextureData.frame)
-						{
-							pivotX += currentTextureData.frame.x;
-							pivotY += currentTextureData.frame.y;
-						}
-						
-						if (rawDisplayData && rawDisplayData != contentDisplayData)
-						{
-							pivotX += rawDisplayData.transform.x - contentDisplayData.transform.x;
-							pivotY += rawDisplayData.transform.y - contentDisplayData.transform.y;
-						}
-						
-						if (currentTextureData.rotated)
-						{
-							width = currentTextureData.region.height;
-							height = currentTextureData.region.width;
+							const meshDisplay:Shape = this._meshDisplay as Shape;
+							
+							if (_pach)
+							{
+								_pach.uvtData.fixed = false;
+								_pach.vertices.fixed = false;
+								_pach.indices.fixed = false;
+								
+								_pach.uvtData.length = this._meshData.uvs.length;
+								_pach.vertices.length = this._meshData.vertices.length;
+								_pach.indices.length = this._meshData.vertexIndices.length;
+								
+								_pach.uvtData.fixed = true;
+								_pach.vertices.fixed = true;
+								_pach.indices.fixed = true;
+							}
+							else
+							{
+								_pach = new GraphicsTrianglePath();
+								_pach.uvtData = new Vector.<Number>(this._meshData.uvs.length, true);
+								_pach.vertices = new Vector.<Number>(this._meshData.vertices.length, true);
+								_pach.indices = new Vector.<int>(this._meshData.vertexIndices.length, true);
+							}
+							
+							var i:uint = 0, l:uint = 0;
+							for (i = 0, l = _pach.uvtData.length; i < l; i += 2)
+							{
+								const u:Number = this._meshData.uvs[i];
+								const v:Number = this._meshData.uvs[i + 1];
+								_pach.uvtData[i] = (currentTextureData.region.x + u * currentTextureData.region.width) / textureAtlasTexture.width;
+								_pach.uvtData[i + 1] = (currentTextureData.region.y + v * currentTextureData.region.height) / textureAtlasTexture.height;
+							}
+							
+							for (i = 0, l = _pach.vertices.length; i < l; ++i)
+							{
+								_pach.vertices[i] = this._meshData.vertices[i];
+							}
+							
+							for (i = 0, l = _pach.indices.length; i < l; ++i)
+							{
+								_pach.indices[i] = this._meshData.vertexIndices[i];
+							}
+							
+							_meshTexture = texture;
+							meshDisplay.graphics.beginBitmapFill(_meshTexture, null, false, true);
+							meshDisplay.graphics.drawTriangles(_pach.vertices, _pach.indices, _pach.uvtData);
+							
+							if (this._meshData.skinned)
+							{
+								const transformationMatrix:Matrix = meshDisplay.transform.matrix;
+								transformationMatrix.identity();
+								meshDisplay.transform.matrix = transformationMatrix;
+							}
 						}
 						else
 						{
-							height = currentTextureData.region.height;
-							width = currentTextureData.region.width;
+							const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
+							
+							var width:Number = rect.width;
+							var height:Number = rect.height;
+							if (currentTextureData.rotated)
+							{
+								width = rect.height;
+								height = rect.width;
+							}
+							
+							var pivotX:Number = contentDisplayData.pivot.x;
+							var pivotY:Number = contentDisplayData.pivot.y;
+							
+							if (contentDisplayData.isRelativePivot)
+							{
+								pivotX = width * pivotX;
+								pivotY = height * pivotY;
+							}
+							
+							if (currentTextureData.frame)
+							{
+								pivotX += currentTextureData.frame.x;
+								pivotY += currentTextureData.frame.y;
+							}
+							
+							if (rawDisplayData && rawDisplayData != contentDisplayData)
+							{
+								pivotX += rawDisplayData.transform.x - contentDisplayData.transform.x;
+								pivotY += rawDisplayData.transform.y - contentDisplayData.transform.y;
+							}
+							
+							if (currentTextureData.rotated)
+							{
+								width = currentTextureData.region.height;
+								height = currentTextureData.region.width;
+							}
+							else
+							{
+								height = currentTextureData.region.height;
+								width = currentTextureData.region.width;
+							}
+							
+							const scale:Number = 1 / currentTextureData.parent.scale;
+							
+							if (currentTextureData.rotated)
+							{
+								_helpMatrix.a = 0;
+								_helpMatrix.b = -scale;
+								_helpMatrix.c = scale;
+								_helpMatrix.d = 0;
+								_helpMatrix.tx = -pivotX - currentTextureData.region.y;
+								_helpMatrix.ty = -pivotY + currentTextureData.region.x + height;
+							}
+							else
+							{
+								_helpMatrix.a = scale;
+								_helpMatrix.b = 0;
+								_helpMatrix.c = 0;
+								_helpMatrix.d = scale;
+								_helpMatrix.tx = -pivotX - currentTextureData.region.x;
+								_helpMatrix.ty = -pivotY - currentTextureData.region.y;
+							}
+							
+							frameDisplay.graphics.beginBitmapFill(texture, _helpMatrix, false, true);
+							frameDisplay.graphics.drawRect(-pivotX, -pivotY, width, height);
 						}
 						
-						const scale:Number = 1 / currentTextureData.parent.scale;
-						
-						if (currentTextureData.rotated)
-						{
-							_helpMatrix.a = 0;
-							_helpMatrix.b = -scale;
-							_helpMatrix.c = scale;
-							_helpMatrix.d = 0;
-							_helpMatrix.tx = -pivotX - currentTextureData.region.y;
-							_helpMatrix.ty = -pivotY + currentTextureData.region.x + height;
-						}
-						else
-						{
-							_helpMatrix.a = scale;
-							_helpMatrix.b = 0;
-							_helpMatrix.c = 0;
-							_helpMatrix.d = scale;
-							_helpMatrix.tx = -pivotX - currentTextureData.region.x;
-							_helpMatrix.ty = -pivotY - currentTextureData.region.y;
-						}
-						
-						frameDisplay.graphics.beginBitmapFill(currentTexture, _helpMatrix, false, true);
-						frameDisplay.graphics.drawRect(-pivotX, -pivotY, width, height);
 						this._updateVisible();
 						
 						return;
@@ -292,6 +360,74 @@ package dragonBones.flash
 		 */
 		override protected function _updateMesh():void
 		{
+			const meshDisplay:Shape = this._meshDisplay as Shape;
+			
+			const hasFFD:Boolean = this._ffdVertices.length > 0;
+			
+			var i:uint = 0, iH:uint = 0, iF:uint = 0, l:uint = this._meshData.vertices.length;
+			var xG:Number = 0, yG:Number = 0;
+			if (this._meshData.skinned)
+			{
+				meshDisplay.graphics.clear();
+				
+				for (i = 0; i < l; i += 2)
+				{
+					iH = i / 2;
+					
+					const boneIndices:Vector.<uint> = this._meshData.boneIndices[iH];
+					const boneVertices:Vector.<Number> = this._meshData.boneVertices[iH];
+					const weights:Vector.<Number> = this._meshData.weights[iH];
+					
+					xG = 0, yG = 0;
+					
+					for (var iB:uint = 0, lB:uint = boneIndices.length; iB < lB; ++iB)
+					{
+						const bone:Bone = this._meshBones[boneIndices[iB]];
+						const matrix:Matrix = bone.globalTransformMatrix;
+						const weight:Number = weights[iB];
+						
+						var xL:Number = 0, yL:Number = 0;
+						if (hasFFD)
+						{
+							xL = boneVertices[iB * 2] + this._ffdVertices[iF];
+							yL = boneVertices[iB * 2 + 1] + this._ffdVertices[iF + 1];
+						}
+						else
+						{
+							xL = boneVertices[iB * 2];
+							yL = boneVertices[iB * 2 + 1];
+						}
+						
+						
+						xG += (matrix.a * xL + matrix.c * yL + matrix.tx) * weight;
+						yG += (matrix.b * xL + matrix.d * yL + matrix.ty) * weight;
+						
+						iF += 2;
+					}
+					
+					_pach.vertices[i] = xG;
+					_pach.vertices[i + 1] = yG;
+				}
+				
+				meshDisplay.graphics.beginBitmapFill(_meshTexture, null, false, true);
+				meshDisplay.graphics.drawTriangles(_pach.vertices, _pach.indices, _pach.uvtData);
+			}
+			else if (hasFFD)
+			{
+				meshDisplay.graphics.clear();
+				
+				const vertices:Vector.<Number> = this._meshData.vertices;
+				for (i = 0; i < l; i += 2)
+				{
+					xG = vertices[i] + this._ffdVertices[i];
+					yG = vertices[i + 1] + this._ffdVertices[i + 1];
+					_pach.vertices[i] = xG;
+					_pach.vertices[i + 1] = yG;
+				}
+				
+				meshDisplay.graphics.beginBitmapFill(_meshTexture, null, false, true);
+				meshDisplay.graphics.drawTriangles(_pach.vertices, _pach.indices, _pach.uvtData);
+			}
 		}
 		
 		/**
