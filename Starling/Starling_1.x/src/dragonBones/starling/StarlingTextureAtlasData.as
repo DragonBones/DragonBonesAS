@@ -17,14 +17,14 @@ package dragonBones.starling
 				const textureData:StarlingTextureData = textureAtlasData.generateTexture() as StarlingTextureData;
 				textureData.name = textureName;
 				textureData.texture = textureAtlas.getTexture(textureName);
-				//textureData.rotate;
-				//textureData.region;
-				//textureData.frame;
+				textureData.rotated = textureAtlas.getRotation(textureName);
+				textureData.region.copyFrom(textureAtlas.getRegion(textureName));
+				textureData.frame = textureAtlas.getFrame(textureName);
 				textureAtlasData.addTexture(textureData);
 			}
 			
-			//textureAtlasData.texture = textureAtlas.texture;
-			//textureAtlasData.scale = textureAtlas.texture.scale;
+			textureAtlasData.texture = textureAtlas.texture;
+			textureAtlasData.scale = textureAtlas.texture.scale;
 			return textureAtlasData;
 		}
 		

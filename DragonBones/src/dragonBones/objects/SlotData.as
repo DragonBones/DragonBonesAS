@@ -64,6 +64,11 @@ package dragonBones.objects
 		/**
 		 * @private
 		 */
+		public const actions: Vector.<ActionData> = new Vector.<ActionData>();
+		
+		/**
+		 * @private
+		 */
 		public function SlotData()
 		{
 			super(this);
@@ -80,6 +85,16 @@ package dragonBones.objects
 			name = null;
 			parent = null;
 			color = null;
+			
+			if (actions.length) 
+			{
+				for each (var actionData:ActionData in actions) 
+				{
+					actionData.returnToPool();
+				}
+				
+				actions.length = 0;
+			}
 		}
 	}
 }

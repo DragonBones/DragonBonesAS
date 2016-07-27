@@ -192,13 +192,21 @@
 				}
 			}
 			
-			this._armature = null;
-			this._rawBones.length = 0;
+			if (
+				(ACTIONS in rawData) ||
+				(DEFAULT_ACTIONS in rawData)
+			) 
+			{
+				_parseActionData(rawData, armature.actions, null, null);
+			}
 			
 			if (this._isParentCooriinate && _getBoolean(rawData, IS_GLOBAL, true)) // Support 2.x ~ 3.x data.
 			{
 				_globalToLocal(armature);
 			}
+			
+			this._armature = null;
+			this._rawBones.length = 0;
 			
 			return armature;
 		}
@@ -286,6 +294,14 @@
 			else
 			{
 				slot.blendMode = _getNumber(rawData, BLEND_MODE, DragonBones.BLEND_MODE_NORMAL);
+			}
+			
+			if (
+				(ACTIONS in rawData) ||
+				(DEFAULT_ACTIONS in rawData)
+			) 
+			{
+				this._parseActionData(rawData, slot.actions, null, null);
 			}
 			
 			if (this._isParentCooriinate) // Support 2.x ~ 3.x data.
@@ -796,7 +812,10 @@
 			
 			_parseFrame(rawData, frame, frameStart, frameCount);
 			
-			if (ACTION in rawData)
+			if (
+				(ACTION in rawData) ||
+				(ACTIONS in rawData)
+			) 
 			{
 				_parseActionData(rawData, frame.actions, null, null);
 			}
@@ -838,7 +857,10 @@
 			
 			const bone:BoneData = (this._timeline as BoneTimelineData).bone;
 			
-			if (ACTION in rawData)
+			if (
+				(ACTION in rawData) ||
+				(ACTIONS in rawData)
+			) 
 			{
 				const slot:SlotData = this._armature.getSlot(bone.name);
 				const actions:Vector.<ActionData> = new Vector.<ActionData>();
@@ -886,7 +908,10 @@
 					frame.displayIndex = -1;
 				}
 			} 
-			else if (ACTION in rawData)
+			else if (
+				(ACTION in rawData) ||
+				(ACTIONS in rawData)
+			) 
 			{
 				const slot:SlotData = (this._timeline as SlotTimelineData).slot;
 				const actions:Vector.<ActionData> = new Vector.<ActionData>();
@@ -1072,7 +1097,7 @@
 		 */
 		protected function _parseActionData(rawData:Object, actions:Vector.<ActionData>, bone:BoneData, slot:SlotData):void
 		{
-			const actionsObject:* = rawData[ACTION];
+			const actionsObject:* = rawData[ACTION] || rawData[ACTIONS] || rawData[DEFAULT_ACTIONS];
 			
 			actions.fixed = false;
 			
@@ -1087,37 +1112,47 @@
 			}
 			else if (actionsObject is Array)
 			{
-				for each (var actionObject:Array in actionsObject)
+				for (var i:uint = 0, l:uint = actionsObject.length; i < l; ++i) 
 				{
+					const actionObject:Array = (actionsObject[i] is Array ? actionsObject[i] : null);
 					const actionDataB:ActionData = BaseObject.borrowObject(ActionData) as ActionData;
-					const actionType:* = actionObject[0];
-					if (actionType is String)
+					const animationName:String = actionObject ? null : actionsObject[i]["gotoAndPlay"];
+					
+					if (actionObject) 
 					{
-						actionDataB.type = _getActionType(actionType);
-					}
-					else
+						const actionType:String = actionObject[0];
+						if (actionType is String) 
+						{
+							actionDataB.type = _getActionType(actionType);
+						} 
+						else 
+						{
+							actionDataB.type = _getParameter(actionObject, 0, DragonBones.ACTION_TYPE_FADE_IN);
+						}
+					} 
+					else 
 					{
-						actionDataB.type = _getParameter(actionObject, 0, DragonBones.ACTION_TYPE_FADE_IN);
+						actionDataB.type = DragonBones.ACTION_TYPE_GOTO_AND_PLAY;
 					}
 					
 					switch (actionDataB.type)
 					{
 						case DragonBones.ACTION_TYPE_PLAY:
 							actionDataB.data = [
-								_getParameter(actionObject, 1, null), // animationName
+								actionObject? _getParameter(actionObject, 1, null): animationName, // animationName
 								_getParameter(actionObject, 2, -1), // playTimes
 							];
 							break;
 						
 						case DragonBones.ACTION_TYPE_STOP:
 							actionDataB.data = [
-								_getParameter(actionObject, 1, null) // animation
+								actionObject? _getParameter(actionObject, 1, null): animationName, // animationName
 							];
 							break;
 						
 						case DragonBones.ACTION_TYPE_GOTO_AND_PLAY:
 							actionDataB.data = [
-								_getParameter(actionObject, 1, null), // animationName
+								actionObject? _getParameter(actionObject, 1, null): animationName, // animationName
 								_getParameter(actionObject, 2, 0), // time
 								_getParameter(actionObject, 3, -1) // playTimes
 							];
@@ -1125,14 +1160,14 @@
 						
 						case DragonBones.ACTION_TYPE_GOTO_AND_STOP:
 							actionDataB.data = [
-								_getParameter(actionObject, 1, null), // animationName
+								actionObject? _getParameter(actionObject, 1, null): animationName, // animationName
 								_getParameter(actionObject, 2, 0), // time
 							];
 							break;
 						
 						case DragonBones.ACTION_TYPE_FADE_IN:
 							actionDataB.data = [
-								_getParameter(actionObject, 1, null), // animationName
+								actionObject? _getParameter(actionObject, 1, null): animationName, // animationName
 								_getParameter(actionObject, 2, -1), // fadeInTime
 								_getParameter(actionObject, 3, -1) // playTimes
 							];
@@ -1140,7 +1175,7 @@
 						
 						case DragonBones.ACTION_TYPE_FADE_OUT:
 							actionDataB.data = [
-								_getParameter(actionObject, 1, null), // animationName
+								actionObject? _getParameter(actionObject, 1, null): animationName, // animationName
 								_getParameter(actionObject, 2, 0) // fadeOutTime
 							];
 							break;

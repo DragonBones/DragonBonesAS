@@ -78,6 +78,11 @@ package dragonBones.objects
 		 */
 		public const animations:Object = {};
 		
+		/**
+		 * @private
+		 */
+		public const actions: Vector.<ActionData> = new Vector.<ActionData>();
+		
 		private var _boneDirty:Boolean;
 		private var _slotDirty:Boolean;
 		private var _defaultSkin:SkinData;
@@ -129,6 +134,16 @@ package dragonBones.objects
 			{
 				(animations[i] as AnimationData).returnToPool();
 				delete animations[i];
+			}
+			
+			if (actions.length) 
+			{
+				for each (var actionData:ActionData in actions) 
+				{
+					actionData.returnToPool();
+				}
+				
+				actions.length = 0;
 			}
 			
 			_boneDirty = false;

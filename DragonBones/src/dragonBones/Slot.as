@@ -8,6 +8,7 @@
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.MeshData;
+	import dragonBones.objects.SlotData;
 	import dragonBones.objects.SlotDisplayDataSet;
 	import dragonBones.objects.SlotTimelineData;
 	
@@ -495,7 +496,15 @@
 							this._childArmature.cacheFrameRate = cacheFrameRate;
 						}
 						
-						_childArmature.animation.play();
+						const slotData:SlotData = this._armature.armatureData.getSlot(this.name);
+						if (slotData.actions.length > 0) 
+						{
+							this._childArmature._action = slotData.actions[slotData.actions.length - 1];
+						} 
+						else 
+						{
+							this._childArmature.animation.play();
+						}
 					}
 				}
 			}

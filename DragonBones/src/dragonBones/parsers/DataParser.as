@@ -97,6 +97,7 @@
 		protected static const SOUND:String = "sound";
 		protected static const ACTION:String = "action";
 		protected static const ACTIONS:String = "actions";
+		protected static const DEFAULT_ACTIONS:String = "defaultActions";
 		
 		protected static const X:String = "x";
 		protected static const Y:String = "y";

@@ -31,6 +31,7 @@
 	public final class StarlingFactory extends BaseFactory
 	{
 		public var generateMipMaps:Boolean = true;
+		
 		/**
 		 * @language zh_CN
 		 * 创建一个工厂。
@@ -134,9 +135,16 @@
 					
 					case DragonBones.DISPLAY_TYPE_ARMATURE:
 						const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName);
-						if (childArmature)
+						if (childArmature) 
 						{
-							childArmature.animation.play();
+							if (slotData.actions.length > 0) 
+							{
+								childArmature._action = slotData.actions[slotData.actions.length - 1];
+							} 
+							else 
+							{
+								childArmature.animation.play();
+							}
 						}
 						
 						displayList.push(childArmature);

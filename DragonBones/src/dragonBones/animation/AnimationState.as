@@ -630,42 +630,43 @@
 		 */
 		dragonBones_internal function _advanceTime(passedTime:Number, weightLeft:Number, index:int):void
 		{
-			if (passedTime != 0)
+			if (passedTime != 0) // Fading.
 			{
 				_advanceFadeTime(passedTime);
 			}
 			
+			// Update time.
 			passedTime *= timeScale;
-			
 			if (passedTime != 0 && _isPlaying && !_isPausePlayhead)
 			{
 				_time += passedTime;
-				_timeline.update(_time);
-				
-				if (autoFadeOutTime >= 0 && _fadeProgress >= 1 && _timeline._isCompleted)
-				{
-					fadeOut(autoFadeOutTime);
-				}
 			}
 			
+			// Blend weight.
 			_weightResult = weight * _fadeProgress * weightLeft;
 			
 			if (_weightResult != 0)
 			{
-				var time:Number = _time;
+				const isCacheEnabled:Boolean = _fadeProgress >= 1 && index == 0 && _armature.cacheFrameRate > 0;
+				const cacheTimeToFrameScale:Number = _animationData.cacheTimeToFrameScale;
+				var isUpdateTimelines:Boolean = true;
+				var isUpdateBoneTimelines:Boolean = true;
+				var time:Number = isCacheEnabled? (uint(_time * cacheTimeToFrameScale) / cacheTimeToFrameScale): _time; // Cache time internval.
+				
+				// Update main timeline.
+				_timeline.update(_time);
 				if (!_animationData.hasAsynchronyTimeline)
 				{
 					time = _timeline._currentTime;
 				}
 				
-				var isUpdateTimelines:Boolean = true;
-				var isUpdateBoneTimelines:Boolean = true;
 				var i:uint = 0, l:uint = 0;
 				
-				if (_fadeProgress >= 1 && index == 0 && _armature.cacheFrameRate > 0)
+				if (isCacheEnabled)
 				{
-					const cacheFrameIndex:uint = uint(_timeline._currentTime * _animationData.cacheTimeToFrameScale);
-					if (_armature._cacheFrameIndex == cacheFrameIndex)
+					const cacheFrameIndex:uint = uint(_timeline._currentTime * cacheTimeToFrameScale);
+					
+					if (_armature._cacheFrameIndex == cacheFrameIndex) // Same cache.
 					{
 						isUpdateTimelines = false;
 						isUpdateBoneTimelines = false;
@@ -674,7 +675,7 @@
 					{
 						_armature._cacheFrameIndex = cacheFrameIndex;
 						
-						if (_armature._animation._animationStateDirty)
+						if (_armature._animation._animationStateDirty) // Update _cacheFrames.
 						{
 							_armature._animation._animationStateDirty = false;
 							
@@ -691,11 +692,11 @@
 							}
 						}
 						
-						if (_animationData.cachedFrames[cacheFrameIndex])
+						if (_animationData.cachedFrames[cacheFrameIndex]) // Cached.
 						{
 							isUpdateBoneTimelines = false;
 						}
-						else
+						else // Cache.
 						{
 							_animationData.cachedFrames[cacheFrameIndex] = true;
 						}
@@ -726,6 +727,11 @@
 						_ffdTimelines[i].update(time);
 					}
 				}
+			}
+			
+			if (autoFadeOutTime >= 0 && _fadeProgress >= 1 && _timeline._isCompleted)
+			{
+				fadeOut(autoFadeOutTime);
 			}
 		}
 		

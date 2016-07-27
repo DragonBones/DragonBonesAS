@@ -782,6 +782,7 @@ package dragonBones
 				_armatureData.cacheFrames(value);
 				
 				// Set child armature frameRate.
+				
 				for (var i:uint = 0, l:uint = _slots.length; i < l; ++i) 
 				{
 					const slot:Slot = _slots[i];

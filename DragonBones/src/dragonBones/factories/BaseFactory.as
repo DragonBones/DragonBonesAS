@@ -646,6 +646,11 @@
 				_buildBones(dataPackage, armature);
 				_buildSlots(dataPackage, armature);
 				
+				if (armature.armatureData.actions.length > 0) // Add default action.
+				{
+					armature._action = armature.armatureData.actions[armature.armatureData.actions.length - 1];
+				}
+				
 				// Update armature pose
 				armature.advanceTime(0);
 				return armature;

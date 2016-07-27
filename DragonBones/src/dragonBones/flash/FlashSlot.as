@@ -238,10 +238,11 @@ package dragonBones.flash
 							}
 							else
 							{
-								_pach = new GraphicsTrianglePath();
-								_pach.uvtData = new Vector.<Number>(this._meshData.uvs.length, true);
-								_pach.vertices = new Vector.<Number>(this._meshData.vertices.length, true);
-								_pach.indices = new Vector.<int>(this._meshData.vertexIndices.length, true);
+								_pach = new GraphicsTrianglePath(
+									new Vector.<Number>(this._meshData.uvs.length, true),
+									new Vector.<int>(this._meshData.vertexIndices.length, true),
+									new Vector.<Number>(this._meshData.vertices.length, true)
+								);
 							}
 							
 							var i:uint = 0, l:uint = 0;
