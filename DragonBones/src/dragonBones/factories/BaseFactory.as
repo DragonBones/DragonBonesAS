@@ -258,17 +258,19 @@
 				}
 				
 				const slot:Slot = _generateSlot(dataPackage, slotDisplayDataSet);
-				
-				slot._displayDataSet = slotDisplayDataSet;
-				slot._setDisplayIndex(slotData.displayIndex);
-				slot._setBlendMode(slotData.blendMode);
-				slot._setColor(slotData.color);
-				
-				slot._replacedDisplayDataSet.fixed = false;
-				slot._replacedDisplayDataSet.length = slot._displayDataSet.displays.length;
-				slot._replacedDisplayDataSet.fixed = true;
-				
-				armature.addSlot(slot, slotData.parent.name);
+				if (slot)
+				{
+					slot._displayDataSet = slotDisplayDataSet;
+					slot._setDisplayIndex(slotData.displayIndex);
+					slot._setBlendMode(slotData.blendMode);
+					slot._setColor(slotData.color);
+					
+					slot._replacedDisplayDataSet.fixed = false;
+					slot._replacedDisplayDataSet.length = slot._displayDataSet.displays.length;
+					slot._replacedDisplayDataSet.fixed = true;
+					
+					armature.addSlot(slot, slotData.parent.name);
+				}
 			}
 		}
 		

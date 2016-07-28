@@ -46,7 +46,7 @@ package dragonBones.starling
 		{
 			_armature = null;
 			
-			this.dispose();
+			super.dispose();
 		}
 		
 		/**
@@ -63,6 +63,14 @@ package dragonBones.starling
 				const event:StarlingEvent = new StarlingEvent(eventObject);
 				this.dispatchEvent(event);
 			}
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function _debugDraw():void
+		{
+			
 		}
 		
 		/**
@@ -113,8 +121,6 @@ package dragonBones.starling
 			{
 				_armature.dispose();
 			}
-			
-			super.dispose();
 		}
 		
 		/**

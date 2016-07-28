@@ -77,9 +77,9 @@
 		dragonBones_internal var _meshData:MeshData;
 		
 		/**
-		 * @private BoneTimelineState
+		 * @private
 		 */
-		dragonBones_internal var _cacheFrames:Vector.<Matrix>;
+		dragonBones_internal var _childArmature:Armature;
 		
 		/**
 		 * @private Factory
@@ -90,6 +90,11 @@
 		 * @private Factory
 		 */
 		dragonBones_internal var _meshDisplay:Object;
+		
+		/**
+		 * @private BoneTimelineState
+		 */
+		dragonBones_internal var _cacheFrames:Vector.<Matrix>;
 		
 		/**
 		 * @private SlotTimelineState
@@ -140,11 +145,6 @@
 		 * @private
 		 */
 		protected var _display:Object;
-		
-		/**
-		 * @private
-		 */
-		protected var _childArmature:Armature;
 		
 		/**
 		 * @private
@@ -221,9 +221,10 @@
 			_zOrder = 0;
 			_displayDataSet = null;
 			_meshData = null;
-			_cacheFrames = null;
+			_childArmature = null;
 			_rawDisplay = null;
 			_meshDisplay = null;
+			_cacheFrames = null;
 			_colorTransform.alphaMultiplier = 1;
 			_colorTransform.redMultiplier = 1;
 			_colorTransform.greenMultiplier = 1;
@@ -254,7 +255,6 @@
 			_displayIndex = 0;
 			_blendMode = DragonBones.BLEND_MODE_NORMAL;
 			_display = null;
-			_childArmature = null;
 			_localMatrix.identity();
 			
 			if (_displayList.length)

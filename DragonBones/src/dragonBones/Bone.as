@@ -472,7 +472,7 @@
 				}
 				else
 				{
-					_transformDirty = 1;
+					_transformDirty = 2;
 					this.globalTransformMatrix = this._globalTransformMatrix;
 				}
 			}
@@ -488,36 +488,43 @@
 			
 			if (_transformDirty > 0)
 			{
-				_transformDirty--;
-				
-				if (this.globalTransformMatrix == this._globalTransformMatrix)
+				if (_transformDirty == 2)
 				{
-					this.global.copyFrom(this.origin).add(this.offset).add(_animationPose);
-					/*this.global.x = this.origin.x + this.offset.x + _animationPose.x;
-					this.global.y = this.origin.y + this.offset.y + _animationPose.y;
-					this.global.skewX = this.origin.skewX + this.offset.skewX + _animationPose.skewX;
-					this.global.skewY = this.origin.skewY + this.offset.skewY + _animationPose.skewY;
-					this.global.scaleX = this.origin.scaleX * this.offset.scaleX * _animationPose.scaleX;
-					this.global.scaleY = this.origin.scaleY * this.offset.scaleY * _animationPose.scaleY;*/
+					_transformDirty = 1;
 					
-					_updateGlobalTransformMatrix();
-					
-					if (_ik && _ikChainIndex == _ikChain  && ikWeight > 0)
+					if (this.globalTransformMatrix == this._globalTransformMatrix)
 					{
-						if (this.inheritTranslation && _ikChain > 0 && this._parent)
+						this.global.copyFrom(this.origin).add(this.offset).add(_animationPose);
+						/*this.global.x = this.origin.x + this.offset.x + _animationPose.x;
+						this.global.y = this.origin.y + this.offset.y + _animationPose.y;
+						this.global.skewX = this.origin.skewX + this.offset.skewX + _animationPose.skewX;
+						this.global.skewY = this.origin.skewY + this.offset.skewY + _animationPose.skewY;
+						this.global.scaleX = this.origin.scaleX * this.offset.scaleX * _animationPose.scaleX;
+						this.global.scaleY = this.origin.scaleY * this.offset.scaleY * _animationPose.scaleY;*/
+						
+						_updateGlobalTransformMatrix();
+						
+						if (_ik && _ikChainIndex == _ikChain  && ikWeight > 0)
 						{
-							_computeIKB();
+							if (this.inheritTranslation && _ikChain > 0 && this._parent)
+							{
+								_computeIKB();
+							}
+							else
+							{
+								_computeIKA();
+							}
 						}
-						else
+						
+						if (cacheFrameIndex >= 0)
 						{
-							_computeIKA();
+							this.globalTransformMatrix = BoneTimelineData.cacheFrame(_cacheFrames, cacheFrameIndex, this._globalTransformMatrix);
 						}
 					}
-					
-					if (cacheFrameIndex >= 0)
-					{
-						this.globalTransformMatrix = BoneTimelineData.cacheFrame(_cacheFrames, cacheFrameIndex, this._globalTransformMatrix);
-					}
+				}
+				else
+				{
+					_transformDirty = 0;
 				}
 			}
 		}

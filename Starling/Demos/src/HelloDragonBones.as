@@ -1,5 +1,14 @@
 ﻿package
 {
+	/**
+	 * How to use
+	 * 1. Load data.
+	 * 2. factory.parseDragonBonesData();
+	 *    factory.parseTextureAtlasData();
+	 * 3. armatureDisplay = factory.buildArmatureDisplay("armatureName");
+	 * 4. addChild(armatureDisplay);
+	 */
+	
 	import flash.display.Sprite;
 	import flash.events.Event;
 
@@ -12,13 +21,13 @@
 	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#666666")]
 	public class HelloDragonBones extends Sprite
 	{
-		[Embed(source = "../assets/TestC/010/c010151.json", mimeType = "application/octet-stream")]
+		[Embed(source = "../assets/Old/Warrior/skeleton.json", mimeType = "application/octet-stream")]
 		public static const DBDataA: Class;
 
-		[Embed(source = "../assets/TestC/010/texture.json", mimeType = "application/octet-stream")]
+		[Embed(source = "../assets/Old/Warrior/texture.json", mimeType = "application/octet-stream")]
 		public static const TADataA1: Class;
 
-		[Embed(source = "../assets/TestC/010/texture.png")]
+		[Embed(source = "../assets/Old/Warrior/texture.png")]
 		public static const TextureA1: Class;
 		
 		private var _isMoved:Boolean = false;
@@ -31,7 +40,7 @@
 			_flashInit();
 			_starlingInit();
 
-			this.addEventListener(Event.ENTER_FRAME, _enterFrameHandler);
+			this.stage.addEventListener(Event.ENTER_FRAME, _enterFrameHandler);
 			this.stage.addEventListener(MouseEvent.MOUSE_UP, _mouseHandler);
 			this.stage.addEventListener(MouseEvent.MOUSE_DOWN, _mouseHandler);
 			this.stage.addEventListener(MouseEvent.MOUSE_MOVE, _mouseHandler);
@@ -118,7 +127,6 @@
 }
 
 
-import dragonBones.Armature;
 import dragonBones.animation.WorldClock;
 import dragonBones.objects.DragonBonesData;
 
@@ -139,7 +147,6 @@ class FlashRender extends flash.display.Sprite
 
 	private var _armatureIndex: uint = 0;
 	private var _animationIndex: uint = 0;
-	private var _armature: Armature = null;
 	private var _armatureDisplay: FlashArmatureDisplay = null;
 	private const _factory: FlashFactory = new FlashFactory();
 
@@ -174,7 +181,6 @@ class FlashRender extends flash.display.Sprite
 		if (dragonBonesData)
 		{
 			changeArmature(_armatureScale);
-			changeAnimation();
 		}
 	}
 
@@ -186,17 +192,14 @@ class FlashRender extends flash.display.Sprite
 			return;
 		}
 		
-		// Remove prev Armature.
-		if (_armature)
+		// Remove prev armature.
+		if (_armatureDisplay)
 		{
-			_armature.dispose();
+			_armatureDisplay.dispose();
 			this.removeChild(_armatureDisplay);
-
-			// b.
-			// dragonBones.WorldClock.clock.remove(_armature);
 		}
 
-		// Get Next Armature name.
+		// Get next armature name.
 		_armatureIndex++;
 		if (_armatureIndex >= armatureNames.length)
 		{
@@ -205,16 +208,10 @@ class FlashRender extends flash.display.Sprite
 
 		const armatureName: String = armatureNames[_armatureIndex];
 
-		// a. Build Armature Display. (buildArmatureDisplay will advanceTime animation by Armature Display)
+		// Build armature display. (buildArmatureDisplay will advanceTime animation by armature display)
 		_armatureDisplay = _factory.buildArmatureDisplay(armatureName);
-		_armature = _armatureDisplay.armature;
 
-		// b. Build Armature. (buildArmature will advanceTime animation by WorldClock)
-		/*_armature = _factory.buildArmature(armatureName);
-		_armatureDisplay = _armature.display as StarlingArmatureDisplay;
-		WorldClock.clock.add(_armature);*/
-
-		// Add Armature Display.
+		// Add armature display.
 		_armatureDisplay.x = 200;
 		_armatureDisplay.y = 400;
 		this.armatureScale = armatureScale;
@@ -231,7 +228,7 @@ class FlashRender extends flash.display.Sprite
 			return;
 		}
 		
-		// Get next Animation name.
+		// Get next animation name.
 		_animationIndex++;
 		if (_animationIndex >= animationNames.length)
 		{
@@ -242,17 +239,12 @@ class FlashRender extends flash.display.Sprite
 
 		// Play animation.
 		_armatureDisplay.animation.play(animationName);
-		//_armature.animation.play(animationName);
 	}
 }
 
 
 // Starling render
 import starling.display.Sprite;
-import starling.display.DisplayObject;
-import starling.events.Touch;
-import starling.events.TouchEvent;
-import starling.events.TouchPhase;
 import starling.events.Event;
 import starling.text.TextField;
 
@@ -267,7 +259,6 @@ class StarlingRender extends starling.display.Sprite
 
 	private var _armatureIndex: uint = 0;
 	private var _animationIndex: uint = 0;
-	private var _armature: Armature = null;
 	private var _armatureDisplay: StarlingArmatureDisplay = null;
 	private const _factory: StarlingFactory = new StarlingFactory();
 
@@ -291,7 +282,7 @@ class StarlingRender extends starling.display.Sprite
 
 	private function _addToStageHandler(event: starling.events.Event): void
 	{
-		// Load DragonBones Data.
+		// Load dragonBones data.
 		dragonBonesData = _factory.parseDragonBonesData(
 			JSON.parse(new HelloDragonBones.DBDataA())
 		);
@@ -303,7 +294,6 @@ class StarlingRender extends starling.display.Sprite
 		if (dragonBonesData)
 		{
 			changeArmature(_armatureScale);
-			changeAnimation();
 		}
 		else
 		{
@@ -326,17 +316,14 @@ class StarlingRender extends starling.display.Sprite
 			return;
 		}
 		
-		// Remove prev Armature.
-		if (_armature)
+		// Remove prev armature.
+		if (_armatureDisplay)
 		{
-			_armature.dispose();
+			_armatureDisplay.dispose();
 			this.removeChild(_armatureDisplay);
-
-			// b.
-			// dragonBones.WorldClock.clock.remove(_armature);
 		}
 
-		// Get Next Armature name.
+		// Get next armature name.
 		_armatureIndex++;
 		if (_armatureIndex >= armatureNames.length)
 		{
@@ -345,16 +332,10 @@ class StarlingRender extends starling.display.Sprite
 
 		const armatureName: String = armatureNames[_armatureIndex];
 
-		// a. Build Armature Display. (buildArmatureDisplay will advanceTime animation by Armature Display)
+		// Build armature display. (buildArmatureDisplay will advanceTime animation by Armature Display)
 		_armatureDisplay = _factory.buildArmatureDisplay(armatureName);
-		_armature = _armatureDisplay.armature;
 
-		// b. Build Armature. (buildArmature will advanceTime animation by WorldClock)
-		/*_armature = _factory.buildArmature(armatureName);
-		_armatureDisplay = _armature.display as StarlingArmatureDisplay;
-		WorldClock.clock.add(_armature);*/
-
-		// Add Armature Display.
+		// Add armature display.
 		_armatureDisplay.x = 600;
 		_armatureDisplay.y = 400;
 		this.armatureScale = armatureScale;
@@ -371,7 +352,7 @@ class StarlingRender extends starling.display.Sprite
 			return;
 		}
 		
-		// Get next Animation name.
+		// Get next animation name.
 		_animationIndex++;
 		if (_animationIndex >= animationNames.length)
 		{
@@ -382,6 +363,5 @@ class StarlingRender extends starling.display.Sprite
 
 		// Play animation.
 		_armatureDisplay.animation.play(animationName);
-		//_armature.animation.play(animationName);
 	}
 }

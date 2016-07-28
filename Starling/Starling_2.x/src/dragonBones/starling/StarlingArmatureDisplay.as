@@ -2,6 +2,7 @@ package dragonBones.starling
 {
 	import dragonBones.Armature;
 	import dragonBones.animation.Animation;
+	import dragonBones.animation.WorldClock;
 	import dragonBones.core.IArmatureDisplay;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.EventObject;
@@ -16,7 +17,15 @@ package dragonBones.starling
 	 */
 	public final class StarlingArmatureDisplay extends Sprite implements IArmatureDisplay
 	{
-		public static const useDefaultStarlingEvent:Boolean = false;
+		public static var useDefaultStarlingEvent:Boolean = false;
+		
+		/*
+		private static const _clock:WorldClock = new WorldClock();
+		private static function _clockHandler(event:EnterFrameEvent):void 
+		{
+			_clock.advanceTime(event.passedTime);
+		}
+		*/
 		
 		/**
 		 * @private
@@ -46,7 +55,7 @@ package dragonBones.starling
 		{
 			_armature = null;
 			
-			this.dispose();
+			super.dispose();
 		}
 		
 		/**
@@ -63,6 +72,13 @@ package dragonBones.starling
 				const event:StarlingEvent = new StarlingEvent(eventObject);
 				this.dispatchEvent(event);
 			}
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function _debugDraw():void
+		{
 		}
 		
 		/**
@@ -113,8 +129,6 @@ package dragonBones.starling
 			{
 				_armature.dispose();
 			}
-			
-			super.dispose();
 		}
 		
 		/**

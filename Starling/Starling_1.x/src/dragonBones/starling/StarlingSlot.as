@@ -108,8 +108,7 @@
 		 */
 		override protected function _disposeDisplay(value:Object):void
 		{
-			const prevDisplay:DisplayObject = value as DisplayObject;
-			prevDisplay.dispose();
+			(value as DisplayObject).dispose();
 		}
 		
 		/**

@@ -19,12 +19,13 @@ package dragonBones.starling
 				textureData.texture = textureAtlas.getTexture(textureName);
 				textureData.rotated = textureAtlas.getRotation(textureName);
 				textureData.region.copyFrom(textureAtlas.getRegion(textureName));
-				textureData.frame = textureAtlas.getFrame(textureName);
+				//textureData.frame = textureAtlas.getFrame(textureName);
 				textureAtlasData.addTexture(textureData);
 			}
 			
 			textureAtlasData.texture = textureAtlas.texture;
 			textureAtlasData.scale = textureAtlas.texture.scale;
+			
 			return textureAtlasData;
 		}
 		

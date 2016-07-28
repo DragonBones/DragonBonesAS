@@ -2,6 +2,7 @@ package dragonBones.core
 {
 	import dragonBones.Armature;
 	import dragonBones.animation.Animation;
+	import dragonBones.events.EventObject;
 	import dragonBones.events.IEventDispatcher;
 
 	/**
@@ -12,6 +13,11 @@ package dragonBones.core
 	 */
 	public interface IArmatureDisplay extends IEventDispatcher
 	{
+		/**
+		 * @private
+		 */
+		function _debugDraw():void;
+		
 		/**
 		 * @language zh_CN
 		 * 由显示容器来更新骨架和动画。

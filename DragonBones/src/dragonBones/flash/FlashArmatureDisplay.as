@@ -1,10 +1,14 @@
 package dragonBones.flash
 {
+	import flash.display.Shape;
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.utils.getTimer;
 	
 	import dragonBones.Armature;
+	import dragonBones.Bone;
 	import dragonBones.animation.Animation;
+	import dragonBones.animation.WorldClock;
 	import dragonBones.core.IArmatureDisplay;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.EventObject;
@@ -16,15 +20,22 @@ package dragonBones.flash
 	 */
 	public class FlashArmatureDisplay extends Sprite implements IArmatureDisplay
 	{
-		/**
-		 * @private
-		 */
-		private var _time:Number;
+		private static const _enterFrameHelper:Shape = new Shape();
+		private static const _clock:WorldClock = new WorldClock();
+		private static function _clockHandler(event:Event):void 
+		{
+			const time:Number = getTimer() * 0.001;
+			const passedTime:Number = time - _clock.time;
+			_clock.advanceTime(passedTime);
+			_clock.time = time;
+		}
 		
 		/**
 		 * @private
 		 */
 		dragonBones_internal var _armature:Armature;
+		
+		private var _debugDrawer:Shape;
 		
 		/**
 		 * @private
@@ -32,16 +43,12 @@ package dragonBones.flash
 		public function FlashArmatureDisplay()
 		{
 			super();
-		}
-		
-		/**
-		 * @private
-		 */
-		private function _advanceTimeHandler(event:Event):void
-		{
-			const passedTime:Number = new Date().getTime() * 0.001 - _time;
-			_time += passedTime;
-			this._armature.advanceTime(passedTime);
+			
+			if (!_enterFrameHelper.hasEventListener(Event.ENTER_FRAME))
+			{
+				_clock.time = getTimer() * 0.001;
+				_enterFrameHelper.addEventListener(Event.ENTER_FRAME, _clockHandler, false, -999999);
+			}
 		}
 		
 		/**
@@ -51,9 +58,8 @@ package dragonBones.flash
 		{
 			advanceTimeBySelf(false);
 			
-			_time = 0;
-			
 			_armature = null;
+			_debugDrawer = null;
 		}
 		
 		/**
@@ -64,6 +70,35 @@ package dragonBones.flash
 			const event:FlashEvent = new FlashEvent(eventObject.type, eventObject);
 			
 			this.dispatchEvent(event);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function _debugDraw():void
+		{
+			if (!_debugDrawer) 
+			{
+				_debugDrawer = new Shape();
+			}
+			
+			this.addChild(_debugDrawer);
+			_debugDrawer.graphics.clear();
+			
+			const bones:Vector.<Bone> = _armature.getBones();
+			for (var i:uint = 0, l:uint = bones.length; i < l; ++i) 
+			{
+				const bone:Bone = bones[i];
+				const boneLength:Number = Math.max(bone.length, 5);
+				const startX:Number = bone.globalTransformMatrix.tx;
+				const startY:Number = bone.globalTransformMatrix.ty;
+				const endX:Number = startX + bone.globalTransformMatrix.a * boneLength;
+				const endY:Number = startY + bone.globalTransformMatrix.b * boneLength;
+				
+				_debugDrawer.graphics.lineStyle(1, bone.ik ? 0xFF0000 : 0x00FF00, 0.5);
+				_debugDrawer.graphics.moveTo(startX, startY);
+				_debugDrawer.graphics.lineTo(endX, endY);
+			}
 		}
 		
 		/**
@@ -97,12 +132,11 @@ package dragonBones.flash
 		{
 			if (on)
 			{
-				_time = new Date().getTime() * 0.001;
-				this.addEventListener(Event.ENTER_FRAME, _advanceTimeHandler);
-			}
-			else
+				_clock.add(this._armature);
+			} 
+			else 
 			{
-				this.removeEventListener(Event.ENTER_FRAME, _advanceTimeHandler);
+				_clock.remove(this._armature);
 			}
 		}
 		

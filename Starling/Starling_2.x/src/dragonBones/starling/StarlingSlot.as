@@ -131,8 +131,7 @@
 		 */
 		override protected function _disposeDisplay(value:Object):void
 		{
-			const renderDisplay:DisplayObject = value as DisplayObject;
-			renderDisplay.dispose();
+			(value as DisplayObject).dispose();
 		}
 		
 		/**

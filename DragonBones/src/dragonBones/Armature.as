@@ -383,7 +383,7 @@ package dragonBones
 					
 					slot._update(_cacheFrameIndex);
 					
-					const childArmature:Armature = slot.childArmature;
+					const childArmature:Armature = slot._childArmature;
 					if (childArmature)
 					{
 						if (slot.inheritAnimation) // Animation's time scale will impact to childArmature
@@ -395,6 +395,12 @@ package dragonBones
 							childArmature.advanceTime(passedTime);
 						}
 					}
+				}
+				
+				// 
+				if (DragonBones.DEBUG_DRAW)
+				{
+					_display._debugDraw();
 				}
 				
 				//

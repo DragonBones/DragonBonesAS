@@ -186,6 +186,16 @@ package dragonBones.core
 		/**
 		 * @private
 		 */
+		public static var DEBUG:Boolean = true;
+		
+		/**
+		 * @private
+		 */
+		public static var DEBUG_DRAW:Boolean = true;
+		
+		/**
+		 * @private
+		 */
 		public static const ABSTRACT_CLASS_ERROR:String = "Abstract class can not be instantiated.";
 		/**
 		 * @private

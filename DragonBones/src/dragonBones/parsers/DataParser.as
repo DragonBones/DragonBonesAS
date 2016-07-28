@@ -263,7 +263,8 @@
 		protected var _animationTweenEasing:Number = 0;
 		protected var _armatureScale:Number = 1;
 		protected const _helpPoint:Point = new Point();
-		protected const _helpTransform:Transform = new Transform();
+		protected const _helpTransformA:Transform = new Transform();
+		protected const _helpTransformB:Transform = new Transform();
 		protected const _helpMatrix:Matrix = new Matrix();
 		protected const _rawBones:Vector.<BoneData> = new Vector.<BoneData>();
 		
@@ -319,8 +320,14 @@
 					tweenProgress = TweenTimelineState._getCurveEasingValue(tweenProgress, frame.curve);
 				}
 				
-				transform.copyFrom((frame.next as BoneFrameData).transform);
-				transform.minus(frame.transform);
+				const nextFrame:BoneFrameData = frame.next as BoneFrameData;
+				
+				transform.x = nextFrame.transform.x - frame.transform.x;
+				transform.y = nextFrame.transform.y - frame.transform.y;
+				transform.skewX = Transform.normalizeRadian(nextFrame.transform.skewX - frame.transform.skewX);
+				transform.skewY = Transform.normalizeRadian(nextFrame.transform.skewY - frame.transform.skewY);
+				transform.scaleX = nextFrame.transform.scaleX - frame.transform.scaleX;
+				transform.scaleY = nextFrame.transform.scaleY - frame.transform.scaleY;
 				
 				transform.x = frame.transform.x + transform.x * tweenProgress;
 				transform.y = frame.transform.y + transform.y * tweenProgress;
@@ -328,7 +335,84 @@
 				transform.skewY = frame.transform.skewY + transform.skewY * tweenProgress;
 				transform.scaleX = frame.transform.scaleX + transform.scaleX * tweenProgress;
 				transform.scaleY = frame.transform.scaleY + transform.scaleY * tweenProgress;
-				transform.add(timeline.originTransform);
+			}
+			
+			transform.add(timeline.originTransform);
+		}
+		
+		protected function _globalToLocal(armature:ArmatureData):void // Support 2.x ~ 3.x data.
+		{
+			const keyFrames:Vector.<BoneFrameData> = new Vector.<BoneFrameData>();
+			const bones:Vector.<BoneData> = armature.sortedBones.reverse();
+			var i:uint = 0, l:uint = 0; 
+			
+			for (i = 0, l = bones.length; i < l; ++i)
+			{
+				const bone:BoneData = bones[i];
+				
+				if (bone.parent) 
+				{
+					bone.parent.transform.toMatrix(_helpMatrix);
+					_helpMatrix.invert();
+					Transform.transformPoint(_helpMatrix, bone.transform.x, bone.transform.y, _helpPoint);
+					bone.transform.x = _helpPoint.x;
+					bone.transform.y = _helpPoint.y;
+					bone.transform.rotation -= bone.parent.transform.rotation;
+				}
+				
+				var frame:BoneFrameData = null;
+				for each (var animation:AnimationData in armature.animations) 
+				{
+					const timeline:BoneTimelineData = animation.getBoneTimeline(bone.name);
+					
+					if (!timeline)
+					{
+						continue;	
+					}
+					
+					const parentTimeline:BoneTimelineData = bone.parent? animation.getBoneTimeline(bone.parent.name): null;
+					_helpTransformB.copyFrom(timeline.originTransform);
+					keyFrames.length = 0;
+					
+					for (i = 0, l = timeline.frames.length; i < l; ++i) 
+					{
+						frame = timeline.frames[i] as BoneFrameData;
+						
+						if (keyFrames.indexOf(frame) >= 0) 
+						{
+							continue;
+						}
+						keyFrames.push(frame);
+						
+						if (parentTimeline)
+						{
+							_getTimelineFrameMatrix(animation, parentTimeline, frame.position, _helpTransformA);
+							frame.transform.add(_helpTransformB);
+							_helpTransformA.toMatrix(_helpMatrix);
+							_helpMatrix.invert();
+							Transform.transformPoint(_helpMatrix, frame.transform.x, frame.transform.y, _helpPoint);
+							frame.transform.x = _helpPoint.x;
+							frame.transform.y = _helpPoint.y;
+							frame.transform.rotation -= _helpTransformA.rotation;
+						} 
+						else 
+						{
+							frame.transform.add(_helpTransformB);
+						}
+						
+						frame.transform.minus(bone.transform);
+						
+						if (i == 0) 
+						{
+							timeline.originTransform.copyFrom(frame.transform);
+							frame.transform.identity();
+						} 
+						else 
+						{
+							frame.transform.minus(timeline.originTransform);
+						}
+					}
+				}
 			}
 		}
 		
@@ -421,69 +505,6 @@
 			nextFrame = frames[0] as AnimationFrameData;
 			prevFrame.next = nextFrame;
 			nextFrame.prev = prevFrame;
-		}
-		
-		protected function _globalToLocal(armature:ArmatureData):void 
-		{
-			const bones:Vector.<BoneData> = armature.sortedBones.reverse();
-			var i:uint = 0, l:uint = 0; 
-			
-			for (i = 0, l = bones.length; i < l; ++i)
-			{
-				const bone:BoneData = bones[i];
-				
-				if (bone.parent) 
-				{
-					bone.parent.transform.toMatrix(_helpMatrix);
-					Transform.transformPoint(_helpMatrix, bone.transform.x, bone.transform.y, _helpPoint);
-					bone.transform.x = _helpPoint.x;
-					bone.transform.y = _helpPoint.y;
-					bone.transform.rotation += bone.transform.rotation - bone.parent.transform.rotation;
-				}
-			}
-			
-			var frame:BoneFrameData = null;
-			for each (var animation:AnimationData in armature.animations) 
-			{
-				for each (var timeline:BoneTimelineData in animation.boneTimelines) 
-				{
-					if (timeline.bone.parent) 
-					{
-						const parentTimeline:BoneTimelineData = animation.getBoneTimeline(timeline.bone.parent.name);
-						
-						for (i = 0, l = timeline.frames.length; i < l; ++i) 
-						{
-							frame = timeline.frames[i] as BoneFrameData;
-							_getTimelineFrameMatrix(animation, parentTimeline, frame.position, _helpTransform);
-							frame.transform.add(timeline.originTransform);
-							_helpTransform.toMatrix(_helpMatrix);
-							Transform.transformPoint(_helpMatrix, frame.transform.x, frame.transform.y, _helpPoint);
-							frame.transform.x = _helpPoint.x;
-							frame.transform.y = _helpPoint.y;
-							frame.transform.rotation += frame.transform.rotation - _helpTransform.rotation;
-						}
-					}
-					
-					_helpTransform.copyFrom(timeline.originTransform);
-					
-					for (i = 0, l = timeline.frames.length; i < l; ++i) 
-					{
-						frame = timeline.frames[i] as BoneFrameData;
-						frame.transform.add(_helpTransform);
-						frame.transform.minus(timeline.bone.transform);
-						
-						if (i == 0) 
-						{
-							timeline.originTransform.copyFrom(frame.transform);
-							frame.transform.identity();
-						} 
-						else 
-						{
-							frame.transform.minus(timeline.originTransform);
-						}
-					}
-				}
-			}
 		}
 	}
 }
