@@ -61,6 +61,7 @@
 		
 		protected static const PIVOT:String = "pivot";
 		protected static const TRANSFORM:String = "transform";
+		protected static const AABB:String = "aabb";
 		protected static const COLOR:String = "color";
 		protected static const FILTER:String = "filter";
 		

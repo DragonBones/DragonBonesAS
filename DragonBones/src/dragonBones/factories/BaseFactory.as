@@ -6,6 +6,8 @@
 	import flash.display.LoaderInfo;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.geom.Matrix;
+	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
 	import flash.utils.clearTimeout;
 	import flash.utils.setTimeout;
@@ -23,6 +25,7 @@
 	import dragonBones.objects.SkinData;
 	import dragonBones.objects.SlotData;
 	import dragonBones.objects.SlotDisplayDataSet;
+	import dragonBones.parsers.DataParser;
 	import dragonBones.parsers.ObjectDataParser;
 	import dragonBones.textures.TextureAtlasData;
 	import dragonBones.textures.TextureData;
@@ -45,6 +48,20 @@
 	 */
 	public class BaseFactory extends EventDispatcher
 	{
+		/** 
+		 * @language zh_CN
+		 * Draw smoothing.
+		 * @version DragonBones 3.0
+		 */
+		public var smoothing:Boolean = true;
+		
+		/** 
+		 * @language zh_CN
+		 * Scale for texture.
+		 * @version DragonBones 3.0
+		 */
+		public var scaleForTexture:Number = 0;
+		
 		/**
 		 * @language zh_CN
 		 * 是否开启共享搜索。 [true: 开启, false: 不开启]
@@ -58,7 +75,7 @@
 		/** 
 		 * @private 
 		 */
-		protected const _objectDataParser:ObjectDataParser = new ObjectDataParser();
+		protected var _dataParser:DataParser = null;
 		
 		/** 
 		 * @private 
@@ -73,7 +90,7 @@
 		/** 
 		 * @private 
 		 */
-		public function BaseFactory(self:BaseFactory)
+		public function BaseFactory(self:BaseFactory, dataParser:DataParser = null)
 		{
 			super(this);
 			
@@ -81,6 +98,8 @@
 			{
 				throw new Error(DragonBones.ABSTRACT_CLASS_ERROR);
 			}
+			
+			_dataParser = dataParser || ObjectDataParser.getInstance();
 		}
 		
 		private var _delayID:uint = 0;
@@ -90,7 +109,7 @@
 			const loaderInfo:LoaderInfo = event.target as LoaderInfo;
 			const decodeData:DecodedData = loaderInfo.loader as DecodedData;
 			loaderInfo.removeEventListener(Event.COMPLETE, _loadTextureAtlasHandler);
-			parseTextureAtlasData(decodeData.textureAtlasData, decodeData.content, decodeData.name);
+			parseTextureAtlasData(decodeData.textureAtlasData, decodeData.content, decodeData.name, scaleForTexture || 0, 1);
 			decodeData.dispose();
 			_decodeDataList.splice(_decodeDataList.indexOf(decodeData), 1);
 			if (_decodeDataList.length == 0)
@@ -389,7 +408,7 @@
 				}
 			}
 			
-			const dragonBonesData:DragonBonesData = _objectDataParser.parseDragonBonesData(rawData);
+			const dragonBonesData:DragonBonesData = _dataParser.parseDragonBonesData(rawData);
 			addDragonBonesData(dragonBonesData, dragonBonesName);
 			
 			if (isComplete)
@@ -418,7 +437,7 @@
 		public function parseTextureAtlasData(rawData:Object, textureAtlas:Object, name:String = null, scale:Number = 0, rawScale:Number = 0):TextureAtlasData
 		{
 			const textureAtlasData:TextureAtlasData = _generateTextureAtlasData(null, null);
-			_objectDataParser.parseTextureAtlasData(rawData, textureAtlasData, scale, rawScale);
+			_dataParser.parseTextureAtlasData(rawData, textureAtlasData, scale, rawScale);
 			
 			if (textureAtlas is Bitmap)
 			{
@@ -427,8 +446,11 @@
 			else if (textureAtlas is DisplayObject)
 			{
 				const displayObject:DisplayObject = textureAtlas as DisplayObject;
-				textureAtlas = new BitmapData(displayObject.width, displayObject.height, true, 0);
-				(textureAtlas as BitmapData).draw(displayObject, null, null, null, null, true);
+				const rect:Rectangle = displayObject.getRect(displayObject);
+				const matrix:Matrix = new Matrix();
+				matrix.scale(textureAtlasData.modifyScale || 1, textureAtlasData.modifyScale || 1);
+				textureAtlas = new BitmapData(rect.x + displayObject.width, rect.y + displayObject.height, true, 0);
+				(textureAtlas as BitmapData).draw(displayObject, matrix, null, null, null, smoothing);
 			}
 			
 			_generateTextureAtlasData(textureAtlasData, textureAtlas);
@@ -667,7 +689,7 @@
 		 * @param toArmature 指定的骨架。
 		 * @param fromArmatreName 其他骨架的名称。
 		 * @param fromSkinName 其他骨架的皮肤名称，如果未设置，则使用默认皮肤。
-         * @param fromDragonBonesDataName 其他骨架属于的龙骨数据名称，如果未设置，则检索所有龙骨数据。
+		 * @param fromDragonBonesDataName 其他骨架属于的龙骨数据名称，如果未设置，则检索所有龙骨数据。
 		 * @param ifRemoveOriginalAnimationList 是否移除原有的动画。 [true: 移除, false: 不移除]
 		 * @return 是否替换成功。 [true: 成功, false: 不成功]
 		 * @see dragonBones.Armature
@@ -741,7 +763,7 @@
 		 * @param slotName 指定的插槽名称。
 		 * @param displayName 指定的显示对象名称。
 		 * @param slot 指定的插槽实例。
-         * @param displayIndex 要替换的显示对象的索引，如果未设置，则替换当前正在显示的显示对象。
+		 * @param displayIndex 要替换的显示对象的索引，如果未设置，则替换当前正在显示的显示对象。
 		 * @version DragonBones 4.5
 		 */
 		public function replaceSlotDisplay(dragonBonesName:String, armatureName:String, slotName:String, displayName:String, slot:Slot, displayIndex:int = -1):void

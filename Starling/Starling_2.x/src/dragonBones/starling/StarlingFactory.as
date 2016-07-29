@@ -13,6 +13,7 @@
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.SlotData;
 	import dragonBones.objects.SlotDisplayDataSet;
+	import dragonBones.parsers.DataParser;
 	import dragonBones.textures.TextureAtlasData;
 	
 	import starling.display.Image;
@@ -37,9 +38,9 @@
 		 * 创建一个工厂。
 		 * @version DragonBones 3.0
 		 */
-		public function StarlingFactory()
+		public function StarlingFactory(dataParser:DataParser = null)
 		{
-			super(this);
+			super(this, dataParser);
 			
 			if (!Armature._soundEventManager) 
 			{

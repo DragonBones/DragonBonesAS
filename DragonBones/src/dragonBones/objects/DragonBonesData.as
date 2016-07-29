@@ -32,6 +32,11 @@ package dragonBones.objects
 		public var name:String;
 		
 		/**
+		 * @private
+		 */
+		public var userData:Object;
+		
+		/**
 		 * @language zh_CN
 		 * 所有的骨架数据。
 		 * @see dragonBones.objects.ArmatureData
@@ -60,6 +65,7 @@ package dragonBones.objects
 			autoSearch = false;
 			frameRate = 0;
 			name = null;
+			userData = null;
 			
 			var i:String = null;
 			for (i in armatures)

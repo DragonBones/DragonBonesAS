@@ -426,7 +426,7 @@ package dragonBones.flash
 					_pach.vertices[i + 1] = yG;
 				}
 				
-				meshDisplay.graphics.beginBitmapFill(_meshTexture, null, false, true);
+				meshDisplay.graphics.beginBitmapFill(_meshTexture, null, true, true);
 				meshDisplay.graphics.drawTriangles(_pach.vertices, _pach.indices, _pach.uvtData);
 			}
 		}

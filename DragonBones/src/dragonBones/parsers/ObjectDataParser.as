@@ -1347,8 +1347,8 @@
 				{
 					for each (var textureObject:Object in rawData[SUB_TEXTURE])
 					{
-						const textureData:TextureData = textureAtlasData.generateTexture();
-						textureData.name = _getString(textureObject, NAME, null);
+ 						const textureData:TextureData = textureAtlasData.generateTexture();
+   						textureData.name = _getString(textureObject, NAME, null);
 						textureData.rotated = _getBoolean(textureObject, ROTATED, false);
 						textureData.region.x = _getNumber(textureObject, X, 0) * scale;
 						textureData.region.y = _getNumber(textureObject, Y, 0) * scale;
@@ -1366,7 +1366,7 @@
 							textureData.frame.height = frameHeight * scale;
 						}
 						
-						textureAtlasData.addTexture(textureData);
+ 						textureAtlasData.addTexture(textureData);
 					}
 				}
 				
@@ -1386,12 +1386,9 @@
 		private static var _instance:ObjectDataParser = null;
 		
 		/**
-		 * @language zh_CN
-		 * 不推荐使用的 API。
-		 * 请选择以下 API。
+		 * @deprecated
 		 * @see dragonBones.factories.BaseFactory#parseTextureAtlasData()
 		 * @see dragonBones.factories.BaseFactory#parseDragonBonesData()
-		 * @version DragonBones 3.0
 		 */
 		public static function getInstance():ObjectDataParser
 		{

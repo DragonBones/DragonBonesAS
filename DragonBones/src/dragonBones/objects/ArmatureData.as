@@ -1,5 +1,7 @@
 package dragonBones.objects
 {
+	import flash.geom.Rectangle;
+	
 	import dragonBones.core.BaseObject;
 	
 	/**
@@ -25,7 +27,7 @@ package dragonBones.objects
 		/**
 		 * @private
 		 */
-		public var cacheFrameRate:uint = 0;
+		public var cacheFrameRate:uint;
 		
 		/**
 		 * @language zh_CN
@@ -45,6 +47,16 @@ package dragonBones.objects
 		 * @private
 		 */
 		public var parent:DragonBonesData;
+		
+		/**
+		 * @private
+		 */
+		public var userData:Object;
+		
+		/**
+		 * @private
+		 */
+		public const aabb:Rectangle = new Rectangle();
 		
 		/**
 		 * @language zh_CN
@@ -109,6 +121,12 @@ package dragonBones.objects
 			type = 0;
 			name = null;
 			parent = null;
+			userData = null;
+			aabb.x = 0;
+			aabb.y = 0;
+			aabb.width = 0;
+			aabb.height = 0;
+			
 			
 			var i:String = null;
 			
