@@ -147,22 +147,29 @@
 			{
 				super._onUpdateFrame(isUpdate);
 				
+				var tweenProgress:Number = 0;
+				
 				if (_tweenTransform)
 				{
 					if (_tweenTransform == TWEEN_TYPE_ONCE)
 					{
 						_tweenTransform = TWEEN_TYPE_NONE;
+						tweenProgress = 0;
+					}
+					else
+					{
+						tweenProgress = this._tweenProgress;
 					}
 					
 					if (this._animationState.additiveBlending) // Additive blending.
 					{
-						_transform.x = _currentTransform.x + _durationTransform.x * this._tweenProgress;
-						_transform.y = _currentTransform.y + _durationTransform.y * this._tweenProgress;
+						_transform.x = _currentTransform.x + _durationTransform.x * tweenProgress;
+						_transform.y = _currentTransform.y + _durationTransform.y * tweenProgress;
 					}
 					else // Normal blending.
 					{
-						_transform.x = _originTransform.x + _currentTransform.x + _durationTransform.x * this._tweenProgress;
-						_transform.y = _originTransform.y + _currentTransform.y + _durationTransform.y * this._tweenProgress;
+						_transform.x = _originTransform.x + _currentTransform.x + _durationTransform.x * tweenProgress;
+						_transform.y = _originTransform.y + _currentTransform.y + _durationTransform.y * tweenProgress;
 					}
 				}
 				
@@ -171,17 +178,22 @@
 					if (_tweenRotate == TWEEN_TYPE_ONCE)
 					{
 						_tweenRotate = TWEEN_TYPE_NONE;
+						tweenProgress = 0;
+					}
+					else
+					{
+						tweenProgress = this._tweenProgress;
 					}
 					
 					if (this._animationState.additiveBlending) // Additive blending.
 					{
-						_transform.skewX = _currentTransform.skewX + _durationTransform.skewX * this._tweenProgress;
-						_transform.skewY = _currentTransform.skewY + _durationTransform.skewY * this._tweenProgress;
+						_transform.skewX = _currentTransform.skewX + _durationTransform.skewX * tweenProgress;
+						_transform.skewY = _currentTransform.skewY + _durationTransform.skewY * tweenProgress;
 					}
 					else // Normal blending.
 					{
-						_transform.skewX = _originTransform.skewX + _currentTransform.skewX + _durationTransform.skewX * this._tweenProgress;
-						_transform.skewY = _originTransform.skewY + _currentTransform.skewY + _durationTransform.skewY * this._tweenProgress;
+						_transform.skewX = _originTransform.skewX + _currentTransform.skewX + _durationTransform.skewX * tweenProgress;
+						_transform.skewY = _originTransform.skewY + _currentTransform.skewY + _durationTransform.skewY * tweenProgress;
 					}
 				}
 				
@@ -190,17 +202,22 @@
 					if (_tweenScale == TWEEN_TYPE_ONCE)
 					{
 						_tweenScale = TWEEN_TYPE_NONE;
+						tweenProgress = 0;
+					}
+					else
+					{
+						tweenProgress = this._tweenProgress;
 					}
 					
 					if (this._animationState.additiveBlending) // Additive blending.
 					{
-						_transform.scaleX = _currentTransform.scaleX + _durationTransform.scaleX * this._tweenProgress;
-						_transform.scaleY = _currentTransform.scaleY + _durationTransform.scaleY * this._tweenProgress;
+						_transform.scaleX = _currentTransform.scaleX + _durationTransform.scaleX * tweenProgress;
+						_transform.scaleY = _currentTransform.scaleY + _durationTransform.scaleY * tweenProgress;
 					}
 					else // Normal blending.
 					{
-						_transform.scaleX = _originTransform.scaleX * (_currentTransform.scaleX + _durationTransform.scaleX * this._tweenProgress);
-						_transform.scaleY = _originTransform.scaleY * (_currentTransform.scaleY + _durationTransform.scaleY * this._tweenProgress);
+						_transform.scaleX = _originTransform.scaleX * (_currentTransform.scaleX + _durationTransform.scaleX * tweenProgress);
+						_transform.scaleY = _originTransform.scaleY * (_currentTransform.scaleY + _durationTransform.scaleY * tweenProgress);
 					}
 				}
 				

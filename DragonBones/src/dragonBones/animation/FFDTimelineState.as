@@ -104,18 +104,25 @@ package dragonBones.animation
 		{
 			super._onUpdateFrame(isUpdate);
 			
+			var tweenProgress:Number = 0;
+			
 			if (_tweenFFD != TWEEN_TYPE_NONE)
 			{
 				if (_tweenFFD == TWEEN_TYPE_ONCE)
 				{
 					_tweenFFD = TWEEN_TYPE_NONE;
+					tweenProgress = 0;
+				}
+				else
+				{
+					tweenProgress = this._tweenProgress;
 				}
 				
 				const currentFFDVertices:Vector.<Number> = (this._currentFrame as ExtensionFrameData).tweens;
 				const nextFFDVertices:Vector.<Number> = _durationFFDFrame.tweens;
 				for (var i:uint = 0, l:uint = currentFFDVertices.length; i < l; ++i)
 				{
-					_ffdVertices[i] = currentFFDVertices[i] + nextFFDVertices[i] * this._tweenProgress;
+					_ffdVertices[i] = currentFFDVertices[i] + nextFFDVertices[i] * tweenProgress;
 				}
 				
 				slot._ffdDirty = true;

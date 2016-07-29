@@ -186,12 +186,12 @@ package dragonBones.core
 		/**
 		 * @private
 		 */
-		public static var DEBUG:Boolean = true;
+		public static var DEBUG:Boolean = false;
 		
 		/**
 		 * @private
 		 */
-		public static var DEBUG_DRAW:Boolean = true;
+		public static var DEBUG_DRAW:Boolean = false;
 		
 		/**
 		 * @private

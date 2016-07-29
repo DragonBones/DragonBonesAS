@@ -133,24 +133,15 @@
 				
 				if (_tweenColor == TWEEN_TYPE_NONE)
 				{
-					_durationColor.alphaMultiplier = currentColor.alphaMultiplier - _slotColor.alphaMultiplier;
-					_durationColor.redMultiplier = currentColor.redMultiplier - _slotColor.redMultiplier;
-					_durationColor.greenMultiplier = currentColor.greenMultiplier - _slotColor.greenMultiplier;
-					_durationColor.blueMultiplier = currentColor.blueMultiplier - _slotColor.blueMultiplier;
-					_durationColor.alphaOffset = currentColor.alphaOffset - _slotColor.alphaOffset;
-					_durationColor.redOffset = currentColor.redOffset - _slotColor.redOffset;
-					_durationColor.greenOffset = currentColor.greenOffset - _slotColor.greenOffset;
-					_durationColor.blueOffset = currentColor.blueOffset - _slotColor.blueOffset;
-					
 					if (
-						_durationColor.alphaMultiplier != 0 ||
-						_durationColor.redMultiplier != 0 ||
-						_durationColor.greenMultiplier != 0 ||
-						_durationColor.blueMultiplier != 0 ||
-						_durationColor.alphaOffset != 0 ||
-						_durationColor.redOffset != 0 ||
-						_durationColor.greenOffset != 0 ||
-						_durationColor.blueOffset != 0
+						_slotColor.alphaMultiplier != currentColor.alphaMultiplier ||
+						_slotColor.redMultiplier != currentColor.redMultiplier ||
+						_slotColor.greenMultiplier != currentColor.greenMultiplier ||
+						_slotColor.blueMultiplier != currentColor.blueMultiplier ||
+						_slotColor.alphaOffset != currentColor.alphaOffset ||
+						_slotColor.redOffset != currentColor.redOffset ||
+						_slotColor.greenOffset != currentColor.greenOffset ||
+						_slotColor.blueOffset != currentColor.blueOffset
 					)
 					{
 						_tweenColor = TWEEN_TYPE_ONCE;
@@ -171,22 +162,29 @@
 			
 			const currentFrame:SlotFrameData = this._currentFrame as SlotFrameData;
 			
+			var tweenProgress:Number = 0;
+			
 			if (_tweenColor)
 			{
 				if (_tweenColor == TWEEN_TYPE_ONCE)
 				{
 					_tweenColor = TWEEN_TYPE_NONE;
+					tweenProgress = 0;
+				}
+				else
+				{
+					tweenProgress = this._tweenProgress;
 				}
 				
 				const currentColor:ColorTransform = currentFrame.color;
-				_color.alphaMultiplier = currentColor.alphaMultiplier + _durationColor.alphaMultiplier * this._tweenProgress;
-				_color.redMultiplier = currentColor.redMultiplier + _durationColor.redMultiplier * this._tweenProgress;
-				_color.greenMultiplier = currentColor.greenMultiplier + _durationColor.greenMultiplier * this._tweenProgress;
-				_color.blueMultiplier = currentColor.blueMultiplier + _durationColor.blueMultiplier * this._tweenProgress;
-				_color.alphaOffset = currentColor.alphaOffset + _durationColor.alphaOffset * this._tweenProgress;
-				_color.redOffset = currentColor.redOffset + _durationColor.redOffset * this._tweenProgress;
-				_color.greenOffset = currentColor.greenOffset + _durationColor.greenOffset * this._tweenProgress;
-				_color.blueOffset = currentColor.blueOffset + _durationColor.blueOffset * this._tweenProgress;
+				_color.alphaMultiplier = currentColor.alphaMultiplier + _durationColor.alphaMultiplier * tweenProgress;
+				_color.redMultiplier = currentColor.redMultiplier + _durationColor.redMultiplier * tweenProgress;
+				_color.greenMultiplier = currentColor.greenMultiplier + _durationColor.greenMultiplier * tweenProgress;
+				_color.blueMultiplier = currentColor.blueMultiplier + _durationColor.blueMultiplier * tweenProgress;
+				_color.alphaOffset = currentColor.alphaOffset + _durationColor.alphaOffset * tweenProgress;
+				_color.redOffset = currentColor.redOffset + _durationColor.redOffset * tweenProgress;
+				_color.greenOffset = currentColor.greenOffset + _durationColor.greenOffset * tweenProgress;
+				_color.blueOffset = currentColor.blueOffset + _durationColor.blueOffset * tweenProgress;
 				
 				_colorDirty = true;
 			}

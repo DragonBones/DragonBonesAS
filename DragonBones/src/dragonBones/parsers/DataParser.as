@@ -343,13 +343,11 @@
 		protected function _globalToLocal(armature:ArmatureData):void // Support 2.x ~ 3.x data.
 		{
 			const keyFrames:Vector.<BoneFrameData> = new Vector.<BoneFrameData>();
-			const bones:Vector.<BoneData> = armature.sortedBones.reverse();
-			var i:uint = 0, l:uint = 0; 
+			const bones:Vector.<BoneData> = armature.sortedBones.concat().reverse();
 			
-			for (i = 0, l = bones.length; i < l; ++i)
+			for (var i:uint = 0, l:uint = bones.length; i < l; ++i)
 			{
 				const bone:BoneData = bones[i];
-				
 				if (bone.parent) 
 				{
 					bone.parent.transform.toMatrix(_helpMatrix);
@@ -374,9 +372,9 @@
 					_helpTransformB.copyFrom(timeline.originTransform);
 					keyFrames.length = 0;
 					
-					for (i = 0, l = timeline.frames.length; i < l; ++i) 
+					for (var j:uint = 0, lJ:uint = timeline.frames.length; j < lJ; ++j) 
 					{
-						frame = timeline.frames[i] as BoneFrameData;
+						frame = timeline.frames[j] as BoneFrameData;
 						
 						if (keyFrames.indexOf(frame) >= 0) 
 						{
@@ -402,7 +400,7 @@
 						
 						frame.transform.minus(bone.transform);
 						
-						if (i == 0) 
+						if (j == 0) 
 						{
 							timeline.originTransform.copyFrom(frame.transform);
 							frame.transform.identity();

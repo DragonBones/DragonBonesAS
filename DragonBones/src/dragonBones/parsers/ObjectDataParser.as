@@ -86,7 +86,7 @@
 				{
 					return defaultValue;
 				}
-
+				
 				return value; // Number(value);
 			}
 			
@@ -338,7 +338,7 @@
 					{
 						this._armature.addSlot(_parseSlot(slotObject));
 					}
-
+					
 					skin.addSlot(_parseSlotDisplaySet(slotObject));
 				}
 				
@@ -891,10 +891,13 @@
 			
 			_parseTweenFrame(rawData, frame, frameStart, frameCount);
 			
-			if (COLOR in rawData)
-			{
+			if (
+				(COLOR in rawData) ||
+				(COLOR_TRANSFORM in rawData)
+			)
+			{ // Support 2.x ~ 3.x data. (colorTransform key)
 				frame.color = SlotFrameData.generateColor();
-				_parseColorTransform(rawData[COLOR], frame.color);
+				_parseColorTransform(rawData[COLOR] || rawData[COLOR_TRANSFORM], frame.color);
 			}
 			else
 			{
