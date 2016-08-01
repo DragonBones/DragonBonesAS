@@ -54,8 +54,6 @@ package dragonBones.starling
 		public function _onClear():void
 		{
 			_armature = null;
-			
-			super.dispose();
 		}
 		
 		/**
@@ -127,8 +125,12 @@ package dragonBones.starling
 		{
 			if (_armature)
 			{
+				advanceTimeBySelf(false);
 				_armature.dispose();
+				_armature = null;
 			}
+			
+			super.dispose();
 		}
 		
 		/**

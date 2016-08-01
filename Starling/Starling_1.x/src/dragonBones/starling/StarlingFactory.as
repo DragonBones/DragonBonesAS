@@ -123,12 +123,17 @@ package dragonBones.starling
 						{
 							if (slotData.actions.length > 0) 
 							{
-								childArmature._action = slotData.actions[slotData.actions.length - 1];
+								for (var i:uint = 0, l:uint = slotData.actions.length; i < l; ++i) 
+								{
+									childArmature._bufferAction(slotData.actions[i]);
+								}
 							} 
 							else 
 							{
 								childArmature.animation.play();
 							}
+							
+							displayData.armatureData = childArmature.armatureData; // 
 						}
 						
 						displayList.push(childArmature);

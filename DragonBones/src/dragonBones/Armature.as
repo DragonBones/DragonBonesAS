@@ -74,11 +74,6 @@ package dragonBones
 		dragonBones_internal var _parent:Slot;
 		
 		/**
-		 * @private AnimationTimelineState
-		 */
-		dragonBones_internal var _action:ActionData;
-		
-		/**
 		 * @private Slot
 		 */
 		dragonBones_internal var _replacedTexture:Object;
@@ -111,7 +106,12 @@ package dragonBones
 		/**
 		 * @private
 		 */
-		private const _events:Vector.<EventObject> = new Vector.<EventObject>;
+		private const _actions:Vector.<ActionData> = new Vector.<ActionData>();
+		
+		/**
+		 * @private
+		 */
+		private const _events:Vector.<EventObject> = new Vector.<EventObject>();
 		
 		/**
 		 * @private
@@ -146,7 +146,6 @@ package dragonBones
 			}
 			
 			_parent = null;
-			_action = null;
 			_replacedTexture = null;
 			
 			_delayDispose = false;
@@ -177,6 +176,16 @@ package dragonBones
 				_slots.fixed = true;
 			}
 			
+			if (_actions.length)
+			{
+				for each (var action:ActionData in _actions)
+				{
+					action.returnToPool();
+				}
+				
+				_actions.length = 0;
+			}
+			
 			if (_events.length)
 			{
 				for each (var event:EventObject in _events)
@@ -184,9 +193,7 @@ package dragonBones
 					event.returnToPool();
 				}
 				
-				_events.fixed = false;
 				_events.length = 0;
-				_events.fixed = true;
 			}
 		}
 		
@@ -254,6 +261,39 @@ package dragonBones
 		/**
 		 * @private
 		 */
+		private function _doAction(value:ActionData):void
+		{
+			switch (value.type) 
+			{
+				case DragonBones.ACTION_TYPE_PLAY:
+					_animation.play(value.data[0], value.data[1]);
+					break;
+				
+				case DragonBones.ACTION_TYPE_STOP:
+					_animation.stop(value.data[0]);
+					break;
+				
+				case DragonBones.ACTION_TYPE_GOTO_AND_PLAY:
+					_animation.gotoAndPlayByTime(value.data[0], value.data[1], value.data[2]);
+					break;
+				
+				case DragonBones.ACTION_TYPE_GOTO_AND_STOP:
+					_animation.gotoAndStopByTime(value.data[0], value.data[1]);
+					break;
+				
+				case DragonBones.ACTION_TYPE_FADE_IN:
+					_animation.fadeIn(value.data[0], value.data[1], value.data[2]);
+					break;
+				
+				case DragonBones.ACTION_TYPE_FADE_OUT:
+					// TODO fade out
+					break;
+			}
+		}
+		
+		/**
+		 * @private
+		 */
 		dragonBones_internal function _addBoneToBoneList(value:Bone):void
 		{
 			if (_bones.indexOf(value) < 0)
@@ -312,6 +352,14 @@ package dragonBones
 		/**
 		 * @private
 		 */
+		dragonBones_internal function _bufferAction(value:ActionData):void
+		{
+			_actions.push(value);
+		}
+		
+		/**
+		 * @private
+		 */
 		dragonBones_internal function _bufferEvent(value:EventObject, type:String):void
 		{
 			value.type = type;
@@ -328,7 +376,7 @@ package dragonBones
 		{
 			_delayDispose = true;
 			
-			if (!_lockDispose)
+			if (!_lockDispose && _animation) // 
 			{
 				this.returnToPool();
 			}
@@ -403,40 +451,8 @@ package dragonBones
 					_display._debugDraw();
 				}
 				
-				//
-				if (_action)
-				{
-					switch (_action.type)
-					{
-						case DragonBones.ACTION_TYPE_PLAY:
-							_animation.play(_action.data[0], _action.data[1]);
-							break;
-						
-						case DragonBones.ACTION_TYPE_STOP:
-							_animation.stop(_action.data[0]);
-							break;
-						
-						case DragonBones.ACTION_TYPE_GOTO_AND_PLAY:
-							_animation.gotoAndPlayByTime(_action.data[0], _action.data[1], _action.data[2]);
-							break;
-						
-						case DragonBones.ACTION_TYPE_GOTO_AND_STOP:
-							_animation.gotoAndStopByTime(_action.data[0], _action.data[1]);
-							break;
-						
-						case DragonBones.ACTION_TYPE_FADE_IN:
-							_animation.fadeIn(_action.data[0], _action.data[1], _action.data[2]);
-							break;
-						
-						case DragonBones.ACTION_TYPE_FADE_OUT:
-							// TODO fade out
-							break;
-					}
-					
-					_action = null;
-				}
-				
-				if (_events.length > 0)
+				// Actions and events.
+				if (_events.length > 0) // Dispatch event before action.
 				{
 					for (i = 0, l = _events.length; i < l; ++i)
 					{
@@ -455,6 +471,43 @@ package dragonBones
 					}
 					
 					_events.length = 0;
+				}
+				
+				if (_actions.length > 0) 
+				{
+					for (i = 0, l = _actions.length; i < l; ++i) 
+					{
+						const action:ActionData = _actions[i];
+						if (action.slot) 
+						{
+							const eachSlot:Slot = getSlot(action.slot.name);
+							if (eachSlot) 
+							{
+								const childArmatureA:Armature = eachSlot._childArmature;
+								if (childArmatureA) 
+								{
+									childArmatureA._doAction(action);
+								}
+							}
+						} 
+						else if (action.bone) 
+						{
+							for (i = 0, l = _slots.length; i < l; ++i) 
+							{
+								const childArmatureB:Armature = _slots[i]._childArmature;
+								if (childArmature) 
+								{
+									childArmature._doAction(action);
+								}
+							}
+						} 
+						else 
+						{
+							_doAction(action);
+						}
+					}
+					
+					_actions.length = 0;
 				}
 				
 				_lockDispose = false;

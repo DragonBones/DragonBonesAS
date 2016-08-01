@@ -1,7 +1,5 @@
 ﻿package dragonBones.animation
 {
-	import dragonBones.Armature;
-	import dragonBones.Slot;
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
@@ -36,41 +34,14 @@
 			_isStarted = false;
 		}
 		
-		override protected function _onCrossFrame(frame:FrameData):void
+		protected function _onCrossFrame(frame:FrameData):void
 		{
 			var i:uint = 0, l:uint = 0;
 			
 			const actions:Vector.<ActionData> = (frame as AnimationFrameData).actions;
 			for (i = 0, l = actions.length; i < l; ++i)
 			{
-				const actionData:ActionData = actions[i];
-				if (actionData.slot)
-				{
-					const slot:Slot = _armature.getSlot(actionData.slot.name);
-					if (slot)
-					{
-						const childArmature:Armature = slot.childArmature;
-						if (childArmature)
-						{
-							childArmature._action = actionData;
-						}
-					}
-				}
-				else if (actionData.bone)
-				{
-					for each (var eachSlot:Slot in _armature.getSlots())
-					{
-						const eachChildArmature:Armature = eachSlot.childArmature;
-						if (eachChildArmature)
-						{
-							eachChildArmature._action = actionData;
-						}
-					}
-				}
-				else
-				{
-					_armature._action = actionData;
-				}
+				this._armature._bufferAction(actions[i]);
 			}
 			
 			const eventDispatcher:IEventDispatcher = _armature.display;
@@ -116,42 +87,103 @@
 		
 		override public function update(time:Number):void
 		{
+			const prevTime:uint = this._currentTime;
 			const prevPlayTimes:uint = this._currentPlayTimes;
-			const eventDispatcher:IEventDispatcher = this._armature.display;
-			var eventObject:EventObject = null;
 			
-			if (!_isStarted && time != 0)
+			if (!this._isCompleted && this._setCurrentTime(time)) 
 			{
-				_isStarted = true;
+				const eventDispatcher:IEventDispatcher = this._armature.display;
+				var eventObject:EventObject = null;
 				
-				if (eventDispatcher.hasEvent(EventObject.START))
+				if (!_isStarted && time != 0)
 				{
-					eventObject = BaseObject.borrowObject(EventObject) as EventObject;
-					eventObject.animationState = this._animationState;
-					this._armature._bufferEvent(eventObject, EventObject.START);
-				}
-			}
-			
-			super.update(time);
-			
-			if (prevPlayTimes != this._currentPlayTimes)
-			{
-				//const eventType:String = _isCompleted? EventObject.COMPLETE: EventObject.LOOP_COMPLETE;
-				var eventType:String = null;
-				if (_isCompleted)
-				{
-					eventType = EventObject.COMPLETE;
-				}
-				else
-				{
-					eventType = EventObject.LOOP_COMPLETE; // TODO buffer loop complete before cross frame event
+					_isStarted = true;
+					
+					if (eventDispatcher.hasEvent(EventObject.START))
+					{
+						eventObject = BaseObject.borrowObject(EventObject) as EventObject;
+						eventObject.animationState = this._animationState;
+						this._armature._bufferEvent(eventObject, EventObject.START);
+					}
 				}
 				
-				if (eventDispatcher.hasEvent(eventType))
+				if (this._keyFrameCount)
 				{
-					eventObject = BaseObject.borrowObject(EventObject) as EventObject;
-					eventObject.animationState = this._animationState;
-					this._armature._bufferEvent(eventObject, eventType);
+					const currentFrameIndex:uint = this._keyFrameCount > 1 ? Math.floor(this._currentTime * this._frameRate) : 0;
+					const currentFrame:FrameData = this._timeline.frames[currentFrameIndex];
+					
+					if (this._currentFrame != currentFrame) 
+					{
+						if (this._keyFrameCount > 1) 
+						{
+							var crossedFrame:FrameData = this._currentFrame;
+							this._currentFrame = currentFrame;
+							
+							if (!crossedFrame) 
+							{
+								const prevFrameIndex:uint = Math.floor(prevTime * this._frameRate);
+								crossedFrame = this._timeline.frames[prevFrameIndex];
+								
+								if (this._isReverse) 
+								{
+									
+								} 
+								else 
+								{
+									if (
+										prevTime <= crossedFrame.position || 
+										prevPlayTimes != this._currentPlayTimes
+									) 
+									{
+										crossedFrame = crossedFrame.prev;
+									}
+								}
+							}
+							
+							if (this._isReverse) 
+							{
+								while (crossedFrame != currentFrame) 
+								{
+									this._onCrossFrame(crossedFrame);
+									crossedFrame = crossedFrame.prev;
+								}
+							} 
+							else 
+							{
+								while (crossedFrame != currentFrame) 
+								{
+									crossedFrame = crossedFrame.next;
+									this._onCrossFrame(crossedFrame);
+								}
+							}
+						} 
+						else 
+						{
+							this._currentFrame = currentFrame;
+							this._onCrossFrame(this._currentFrame);
+						}
+					}
+				}
+				
+				if (prevPlayTimes != this._currentPlayTimes)
+				{
+					//const eventType:String = _isCompleted? EventObject.COMPLETE: EventObject.LOOP_COMPLETE;
+					var eventType:String = null;
+					if (_isCompleted)
+					{
+						eventType = EventObject.COMPLETE;
+					}
+					else
+					{
+						eventType = EventObject.LOOP_COMPLETE; // TODO buffer loop complete before cross frame event
+					}
+					
+					if (eventDispatcher.hasEvent(eventType))
+					{
+						eventObject = BaseObject.borrowObject(EventObject) as EventObject;
+						eventObject.animationState = this._animationState;
+						this._armature._bufferEvent(eventObject, eventType);
+					}
 				}
 			}
 		}

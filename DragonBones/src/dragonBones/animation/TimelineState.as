@@ -74,8 +74,6 @@
 		
 		protected function _onArriveAtFrame(isUpdate:Boolean):void {}
 		
-		protected function _onCrossFrame(frame:FrameData):void {}
-		
 		protected function _setCurrentTime(value:Number):Boolean
 		{
 			var currentPlayTimes:uint = 0;
@@ -209,8 +207,6 @@
 		
 		public function update(time:Number):void
 		{
-			const prevTime:Number = _currentTime;
-			
 			if (!_isCompleted && _setCurrentTime(time) && _keyFrameCount)
 			{
 				//const currentFrameIndex:uint = _keyFrameCount > 1? _currentTime * _timeToFrameSccale: 0;
@@ -223,46 +219,8 @@
 				const currentFrame:FrameData = _timeline.frames[currentFrameIndex];
 				if (_currentFrame != currentFrame)
 				{
-					if (_keyFrameCount > 1)
-					{
-						var crossedFrame:FrameData = _currentFrame;
-						_currentFrame = currentFrame;
-						
-						if (!crossedFrame) 
-						{
-							const prevFrameIndex:uint = uint(prevTime * _frameRate);
-							crossedFrame = _timeline.frames[prevFrameIndex];
-							if (!_isReverse && prevTime <= crossedFrame.position) 
-							{
-								crossedFrame = crossedFrame.prev;
-							}
-						}
-						
-						if (_isReverse) 
-						{
-							while (crossedFrame != currentFrame) 
-							{
-								_onCrossFrame(crossedFrame);
-								crossedFrame = crossedFrame.prev;
-							}
-						} 
-						else 
-						{
-							while (crossedFrame != currentFrame) 
-							{
-								crossedFrame = crossedFrame.next;
-								_onCrossFrame(crossedFrame);
-							}
-						}
-						
-						_onArriveAtFrame(true);
-					}
-					else
-					{
-						_currentFrame = currentFrame;
-						_onCrossFrame(_currentFrame);
-						_onArriveAtFrame(true);
-					}
+					_currentFrame = currentFrame;
+					_onArriveAtFrame(true);
 				}
 				
 				_onUpdateFrame(true);

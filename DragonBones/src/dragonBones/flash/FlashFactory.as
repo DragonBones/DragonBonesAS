@@ -120,9 +120,20 @@
 					
 					case DragonBones.DISPLAY_TYPE_ARMATURE:
 						const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName);
-						if (childArmature)
+						if (childArmature) 
 						{
-							childArmature.animation.play();
+							if (slotData.actions.length > 0) 
+							{
+								for (var i:uint = 0, l:uint = childArmature.armatureData.actions.length; i < l; ++i) 
+								{
+									childArmature._bufferAction(childArmature.armatureData.actions[i]);
+								}
+							} 
+							else 
+							{
+								childArmature.animation.play();
+							}
+							
 							displayData.armatureData = childArmature.armatureData; // 
 						}
 						

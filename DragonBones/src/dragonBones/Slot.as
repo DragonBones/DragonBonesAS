@@ -194,7 +194,7 @@
 			{
 				if (eachDisplay is Armature)
 				{
-					(eachDisplay as Armature).returnToPool();
+					(eachDisplay as Armature).dispose();
 				}
 				else
 				{
@@ -493,17 +493,20 @@
 						const cacheFrameRate:uint = this._armature.cacheFrameRate;
 						if (cacheFrameRate) 
 						{
-							this._childArmature.cacheFrameRate = cacheFrameRate;
+							_childArmature.cacheFrameRate = cacheFrameRate;
 						}
 						
 						const slotData:SlotData = this._armature.armatureData.getSlot(this.name);
 						if (slotData.actions.length > 0) 
 						{
-							this._childArmature._action = slotData.actions[slotData.actions.length - 1];
+							for (var i:uint = 0, l:uint = slotData.actions.length; i < l; ++i) 
+							{
+								_childArmature._bufferAction(slotData.actions[i]);
+							}
 						} 
 						else 
 						{
-							this._childArmature.animation.play();
+							_childArmature.animation.play();
 						}
 					}
 				}
@@ -910,7 +913,7 @@
 			{
 				if (eachDisplay is Armature)
 				{
-					(eachDisplay as Armature).returnToPool();
+					(eachDisplay as Armature).dispose();
 				}
 				else
 				{

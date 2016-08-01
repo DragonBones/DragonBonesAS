@@ -1331,17 +1331,7 @@
 					scale = textureAtlasData.scale = _getNumber(rawData, SCALE, textureAtlasData.scale);
 				}
 				
-				scale = 1 / scale;
-				
-				if (rawScale > 0)
-				{
-					textureAtlasData.modifyScale = scale * rawScale;
-					scale *= textureAtlasData.modifyScale;
-				}
-				else
-				{
-					textureAtlasData.modifyScale = 1;
-				}
+				scale = 1 / (rawScale > 0? rawScale: scale);
 				
 				if (SUB_TEXTURE in rawData)
 				{

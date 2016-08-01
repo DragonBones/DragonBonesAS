@@ -56,8 +56,6 @@ package dragonBones.flash
 		 */
 		public function _onClear():void
 		{
-			advanceTimeBySelf(false);
-			
 			_armature = null;
 			_debugDrawer = null;
 		}
@@ -147,7 +145,9 @@ package dragonBones.flash
 		{
 			if (_armature)
 			{
+				advanceTimeBySelf(false);
 				_armature.dispose();
+				_armature = null;
 			}
 		}
 		

@@ -33,7 +33,7 @@
 	use namespace dragonBones_internal;
 	
 	/** 
-	 * Dispatched after a sucessful call to parseData().
+	 * Dispatched after a sucessful call to parseDragonBonesData().
 	 */
 	[Event(name="complete", type="flash.events.Event")]
 	
@@ -378,7 +378,7 @@
 		/**
 		 * @language zh_CN
 		 * 解析并添加龙骨数据。
-		 * @param rawData 需要解析的原始数据。 (JSON)
+		 * @param rawData 需要解析的原始数据。 (JSON，如果是 merged data 则需要监听 Event.COMPLETE 事件，因为这是一个异步的过程)
 		 * @param dragonBonesName 为数据指定一个名称，以便可以通过这个名称来获取数据，如果未设置，则使用数据中的名称。
 		 * @return DragonBonesData
 		 * @see #getDragonBonesData()
@@ -448,8 +448,13 @@
 				const displayObject:DisplayObject = textureAtlas as DisplayObject;
 				const rect:Rectangle = displayObject.getRect(displayObject);
 				const matrix:Matrix = new Matrix();
-				matrix.scale(textureAtlasData.modifyScale || 1, textureAtlasData.modifyScale || 1);
-				textureAtlas = new BitmapData(rect.x + displayObject.width, rect.y + displayObject.height, true, 0);
+				matrix.scale(textureAtlasData.scale, textureAtlasData.scale);
+				textureAtlas = new BitmapData(
+					(rect.x + displayObject.width) * textureAtlasData.scale, 
+					(rect.y + displayObject.height) * textureAtlasData.scale, 
+					true, 
+					0
+				);
 				(textureAtlas as BitmapData).draw(displayObject, matrix, null, null, null, smoothing);
 			}
 			
@@ -672,7 +677,10 @@
 				
 				if (armature.armatureData.actions.length > 0) // Add default action.
 				{
-					armature._action = armature.armatureData.actions[armature.armatureData.actions.length - 1];
+					for (var i:uint = 0, l:uint = armature.armatureData.actions.length; i < l; ++i) 
+					{
+						armature._bufferAction(armature.armatureData.actions[i]);
+					}
 				}
 				
 				// Update armature pose

@@ -19,20 +19,14 @@
 	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#666666")]
 	public class HelloDragonBones extends Sprite
 	{
-		[Embed(source = "../assets/Old/Warrior/skeleton.json", mimeType = "application/octet-stream")]
+		[Embed(source = "../assets/TestC/npc1_4/npc1.json", mimeType = "application/octet-stream")]
 		public static const DBDataA: Class;
 		
-		[Embed(source = "../assets/Old/Warrior/texture.json", mimeType = "application/octet-stream")]
+		[Embed(source = "../assets/TestC/npc1_4/texture.json", mimeType = "application/octet-stream")]
 		public static const TADataA1: Class;
 		
-		[Embed(source = "../assets/Old/Warrior/texture.png")]
+		[Embed(source = "../assets/TestC/npc1_4/texture.png")]
 		public static const TextureA1: Class;
-		
-		[Embed(source = "../assets/Old/Warrior/Warrior.png", mimeType = "application/octet-stream")]
-		public static const DBPNG: Class;
-		
-		[Embed(source = "../assets/Old/Warrior/Warrior.dbswf", mimeType = "application/octet-stream")]
-		public static const DBSWF: Class;
 		
 		private var _isMoved:Boolean = false;
 		private var _isHorizontalMoved:Boolean = false;
@@ -47,7 +41,7 @@
 		public function HelloDragonBones()
 		{
 			// Render init.
-			_flashInit();
+			//_flashInit();
 			_starlingInit();
 			
 			// Add event listeners.
@@ -209,16 +203,7 @@ class FlashRender extends flash.display.Sprite
 	{
 		instance = this;
 		
-		
-		//this.addEventListener(flash.events.Event.ADDED_TO_STAGE, _addToStageHandler);
-		
-		// Parse data.
-		dragonBonesData = _factory.parseDragonBonesData(
-			new HelloDragonBones.DBSWF()
-		);
-		_factory.addEventListener(flash.events.Event.COMPLETE, _addToStageHandler);
-		
-		_factory.scaleForTexture = 2;
+		this.addEventListener(flash.events.Event.ADDED_TO_STAGE, _addToStageHandler);
 	}
 	
 	public function get armatureDisplay(): FlashArmatureDisplay
@@ -229,13 +214,13 @@ class FlashRender extends flash.display.Sprite
 	private function _addToStageHandler(event: flash.events.Event): void
 	{
 		// Parse data.
-		/*dragonBonesData = _factory.parseDragonBonesData(
+		dragonBonesData = _factory.parseDragonBonesData(
 			JSON.parse(new HelloDragonBones.DBDataA())
 		);
 		_factory.parseTextureAtlasData(
 			JSON.parse(new HelloDragonBones.TADataA1()),
 			new HelloDragonBones.TextureA1()
-		);*/
+		);
 		
 		if (dragonBonesData)
 		{

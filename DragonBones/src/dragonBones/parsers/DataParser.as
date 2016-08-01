@@ -420,6 +420,8 @@
 			const frameStart:uint = uint(frame.position * this._armature.frameRate); // uint()
 			const frames:Vector.<FrameData> = this._animation.frames;
 			
+			frames.fixed = false;
+			
 			if (frames.length == 0) {
 				const startFrame:AnimationFrameData = BaseObject.borrowObject(AnimationFrameData) as AnimationFrameData; // Add start frame.
 				startFrame.position = 0;
@@ -437,7 +439,7 @@
 			
 			var i:uint = 0, l:uint = 0;
 			var insertedFrame:AnimationFrameData = null;
-			const replacedFrame:AnimationFrameData = frames[frameStart] as AnimationFrameData;
+			const replacedFrame:AnimationFrameData = frames.length? frames[frameStart] as AnimationFrameData: null;
 			
 			if (replacedFrame && (frameStart == 0 || frames[frameStart - 1] == replacedFrame.prev)) // Key frame.
 			{
@@ -460,18 +462,26 @@
 			
 			if (actions) // Merge actions.
 			{
+				insertedFrame.actions.fixed = false;
+				
 				for (i = 0, l = actions.length; i < l; ++i) 
 				{
 					insertedFrame.actions.push(actions[i]);
 				}
+				
+				insertedFrame.actions.fixed = true;
 			}
 			
 			if (events) // Merge events.
 			{
+				insertedFrame.events.fixed = false;
+				
 				for (i = 0, l = events.length; i < l; ++i) 
 				{
 					insertedFrame.events.push(events[i]);
 				}
+				
+				insertedFrame.events.fixed = true;
 			}
 			
 			// Modify frame link and duration.
@@ -504,6 +514,8 @@
 			nextFrame = frames[0] as AnimationFrameData;
 			prevFrame.next = nextFrame;
 			nextFrame.prev = prevFrame;
+			
+			frames.fixed = true;
 		}
 	}
 }
