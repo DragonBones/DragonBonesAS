@@ -13,19 +13,20 @@
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.text.TextField;
 	
 	import starling.core.Starling;
 	
 	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#666666")]
 	public class HelloDragonBones extends Sprite
 	{
-		[Embed(source = "../assets/TestC/npc1_4/npc1.json", mimeType = "application/octet-stream")]
+		[Embed(source = "../assets/DragonBoy/DragonBoy.json", mimeType = "application/octet-stream")]
 		public static const DBDataA: Class;
 		
-		[Embed(source = "../assets/TestC/npc1_4/texture.json", mimeType = "application/octet-stream")]
+		[Embed(source = "../assets/DragonBoy/DragonBoy_texture_1.json", mimeType = "application/octet-stream")]
 		public static const TADataA1: Class;
 		
-		[Embed(source = "../assets/TestC/npc1_4/texture.png")]
+		[Embed(source = "../assets/DragonBoy/DragonBoy_texture_1.png")]
 		public static const TextureA1: Class;
 		
 		private var _isMoved:Boolean = false;
@@ -41,7 +42,7 @@
 		public function HelloDragonBones()
 		{
 			// Render init.
-			//_flashInit();
+			_flashInit();
 			_starlingInit();
 			
 			// Add event listeners.
@@ -50,12 +51,14 @@
 			this.stage.addEventListener(MouseEvent.MOUSE_MOVE, _mouseHandler);
 			
 			// Add infomation.
-			/*const text:TextField = new TextField(this.stage.stageWidth, 60, "");
+			const text:TextField = new TextField();
+			text.width = this.stage.stageWidth;
+			text.height = 60;
 			text.x = 0;
 			text.y = this.stage.stageHeight - 60;
 			text.autoSize = "center";
 			text.text = "Touch screen left to change armature / right to change animation.\nTouch move to scale armature and animation.";
-			this.addChild(text);*/
+			this.addChild(text);
 		}
 		
 		private function _flashInit(): void
