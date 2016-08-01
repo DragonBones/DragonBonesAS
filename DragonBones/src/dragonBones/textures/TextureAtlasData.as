@@ -19,11 +19,6 @@
 		public var autoSearch:Boolean;
 		
 		/**
-		 * @private
-		 */
-		public var modifyScale:Number;
-		
-		/**
 		 * @language zh_CN
 		 * 贴图集缩放系数。
 		 * @version DragonBones 3.0
@@ -68,7 +63,6 @@
 		override protected function _onClear():void
 		{
 			autoSearch = false;
-			modifyScale = 1;
 			scale = 1;
 			name = null;
 			imagePath = null;
