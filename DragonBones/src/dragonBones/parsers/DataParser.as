@@ -147,7 +147,7 @@
 				case "armature":
 					return DragonBones.ARMATURE_TYPE_ARMATURE;
 					
-				case "movieClip":
+				case "movieclip":
 					return DragonBones.ARMATURE_TYPE_MOVIE_CLIP;
 					
 				default:

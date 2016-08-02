@@ -568,7 +568,7 @@
 		{
 			const prevMeshData:MeshData = _meshData;
 			
-			if (_display == _meshDisplay && _displayDataSet && _displayIndex >= 0 && _displayIndex < _displayDataSet.displays.length)
+			if (_meshDisplay && _displayDataSet && _displayIndex >= 0 && _displayIndex < _displayDataSet.displays.length)
 			{
 				_meshData = _displayDataSet.displays[_displayIndex].meshData;
 			}

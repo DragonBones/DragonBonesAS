@@ -756,7 +756,7 @@
 			pauseFadeIn:Boolean = true
 		):AnimationState
 		{
-			const animationState:AnimationState = this.fadeIn(animationName, playTimes, fadeInTime, layer, group, fadeOutMode, additiveBlending, pauseFadeOut, pauseFadeIn);
+			const animationState:AnimationState = this.fadeIn(animationName, fadeInTime, playTimes, layer, group, fadeOutMode, additiveBlending, pauseFadeOut, pauseFadeIn);
 			if (animationState && duration > 0)
 			{
 				animationState.timeScale = animationState.totalTime / duration;
