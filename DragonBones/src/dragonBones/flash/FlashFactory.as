@@ -9,6 +9,7 @@
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.events.EventObject;
 	import dragonBones.factories.BaseFactory;
 	import dragonBones.factories.BuildArmaturePackage;
 	import dragonBones.objects.DisplayData;
@@ -35,9 +36,9 @@
 		{
 			super(this, dataParser);
 			
-			if (!Armature._soundEventManager) 
+			if (!EventObject._soundEventManager) 
 			{
-				Armature._soundEventManager = new FlashArmatureDisplay();
+				EventObject._soundEventManager = new FlashArmatureDisplay();
 			}
 		}
 		
@@ -182,7 +183,7 @@
 		 */
 		public function get soundEventManager(): FlashArmatureDisplay
 		{
-			return Armature._soundEventManager as FlashArmatureDisplay;
+			return EventObject._soundEventManager as FlashArmatureDisplay;
 		}
 	}
 }

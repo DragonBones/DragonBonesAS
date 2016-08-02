@@ -200,7 +200,7 @@
 				_parseActionData(rawData, armature.actions, null, null);
 			}
 			
-			if (this._isParentCooriinate && _getBoolean(rawData, IS_GLOBAL, true)) // Support 2.x ~ 3.x data.
+			if (this._isOldData && this._isGlobalTransform) // Support 2.x ~ 3.x data.
 			{
 				_globalToLocal(armature);
 			}
@@ -228,7 +228,7 @@
 				_parseTransform(rawData[TRANSFORM], bone.transform);
 			}
 			
-			if (this._isParentCooriinate) // Support 2.x ~ 3.x data.
+			if (this._isOldData) // Support 2.x ~ 3.x data.
 			{
 				bone.inheritRotation = true;
 				bone.inheritScale = false;
@@ -304,7 +304,7 @@
 				this._parseActionData(rawData, slot.actions, null, null);
 			}
 			
-			if (this._isParentCooriinate) // Support 2.x ~ 3.x data.
+			if (this._isOldData) // Support 2.x ~ 3.x data.
 			{
 				if (COLOR_TRANSFORM in rawData) 
 				{
@@ -334,7 +334,7 @@
 				
 				for each (var slotObject:Object in rawData[SLOT])
 				{
-					if (this._isParentCooriinate) // Support 2.x ~ 3.x data.
+					if (this._isOldData) // Support 2.x ~ 3.x data.
 					{
 						this._armature.addSlot(_parseSlot(slotObject));
 					}
@@ -403,7 +403,7 @@
 				display.pivot.x = _getNumber(pivotObject, X, 0);
 				display.pivot.y = _getNumber(pivotObject, Y, 0);
 			}
-			else if (this._isParentCooriinate) // Support 2.x ~ 3.x data.
+			else if (this._isOldData) // Support 2.x ~ 3.x data.
 			{
 				const transformObject:Object = rawData[TRANSFORM];
 				display.isRelativePivot = false;
@@ -627,7 +627,7 @@
 				}
 			}
 			
-			if (this._isParentCooriinate) // Support 2.x ~ 3.x data.
+			if (this._isOldData) // Support 2.x ~ 3.x data.
 			{
 				this._isAutoTween = _getBoolean(rawData, AUTO_TWEEN, true);
 				this._animationTweenEasing = _getNumber(rawData, TWEEN_EASING, 0) || 0;
@@ -697,7 +697,7 @@
 					slotTimeline.frames.fixed = true;
 					animation.addSlotTimeline(slotTimeline);
 					
-					if (this._isParentCooriinate) // Support 2.x ~ 3.x data.
+					if (this._isOldData) // Support 2.x ~ 3.x data.
 					{
 						slotFrame.displayIndex = -1;
 					}
@@ -752,6 +752,23 @@
 			if (timeline.scale != 1 || timeline.offset != 0)
 			{
 				this._animation.hasAsynchronyTimeline = true;
+			}
+			
+			if (
+				this._isOldData &&
+				(
+					(PIVOT_X in rawData) ||
+					(PIVOT_Y in rawData)
+				)
+			)  // Support 2.x ~ 3.x data.
+			{
+				this._timelinePivot.x = _getNumber(rawData, PIVOT_X, 0);
+				this._timelinePivot.y = _getNumber(rawData, PIVOT_Y, 0);
+			} 
+			else 
+			{
+				this._timelinePivot.x = 0;
+				this._timelinePivot.y = 0;
 			}
 			
 			return timeline;
@@ -844,10 +861,10 @@
 				const transformObject:Object = rawData[TRANSFORM];
 				_parseTransform(rawData[TRANSFORM], frame.transform);
 				
-				if (this._isParentCooriinate) // Support 2.x ~ 3.x data.
+				if (this._isOldData) // Support 2.x ~ 3.x data.
 				{
-					this._helpPoint.x = _getNumber(transformObject, PIVOT_X, 0);
-					this._helpPoint.y = _getNumber(transformObject, PIVOT_Y, 0);
+					this._helpPoint.x = this._timelinePivot.x + _getNumber(transformObject, PIVOT_X, 0);
+					this._helpPoint.y = this._timelinePivot.y + _getNumber(transformObject, PIVOT_Y, 0);
 					frame.transform.toMatrix(this._helpMatrix);
 					Transform.transformPoint(this._helpMatrix, this._helpPoint.x, this._helpPoint.y, this._helpPoint, true);
 					frame.transform.x += this._helpPoint.x;
@@ -904,7 +921,7 @@
 				frame.color = SlotFrameData.DEFAULT_COLOR;
 			}
 			
-			if (this._isParentCooriinate) // Support 2.x ~ 3.x data.
+			if (this._isOldData) // Support 2.x ~ 3.x data.
 			{
 				if (_getBoolean(rawData, HIDE, false)) 
 				{
@@ -987,23 +1004,35 @@
 		{
 			_parseFrame(rawData, frame, frameStart, frameCount);
 			
-			if (TWEEN_EASING in rawData)
+			if (frame.duration > 0)
 			{
-				frame.tweenEasing = _getNumber(rawData, TWEEN_EASING, DragonBones.NO_TWEEN);
+				if (TWEEN_EASING in rawData)
+				{
+					frame.tweenEasing = _getNumber(rawData, TWEEN_EASING, DragonBones.NO_TWEEN);
+				}
+				else if (this._isOldData) // Support 2.x ~ 3.x data.
+				{
+					frame.tweenEasing = this._isAutoTween ? this._animationTweenEasing : DragonBones.NO_TWEEN;
+				}
+				else
+				{
+					frame.tweenEasing = DragonBones.NO_TWEEN;
+				}
+				
+				if (this._isOldData && this._animation.scale == 1 && this._timeline.scale == 1 && frame.duration * this._armature.frameRate < 2) // Support 2.x ~ 3.x data.
+				{
+					frame.tweenEasing = DragonBones.NO_TWEEN;
+				}
+				
+				if (CURVE in rawData)
+				{
+					frame.curve = TweenFrameData.samplingCurve(rawData[CURVE], frameCount);
+				}
 			}
-			else if (this._isParentCooriinate) // Support 2.x ~ 3.x data.
-			{
-				frame.tweenEasing = this._isAutoTween ? this._animationTweenEasing : DragonBones.NO_TWEEN;
-			}
-			
-			if (this._isParentCooriinate && this._animation.scale == 1 && this._timeline.scale == 1 && frame.duration * this._armature.frameRate < 2) // Support 2.x ~ 3.x data.
+			else
 			{
 				frame.tweenEasing = DragonBones.NO_TWEEN;
-			}
-			
-			if (CURVE in rawData)
-			{
-				frame.curve = TweenFrameData.samplingCurve(rawData[CURVE], frameCount);
+				frame.curve = null;
 			}
 		}
 		
@@ -1058,7 +1087,7 @@
 									prevFrame.next = frame;
 									frame.prev = prevFrame;
 									
-									if (this._isParentCooriinate) // Support 2.x ~ 3.x data.
+									if (this._isOldData) // Support 2.x ~ 3.x data.
 									{
 										if (prevFrame is TweenFrameData && frameObject[DISPLAY_INDEX] == -1) 
 										{
@@ -1079,7 +1108,7 @@
 						prevFrame.next = frame;
 						frame.prev = prevFrame;
 						
-						if (this._isParentCooriinate) // Support 2.x ~ 3.x data.
+						if (this._isOldData) // Support 2.x ~ 3.x data.
 						{
 							if (prevFrame is TweenFrameData && rawFrames[0][DISPLAY_INDEX] == -1) 
 							{
@@ -1270,10 +1299,19 @@
 				}
 				
 				const version:String = _getString(rawData, VERSION, null);
-				this._isParentCooriinate = version == DATA_VERSION_2_3 || version == DATA_VERSION_3_0;
+				this._isOldData = version == DATA_VERSION_2_3 || version == DATA_VERSION_3_0;
+				if (this._isOldData) 
+				{
+					this._isGlobalTransform = _getBoolean(rawData, IS_GLOBAL, true);
+				} 
+				else 
+				{
+					this._isGlobalTransform = false;
+				}
+				
 				this._armatureScale = scale;
 				
-				if (version == DATA_VERSION || version == DATA_VERSION_4_0 || this._isParentCooriinate)
+				if (version == DATA_VERSION || version == DATA_VERSION_4_0 || this._isOldData)
 				{
 					const data:DragonBonesData = BaseObject.borrowObject(DragonBonesData) as DragonBonesData;
 					data.name = _getString(rawData, NAME, null);

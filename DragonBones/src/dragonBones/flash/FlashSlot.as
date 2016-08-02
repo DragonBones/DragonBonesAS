@@ -206,8 +206,8 @@ package dragonBones.flash
 			{
 				const rawDisplayData:DisplayData = this._displayIndex < this._displayDataSet.displays.length? this._displayDataSet.displays[this._displayIndex]: null;
 				const replacedDisplayData:DisplayData = this._displayIndex < this._replacedDisplayDataSet.length? this._replacedDisplayDataSet[this._displayIndex]: null;
-				const contentDisplayData:DisplayData = replacedDisplayData || rawDisplayData;
-				const currentTextureData:FlashTextureData = contentDisplayData.textureData as FlashTextureData;
+				const currentDisplayData:DisplayData = replacedDisplayData || rawDisplayData;
+				const currentTextureData:FlashTextureData = currentDisplayData.textureData as FlashTextureData;
 				if (currentTextureData)
 				{
 					const textureAtlasTexture:BitmapData = (currentTextureData.parent as FlashTextureAtlasData).texture;
@@ -287,10 +287,10 @@ package dragonBones.flash
 								height = rect.width;
 							}
 							
-							var pivotX:Number = contentDisplayData.pivot.x;
-							var pivotY:Number = contentDisplayData.pivot.y;
+							var pivotX:Number = currentDisplayData.pivot.x;
+							var pivotY:Number = currentDisplayData.pivot.y;
 							
-							if (contentDisplayData.isRelativePivot)
+							if (currentDisplayData.isRelativePivot)
 							{
 								pivotX = width * pivotX;
 								pivotY = height * pivotY;
@@ -302,10 +302,10 @@ package dragonBones.flash
 								pivotY += currentTextureData.frame.y;
 							}
 							
-							if (rawDisplayData && rawDisplayData != contentDisplayData)
+							if (rawDisplayData && rawDisplayData != currentDisplayData)
 							{
-								pivotX += rawDisplayData.transform.x - contentDisplayData.transform.x;
-								pivotY += rawDisplayData.transform.y - contentDisplayData.transform.y;
+								pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
+								pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
 							}
 							
 							if (currentTextureData.rotated)

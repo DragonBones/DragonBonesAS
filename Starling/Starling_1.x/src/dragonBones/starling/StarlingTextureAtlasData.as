@@ -1,5 +1,7 @@
 package dragonBones.starling
 {
+	import flash.display.BitmapData;
+	
 	import dragonBones.core.BaseObject;
 	import dragonBones.textures.TextureAtlasData;
 	import dragonBones.textures.TextureData;
@@ -29,7 +31,12 @@ package dragonBones.starling
 			return textureAtlasData;
 		}
 		
-		public var texture:Texture = null;
+		public var texture:Texture;
+		
+		/**
+		 * @private
+		 */
+		public var disposeTexture:Boolean;
 		
 		/**
 		 * @private
@@ -44,13 +51,18 @@ package dragonBones.starling
 		 */
 		override protected function _onClear():void
 		{
-			super._onClear();
-			
 			if (texture)
 			{
-				//texture.dispose();
+				if (disposeTexture)
+				{
+					disposeTexture = false;
+					texture.dispose();
+				}
+				
 				texture = null;
 			}
+			
+			super._onClear();
 		}
 		
 		/**

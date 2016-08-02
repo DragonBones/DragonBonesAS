@@ -1,5 +1,7 @@
 ﻿package dragonBones.textures
 {
+	import flash.display.BitmapData;
+	
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	
@@ -40,6 +42,11 @@
 		public var imagePath:String;
 		
 		/**
+		 * @private For AS.
+		 */
+		public var bitmapData:BitmapData;
+		
+		/**
 		 * @private
 		 */
 		public const textures:Object = {};
@@ -66,6 +73,12 @@
 			scale = 1;
 			name = null;
 			imagePath = null;
+			
+			if (bitmapData)
+			{
+				bitmapData.dispose();
+				bitmapData = null;
+			}
 			
 			var i:String = null;
 			

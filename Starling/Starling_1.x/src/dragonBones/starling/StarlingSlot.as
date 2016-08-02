@@ -28,9 +28,9 @@
 		 */
 		dragonBones_internal static const EMPTY_TEXTURE:Texture = Texture.empty(1, 1);
 		
-		public var transformUpdateEnabled:Boolean = false;
+		public var transformUpdateEnabled:Boolean;
 		
-		private var _renderDisplay:DisplayObject = null;
+		private var _renderDisplay:DisplayObject;
 		
 		/**
 		 * @language zh_CN
@@ -48,6 +48,8 @@
 		override protected function _onClear():void
 		{
 			super._onClear();
+			
+			transformUpdateEnabled = false;
 			
 			_renderDisplay = null;
 		}

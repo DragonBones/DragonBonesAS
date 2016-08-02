@@ -259,9 +259,12 @@
 		protected var _animation:AnimationData = null;
 		protected var _timeline:TimelineData = null;
 		
-		protected var _isParentCooriinate:Boolean = false;
+		protected var _isOldData:Boolean = false;
+		protected var _isGlobalTransform:Boolean = false;
 		protected var _isAutoTween:Boolean = false;
 		protected var _animationTweenEasing:Number = 0;
+		protected const _timelinePivot:Point = new Point();
+		
 		protected var _armatureScale:Number = 1;
 		protected const _helpPoint:Point = new Point();
 		protected const _helpTransformA:Transform = new Transform();
@@ -307,7 +310,7 @@
 				const frame:BoneFrameData = timeline.frames[frameIndex] as BoneFrameData;
 				var tweenProgress:Number = 0;
 				
-				if (frame.duration > 0 && frame.tweenEasing != DragonBones.NO_TWEEN) 
+				if (frame.tweenEasing != DragonBones.NO_TWEEN) 
 				{
 					tweenProgress = (position - frame.position) / frame.duration;
 					if (frame.tweenEasing != 0) 

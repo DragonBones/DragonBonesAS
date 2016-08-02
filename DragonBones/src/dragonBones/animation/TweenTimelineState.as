@@ -111,7 +111,7 @@ package dragonBones.animation
 			_curve = currentFrame.curve;
 			
 			if (
-				this._keyFrameCount == 1 ||
+				this._keyFrameCount <= 1 ||
 				(
 					this._currentFrame.next == this._timeline.frames[0] && 
 					(_tweenEasing != DragonBones.NO_TWEEN || _curve) &&
@@ -127,7 +127,7 @@ package dragonBones.animation
 		
 		override protected function _onUpdateFrame(isUpdate:Boolean):void
 		{
-			if (_tweenEasing != DragonBones.NO_TWEEN && this._currentFrame.duration > 0)
+			if (_tweenEasing != DragonBones.NO_TWEEN)
 			{
 				_tweenProgress = (this._currentTime - this._currentFrame.position + this._position) / this._currentFrame.duration;
 				if (_tweenEasing != 0)

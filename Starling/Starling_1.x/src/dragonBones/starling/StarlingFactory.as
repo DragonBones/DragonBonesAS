@@ -8,6 +8,7 @@ package dragonBones.starling
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.events.EventObject;
 	import dragonBones.factories.BaseFactory;
 	import dragonBones.factories.BuildArmaturePackage;
 	import dragonBones.objects.DisplayData;
@@ -17,8 +18,8 @@ package dragonBones.starling
 	import dragonBones.parsers.DataParser;
 	import dragonBones.textures.TextureAtlasData;
 	
+	import starling.core.Starling;
 	import starling.display.Image;
-	import starling.textures.SubTexture;
 	import starling.textures.Texture;
 	
 	use namespace dragonBones_internal;
@@ -41,9 +42,9 @@ package dragonBones.starling
 		{
 			super(this, dataParser);
 			
-			if (!Armature._soundEventManager) 
+			if (!EventObject._soundEventManager) 
 			{
-				Armature._soundEventManager = new StarlingArmatureDisplay();
+				EventObject._soundEventManager = new StarlingArmatureDisplay();
 			}
 		}
 		
@@ -54,9 +55,18 @@ package dragonBones.starling
 		{
 			if (textureAtlasData)
 			{
+				const starlingTextureAtlasData:StarlingTextureAtlasData = textureAtlasData as StarlingTextureAtlasData;
+				
 				if (textureAtlas is BitmapData)
 				{
-					(textureAtlasData as StarlingTextureAtlasData).texture = Texture.fromBitmapData(textureAtlas as BitmapData, generateMipMaps, false, textureAtlasData.scale);
+					starlingTextureAtlasData.texture = Texture.fromBitmapData(textureAtlas as BitmapData, generateMipMaps, false, textureAtlasData.scale);
+					starlingTextureAtlasData.disposeTexture = true;
+					
+					if (starlingTextureAtlasData.bitmapData && !Starling.handleLostContext)
+					{
+						starlingTextureAtlasData.bitmapData.dispose();
+						starlingTextureAtlasData.bitmapData = null;
+					}
 				}
 				else if (textureAtlas is Texture)
 				{
@@ -206,7 +216,7 @@ package dragonBones.starling
 		 */
 		public function get soundEventManager(): StarlingArmatureDisplay
 		{
-			return Armature._soundEventManager as StarlingArmatureDisplay;
+			return EventObject._soundEventManager as StarlingArmatureDisplay;
 		}
 	}
 }

@@ -8,6 +8,7 @@
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.events.EventObject;
 	import dragonBones.factories.BaseFactory;
 	import dragonBones.factories.BuildArmaturePackage;
 	import dragonBones.objects.DisplayData;
@@ -42,9 +43,9 @@
 		{
 			super(this, dataParser);
 			
-			if (!Armature._soundEventManager) 
+			if (!EventObject._soundEventManager) 
 			{
-				Armature._soundEventManager = new StarlingArmatureDisplay();
+				EventObject._soundEventManager = new StarlingArmatureDisplay();
 			}
 		}
 		
@@ -58,6 +59,7 @@
 				if (textureAtlas is BitmapData)
 				{
 					(textureAtlasData as StarlingTextureAtlasData).texture = Texture.fromBitmapData(textureAtlas as BitmapData, generateMipMaps, false, textureAtlasData.scale);
+					(textureAtlasData as StarlingTextureAtlasData).disposeTexture = true;
 				}
 				else if (textureAtlas is Texture)
 				{
@@ -214,7 +216,7 @@
 		 */
 		public function get soundEventManager(): StarlingArmatureDisplay
 		{
-			return Armature._soundEventManager as StarlingArmatureDisplay;
+			return EventObject._soundEventManager as StarlingArmatureDisplay;
 		}
 	}
 }

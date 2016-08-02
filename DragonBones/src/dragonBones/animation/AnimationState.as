@@ -782,6 +782,7 @@
 			else
 			{
 				_isFadeOut = true;
+				
 				if (fadeOutTime == 0 || _fadeProgress <= 0)
 				{
 					_fadeProgress = 0.000001;
@@ -835,7 +836,7 @@
 			if (
 				_boneMask.indexOf(name) < 0 &&
 				_animationData.getBoneTimeline(name)
-			) // Add mixing
+			) // Add mixing.
 			{
 				_boneMask.push(name);
 			}
@@ -849,7 +850,7 @@
 						_boneMask.indexOf(boneName) < 0 &&
 						_animationData.getBoneTimeline(boneName) &&
 						currentBone.contains(bone)
-					) // Add recursive mixing
+					) // Add recursive mixing.
 					{
 						_boneMask.push(boneName)
 					}
@@ -873,7 +874,7 @@
 			_boneMask.fixed = false;
 			
 			const indexA:int = _boneMask.indexOf(name);
-			if (indexA >= 0) // Remove mixing
+			if (indexA >= 0) // Remove mixing.
 			{
 				_boneMask.splice(indexA, 1);
 			}
@@ -890,7 +891,7 @@
 						if (
 							indexB >= 0 &&
 							currentBone.contains(bone)
-						) // remove recursive mixing
+						) // Remove recursive mixing.
 						{
 							_boneMask.splice(indexB, 1);
 						}
@@ -1046,7 +1047,6 @@
 		/**
 		 * @deprecated
 		 * @see #animationData
-		 * @version DragonBones 3.0
 		 */
 		public function get clip():AnimationData
 		{

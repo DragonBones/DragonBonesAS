@@ -449,17 +449,20 @@
 				const rect:Rectangle = displayObject.getRect(displayObject);
 				const matrix:Matrix = new Matrix();
 				matrix.scale(textureAtlasData.scale, textureAtlasData.scale);
-				textureAtlas = new BitmapData(
+				textureAtlasData.bitmapData = new BitmapData(
 					(rect.x + displayObject.width) * textureAtlasData.scale, 
 					(rect.y + displayObject.height) * textureAtlasData.scale, 
 					true, 
 					0
 				);
-				(textureAtlas as BitmapData).draw(displayObject, matrix, null, null, null, smoothing);
+				
+				textureAtlasData.bitmapData.draw(displayObject, matrix, null, null, null, smoothing);
+				textureAtlas = textureAtlasData.bitmapData;
 			}
 			
 			_generateTextureAtlasData(textureAtlasData, textureAtlas);
 			addTextureAtlasData(textureAtlasData, name);
+			
 			return textureAtlasData;
 		}
 		

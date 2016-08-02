@@ -27,11 +27,6 @@ package dragonBones
 	public final class Armature extends BaseObject implements IAnimateble
 	{
 		/**
-		 * @private RenderFactory
-		 */
-		dragonBones_internal static var _soundEventManager:IEventDispatcher = null;
-		
-		/**
 		 * @language zh_CN
 		 * 可以用于存储临时数据。
 		 * @version DragonBones 3.0
@@ -458,9 +453,9 @@ package dragonBones
 					{
 						const event:EventObject = _events[i];
 						
-						if (_soundEventManager && event.type == EventObject.SOUND_EVENT)
+						if (EventObject._soundEventManager && event.type == EventObject.SOUND_EVENT)
 						{
-							_soundEventManager._dispatchEvent(event);
+							EventObject._soundEventManager._dispatchEvent(event);
 						}
 						else
 						{

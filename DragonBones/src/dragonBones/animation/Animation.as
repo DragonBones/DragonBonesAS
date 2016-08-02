@@ -231,7 +231,7 @@
 				var prevLayer:int = _animationStates[0]._layer;
 				var weightLeft:Number = 1;
 				var layerTotalWeight:Number = 0;
-				var layerIndex:uint = 1;
+				var animationIndex:uint = 1;
 				
 				for (var i:uint = 0, r:uint = 0; i < animationStateCount; ++i)
 				{
@@ -282,12 +282,12 @@
 							animationState._updateTimelineStates();
 						}
 						
-						animationState._advanceTime(passedTime, weightLeft, layerIndex);
+						animationState._advanceTime(passedTime, weightLeft, animationIndex);
 						
 						if (animationState._weightResult != 0)
 						{
 							layerTotalWeight += animationState._weightResult;
-							layerIndex++;
+							animationIndex++;
 						}
 					}
 					
@@ -403,8 +403,8 @@
 			pauseFadeOut:Boolean = true, pauseFadeIn:Boolean = true
 		):AnimationState
 		{
-			const clipData:AnimationData = _animations[animationName];
-			if (!clipData)
+			const animationData:AnimationData = _animations[animationName];
+			if (!animationData)
 			{
 				_time = 0;
 				return null;
@@ -416,7 +416,7 @@
 			{
 				if (_lastAnimationState)
 				{
-					fadeInTime = clipData.fadeInTime;
+					fadeInTime = animationData.fadeInTime;
 				}
 				else
 				{
@@ -426,7 +426,7 @@
 			
 			if (playTimes < 0)
 			{
-				playTimes = clipData.playTimes;
+				playTimes = animationData.playTimes;
 			}
 			
 			_fadeOut(fadeInTime, layer, group, fadeOutMode, pauseFadeOut);
@@ -437,8 +437,8 @@
 			_lastAnimationState.additiveBlending = additiveBlending;
 			_lastAnimationState.displayControl = displayControl;
 			_lastAnimationState._fadeIn(
-				_armature, clipData.animation || clipData, animationName, 
-				playTimes, clipData.position, clipData.duration, _time, 1 / clipData.scale, fadeInTime, 
+				_armature, animationData.animation || animationData, animationName, 
+				playTimes, animationData.position, animationData.duration, _time, 1 / animationData.scale, fadeInTime, 
 				pauseFadeIn
 			);
 			_animationStates.push(_lastAnimationState);
@@ -502,10 +502,10 @@
 		 */
 		public function gotoAndPlayByFrame(animationName:String, frame:uint = 0, playTimes:int = -1):AnimationState
 		{
-			const clipData:AnimationData = _animations[animationName];
-			if (clipData)
+			const animationData:AnimationData = _animations[animationName];
+			if (animationData)
 			{
-				_time = clipData.duration * frame / clipData.frameCount;
+				_time = animationData.duration * frame / animationData.frameCount;
 			}
 			
 			return fadeIn(animationName, 0, playTimes, 0, null, AnimationFadeOutMode.All);
@@ -523,10 +523,10 @@
 		 */
 		public function gotoAndPlayByProgress(animationName:String, progress:Number = 0, playTimes:int = -1):AnimationState
 		{
-			const clipData:AnimationData = _animations[animationName];
-			if (clipData)
+			const animationData:AnimationData = _animations[animationName];
+			if (animationData)
 			{
-				_time = clipData.duration * Math.max(progress, 0);
+				_time = animationData.duration * Math.max(progress, 0);
 			}
 			
 			return fadeIn(animationName, 0, playTimes, 0, null, AnimationFadeOutMode.All);
@@ -742,7 +742,6 @@
 		 * @see #gotoAndPlayByTime()
 		 * @see #gotoAndPlayByFrame()
 		 * @see #gotoAndPlayByProgress()
-		 * @version DragonBones 3.0
 		 */
 		public function gotoAndPlay(
 			animationName:String,
@@ -771,8 +770,6 @@
 		 * @see #gotoAndStopByTime()
 		 * @see #gotoAndStopByFrame()
 		 * @see #gotoAndStopByProgress()
-		 * @return #gotoAndStopByProgress()
-		 * @version DragonBones 3.0
 		 */
 		public function gotoAndStop(animationName:String, time:Number = 0):AnimationState
 		{

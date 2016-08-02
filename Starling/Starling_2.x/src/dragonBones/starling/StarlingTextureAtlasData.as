@@ -29,7 +29,12 @@ package dragonBones.starling
 			return textureAtlasData;
 		}
 		
-		public var texture:Texture = null;
+		public var texture:Texture;
+		
+		/**
+		 * @private
+		 */
+		public var disposeTexture:Boolean;
 		
 		/**
 		 * @private
@@ -48,7 +53,12 @@ package dragonBones.starling
 			
 			if (texture)
 			{
-				//texture.dispose();
+				if (disposeTexture)
+				{
+					disposeTexture = false;
+					texture.dispose();
+				}
+				
 				texture = null;
 			}
 		}
