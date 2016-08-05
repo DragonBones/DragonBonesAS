@@ -4,6 +4,7 @@
 	import flash.geom.Matrix;
 	
 	import dragonBones.core.DragonBones;
+	import dragonBones.core.IArmatureDisplay;
 	import dragonBones.core.TransformObject;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DisplayData;
@@ -980,6 +981,8 @@
 				return;
 			}
 			
+			(value.display as IArmatureDisplay).advanceTimeBySelf(false); // Stop child armature self advanceTime.
+
 			display = value;
 		}
 	}

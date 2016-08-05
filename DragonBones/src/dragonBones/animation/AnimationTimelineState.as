@@ -62,7 +62,12 @@
 						break;
 				}
 				
-				if (eventDispatcher.hasEvent(eventType))
+				if (
+					(eventData.type == DragonBones.EVENT_TYPE_SOUND? 
+						(EventObject._soundEventManager || eventDispatcher):
+						eventDispatcher
+					).hasEvent(eventType)
+				)
 				{
 					const eventObject:EventObject = BaseObject.borrowObject(EventObject) as EventObject;
 					eventObject.animationState = _animationState;

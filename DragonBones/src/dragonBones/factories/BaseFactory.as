@@ -822,5 +822,21 @@
 				}
 			}
 		}
+		
+		/** 
+		 * @private 
+		 */
+		public function get allDragonBonesData():Object
+		{
+			return _dragonBonesDataMap;
+		}
+		
+		/** 
+		 * @private 
+		 */
+		public function get allTextureAtlasData():Object
+		{
+			return _textureAtlasDataMap;
+		}
 	}
 }

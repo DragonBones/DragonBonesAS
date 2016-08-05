@@ -53,6 +53,15 @@ package dragonBones.animation
 		
 		dragonBones_internal static function _getCurveEasingValue(progress:Number, sampling:Vector.<Number>):Number
 		{
+			if (progress <= 0) 
+			{
+				return 0;
+			} 
+			else if (progress >= 1) 
+			{
+				return 1;
+			}
+			
 			var x:Number = 0;
 			var y:Number = 0;
 			
