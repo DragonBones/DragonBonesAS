@@ -68,6 +68,16 @@
 		dragonBones_internal var _zOrder:int;
 		
 		/**
+		 * @private
+		 */
+		dragonBones_internal var _pivotX:Number;
+		
+		/**
+		 * @private
+		 */
+		dragonBones_internal var _pivotY:Number;
+		
+		/**
 		 * @private Factory
 		 */
 		dragonBones_internal var _displayDataSet:SlotDisplayDataSet;
@@ -220,6 +230,8 @@
 			_ffdDirty = false;
 			_blendIndex = 0;
 			_zOrder = 0;
+			_pivotX = 0;
+			_pivotY = 0;
 			_displayDataSet = null;
 			_meshData = null;
 			_childArmature = null;

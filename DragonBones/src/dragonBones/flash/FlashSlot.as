@@ -268,6 +268,9 @@ package dragonBones.flash
 							meshDisplay.graphics.beginBitmapFill(_meshTexture, null, false, true);
 							meshDisplay.graphics.drawTriangles(_pach.vertices, _pach.indices, _pach.uvtData);
 							
+							this._pivotX = 0;
+							this._pivotY = 0;
+							
 							if (this._meshData.skinned)
 							{
 								const transformationMatrix:Matrix = meshDisplay.transform.matrix;
@@ -287,25 +290,25 @@ package dragonBones.flash
 								height = rect.width;
 							}
 							
-							var pivotX:Number = currentDisplayData.pivot.x;
-							var pivotY:Number = currentDisplayData.pivot.y;
+							this._pivotX = currentDisplayData.pivot.x;
+							this._pivotY = currentDisplayData.pivot.y;
 							
 							if (currentDisplayData.isRelativePivot)
 							{
-								pivotX = width * pivotX;
-								pivotY = height * pivotY;
+								this._pivotX = width * this._pivotX;
+								this._pivotY = height * this._pivotY;
 							}
 							
 							if (currentTextureData.frame)
 							{
-								pivotX += currentTextureData.frame.x;
-								pivotY += currentTextureData.frame.y;
+								this._pivotX += currentTextureData.frame.x;
+								this._pivotY += currentTextureData.frame.y;
 							}
 							
 							if (rawDisplayData && rawDisplayData != currentDisplayData)
 							{
-								pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
-								pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
+								this._pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
+								this._pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
 							}
 							
 							if (currentTextureData.rotated)
@@ -327,8 +330,8 @@ package dragonBones.flash
 								_helpMatrix.b = -scale;
 								_helpMatrix.c = scale;
 								_helpMatrix.d = 0;
-								_helpMatrix.tx = -pivotX - currentTextureData.region.y;
-								_helpMatrix.ty = -pivotY + currentTextureData.region.x + height;
+								_helpMatrix.tx = -this._pivotX - currentTextureData.region.y;
+								_helpMatrix.ty = -this._pivotY + currentTextureData.region.x + height;
 							}
 							else
 							{
@@ -336,12 +339,12 @@ package dragonBones.flash
 								_helpMatrix.b = 0;
 								_helpMatrix.c = 0;
 								_helpMatrix.d = scale;
-								_helpMatrix.tx = -pivotX - currentTextureData.region.x;
-								_helpMatrix.ty = -pivotY - currentTextureData.region.y;
+								_helpMatrix.tx = -this._pivotX - currentTextureData.region.x;
+								_helpMatrix.ty = -this._pivotY - currentTextureData.region.y;
 							}
 							
 							frameDisplay.graphics.beginBitmapFill(texture, _helpMatrix, false, true);
-							frameDisplay.graphics.drawRect(-pivotX, -pivotY, width, height);
+							frameDisplay.graphics.drawRect(-this._pivotX, -this._pivotY, width, height);
 						}
 						
 						this._updateVisible();
@@ -350,6 +353,9 @@ package dragonBones.flash
 					}
 				}
 			}
+			
+			this._pivotX = 0;
+			this._pivotY = 0;
 			
 			frameDisplay.visible = false;
 			frameDisplay.x = 0;

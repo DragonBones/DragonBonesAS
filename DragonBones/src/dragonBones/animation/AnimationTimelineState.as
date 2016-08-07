@@ -38,10 +38,13 @@
 		{
 			var i:uint = 0, l:uint = 0;
 			
-			const actions:Vector.<ActionData> = (frame as AnimationFrameData).actions;
-			for (i = 0, l = actions.length; i < l; ++i)
+			if (this._animationState.actionEnabled)
 			{
-				this._armature._bufferAction(actions[i]);
+				const actions:Vector.<ActionData> = (frame as AnimationFrameData).actions;
+				for (i = 0, l = actions.length; i < l; ++i)
+				{
+					this._armature._bufferAction(actions[i]);
+				}
 			}
 			
 			const eventDispatcher:IEventDispatcher = _armature.display;

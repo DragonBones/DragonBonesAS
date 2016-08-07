@@ -7,7 +7,6 @@ package dragonBones
 	import dragonBones.core.IArmatureDisplay;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.EventObject;
-	import dragonBones.events.IEventDispatcher;
 	import dragonBones.objects.ActionData;
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.SkinData;

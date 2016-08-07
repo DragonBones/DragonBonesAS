@@ -24,6 +24,11 @@
 	public final class AnimationState extends BaseObject
 	{
 		/**
+		 * @private
+		 */
+		public static var actionEnabled:Boolean = true;
+		
+		/**
 		 * @language zh_CN
 		 * 是否对插槽的颜色，显示序列索引，深度排序，行为等拥有控制的权限。
 		 * @see dragonBones.Slot#displayController
@@ -37,6 +42,11 @@
 		 * @version DragonBones 3.0
 		 */
 		public var additiveBlending:Boolean;
+		
+		/**
+		 * @private
+		 */
+		public var actionEnabled:Boolean;
 		
 		/**
 		 * @language zh_CN
@@ -194,6 +204,7 @@
 		{
 			displayControl = true;
 			additiveBlending = false;
+			actionEnabled = false;
 			playTimes = 1;
 			timeScale = 1;
 			weight = 1;
@@ -431,6 +442,8 @@
 			_timeline.fadeIn(_armature, this, _animationData, _time);
 			
 			_updateTimelineStates();
+			
+			actionEnabled = AnimationState.actionEnabled;
 		}
 		
 		/**
