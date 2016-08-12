@@ -5,7 +5,7 @@
 	import starling.core.Starling;
 
 	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#666666")]
-	public class PerformanceTest extends Sprite
+	public class PerformanceTest extends flash.display.Sprite
 	{
 		private var _starling: Starling = null;
 
@@ -24,19 +24,19 @@
 }
 
 // Starling render
+import dragonBones.Armature;
+import dragonBones.animation.WorldClock;
+import dragonBones.objects.DragonBonesData;
+import dragonBones.starling.StarlingArmatureDisplay;
+import dragonBones.starling.StarlingFactory;
+
 import starling.display.Sprite;
-import starling.events.Event;
 import starling.events.EnterFrameEvent;
+import starling.events.Event;
 import starling.events.Touch;
 import starling.events.TouchEvent;
 import starling.events.TouchPhase;
 import starling.text.TextField;
-
-import dragonBones.Armature;
-import dragonBones.animation.WorldClock;
-import dragonBones.starling.StarlingFactory;
-import dragonBones.objects.DragonBonesData;
-import dragonBones.starling.StarlingArmatureDisplay;
 
 class StarlingRender extends Sprite
 {
@@ -151,14 +151,16 @@ class StarlingRender extends Sprite
 
 	private function _addArmature(): void
 	{
-		const armature: Armature = _factory.buildArmature(_dragonBonesData.armatureNames[1]);
+		const armature: Armature = _factory.buildArmature(_dragonBonesData.armatureNames[0]);
 		const armatureDisplay: StarlingArmatureDisplay = armature.display as StarlingArmatureDisplay;
 
-		armatureDisplay.scaleX = armatureDisplay.scaleY = 0.3;
+		armatureDisplay.scaleX = armatureDisplay.scaleY = 0.7;
 		this.addChild(armatureDisplay);
 
 		armature.cacheFrameRate = 24;
-		armature.animation.play(armature.animation.animationNames[0], 0);
+		//armature.animation.play(armature.animation.animationNames[0], 0);
+		const animationName:String = armature.animation.animationNames[Math.floor(Math.random() * armature.animation.animationNames.length)];
+		armature.animation.play(animationName, 0);
 		WorldClock.clock.add(armature);
 
 		_armatures.push(armature);

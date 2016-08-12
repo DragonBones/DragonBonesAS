@@ -440,7 +440,7 @@ package dragonBones
 				}
 				
 				// 
-				if (DragonBones.DEBUG_DRAW)
+				if (DragonBones.debugDraw)
 				{
 					_display._debugDraw();
 				}

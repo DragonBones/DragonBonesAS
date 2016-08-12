@@ -212,7 +212,7 @@
 		 */
 		override protected function _updateFrame():void
 		{
-			const frameDisplay:Image = this._rawDisplay as Image;
+			const frameDisplay:Image = this._rawDisplay as Image; // TODO
 			
 			if (this._display && this._displayIndex >= 0)
 			{
@@ -251,31 +251,29 @@
 								height = rect.width;
 							}
 							
-							var pivotX:Number = currentDisplayData.pivot.x;
-							var pivotY:Number = currentDisplayData.pivot.y;
+							this._pivotX = currentDisplayData.pivot.x;
+							this._pivotY = currentDisplayData.pivot.y;
 							
 							if (currentDisplayData.isRelativePivot)
 							{
-								pivotX = width * pivotX;
-								pivotY = height * pivotY;
+								this._pivotX = width * this._pivotX;
+								this._pivotY = height * this._pivotY;
 							}
 							
 							if (currentTextureData.frame)
 							{
-								pivotX += currentTextureData.frame.x;
-								pivotY += currentTextureData.frame.y;
+								this._pivotX += currentTextureData.frame.x;
+								this._pivotY += currentTextureData.frame.y;
 							}
 							
 							if (rawDisplayData && rawDisplayData != currentDisplayData)
 							{
-								pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
-								pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
+								this._pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
+								this._pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
 							}
 							
 							frameDisplay.texture = texture;
 							frameDisplay.readjustSize();
-							frameDisplay.pivotX = pivotX;
-							frameDisplay.pivotY = pivotY;
 						}
 						
 						this._updateVisible();
@@ -288,10 +286,8 @@
 			frameDisplay.visible = false;
 			frameDisplay.texture = EMPTY_TEXTURE;
 			frameDisplay.readjustSize();
-			frameDisplay.pivotX = 0;
-			frameDisplay.pivotY = 0;
-			frameDisplay.x = 0;
-			frameDisplay.y = 0;
+			frameDisplay.x = this.origin.x;
+			frameDisplay.y = this.origin.y;
 		}
 		
 		/**
@@ -307,17 +303,14 @@
 		 */
 		override protected function _updateTransform():void
 		{
-			const pivotX:Number = _renderDisplay.pivotX;
-			const pivotY:Number = _renderDisplay.pivotY;
-			
 			if (transformUpdateEnabled)
 			{
 				_renderDisplay.transformationMatrix = this.globalTransformMatrix;
 				
-				if (pivotX || pivotY)
+				if (this._pivotX != 0 || this._pivotY != 0)
 				{
-					_renderDisplay.pivotX = pivotX;
-					_renderDisplay.pivotY = pivotY;
+					_renderDisplay.pivotX = this._pivotX;
+					_renderDisplay.pivotY = this._pivotY;
 				}
 			}
 			else
@@ -328,10 +321,10 @@
 				displayMatrix.c = this.globalTransformMatrix.c;
 				displayMatrix.d = this.globalTransformMatrix.d;
 				
-				if (pivotX || pivotY)
+				if (this._pivotX != 0 || this._pivotY != 0)
 				{
-					displayMatrix.tx = this.globalTransformMatrix.tx - (this.globalTransformMatrix.a * pivotX + this.globalTransformMatrix.c * pivotY);
-					displayMatrix.ty = this.globalTransformMatrix.ty - (this.globalTransformMatrix.b * pivotX + this.globalTransformMatrix.d * pivotY);
+					displayMatrix.tx = this.globalTransformMatrix.tx - (this.globalTransformMatrix.a * this._pivotX + this.globalTransformMatrix.c * this._pivotY);
+					displayMatrix.ty = this.globalTransformMatrix.ty - (this.globalTransformMatrix.b * this._pivotX + this.globalTransformMatrix.d * this._pivotY);
 				}
 				else
 				{

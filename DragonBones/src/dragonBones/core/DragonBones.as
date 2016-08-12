@@ -121,11 +121,11 @@ package dragonBones.core
 		/**
 		 * @private
 		 */
-		public static const EVENT_TYPE_FRAME:int = 0;
+		public static const EVENT_TYPE_FRAME:int = 10;
 		/**
 		 * @private
 		 */
-		public static const EVENT_TYPE_SOUND:int = 1;
+		public static const EVENT_TYPE_SOUND:int = 11;
 		
 		/**
 		 * @private
@@ -186,20 +186,20 @@ package dragonBones.core
 		/**
 		 * @private
 		 */
-		public static var DEBUG:Boolean = false;
-		
-		/**
-		 * @private
-		 */
-		public static var DEBUG_DRAW:Boolean = false;
-		
-		/**
-		 * @private
-		 */
 		public static const ABSTRACT_CLASS_ERROR:String = "Abstract class can not be instantiated.";
 		/**
 		 * @private
 		 */
 		public static const ABSTRACT_METHOD_ERROR:String = "Abstract method needs to be implemented in subclass.";
+		
+		/**
+		 * @private
+		 */
+		public static var debug:Boolean = false;
+		
+		/**
+		 * @private
+		 */
+		public static var debugDraw:Boolean = false;
 	}
 }

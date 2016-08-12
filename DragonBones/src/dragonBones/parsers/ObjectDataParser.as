@@ -170,9 +170,10 @@
 			
 			if (SLOT in rawData)
 			{
+				var zOrder:int = 0;
 				for each (var slotObject:Object in rawData[SLOT])
 				{
-					armature.addSlot(_parseSlot(slotObject));
+					armature.addSlot(_parseSlot(slotObject, zOrder++));
 				}
 			}
 			
@@ -268,13 +269,13 @@
 		/**
 		 * @private
 		 */
-		protected function _parseSlot(rawData:Object):SlotData
+		protected function _parseSlot(rawData:Object, zOrder:int):SlotData
 		{
 			const slot:SlotData = BaseObject.borrowObject(SlotData) as SlotData;
 			slot.name = _getString(rawData, NAME, null);
 			slot.parent = this._armature.getBone(_getString(rawData, PARENT, null));
 			slot.displayIndex = _getNumber(rawData, DISPLAY_INDEX, 0);
-			slot.zOrder = _getNumber(rawData, Z_ORDER, this._armature.sortedSlots.length); // 如果未标识 zOrder 则使用队列顺序
+			slot.zOrder = _getNumber(rawData, Z_ORDER, zOrder); // 如果未标识 zOrder 则使用队列顺序
 			
 			if (COLOR in rawData)
 			{
@@ -331,12 +332,12 @@
 			if (SLOT in rawData)
 			{
 				this._skin = skin;
-				
+				var zOrder:int = 0;
 				for each (var slotObject:Object in rawData[SLOT])
 				{
 					if (this._isOldData) // Support 2.x ~ 3.x data.
 					{
-						this._armature.addSlot(_parseSlot(slotObject));
+						this._armature.addSlot(_parseSlot(slotObject, zOrder++));
 					}
 					
 					skin.addSlot(_parseSlotDisplaySet(slotObject));
@@ -1073,7 +1074,7 @@
 						var frame:FrameData = null;
 						var prevFrame:FrameData = null;
 						
-						for (var i:uint = 0, iW:uint = 0, l:uint = this._animation.frameCount + 1; i < l; ++i)
+						for (var i:uint = 0, iW:uint = 0, l:uint = timeline.frames.length; i < l; ++i)
 						{
 							if (frameStart + frameCount <= i && iW < rawFrames.length)
 							{

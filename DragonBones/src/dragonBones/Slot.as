@@ -7,6 +7,7 @@
 	import dragonBones.core.IArmatureDisplay;
 	import dragonBones.core.TransformObject;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.objects.ActionData;
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.MeshData;
 	import dragonBones.objects.SlotData;
@@ -510,11 +511,12 @@
 						}
 						
 						const slotData:SlotData = this._armature.armatureData.getSlot(this.name);
-						if (slotData.actions.length > 0) 
+						const actions:Vector.<ActionData> = slotData.actions.length > 0? slotData.actions: _childArmature.armatureData.actions;
+						if (actions.length > 0) 
 						{
-							for (var i:uint = 0, l:uint = slotData.actions.length; i < l; ++i) 
+							for (var i:uint = 0, l:uint = actions.length; i < l; ++i) 
 							{
-								_childArmature._bufferAction(slotData.actions[i]);
+								_childArmature._bufferAction(actions[i]);
 							}
 						} 
 						else 
@@ -744,7 +746,7 @@
 				{
 					_updateGlobalTransformMatrix();
 					
-					if (cacheFrameIndex >= 0)
+					if (cacheFrameIndex >= 0 && !_cacheFrames[cacheFrameIndex])
 					{
 						this.globalTransformMatrix = SlotTimelineData.cacheFrame(_cacheFrames, cacheFrameIndex, this._globalTransformMatrix);
 					}
@@ -856,7 +858,7 @@
 		 */
 		public function invalidUpdate():void
 		{
-			_displayDirty = true;
+			_originDirty = true;
 		}
 		
 		/**
@@ -993,7 +995,10 @@
 				return;
 			}
 			
-			(value.display as IArmatureDisplay).advanceTimeBySelf(false); // Stop child armature self advanceTime.
+			if (value)
+			{
+				(value.display as IArmatureDisplay).advanceTimeBySelf(false); // Stop child armature self advanceTime.
+			}
 
 			display = value;
 		}

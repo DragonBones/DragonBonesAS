@@ -12,6 +12,7 @@
 	import dragonBones.events.EventObject;
 	import dragonBones.factories.BaseFactory;
 	import dragonBones.factories.BuildArmaturePackage;
+	import dragonBones.objects.ActionData;
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.SlotData;
 	import dragonBones.objects.SlotDisplayDataSet;
@@ -27,6 +28,13 @@
 	 */
 	public class FlashFactory extends BaseFactory
 	{
+		/**
+		 * @language zh_CN
+		 * 一个可以直接使用的全局工厂实例.
+		 * @version DragonBones 4.7
+		 */
+		public static const factory:FlashFactory = new FlashFactory();
+		
 		/**
 		 * @language zh_CN
 		 * 创建一个工厂。
@@ -123,16 +131,20 @@
 						const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName);
 						if (childArmature) 
 						{
-							if (slotData.actions.length > 0) 
+							if (!slot.inheritAnimation)
 							{
-								for (var i:uint = 0, l:uint = childArmature.armatureData.actions.length; i < l; ++i) 
+								const actions:Vector.<ActionData> = slotData.actions.length > 0? slotData.actions: childArmature.armatureData.actions;
+								if (actions.length > 0) 
 								{
-									childArmature._bufferAction(childArmature.armatureData.actions[i]);
+									for (var i:uint = 0, l:uint = actions.length; i < l; ++i) 
+									{
+										childArmature._bufferAction(actions[i]);
+									}
+								} 
+								else 
+								{
+									childArmature.animation.play();
 								}
-							} 
-							else 
-							{
-								childArmature.animation.play();
 							}
 							
 							displayData.armatureData = childArmature.armatureData; // 

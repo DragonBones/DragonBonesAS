@@ -19,6 +19,7 @@ package dragonBones.objects
 			const sampling:Vector.<Number> = new Vector.<Number>((samplingTimes - 1) * 2, true);
 			
 			//
+			curve = curve.concat();
 			curve.unshift(0, 0);
 			curve.push(1, 1);
 			
