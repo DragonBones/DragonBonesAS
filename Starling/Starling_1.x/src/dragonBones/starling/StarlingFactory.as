@@ -120,7 +120,7 @@ package dragonBones.starling
 			const displayList:Vector.<Object> = new Vector.<Object>();
 			
 			slot.name = slotData.name;
-			slot._rawDisplay = new Image(StarlingSlot.EMPTY_TEXTURE);
+			slot._rawDisplay = new Image(StarlingSlot.getEmptyTexture());
 			
 			for each (var displayData:DisplayData in slotDisplayDataSet.displays)
 			{

@@ -23,10 +23,20 @@
 	 */
 	public final class StarlingSlot extends Slot
 	{
+		private static var _emptyEtexture:Texture = null;
 		/**
 		 * @private
 		 */
-		dragonBones_internal static const EMPTY_TEXTURE:Texture = Texture.empty(1, 1);
+		dragonBones_internal static function getEmptyTexture():Texture
+		{
+			if (!_emptyEtexture)
+			{
+				_emptyEtexture = Texture.empty(1, 1);
+			}
+			
+			return _emptyEtexture;
+		}
+		
 		
 		public var transformUpdateEnabled:Boolean;
 		
@@ -63,7 +73,7 @@
 		{
 			if (!this._rawDisplay)
 			{
-				this._rawDisplay = new Image(EMPTY_TEXTURE);	
+				this._rawDisplay = new Image(getEmptyTexture());	
 			}
 			
 			_renderDisplay = (this._display || this._rawDisplay) as DisplayObject;
@@ -284,7 +294,7 @@
 			}
 			
 			frameDisplay.visible = false;
-			frameDisplay.texture = EMPTY_TEXTURE;
+			frameDisplay.texture = getEmptyTexture();
 			frameDisplay.readjustSize();
 			frameDisplay.x = this.origin.x;
 			frameDisplay.y = this.origin.y;
