@@ -431,7 +431,7 @@
 					break;
 				
 				case DragonBones.DISPLAY_TYPE_MESH:
-					display.meshData = _parseMesh(rawData);
+					display.mesh = _parseMesh(rawData);
 					break;
 			}
 			
@@ -806,10 +806,10 @@
 			for (var i:uint = 0, l:uint = timeline.slot.displays.length; i < l; ++i)
 			{
 				const displayData:DisplayData = timeline.slot.displays[i];
-				if (displayData.meshData && displayData.name == meshName)
+				if (displayData.mesh && displayData.name == meshName)
 				{
 					timeline.displayIndex = i; // rawData[DISPLAY_INDEX];
-					this._mesh = displayData.meshData;
+					this._mesh = displayData.mesh;
 					break;
 				}
 			}
@@ -1294,11 +1294,6 @@
 		{
 			if (rawData)
 			{
-				if (rawData is String)
-				{
-					rawData = JSON.parse(rawData);
-				}
-				
 				const version:String = _getString(rawData, VERSION, null);
 				this._isOldData = version == DATA_VERSION_2_3 || version == DATA_VERSION_3_0;
 				if (this._isOldData) 
@@ -1352,11 +1347,6 @@
 		{
 			if (rawData)
 			{
-				if (rawData is String)
-				{
-					rawData = JSON.parse(rawData);
-				}
-				
 				// format
 				textureAtlasData.name = _getString(rawData, NAME, null);
 				textureAtlasData.imagePath = _getString(rawData, IMAGE_PATH, null);

@@ -384,6 +384,7 @@
 						{
 							continue;
 						}
+						
 						keyFrames.push(frame);
 						
 						if (parentTimeline)

@@ -134,7 +134,6 @@
 								
 								if (this._isReverse) 
 								{
-									
 								} 
 								else 
 								{

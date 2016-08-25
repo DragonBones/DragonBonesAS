@@ -486,7 +486,7 @@
 				this.globalTransformMatrix = this._globalTransformMatrix;
 			}
 			
-			if (_transformDirty > 0)
+			if (_transformDirty != 0)
 			{
 				if (_transformDirty == 2)
 				{
@@ -516,7 +516,7 @@
 							}
 						}
 						
-						if (cacheFrameIndex >= 0)
+						if (cacheFrameIndex >= 0 && !_cacheFrames[cacheFrameIndex])
 						{
 							this.globalTransformMatrix = BoneTimelineData.cacheFrame(_cacheFrames, cacheFrameIndex, this._globalTransformMatrix);
 						}

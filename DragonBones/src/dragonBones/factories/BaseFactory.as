@@ -199,7 +199,10 @@
 				dataPackage.dataName = dragonBonesName;
 				dataPackage.data = dragonBonesData;
 				dataPackage.armature = armatureData;
-				dataPackage.skin = armatureData.getSkin(skinName) || armatureData.defaultSkin;
+				dataPackage.skin = armatureData.getSkin(skinName);
+				if (!dataPackage.skin) {
+					dataPackage.skin = armatureData.defaultSkin;
+				}
 				return true;
 			}
 			
@@ -212,7 +215,6 @@
 		protected function _buildBones(dataPackage:BuildArmaturePackage, armature:Armature):void
 		{
 			const bones:Vector.<BoneData> = dataPackage.armature.sortedBones;
-			
 			for (var i:uint = 0, l:uint = bones.length; i < l; ++i)
 			{
 				const boneData:BoneData = bones[i];
@@ -224,15 +226,7 @@
 				bone.inheritScale = boneData.inheritScale; 
 				bone.length = boneData.length;
 				bone.origin.copyFrom(boneData.transform);
-				
-				if (boneData.parent)
-				{
-					armature.addBone(bone, boneData.parent.name);
-				}
-				else
-				{
-					armature.addBone(bone);
-				}
+				armature.addBone(bone, boneData.parent? boneData.parent.name: null);
 				
 				if (boneData.ik)
 				{
@@ -305,42 +299,42 @@
 			
 			if (displayIndex >= 0)
 			{
-				const displayList:Vector.<Object> = slot.displayList; // copy
+				const displayList:Vector.<*> = slot.displayList; // copy
 				if (displayList.length <=  displayIndex)
 				{
 					displayList.fixed = false;
 					displayList.length = displayIndex + 1;
 				}
 				
-				if (!displayData.textureData)
+				if (!displayData.texture)
 				{
-					displayData.textureData = _getTextureData(dataPackage.dataName, displayData.name);
+					displayData.texture = _getTextureData(dataPackage.dataName, displayData.name);
 				}
+				
+				if (slot._replacedDisplayDataSet.length <= displayIndex)
+				{
+					slot._replacedDisplayDataSet.fixed = false;
+					slot._replacedDisplayDataSet.length = displayIndex + 1;
+					slot._replacedDisplayDataSet.fixed = true;
+				}
+				
+				slot._replacedDisplayDataSet[displayIndex] = displayData;
 				
 				if (displayData.type == DragonBones.DISPLAY_TYPE_ARMATURE)
 				{
 					const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName);
 					displayList[displayIndex] = childArmature;
 				}
+				else if (
+					displayData.mesh ||
+					(displayIndex < slot._displayDataSet.displays.length && slot._displayDataSet.displays[displayIndex].mesh)
+				)
+				{
+					displayList[displayIndex] = slot.MeshDisplay;
+				}
 				else
 				{
-					if (slot._replacedDisplayDataSet.length <= displayIndex)
-					{
-						slot._replacedDisplayDataSet.fixed = false;
-						slot._replacedDisplayDataSet.length = displayIndex + 1;
-						slot._replacedDisplayDataSet.fixed = true;
-					}
-					
-					slot._replacedDisplayDataSet[displayIndex] = displayData;
-					
-					if (displayData.meshData)
-					{
-						displayList[displayIndex] = slot.MeshDisplay;
-					}
-					else
-					{
-						displayList[displayIndex] = slot.rawDisplay;
-					}
+					displayList[displayIndex] = slot.rawDisplay;
 				}
 				
 				slot.displayList = displayList;
@@ -678,16 +672,7 @@
 				_buildBones(dataPackage, armature);
 				_buildSlots(dataPackage, armature);
 				
-				if (armature.armatureData.actions.length > 0) // Add default action.
-				{
-					for (var i:uint = 0, l:uint = armature.armatureData.actions.length; i < l; ++i) 
-					{
-						armature._bufferAction(armature.armatureData.actions[i]);
-					}
-				}
-				
-				// Update armature pose
-				armature.advanceTime(0);
+				armature.advanceTime(0); // Update armature pose.
 				return armature;
 			}
 			
@@ -740,7 +725,7 @@
 				{
 					for each(var toSlot:Slot in toArmature.getSlots())
 					{
-						const toSlotDisplayList:Vector.<Object> = toSlot.displayList;
+						const toSlotDisplayList:Vector.<*> = toSlot.displayList;
 						for (var i:uint = 0, l:uint = toSlotDisplayList.length; i < l; ++i)
 						{
 							const toDisplayObject:Object = toSlotDisplayList[i];

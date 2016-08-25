@@ -15,9 +15,9 @@ package dragonBones.objects
 		public var isRelativePivot:Boolean;
 		public var type:int;
 		public var name:String;
-		public var textureData:TextureData;
-		public var armatureData:ArmatureData;
-		public var meshData:MeshData;
+		public var texture:TextureData;
+		public var armature:ArmatureData;
+		public var mesh:MeshData;
 		public const pivot:Point = new Point();
 		public const transform:Transform = new Transform();
 		
@@ -34,13 +34,13 @@ package dragonBones.objects
 			isRelativePivot = false;
 			type = DragonBones.DISPLAY_TYPE_IMAGE;
 			name = null;
-			textureData = null;
-			armatureData = null;
+			texture = null;
+			armature = null;
 			
-			if (meshData)
+			if (mesh)
 			{
-				meshData.returnToPool();
-				meshData = null;
+				mesh.returnToPool();
+				mesh = null;
 			}
 			
 			pivot.x = 0;

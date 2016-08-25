@@ -82,7 +82,7 @@
 		/**
 		 * @private
 		 */
-		override protected function _initDisplay(value:Object):void
+		override protected function _initDisplay(value:*):void
 		{
 		}
 		
@@ -98,7 +98,7 @@
 		/**
 		 * @private
 		 */
-		override protected function _replaceDisplay(value:Object):void
+		override protected function _replaceDisplay(value:*):void
 		{
 			const container:StarlingArmatureDisplay = this._armature.display as StarlingArmatureDisplay;
 			const prevDisplay:DisplayObject = value as DisplayObject;
@@ -118,7 +118,7 @@
 		/**
 		 * @private
 		 */
-		override protected function _disposeDisplay(value:Object):void
+		override protected function _disposeDisplay(value:*):void
 		{
 			(value as DisplayObject).dispose();
 		}
@@ -229,7 +229,7 @@
 				const rawDisplayData:DisplayData = this._displayIndex < this._displayDataSet.displays.length? this._displayDataSet.displays[this._displayIndex]: null;
 				const replacedDisplayData:DisplayData = this._displayIndex < this._replacedDisplayDataSet.length? this._replacedDisplayDataSet[this._displayIndex]: null;
 				const currentDisplayData:DisplayData = replacedDisplayData || rawDisplayData;
-				const currentTextureData:StarlingTextureData = currentDisplayData.textureData as StarlingTextureData;
+				const currentTextureData:StarlingTextureData = currentDisplayData.texture as StarlingTextureData;
 				
 				if (currentTextureData)
 				{
@@ -243,55 +243,65 @@
 					}
 					
 					const texture:Texture = (this._armature._replacedTexture as Texture) || currentTextureData.texture;
-					if (texture)
+					if (this._meshData && this._display == this._meshDisplay)
 					{
-						if (this._meshData && this._display == this._meshDisplay)
+						// TODO
+						this._pivotX = 0;
+						this._pivotY = 0;
+					}
+					else
+					{
+						const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
+						
+						var width:Number = rect.width;
+						var height:Number = rect.height;
+						if (currentTextureData.rotated)
 						{
-							// TODO
+							width = rect.height;
+							height = rect.width;
+						}
+						
+						this._pivotX = currentDisplayData.pivot.x;
+						this._pivotY = currentDisplayData.pivot.y;
+						
+						if (currentDisplayData.isRelativePivot)
+						{
+							this._pivotX = width * this._pivotX;
+							this._pivotY = height * this._pivotY;
+						}
+						
+						if (currentTextureData.frame)
+						{
+							this._pivotX += currentTextureData.frame.x;
+							this._pivotY += currentTextureData.frame.y;
+						}
+						
+						if (rawDisplayData && rawDisplayData != currentDisplayData)
+						{
+							this._pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
+							this._pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
+						}
+						
+						if (texture)
+						{
+							frameDisplay.texture = texture;
 						}
 						else
 						{
-							const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
-							
-							var width:Number = rect.width;
-							var height:Number = rect.height;
-							if (currentTextureData.rotated)
-							{
-								width = rect.height;
-								height = rect.width;
-							}
-							
-							this._pivotX = currentDisplayData.pivot.x;
-							this._pivotY = currentDisplayData.pivot.y;
-							
-							if (currentDisplayData.isRelativePivot)
-							{
-								this._pivotX = width * this._pivotX;
-								this._pivotY = height * this._pivotY;
-							}
-							
-							if (currentTextureData.frame)
-							{
-								this._pivotX += currentTextureData.frame.x;
-								this._pivotY += currentTextureData.frame.y;
-							}
-							
-							if (rawDisplayData && rawDisplayData != currentDisplayData)
-							{
-								this._pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
-								this._pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
-							}
-							
-							frameDisplay.texture = texture;
-							frameDisplay.readjustSize();
+							frameDisplay.texture = getEmptyTexture();
 						}
 						
-						this._updateVisible();
-						
-						return;
+						frameDisplay.readjustSize();
 					}
+					
+					this._updateVisible();
+					
+					return;
 				}
 			}
+			
+			this._pivotX = 0;
+			this._pivotY = 0;
 			
 			frameDisplay.visible = false;
 			frameDisplay.texture = getEmptyTexture();

@@ -34,12 +34,12 @@
 		public var timeScale:Number;
 		
 		/**
-		 * @private Armature Slot
+		 * @private
 		 */
 		dragonBones_internal var _animationStateDirty:Boolean;
 		
 		/**
-		 * @private Armature Slot
+		 * @private
 		 */
 		dragonBones_internal var _timelineStateDirty:Boolean;
 		
@@ -91,6 +91,16 @@
 		 */
 		override protected function _onClear():void
 		{
+			for (var i:String in _animations)
+			{
+				delete _animations[i];
+			}
+			
+			for each (var animationState:AnimationState in _animationStates)
+			{
+				animationState.returnToPool();
+			}
+			
 			timeScale = 1;
 			
 			_animationStateDirty = false;
@@ -101,21 +111,11 @@
 			_time = 0;
 			_lastAnimationState = null;
 			
-			for (var i:String in _animations)
-			{
-				delete _animations[i];
-			}
-			
 			if (_animationNames.length)
 			{
 				_animationNames.fixed = false;
 				_animationNames.length = 0;
 				_animationNames.fixed = true;	
-			}
-			
-			for each (var animationState:AnimationState in _animationStates)
-			{
-				animationState.returnToPool();
 			}
 			
 			_animationStates.length = 0;
@@ -131,9 +131,6 @@
 			
 			switch (fadeOutMode)
 			{
-				case AnimationFadeOutMode.None:
-					break;
-				
 				case AnimationFadeOutMode.SameLayer:
 					for ( ; i < l; ++i)
 					{
@@ -173,6 +170,10 @@
 							animationState.fadeOut(fadeOutTime, pauseFadeOut);
 						}
 					}
+					break;
+				
+				case AnimationFadeOutMode.None:
+				default:
 					break;
 			}
 		}
@@ -308,14 +309,13 @@
 		 */
 		public function reset():void
 		{
-			_isPlaying = false;
-			_lastAnimationState = null;
-			
 			for (var i:uint = 0, l:uint = _animationStates.length; i < l; ++i)
 			{
 				_animationStates[i].returnToPool();
 			}
 			
+			_isPlaying = false;
+			_lastAnimationState = null;
 			_animationStates.length = 0;
 		}
 		
@@ -407,7 +407,18 @@
 			if (!animationData)
 			{
 				_time = 0;
+				trace(
+					"Non-existent animation.",
+					"DragonBones: " + _armature.armatureData.parent.name,
+					"Armature: " + _armature.name,
+					"Animation: " + animationName
+				);
 				return null;
+			}
+			
+			if (_time != _time) 
+			{
+				_time = 0;
 			}
 			
 			_isPlaying = true;
@@ -546,8 +557,9 @@
 			const animationState:AnimationState = gotoAndPlayByTime(animationName, time, 1);
 			if (animationState)
 			{
-				_isPlaying = false;
 				animationState.stop();
+				_advanceTime(0);
+				_isPlaying = false;
 			}
 			
 			return animationState;
@@ -567,8 +579,9 @@
 			const animationState:AnimationState = gotoAndPlayByFrame(animationName, frame, 1);
 			if (animationState)
 			{
-				_isPlaying = false;
 				animationState.stop();
+				_advanceTime(0);
+				_isPlaying = false;
 			}
 			
 			return animationState;
@@ -588,8 +601,9 @@
 			const animationState:AnimationState = gotoAndPlayByProgress(animationName, progress, 1);
 			if (animationState)
 			{
-				_isPlaying = false;
 				animationState.stop();
+				_advanceTime(0);
+				_isPlaying = false;
 			}
 			
 			return animationState;
@@ -635,7 +649,7 @@
 		 */
 		public function get isPlaying():Boolean
 		{
-			return _isPlaying;
+			return _isPlaying && !isCompleted;
 		}
 		
 		/**
@@ -660,9 +674,11 @@
 						return false;
 					}
 				}
+				
+				return true;
 			}
 			
-			return true;
+			return false;
 		}
 		
 		/**
@@ -751,12 +767,11 @@
 			layer:int = 0,
 			group:String = null,
 			fadeOutMode:int = AnimationFadeOutMode.SameLayerAndGroup,
-			additiveBlending:Boolean = false,
 			pauseFadeOut:Boolean = true,
 			pauseFadeIn:Boolean = true
 		):AnimationState
 		{
-			const animationState:AnimationState = this.fadeIn(animationName, fadeInTime, playTimes, layer, group, fadeOutMode, additiveBlending, pauseFadeOut, pauseFadeIn);
+			const animationState:AnimationState = this.fadeIn(animationName, fadeInTime, playTimes, layer, group, fadeOutMode, false, true, pauseFadeOut, pauseFadeIn);
 			if (animationState && duration > 0)
 			{
 				animationState.timeScale = animationState.totalTime / duration;

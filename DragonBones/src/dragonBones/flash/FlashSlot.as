@@ -56,7 +56,7 @@ package dragonBones.flash
 		/**
 		 * @private
 		 */
-		override protected function _initDisplay(value:Object):void
+		override protected function _initDisplay(value:*):void
 		{
 		}
 		
@@ -85,7 +85,7 @@ package dragonBones.flash
 		/**
 		 * @private
 		 */
-		override protected function _replaceDisplay(prevDisplay:Object):void
+		override protected function _replaceDisplay(prevDisplay:*):void
 		{
 			const container:FlashArmatureDisplay = this._armature.display as FlashArmatureDisplay;
 			const displayObject:DisplayObject = prevDisplay as DisplayObject;
@@ -105,7 +105,7 @@ package dragonBones.flash
 		/**
 		 * @private
 		 */
-		override protected function _disposeDisplay(value:Object):void
+		override protected function _disposeDisplay(value:*):void
 		{
 		}
 		
@@ -206,7 +206,7 @@ package dragonBones.flash
 				const rawDisplayData:DisplayData = this._displayIndex < this._displayDataSet.displays.length? this._displayDataSet.displays[this._displayIndex]: null;
 				const replacedDisplayData:DisplayData = this._displayIndex < this._replacedDisplayDataSet.length? this._replacedDisplayDataSet[this._displayIndex]: null;
 				const currentDisplayData:DisplayData = replacedDisplayData || rawDisplayData;
-				const currentTextureData:FlashTextureData = currentDisplayData.textureData as FlashTextureData;
+				const currentTextureData:FlashTextureData = currentDisplayData.texture as FlashTextureData;
 				
 				if (currentTextureData)
 				{
@@ -378,7 +378,7 @@ package dragonBones.flash
 		{
 			const meshDisplay:Shape = this._meshDisplay as Shape;
 			
-			if (!meshDisplay.visible)
+			if (!_meshTexture)
 			{
 				return;	
 			}

@@ -2,7 +2,6 @@ package dragonBones.core
 {
 	import dragonBones.Armature;
 	import dragonBones.animation.Animation;
-	import dragonBones.events.EventObject;
 	import dragonBones.events.IEventDispatcher;
 
 	/**

@@ -70,7 +70,7 @@ package dragonBones
 		/**
 		 * @private Slot
 		 */
-		dragonBones_internal var _replacedTexture:Object;
+		dragonBones_internal var _replacedTexture:*;
 		
 		/**
 		 * @private
@@ -120,32 +120,6 @@ package dragonBones
 		 */
 		override protected function _onClear():void
 		{
-			userData = null;
-			
-			_bonesDirty = false;
-			_cacheFrameIndex = -1;
-			_armatureData = null;
-			_skinData = null;
-			
-			if (_animation)
-			{
-				_animation.returnToPool();
-				_animation = null;
-			}
-			
-			if (_display)
-			{
-				_display._onClear();
-				_display = null;
-			}
-			
-			_parent = null;
-			_replacedTexture = null;
-			
-			_delayDispose = false;
-			_lockDispose = false;
-			_slotsDirty = false;
-			
 			if (_bones.length)
 			{
 				for each (var bone:Bone in _bones)
@@ -189,6 +163,32 @@ package dragonBones
 				
 				_events.length = 0;
 			}
+			
+			userData = null;
+			
+			_bonesDirty = false;
+			_cacheFrameIndex = -1;
+			_armatureData = null;
+			_skinData = null;
+			
+			if (_animation)
+			{
+				_animation.returnToPool();
+				_animation = null;
+			}
+			
+			if (_display)
+			{
+				_display._onClear();
+				_display = null;
+			}
+			
+			_parent = null;
+			_replacedTexture = null;
+			
+			_delayDispose = false;
+			_lockDispose = false;
+			_slotsDirty = false;
 		}
 		
 		/**
@@ -391,6 +391,11 @@ package dragonBones
 			{
 				_lockDispose = true;
 				
+				if (!_animation)
+				{
+					throw new Error("The armature has been disposed.");
+				}
+				
 				const scaledPassedTime:Number = passedTime * _animation.timeScale;
 				
 				//
@@ -524,6 +529,8 @@ package dragonBones
 		 */
 		public function invalidUpdate(boneName:String = null, updateSlotDisplay:Boolean = false):void
 		{
+			var slot:Slot = null;
+			
 			if (boneName)
 			{
 				const bone:Bone = getBone(boneName);
@@ -533,11 +540,11 @@ package dragonBones
 					
 					if (updateSlotDisplay)
 					{
-						for each (var slotA:Slot in _slots)
+						for each (slot in _slots)
 						{
-							if (slotA.parent == bone)
+							if (slot.parent == bone)
 							{
-								slotA.invalidUpdate();
+								slot.invalidUpdate();
 							}
 						}
 					}
@@ -552,9 +559,9 @@ package dragonBones
 				
 				if (updateSlotDisplay)
 				{
-					for each (var slotB:Slot in _slots)
+					for each (slot in _slots)
 					{
-						slotB.invalidUpdate();
+						slot.invalidUpdate();
 					}
 				}
 			}

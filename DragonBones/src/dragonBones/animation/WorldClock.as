@@ -13,7 +13,7 @@
 	{
 		/**
 		 * @language zh_CN
-		 * 一个可以直接使用的全局静态 WorldClock 实例.
+		 * 一个可以直接使用的全局 WorldClock 实例.
 		 * @version DragonBones 3.0
 		 */
 		public static const clock:WorldClock = new WorldClock();
@@ -33,9 +33,6 @@
 		 */
 		public var timeScale:Number = 1;
 		
-		/**
-		 * @private
-		 */
 		private const _animatebles:Vector.<IAnimateble> = new Vector.<IAnimateble>();
 		
 		/**

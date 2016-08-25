@@ -10,6 +10,7 @@
 	import dragonBones.objects.AnimationData;
 	import dragonBones.objects.BoneTimelineData;
 	import dragonBones.objects.FFDTimelineData;
+	import dragonBones.objects.MeshData;
 	import dragonBones.objects.SlotTimelineData;
 	
 	use namespace dragonBones_internal;
@@ -202,46 +203,6 @@
 		 */
 		override protected function _onClear():void
 		{
-			displayControl = true;
-			additiveBlending = false;
-			actionEnabled = false;
-			playTimes = 1;
-			timeScale = 1;
-			weight = 1;
-			autoFadeOutTime = -1;
-			fadeTotalTime = 0;
-			
-			_isFadeOutComplete = false;
-			_layer = 0;
-			_position = 0;
-			_duration = 0;
-			_weightResult = 0;
-			_fadeProgress = 0;
-			_group = null;
-			
-			if (_timeline)
-			{
-				_timeline.returnToPool();
-				_timeline = null;
-			}
-			
-			_isPlaying = true;
-			_isPausePlayhead = false;
-			_isFadeOut = false;
-			_currentPlayTimes = 0;
-			_fadeTime = 0;
-			_time = 0;
-			_name = null;
-			_armature = null;
-			_animationData = null;
-			
-			if (_boneMask.length)
-			{
-				_boneMask.fixed = false;
-				_boneMask.length = 0;
-				_boneMask.fixed = true;
-			}
-			
 			var i:uint = 0, l:uint = 0;
 			
 			l = _boneTimelines.length;
@@ -281,6 +242,46 @@
 				_ffdTimelines.fixed = false;
 				_ffdTimelines.length = 0;
 				_ffdTimelines.fixed = true;
+			}
+			
+			displayControl = true;
+			additiveBlending = false;
+			actionEnabled = false;
+			playTimes = 1;
+			timeScale = 1;
+			weight = 1;
+			autoFadeOutTime = -1;
+			fadeTotalTime = 0;
+			
+			_isFadeOutComplete = false;
+			_layer = 0;
+			_position = 0;
+			_duration = 0;
+			_weightResult = 0;
+			_fadeProgress = 0;
+			_group = null;
+			
+			if (_timeline)
+			{
+				_timeline.returnToPool();
+				_timeline = null;
+			}
+			
+			_isPlaying = true;
+			_isPausePlayhead = false;
+			_isFadeOut = false;
+			_currentPlayTimes = 0;
+			_fadeTime = 0;
+			_time = 0;
+			_name = null;
+			_armature = null;
+			_animationData = null;
+			
+			if (_boneMask.length)
+			{
+				_boneMask.fixed = false;
+				_boneMask.length = 0;
+				_boneMask.fixed = true;
 			}
 		}
 		
@@ -425,6 +426,7 @@
 			_animationData = clip;
 			_name = animationName;
 			
+			actionEnabled = AnimationState.actionEnabled;
 			this.playTimes = playTimes;
 			this.timeScale = timeScale;
 			fadeTotalTime = fadeInTime;
@@ -442,8 +444,6 @@
 			_timeline.fadeIn(_armature, this, _animationData, _time);
 			
 			_updateTimelineStates();
-			
-			actionEnabled = AnimationState.actionEnabled;
 		}
 		
 		/**
@@ -584,37 +584,43 @@
 				
 				if (slot._meshData)
 				{
-					const ffdTimelineData:FFDTimelineData = _animationData.getFFDTimeline(_armature._skinData.name, slotTimelineName, slot.displayIndex);
-					if (ffdTimelineData && containsBoneMask(parentTimelineName)) // && !_isFadeOut
+					const displayIndex:int = slot.displayIndex;
+					const rawMeshData:MeshData = displayIndex < slot._displayDataSet.displays.length ? slot._displayDataSet.displays[displayIndex].mesh : null;
+					
+					if (slot._meshData == rawMeshData) 
 					{
-						ffdTimelineState = ffdTimelineStates[slotTimelineName];
-						if (ffdTimelineState)
+						const ffdTimelineData:FFDTimelineData = _animationData.getFFDTimeline(_armature._skinData.name, slotTimelineName, slot.displayIndex);
+						if (ffdTimelineData && containsBoneMask(parentTimelineName)) // && !_isFadeOut
 						{
-							delete ffdTimelineStates[slotTimelineName];
+							ffdTimelineState = ffdTimelineStates[slotTimelineName];
+							if (ffdTimelineState)
+							{
+								delete ffdTimelineStates[slotTimelineName];
+							}
+							else
+							{
+								ffdTimelineState = BaseObject.borrowObject(FFDTimelineState) as FFDTimelineState;
+								ffdTimelineState.slot = slot;
+								ffdTimelineState.fadeIn(_armature, this, ffdTimelineData, time);
+								_ffdTimelines.push(ffdTimelineState);
+							}
 						}
-						else
+						else 
 						{
-							ffdTimelineState = BaseObject.borrowObject(FFDTimelineState) as FFDTimelineState;
-							ffdTimelineState.slot = slot;
-							ffdTimelineState.fadeIn(_armature, this, ffdTimelineData, time);
-							_ffdTimelines.push(ffdTimelineState);
+							for (var iF:uint = 0, lF:uint = slot._ffdVertices.length; iF < lF; ++iF)
+							{
+								slot._ffdVertices[iF] = 0;
+							}
+							
+							slot._ffdDirty = true;
 						}
-					}
-					else 
-					{
-						for (var iF:uint = 0, lF:uint = slot._ffdVertices.length; iF < lF; ++iF)
-						{
-							slot._ffdVertices[iF] = 0;
-						}
-						
-						slot._ffdDirty = true;
 					}
 				}
 			}
 			
 			for each (ffdTimelineState in ffdTimelineStates)
 			{
-				ffdTimelineState.slot._ffdDirty = true;
+				//ffdTimelineState.slot._ffdDirty = true;
 				_ffdTimelines.splice(_ffdTimelines.indexOf(ffdTimelineState), 1);
 				ffdTimelineState.returnToPool();
 			}
@@ -664,10 +670,11 @@
 				const cacheTimeToFrameScale:Number = _animationData.cacheTimeToFrameScale;
 				var isUpdateTimelines:Boolean = true;
 				var isUpdateBoneTimelines:Boolean = true;
-				var time:Number = isCacheEnabled? (uint(_time * cacheTimeToFrameScale) / cacheTimeToFrameScale): _time; // Cache time internval.
+				var time:Number = cacheTimeToFrameScale * 2;
+				time = isCacheEnabled? (uint(_time * time) / time): _time; // Cache time internval.
 				
 				// Update main timeline.
-				_timeline.update(_time);
+				_timeline.update(time);
 				if (!_animationData.hasAsynchronyTimeline)
 				{
 					time = _timeline._currentTime;
@@ -678,7 +685,6 @@
 				if (isCacheEnabled)
 				{
 					const cacheFrameIndex:uint = uint(_timeline._currentTime * cacheTimeToFrameScale);
-					
 					if (_armature._cacheFrameIndex == cacheFrameIndex) // Same cache.
 					{
 						isUpdateTimelines = false;
@@ -989,7 +995,7 @@
 		 */
 		public function get isPlaying():Boolean
 		{
-			return (_isPlaying && !_timeline._isCompleted);
+			return _isPlaying && !_timeline._isCompleted;
 		}
 		
 		/**

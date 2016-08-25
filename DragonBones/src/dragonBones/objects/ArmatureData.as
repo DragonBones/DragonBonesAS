@@ -127,7 +127,6 @@ package dragonBones.objects
 			aabb.width = 0;
 			aabb.height = 0;
 			
-			
 			var i:String = null;
 			
 			for (i in bones)

@@ -93,7 +93,7 @@
 		/**
 		 * @private
 		 */
-		override protected function _initDisplay(value:Object):void
+		override protected function _initDisplay(value:*):void
 		{
 		}
 		
@@ -109,7 +109,7 @@
 		/**
 		 * @private
 		 */
-		override protected function _replaceDisplay(value:Object):void
+		override protected function _replaceDisplay(value:*):void
 		{
 			const container:StarlingArmatureDisplay = this._armature.display as StarlingArmatureDisplay;
 			const prevDisplay:DisplayObject = value as DisplayObject;
@@ -129,7 +129,7 @@
 		/**
 		 * @private
 		 */
-		override protected function _disposeDisplay(value:Object):void
+		override protected function _disposeDisplay(value:*):void
 		{
 			(value as DisplayObject).dispose();
 		}
@@ -240,7 +240,7 @@
 				const rawDisplayData:DisplayData = this._displayIndex < this._displayDataSet.displays.length? this._displayDataSet.displays[this._displayIndex]: null;
 				const replacedDisplayData:DisplayData = this._displayIndex < this._replacedDisplayDataSet.length? this._replacedDisplayDataSet[this._displayIndex]: null;
 				const currentDisplayData:DisplayData = replacedDisplayData || rawDisplayData;
-				const currentTextureData:StarlingTextureData = currentDisplayData.textureData as StarlingTextureData;
+				const currentTextureData:StarlingTextureData = currentDisplayData.texture as StarlingTextureData;
 				
 				if (currentTextureData)
 				{
@@ -252,83 +252,86 @@
 					
 					const texture:Texture = (this._armature._replacedTexture as Texture) || currentTextureData.texture;
 					
-					if (texture)
+					if (this._meshData && this._display == this._meshDisplay)
 					{
-						if (this._meshData && this._display == this._meshDisplay)
+						const meshDisplay:Mesh = this._meshDisplay as Mesh;
+						const meshStyle:MeshStyle = meshDisplay.style;
+						
+						_indexData.clear();
+						_vertexData.clear();
+						
+						var i:uint = 0, l:uint = 0;
+						
+						for (i = 0, l = this._meshData.vertexIndices.length; i < l; ++i)
 						{
-							const meshDisplay:Mesh = this._meshDisplay as Mesh;
-							const meshStyle:MeshStyle = meshDisplay.style;
-							
-							_indexData.clear();
-							_vertexData.clear();
-							
-							var i:uint = 0, l:uint = 0;
-							
-							for (i = 0, l = this._meshData.vertexIndices.length; i < l; ++i)
-							{
-								_indexData.setIndex(i, this._meshData.vertexIndices[i]);
-							}
-							
-							for (i = 0, l = this._meshData.uvs.length; i < l; i += 2)
-							{
-								const iH:uint = uint(i / 2);
-								meshStyle.setTexCoords(iH, this._meshData.uvs[i], this._meshData.uvs[i + 1]);
-								meshStyle.setVertexPosition(iH, this._meshData.vertices[i], this._meshData.vertices[i + 1]);
-							}
-							
-							meshDisplay.texture = texture;
-							//meshDisplay.readjustSize();
-							
-							if (this._meshData.skinned)
-							{
-								const transformationMatrix:Matrix = meshDisplay.transformationMatrix;
-								transformationMatrix.identity();
-								meshDisplay.transformationMatrix = transformationMatrix;
-							}
-						}
-						else
-						{
-							const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
-							
-							var width:Number = rect.width;
-							var height:Number = rect.height;
-							if (!currentTextureData.frame && currentTextureData.rotated)
-							{
-								width = rect.height;
-								height = rect.width;
-							}
-							
-							this._pivotX = currentDisplayData.pivot.x;
-							this._pivotY = currentDisplayData.pivot.y;
-							
-							if (currentDisplayData.isRelativePivot)
-							{
-								this._pivotX = width * this._pivotX;
-								this._pivotY = height * this._pivotY;
-							}
-							
-							if (currentTextureData.frame)
-							{
-								this._pivotX += currentTextureData.frame.x;
-								this._pivotY += currentTextureData.frame.y;
-							}
-							
-							if (rawDisplayData && rawDisplayData != currentDisplayData)
-							{
-								this._pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
-								this._pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
-							}
-							
-							frameDisplay.texture = texture;
-							frameDisplay.readjustSize();
+							_indexData.setIndex(i, this._meshData.vertexIndices[i]);
 						}
 						
-						this._updateVisible();
+						for (i = 0, l = this._meshData.uvs.length; i < l; i += 2)
+						{
+							const iH:uint = uint(i / 2);
+							meshStyle.setTexCoords(iH, this._meshData.uvs[i], this._meshData.uvs[i + 1]);
+							meshStyle.setVertexPosition(iH, this._meshData.vertices[i], this._meshData.vertices[i + 1]);
+						}
 						
-						return;
+						this._pivotX = 0;
+						this._pivotY = 0;
+						
+						meshDisplay.texture = texture;
+						//meshDisplay.readjustSize();
+						
+						if (this._meshData.skinned)
+						{
+							const transformationMatrix:Matrix = meshDisplay.transformationMatrix;
+							transformationMatrix.identity();
+							meshDisplay.transformationMatrix = transformationMatrix;
+						}
 					}
+					else
+					{
+						const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
+						
+						var width:Number = rect.width;
+						var height:Number = rect.height;
+						if (!currentTextureData.frame && currentTextureData.rotated)
+						{
+							width = rect.height;
+							height = rect.width;
+						}
+						
+						this._pivotX = currentDisplayData.pivot.x;
+						this._pivotY = currentDisplayData.pivot.y;
+						
+						if (currentDisplayData.isRelativePivot)
+						{
+							this._pivotX = width * this._pivotX;
+							this._pivotY = height * this._pivotY;
+						}
+						
+						if (currentTextureData.frame)
+						{
+							this._pivotX += currentTextureData.frame.x;
+							this._pivotY += currentTextureData.frame.y;
+						}
+						
+						if (rawDisplayData && rawDisplayData != currentDisplayData)
+						{
+							this._pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
+							this._pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
+						}
+						
+						frameDisplay.texture = texture;
+						frameDisplay.readjustSize();
+					}
+					
+					this._updateVisible();
+					
+					return;
 				}
 			}
+			
+			this._pivotX = 0;
+			this._pivotY = 0;
 			
 			frameDisplay.visible = false;
 			frameDisplay.texture = null;
@@ -337,8 +340,6 @@
 				frameDisplay.readjustSize();
 			}
 			
-			frameDisplay.pivotX = 0;
-			frameDisplay.pivotY = 0;
 			frameDisplay.x = this.origin.x;
 			frameDisplay.y = this.origin.y;
 		}
@@ -384,7 +385,7 @@
 							yL = boneVertices[iB * 2 + 1];
 						}
 						
-					
+						
 						xG += (matrix.a * xL + matrix.c * yL + matrix.tx) * weight;
 						yG += (matrix.b * xL + matrix.d * yL + matrix.ty) * weight;
 						

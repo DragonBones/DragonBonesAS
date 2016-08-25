@@ -234,7 +234,7 @@ package dragonBones.geom
 		 * @version DragonBones 3.0
 		 */
 		[inline]
-		final public function toMatrix(matrix:Matrix):void
+		final public function toMatrix(matrix:Matrix):Transform
 		{
 			matrix.a = scaleX * Math.cos(skewY);
 			matrix.b = scaleX * Math.sin(skewY);
@@ -242,6 +242,8 @@ package dragonBones.geom
 			matrix.d = scaleY * Math.cos(skewX);
 			matrix.tx = x;
 			matrix.ty = y;
+			
+			return this;
 		}
 		
 		/**

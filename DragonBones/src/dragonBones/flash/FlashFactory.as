@@ -98,7 +98,7 @@
 		{
 			const slot:FlashSlot = BaseObject.borrowObject(FlashSlot) as FlashSlot;
 			const slotData:SlotData = slotDisplayDataSet.slot;
-			const displayList:Vector.<Object> = new Vector.<Object>(slotDisplayDataSet.displays.length, true);
+			const displayList:Vector.<*> = new Vector.<*>(slotDisplayDataSet.displays.length, true);
 			
 			slot.name = slotData.name;
 			slot._rawDisplay = new Shape();
@@ -110,18 +110,18 @@
 				switch (displayData.type)
 				{
 					case DragonBones.DISPLAY_TYPE_IMAGE:
-						if (!displayData.textureData)
+						if (!displayData.texture)
 						{
-							displayData.textureData = this._getTextureData(dataPackage.dataName, displayData.name);
+							displayData.texture = this._getTextureData(dataPackage.dataName, displayData.name);
 						}
 						
 						displayList[displayIndex] = slot._rawDisplay;
 						break;
 					
 					case DragonBones.DISPLAY_TYPE_MESH:
-						if (!displayData.textureData)
+						if (!displayData.texture)
 						{
-							displayData.textureData = this._getTextureData(dataPackage.dataName, displayData.name);
+							displayData.texture = this._getTextureData(dataPackage.dataName, displayData.name);
 						}
 						
 						displayList[displayIndex] = slot._meshDisplay;
@@ -147,7 +147,7 @@
 								}
 							}
 							
-							displayData.armatureData = childArmature.armatureData; // 
+							displayData.armature = childArmature.armatureData; // 
 						}
 						
 						displayList[displayIndex] = childArmature;

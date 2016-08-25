@@ -4,7 +4,6 @@
 	import flash.geom.Matrix;
 	
 	import dragonBones.core.DragonBones;
-	import dragonBones.core.IArmatureDisplay;
 	import dragonBones.core.TransformObject;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.ActionData;
@@ -96,12 +95,12 @@
 		/**
 		 * @private Factory
 		 */
-		dragonBones_internal var _rawDisplay:Object;
+		dragonBones_internal var _rawDisplay:*;
 		
 		/**
 		 * @private Factory
 		 */
-		dragonBones_internal var _meshDisplay:Object;
+		dragonBones_internal var _meshDisplay:*;
 		
 		/**
 		 * @private BoneTimelineState
@@ -156,7 +155,7 @@
 		/**
 		 * @private
 		 */
-		protected var _display:Object;
+		protected var _display:*;
 		
 		/**
 		 * @private
@@ -166,7 +165,7 @@
 		/**
 		 * @private
 		 */
-		protected const _displayList:Vector.<Object> = new Vector.<Object>(0, true);
+		protected const _displayList:Vector.<*> = new Vector.<*>(0, true);
 		
 		/**
 		 * @private
@@ -193,10 +192,13 @@
 		{
 			super._onClear();
 			
-			const disposeDisplayList:Vector.<Object> = new Vector.<Object>();
-			for each (var eachDisplay:Object in _displayList)
+			const disposeDisplayList:Vector.<*> = new Vector.<*>();
+			for each (var eachDisplay:* in _displayList)
 			{
-				if (eachDisplay != _rawDisplay && eachDisplay != _meshDisplay &&  disposeDisplayList.indexOf(eachDisplay) < 0)
+				if (
+					eachDisplay != _rawDisplay && eachDisplay != _meshDisplay &&
+					disposeDisplayList.indexOf(eachDisplay) < 0
+				)
 				{
 					disposeDisplayList.push(eachDisplay);
 				}
@@ -299,7 +301,7 @@
 		/**
 		 * @private
 		 */
-		protected function _initDisplay(value:Object):void
+		protected function _initDisplay(value:*):void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
@@ -315,7 +317,7 @@
 		/**
 		 * @private
 		 */
-		protected function _replaceDisplay(value:Object):void
+		protected function _replaceDisplay(value:*):void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
@@ -331,7 +333,7 @@
 		/**
 		 * @private
 		 */
-		protected function _disposeDisplay(value:Object):void
+		protected function _disposeDisplay(value:*):void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
@@ -353,7 +355,7 @@
 		}
 		
 		/**
-		 * @private Bone
+		 * @private
 		 */
 		dragonBones_internal function _updateVisible():void
 		{
@@ -416,7 +418,7 @@
 		{
 			for (var i:uint = 0, l:uint = _meshBones.length; i < l; ++i)
 			{
-				if (_meshBones[i]._transformDirty)
+				if (_meshBones[i]._transformDirty != 0)
 				{
 					return true;
 				}
@@ -430,7 +432,7 @@
 		 */
 		protected function _updateDisplay():void
 		{	
-			const prevDisplay:Object = _display || _rawDisplay;
+			const prevDisplay:* = _display || _rawDisplay;
 			const prevChildArmature:Armature = _childArmature;
 			
 			if (_displayIndex >= 0 && _displayIndex < _displayList.length)
@@ -452,7 +454,7 @@
 				_childArmature = null;
 			}
 			
-			const currentDisplay:Object = _display || _rawDisplay;
+			const currentDisplay:* = _display || _rawDisplay;
 			
 			if (currentDisplay != prevDisplay)
 			{
@@ -503,11 +505,13 @@
 					_childArmature._parent = this; // Update child armature parent.
 					if (inheritAnimation)
 					{
-						// Set child armature frameRate.
-						const cacheFrameRate:uint = this._armature.cacheFrameRate;
-						if (cacheFrameRate) 
+						if (_childArmature.cacheFrameRate == 0) // Set child armature frameRate.
 						{
-							_childArmature.cacheFrameRate = cacheFrameRate;
+							const cacheFrameRate:uint = this._armature.cacheFrameRate;
+							if (cacheFrameRate) 
+							{
+								_childArmature.cacheFrameRate = cacheFrameRate;
+							}
 						}
 						
 						const slotData:SlotData = this._armature.armatureData.getSlot(this.name);
@@ -582,10 +586,14 @@
 		dragonBones_internal function _updateMeshData(isTimelineUpdate:Boolean):void
 		{
 			const prevMeshData:MeshData = _meshData;
+			var rawMeshData:MeshData = null;
 			
-			if (_meshDisplay && _displayDataSet && _displayIndex >= 0 && _displayIndex < _displayDataSet.displays.length)
+			if (_meshDisplay && _displayIndex >= 0)
 			{
-				_meshData = _displayDataSet.displays[_displayIndex].meshData;
+				rawMeshData = (_displayDataSet && _displayIndex < _displayDataSet.displays.length) ? _displayDataSet.displays[_displayIndex].mesh : null;
+				const replaceDisplayData:DisplayData = (_displayIndex < _replacedDisplayDataSet.length) ? _replacedDisplayDataSet[_displayIndex] : null;
+				const replaceMeshData:MeshData = replaceDisplayData? replaceDisplayData.mesh : null;
+				_meshData = replaceMeshData || rawMeshData;
 			}
 			else
 			{
@@ -594,7 +602,7 @@
 			
 			if (_meshData != prevMeshData)
 			{
-				if (_meshData)
+				if (_meshData && _meshData == rawMeshData)
 				{
 					var i:uint = 0, l:uint = 0;
 					
@@ -716,7 +724,7 @@
 					_transformDirty = true;
 					this.globalTransformMatrix = cacheFrame;
 				}
-				else if (_transformDirty || this._parent._transformDirty)
+				else if (_transformDirty || this._parent._transformDirty != 0)
 				{
 					_transformDirty = true;
 					this.globalTransformMatrix = this._globalTransformMatrix;
@@ -732,7 +740,7 @@
 					this.globalTransformMatrix = this._globalTransformMatrix;
 				}
 			}
-			else if (_transformDirty || this._parent._transformDirty)
+			else if (_transformDirty || this._parent._transformDirty != 0)
 			{
 				_transformDirty = true;
 				this.globalTransformMatrix = this._globalTransformMatrix;
@@ -759,7 +767,7 @@
 		/**
 		 * @private Factory
 		 */
-		dragonBones_internal function _setDisplayList(value:Vector.<Object>):Boolean
+		dragonBones_internal function _setDisplayList(value:Vector.<*>):Boolean
 		{
 			if (value && value.length)
 			{
@@ -772,8 +780,9 @@
 				
 				for (var i:uint = 0, l:uint = _displayList.length; i < l; ++i)
 				{
-					const eachDisplay:Object = value[i];
-					if (eachDisplay && eachDisplay != _rawDisplay && !(eachDisplay is Armature) && _displayList.indexOf(eachDisplay) < 0)
+					const eachDisplay:* = value[i];
+					if (eachDisplay && eachDisplay != _rawDisplay && eachDisplay != _meshDisplay && 
+						!(eachDisplay is Armature) && _displayList.indexOf(eachDisplay) < 0)
 					{
 						_initDisplay(eachDisplay);
 					}
@@ -899,21 +908,21 @@
 		 * 包含显示对象或子骨架的显示列表。
 		 * @version DragonBones 3.0
 		 */
-		public function get displayList():Vector.<Object>
+		public function get displayList():Vector.<*>
 		{
 			return _displayList.concat();
 		}
-		public function set displayList(value:Vector.<Object>):void
+		public function set displayList(value:Vector.<*>):void
 		{
-			const backupDisplayList:Vector.<Object> = _displayList.concat();
-			const disposeDisplayList:Vector.<Object> = new Vector.<Object>();
+			const backupDisplayList:Vector.<*> = _displayList.concat();
+			const disposeDisplayList:Vector.<*> = new Vector.<*>();
 			
 			if (_setDisplayList(value))
 			{
 				_update(-1);
 			}
 			
-			for each (var eachDisplay:Object in backupDisplayList)
+			for each (var eachDisplay:* in backupDisplayList)
 			{
 				if (eachDisplay != _rawDisplay && _displayList.indexOf(eachDisplay) < 0)
 				{
@@ -942,11 +951,11 @@
 		 * 此时显示的显示对象。
 		 * @version DragonBones 3.0
 		 */
-		public function get display():Object
+		public function get display():*
 		{
 			return _display;
 		}
-		public function set display(value:Object):void
+		public function set display(value:*):void
 		{
 			if (_display == value)
 			{
@@ -965,7 +974,7 @@
 			}
 			else
 			{
-				const replaceDisplayList:Vector.<Object> = displayList; // copy
+				const replaceDisplayList:Vector.<*> = displayList; // copy
 				if (displayListLength <= _displayIndex)
 				{
 					replaceDisplayList.fixed = false;
@@ -997,7 +1006,7 @@
 			
 			if (value)
 			{
-				(value.display as IArmatureDisplay).advanceTimeBySelf(false); // Stop child armature self advanceTime.
+				value.display.advanceTimeBySelf(false); // Stop child armature self advanceTime.
 			}
 
 			display = value;
