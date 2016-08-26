@@ -1,11 +1,13 @@
 ﻿package dragonBones.animation
 {
+	import dragonBones.Armature;
 	import dragonBones.Bone;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.geom.Transform;
 	import dragonBones.objects.BoneFrameData;
 	import dragonBones.objects.BoneTimelineData;
+	import dragonBones.objects.TimelineData;
 	
 	use namespace dragonBones_internal;
 	
@@ -47,12 +49,6 @@
 			_transform.identity();
 			_currentTransform.identity();
 			_durationTransform.identity();
-		}
-		
-		override protected function _onFadeIn():void
-		{
-			_originTransform = (this._timeline as BoneTimelineData).originTransform;
-			_boneTransform = bone._animationPose;
 		}
 		
 		override protected function _onArriveAtFrame(isUpdate:Boolean):void
@@ -223,6 +219,14 @@
 				
 				bone.invalidUpdate();
 			}
+		}
+		
+		override public function fadeIn(armature:Armature, animationState:AnimationState, timelineData:TimelineData, time:Number):void
+		{
+			super.fadeIn(armature, animationState, timelineData, time);
+			
+			_originTransform = (this._timeline as BoneTimelineData).originTransform;
+			_boneTransform = bone._animationPose;
 		}
 		
 		override public function fadeOut():void

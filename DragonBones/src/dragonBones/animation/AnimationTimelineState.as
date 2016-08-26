@@ -1,5 +1,6 @@
 ﻿package dragonBones.animation
 {
+	import dragonBones.Armature;
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
@@ -9,6 +10,7 @@
 	import dragonBones.objects.AnimationFrameData;
 	import dragonBones.objects.EventData;
 	import dragonBones.objects.FrameData;
+	import dragonBones.objects.TimelineData;
 	
 	use namespace dragonBones_internal;
 	
@@ -93,6 +95,13 @@
 			}
 		}
 		
+		override public function fadeIn(armature:Armature, animationState:AnimationState, timelineData:TimelineData, time:Number):void
+		{
+			super.fadeIn(armature, animationState, timelineData, time);
+			
+			this._currentTime = time;
+		}
+		
 		override public function update(time:Number):void
 		{
 			const prevTime:uint = this._currentTime;
@@ -103,7 +112,7 @@
 				const eventDispatcher:IEventDispatcher = this._armature.display;
 				var eventObject:EventObject = null;
 				
-				if (!_isStarted && time != 0)
+				if (!_isStarted)
 				{
 					_isStarted = true;
 					
@@ -174,25 +183,26 @@
 				
 				if (prevPlayTimes != this._currentPlayTimes)
 				{
-					//const eventType:String = _isCompleted? EventObject.COMPLETE: EventObject.LOOP_COMPLETE;
-					var eventType:String = null;
-					if (_isCompleted)
-					{
-						eventType = EventObject.COMPLETE;
-					}
-					else
-					{
-						eventType = EventObject.LOOP_COMPLETE; // TODO buffer loop complete before cross frame event
-					}
-					
-					if (eventDispatcher.hasEvent(eventType))
+					if (eventDispatcher.hasEvent(EventObject.LOOP_COMPLETE))
 					{
 						eventObject = BaseObject.borrowObject(EventObject) as EventObject;
 						eventObject.animationState = this._animationState;
-						this._armature._bufferEvent(eventObject, eventType);
+						this._armature._bufferEvent(eventObject, EventObject.LOOP_COMPLETE);
+					}
+					
+					if (this._isCompleted && eventDispatcher.hasEvent(EventObject.COMPLETE))
+					{
+						eventObject = BaseObject.borrowObject(EventObject) as EventObject;
+						eventObject.animationState = this._animationState;
+						this._armature._bufferEvent(eventObject, EventObject.COMPLETE);
 					}
 				}
 			}
+		}
+		
+		public function setCurrentTime(value: Number): void {
+			this._setCurrentTime(value);
+			this._currentFrame = null;
 		}
 	}
 }

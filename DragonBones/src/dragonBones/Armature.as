@@ -387,68 +387,69 @@ package dragonBones
 		 */
 		public function advanceTime(passedTime:Number):void
 		{
+			if (!_animation)
+			{
+				throw new Error("The armature has been disposed.");
+			}
+			
+			const scaledPassedTime:Number = passedTime * _animation.timeScale;
+			
+			//
+			_animation._advanceTime(scaledPassedTime);
+			
+			//
+			if (_bonesDirty)
+			{
+				_bonesDirty = false;
+				_sortBones();
+				_bones.fixed = true;
+			}
+			
+			if (_slotsDirty)
+			{
+				_slotsDirty = false;
+				_sortSlots();
+				_slots.fixed = true;
+			}
+			
+			//
+			var i:uint = 0, l:uint = 0;
+			
+			for (i = 0, l = _bones.length; i < l; ++i)
+			{
+				_bones[i]._update(_cacheFrameIndex);
+			}
+			
+			for (i = 0, l = _slots.length; i < l; ++i)
+			{
+				const slot:Slot = _slots[i];
+				
+				slot._update(_cacheFrameIndex);
+				
+				const childArmature:Armature = slot._childArmature;
+				if (childArmature)
+				{
+					if (slot.inheritAnimation) // Animation's time scale will impact to childArmature
+					{
+						childArmature.advanceTime(scaledPassedTime);
+					}
+					else
+					{
+						childArmature.advanceTime(passedTime);
+					}
+				}
+			}
+			
+			// 
+			if (DragonBones.debugDraw)
+			{
+				_display._debugDraw();
+			}
+			
 			if (!_lockDispose)
 			{
 				_lockDispose = true;
 				
-				if (!_animation)
-				{
-					throw new Error("The armature has been disposed.");
-				}
-				
-				const scaledPassedTime:Number = passedTime * _animation.timeScale;
-				
-				//
-				_animation._advanceTime(scaledPassedTime);
-				
-				//
-				if (_bonesDirty)
-				{
-					_bonesDirty = false;
-					_sortBones();
-					_bones.fixed = true;
-				}
-				
-				if (_slotsDirty)
-				{
-					_slotsDirty = false;
-					_sortSlots();
-					_slots.fixed = true;
-				}
-				
-				//
-				var i:uint = 0, l:uint = 0;
-				
-				for (i = 0, l = _bones.length; i < l; ++i)
-				{
-					_bones[i]._update(_cacheFrameIndex);
-				}
-				
-				for (i = 0, l = _slots.length; i < l; ++i)
-				{
-					const slot:Slot = _slots[i];
-					
-					slot._update(_cacheFrameIndex);
-					
-					const childArmature:Armature = slot._childArmature;
-					if (childArmature)
-					{
-						if (slot.inheritAnimation) // Animation's time scale will impact to childArmature
-						{
-							childArmature.advanceTime(scaledPassedTime);
-						}
-						else
-						{
-							childArmature.advanceTime(passedTime);
-						}
-					}
-				}
-				
-				// 
-				if (DragonBones.debugDraw)
-				{
-					_display._debugDraw();
-				}
 				
 				// Actions and events.
 				if (_events.length > 0) // Dispatch event before action.
@@ -521,7 +522,7 @@ package dragonBones
 		/**
 		 * @language zh_CN
 		 * 更新骨骼和插槽的变换。 (当骨骼没有动画状态或动画状态播放完成时，骨骼将不在更新)
-         * @param boneName 指定的骨骼名称，如果未设置，将更新所有骨骼。
+		 * @param boneName 指定的骨骼名称，如果未设置，将更新所有骨骼。
 		 * @param updateSlotDisplay 是否更新插槽的显示对象。
 		 * @see dragonBones.Bone
 		 * @see dragonBones.Slot
@@ -693,7 +694,7 @@ package dragonBones
 		 * @language zh_CN
 		 * 将一个指定的骨骼添加到骨架中。
 		 * @param value 需要添加的骨骼。
-         * @param parentName 需要添加到父骨骼的名称，如果未设置，则添加到骨架根部。
+		 * @param parentName 需要添加到父骨骼的名称，如果未设置，则添加到骨架根部。
 		 * @see dragonBones.Bone
 		 * @version DragonBones 3.0
 		 */

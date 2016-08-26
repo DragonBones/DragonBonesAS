@@ -71,7 +71,7 @@
 		/**
 		 * @private
 		 */
-		protected const _animationNames:Vector.<String> = new Vector.<String>(0, true);
+		protected const _animationNames:Vector.<String> = new Vector.<String>();
 		
 		/**
 		 * @private
@@ -110,14 +110,7 @@
 			_isPlaying = false;
 			_time = 0;
 			_lastAnimationState = null;
-			
-			if (_animationNames.length)
-			{
-				_animationNames.fixed = false;
-				_animationNames.length = 0;
-				_animationNames.fixed = true;	
-			}
-			
+			_animationNames.length = 0;
 			_animationStates.length = 0;
 		}
 		
@@ -157,7 +150,19 @@
 					for ( ; i < l; ++i)
 					{
 						animationState = _animationStates[i];
-						animationState.fadeOut(fadeOutTime, pauseFadeOut);
+						if (fadeOutTime == 0)
+						{
+							animationState.returnToPool();
+						}
+						else
+						{
+							animationState.fadeOut(fadeOutTime, pauseFadeOut);
+						}
+					}
+					
+					if (fadeOutTime == 0) 
+					{
+						_animationStates.length = 0;
 					}
 					break;
 				
@@ -369,6 +374,11 @@
 			else if (!_isPlaying)
 			{
 				_isPlaying = true;
+				
+				if (_lastAnimationState) 
+				{
+					_lastAnimationState.play();
+				}
 			}
 			else
 			{
@@ -479,7 +489,10 @@
 				}
 			}
 			
-			_armature.advanceTime(0);
+			if (fadeInTime == 0)
+			{
+				_armature.advanceTime(0);
+			}
 			
 			return _lastAnimationState;
 		}
@@ -558,8 +571,6 @@
 			if (animationState)
 			{
 				animationState.stop();
-				_advanceTime(0);
-				_isPlaying = false;
 			}
 			
 			return animationState;
@@ -580,8 +591,6 @@
 			if (animationState)
 			{
 				animationState.stop();
-				_advanceTime(0);
-				_isPlaying = false;
 			}
 			
 			return animationState;
@@ -602,8 +611,6 @@
 			if (animationState)
 			{
 				animationState.stop();
-				_advanceTime(0);
-				_isPlaying = false;
 			}
 			
 			return animationState;
@@ -649,7 +656,16 @@
 		 */
 		public function get isPlaying():Boolean
 		{
-			return _isPlaying && !isCompleted;
+			if (_animationStates.length > 1) 
+			{
+				return _isPlaying && !isCompleted;
+			}
+			else if (_lastAnimationState) 
+			{
+				return _isPlaying && _lastAnimationState.isPlaying;
+			}
+			
+			return _isPlaying;
 		}
 		
 		/**
@@ -736,7 +752,6 @@
 				delete _animations[i];
 			}
 			
-			_animationNames.fixed = false;
 			_animationNames.length = 0;
 			
 			if (value)
@@ -747,8 +762,6 @@
 					_animationNames.push(animationName);
 				}
 			}
-			
-			_animationNames.fixed = true;
 		}
 		
 		/**

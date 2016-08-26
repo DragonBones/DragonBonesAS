@@ -2,10 +2,12 @@
 {
 	import flash.geom.ColorTransform;
 	
+	import dragonBones.Armature;
 	import dragonBones.Slot;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.SlotFrameData;
+	import dragonBones.objects.TimelineData;
 	
 	use namespace dragonBones_internal;
 	
@@ -55,11 +57,6 @@
 			_durationColor.redOffset = 0;
 			_durationColor.greenOffset = 0;
 			_durationColor.blueOffset = 0;
-		}
-		
-		override protected function _onFadeIn():void
-		{
-			_slotColor = slot._colorTransform;
 		}
 		
 		override protected function _onArriveAtFrame(isUpdate:Boolean):void
@@ -188,6 +185,13 @@
 				
 				_colorDirty = true;
 			}
+		}
+		
+		override public function fadeIn(armature:Armature, animationState:AnimationState, timelineData:TimelineData, time:Number):void
+		{
+			super.fadeIn(armature, animationState, timelineData, time);
+			
+			_slotColor = slot._colorTransform;
 		}
 		
 		override public function fadeOut():void

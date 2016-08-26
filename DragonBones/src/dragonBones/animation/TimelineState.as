@@ -49,8 +49,8 @@
 		override protected function _onClear():void
 		{
 			_isCompleted = false;
-			_currentPlayTimes = 0;
-			_currentTime = 0;
+			_currentPlayTimes = -1;
+			_currentTime = -1;
 			_timeline = null;
 			
 			_isReverse = false;
@@ -68,8 +68,6 @@
 			_animationState = null;
 		}
 		
-		protected function _onFadeIn():void {}
-		
 		protected function _onUpdateFrame(isUpdate:Boolean):void {}
 		
 		protected function _onArriveAtFrame(isUpdate:Boolean):void {}
@@ -78,7 +76,12 @@
 		{
 			var currentPlayTimes:uint = 0;
 			
-			if (_hasAsynchronyTimeline)
+			if (_keyFrameCount == 1 && this != _animationState._timeline)
+			{
+				_isCompleted = true;
+				currentPlayTimes = 1;
+			}
+			else if (_hasAsynchronyTimeline)
 			{
 				const playTimes:uint = _animationState.playTimes;
 				const totalTimes:Number = playTimes * _duration;
@@ -132,19 +135,15 @@
 				currentPlayTimes = _animationState._timeline._currentPlayTimes;
 			}
 			
+			_currentPlayTimes = currentPlayTimes;
+			
 			if (_currentTime == value)
 			{
 				return false;
 			}
 			
-			if (_keyFrameCount == 1 && value > _position && this != _animationState._timeline)
-			{
-				_isCompleted = true;
-			}
-			
 			_isReverse = _currentTime > value && _currentPlayTimes == currentPlayTimes;
 			_currentTime = value;
-			_currentPlayTimes = currentPlayTimes;
 			
 			return true;
 		}
@@ -153,31 +152,6 @@
 		{
 			_timeScale = this == _animationState._timeline? 1: (1 / _timeline.scale);
 			_timeOffset = this == _animationState._timeline? 0: _timeline.offset;
-		}
-		
-		public function setCurrentTime(value:Number):void
-		{
-			_setCurrentTime(value);
-			
-			switch (_keyFrameCount)
-			{
-				case 0:
-					break;
-				
-				case 1:
-					_currentFrame = _timeline.frames[0];
-					_onArriveAtFrame(false);
-					_onUpdateFrame(false);
-					break;
-				
-				default:
-					_currentFrame = _timeline.frames[uint(_currentTime * _frameRate)];
-					_onArriveAtFrame(false);
-					_onUpdateFrame(false);
-					break;
-			}
-			
-			_currentFrame = null;
 		}
 		
 		public function fadeIn(armature:Armature, animationState:AnimationState, timelineData:TimelineData, time:Number):void
@@ -197,17 +171,13 @@
 			_animationDutation = _animationState.animationData.duration;
 			_timeScale = isMainTimeline? 1: (1 / _timeline.scale);
 			_timeOffset = isMainTimeline? 0: _timeline.offset;
-			
-			_onFadeIn();
-			
-			setCurrentTime(time);
 		}
 		
 		public function fadeOut():void {}
 		
 		public function update(time:Number):void
 		{
-			if (!_isCompleted && _setCurrentTime(time) && _keyFrameCount)
+			if (!_isCompleted && _setCurrentTime(time))
 			{
 				//const currentFrameIndex:uint = _keyFrameCount > 1? _currentTime * _timeToFrameSccale: 0;
 				var currentFrameIndex:uint = 0;

@@ -27,7 +27,7 @@
 		/**
 		 * @private
 		 */
-		public static var actionEnabled:Boolean = true;
+		public static var stateActionEnabled:Boolean = true;
 		
 		/**
 		 * @language zh_CN
@@ -139,11 +139,6 @@
 		 * @private
 		 */
 		private var _isFadeOut:Boolean;
-		
-		/**
-		 * @private
-		 */
-		private var _currentPlayTimes:uint;
 		
 		/**
 		 * @private
@@ -270,7 +265,6 @@
 			_isPlaying = true;
 			_isPausePlayhead = false;
 			_isFadeOut = false;
-			_currentPlayTimes = 0;
 			_fadeTime = 0;
 			_time = 0;
 			_name = null;
@@ -426,7 +420,7 @@
 			_animationData = clip;
 			_name = animationName;
 			
-			actionEnabled = AnimationState.actionEnabled;
+			actionEnabled = AnimationState.stateActionEnabled;
 			this.playTimes = playTimes;
 			this.timeScale = timeScale;
 			fadeTotalTime = fadeInTime;
@@ -649,10 +643,8 @@
 		 */
 		dragonBones_internal function _advanceTime(passedTime:Number, weightLeft:Number, index:int):void
 		{
-			if (passedTime != 0) // Fading.
-			{
-				_advanceFadeTime(passedTime);
-			}
+			// Update fade time. (Still need to be update even if the passedTime is zero)
+			_advanceFadeTime(passedTime);
 			
 			// Update time.
 			passedTime *= timeScale;
@@ -1005,7 +997,7 @@
 		 */
 		public function get currentPlayTimes():uint
 		{
-			return _currentPlayTimes;
+			return _timeline._currentPlayTimes;
 		}
 		
 		/**
@@ -1034,32 +1026,30 @@
 				value = 0;
 			}
 			
+			const currentPlayTimes:uint = _timeline._currentPlayTimes - (_timeline._isCompleted? 1: 0);
+			value = (value % _duration) + currentPlayTimes * _duration;
+			if (_time == value) 
+			{
+				return;
+			}
+			
 			_time = value;
 			_timeline.setCurrentTime(_time);
 			
-			if (_weightResult != 0)
+			var i:uint = 0, l:uint = 0;
+			for (i = 0, l = _boneTimelines.length; i < l; ++i) 
 			{
-				var time:Number = _time;
-				if (!_animationData.hasAsynchronyTimeline)
-				{
-					time = _timeline._currentTime;
-				}
-				
-				var i:uint = 0, l:uint = 0;
-				for (i = 0, l = _boneTimelines.length; i < l; ++i)
-				{
-					_boneTimelines[i].setCurrentTime(time);
-				}
-				
-				for (i = 0, l = _slotTimelines.length; i < l; ++i)
-				{
-					_slotTimelines[i].setCurrentTime(time);
-				}
-				
-				for (i = 0, l = _ffdTimelines.length; i < l; ++i)
-				{
-					_ffdTimelines[i].setCurrentTime(time);
-				}
+				_boneTimelines[i]._isCompleted = false;
+			}
+			
+			for (i = 0, l = _slotTimelines.length; i < l; ++i) 
+			{
+				_slotTimelines[i]._isCompleted = false;
+			}
+			
+			for (i = 0, l = _ffdTimelines.length; i < l; ++i) 
+			{
+				_ffdTimelines[i]._isCompleted = false;
 			}
 		}
 		

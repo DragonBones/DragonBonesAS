@@ -18,6 +18,15 @@ package dragonBones.animation
 		
 		dragonBones_internal static function _getEasingValue(progress:Number, easing:Number):Number
 		{
+			if (progress <= 0) 
+			{
+				return 0;
+			} 
+			else if (progress >= 1) 
+			{
+				return 1;
+			}
+			
 			var value:Number = 1;
 			if (easing > 2)
 			{

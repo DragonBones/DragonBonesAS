@@ -1,10 +1,12 @@
 package dragonBones.animation
 {
+	import dragonBones.Armature;
 	import dragonBones.Slot;
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.ExtensionFrameData;
+	import dragonBones.objects.TimelineData;
 	
 	use namespace dragonBones_internal;
 	
@@ -48,28 +50,6 @@ package dragonBones.animation
 				_ffdVertices.fixed = false;
 				_ffdVertices.length = 0;
 				_ffdVertices.fixed = true;
-			}
-		}
-		
-		override protected function _onFadeIn():void
-		{
-			_slotFFDVertices = slot._ffdVertices;
-			
-			_durationFFDFrame = BaseObject.borrowObject(ExtensionFrameData) as ExtensionFrameData;
-			_durationFFDFrame.tweens.fixed = false;
-			_durationFFDFrame.tweens.length = _slotFFDVertices.length;
-			_durationFFDFrame.tweens.fixed = true;
-			_ffdVertices.fixed = false;
-			_ffdVertices.length = _slotFFDVertices.length;
-			_ffdVertices.fixed = true;
-			
-			var i:uint = 0, l:uint = 0;
-			for (i = 0, l = this._durationFFDFrame.tweens.length; i < l; ++i) {
-				_durationFFDFrame.tweens[i] = 0;
-			}
-			
-			for (i = 0, l = this._ffdVertices.length; i < l; ++i) {
-				_ffdVertices[i] = 0;
 			}
 		}
 		
@@ -126,6 +106,29 @@ package dragonBones.animation
 				}
 				
 				slot._ffdDirty = true;
+			}
+		}
+		
+		override public function fadeIn(armature:Armature, animationState:AnimationState, timelineData:TimelineData, time:Number):void
+		{
+			super.fadeIn(armature, animationState, timelineData, time);
+			
+			_slotFFDVertices = slot._ffdVertices;
+			_durationFFDFrame = BaseObject.borrowObject(ExtensionFrameData) as ExtensionFrameData;
+			_durationFFDFrame.tweens.fixed = false;
+			_durationFFDFrame.tweens.length = _slotFFDVertices.length;
+			_durationFFDFrame.tweens.fixed = true;
+			_ffdVertices.fixed = false;
+			_ffdVertices.length = _slotFFDVertices.length;
+			_ffdVertices.fixed = true;
+			
+			var i:uint = 0, l:uint = 0;
+			for (i = 0, l = this._durationFFDFrame.tweens.length; i < l; ++i) {
+				_durationFFDFrame.tweens[i] = 0;
+			}
+			
+			for (i = 0, l = this._ffdVertices.length; i < l; ++i) {
+				_ffdVertices[i] = 0;
 			}
 		}
 		
