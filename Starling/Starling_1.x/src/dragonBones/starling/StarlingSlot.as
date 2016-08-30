@@ -69,6 +69,21 @@
 		/**
 		 * @private
 		 */
+		override protected function _initDisplay(value:*):void
+		{
+		}
+		
+		/**
+		 * @private
+		 */
+		override protected function _disposeDisplay(value:*):void
+		{
+			(value as DisplayObject).dispose();
+		}
+		
+		/**
+		 * @private
+		 */
 		override protected function _onUpdateDisplay():void
 		{
 			if (!this._rawDisplay)
@@ -77,13 +92,6 @@
 			}
 			
 			_renderDisplay = (this._display || this._rawDisplay) as DisplayObject;
-		}
-		
-		/**
-		 * @private
-		 */
-		override protected function _initDisplay(value:*):void
-		{
 		}
 		
 		/**
@@ -113,14 +121,6 @@
 		override protected function _removeDisplay():void
 		{
 			_renderDisplay.removeFromParent();
-		}
-		
-		/**
-		 * @private
-		 */
-		override protected function _disposeDisplay(value:*):void
-		{
-			(value as DisplayObject).dispose();
 		}
 		
 		/**
@@ -340,17 +340,8 @@
 				displayMatrix.b = this.globalTransformMatrix.b;
 				displayMatrix.c = this.globalTransformMatrix.c;
 				displayMatrix.d = this.globalTransformMatrix.d;
-				
-				if (this._pivotX != 0 || this._pivotY != 0)
-				{
-					displayMatrix.tx = this.globalTransformMatrix.tx - (this.globalTransformMatrix.a * this._pivotX + this.globalTransformMatrix.c * this._pivotY);
-					displayMatrix.ty = this.globalTransformMatrix.ty - (this.globalTransformMatrix.b * this._pivotX + this.globalTransformMatrix.d * this._pivotY);
-				}
-				else
-				{
-					displayMatrix.tx = this.globalTransformMatrix.tx;
-					displayMatrix.ty = this.globalTransformMatrix.ty;
-				}
+				displayMatrix.tx = this.globalTransformMatrix.tx - (this.globalTransformMatrix.a * this._pivotX + this.globalTransformMatrix.c * this._pivotY);
+				displayMatrix.ty = this.globalTransformMatrix.ty - (this.globalTransformMatrix.b * this._pivotX + this.globalTransformMatrix.d * this._pivotY);
 			}
 		}
 	}

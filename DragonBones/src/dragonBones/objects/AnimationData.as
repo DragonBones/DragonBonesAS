@@ -99,18 +99,7 @@
 		{
 			super._onClear();
 			
-			hasAsynchronyTimeline = false;
-			frameCount = 0;
-			playTimes = 0;
-			position = 0;
-			duration = 0;
-			fadeInTime = 0;
-			cacheTimeToFrameScale = 0;
-			name = null;
-			animation = null;
-			
 			var i:String = null;
-			
 			for (i in boneTimelines)
 			{
 				(boneTimelines[i] as BoneTimelineData).returnToPool();
@@ -132,6 +121,16 @@
 				
 				delete ffdTimelines[i];
 			}
+			
+			hasAsynchronyTimeline = false;
+			frameCount = 0;
+			playTimes = 0;
+			position = 0;
+			duration = 0;
+			fadeInTime = 0;
+			cacheTimeToFrameScale = 0;
+			name = null;
+			animation = null;
 			
 			if (cachedFrames.length)
 			{

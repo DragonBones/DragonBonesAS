@@ -144,24 +144,9 @@ package dragonBones
 				_slots.fixed = true;
 			}
 			
-			if (_actions.length)
+			for each (var event:EventObject in _events)
 			{
-				for each (var action:ActionData in _actions)
-				{
-					action.returnToPool();
-				}
-				
-				_actions.length = 0;
-			}
-			
-			if (_events.length)
-			{
-				for each (var event:EventObject in _events)
-				{
-					event.returnToPool();
-				}
-				
-				_events.length = 0;
+				event.returnToPool();
 			}
 			
 			userData = null;
@@ -189,6 +174,8 @@ package dragonBones
 			_delayDispose = false;
 			_lockDispose = false;
 			_slotsDirty = false;
+			_actions.length = 0;
+			_events.length = 0;
 		}
 		
 		/**
@@ -281,6 +268,9 @@ package dragonBones
 				
 				case DragonBones.ACTION_TYPE_FADE_OUT:
 					// TODO fade out
+					break;
+				
+				default:
 					break;
 			}
 		}
@@ -848,7 +838,7 @@ package dragonBones
 				{
 					const slot:Slot = _slots[i];
 					const childArmature:Armature = slot.childArmature;
-					if (childArmature) 
+					if (childArmature && childArmature.cacheFrameRate == 0) 
 					{
 						childArmature.cacheFrameRate = value;
 					}

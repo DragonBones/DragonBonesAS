@@ -63,6 +63,13 @@ package dragonBones.flash
 		/**
 		 * @private
 		 */
+		override protected function _disposeDisplay(value:*):void
+		{
+		}
+		
+		/**
+		 * @private
+		 */
 		override protected function _onUpdateDisplay():void
 		{
 			if (!this._rawDisplay)
@@ -100,13 +107,6 @@ package dragonBones.flash
 		override protected function _removeDisplay():void
 		{
 			_renderDisplay.parent.removeChild(_renderDisplay);
-		}
-		
-		/**
-		 * @private
-		 */
-		override protected function _disposeDisplay(value:*):void
-		{
 		}
 		
 		/**

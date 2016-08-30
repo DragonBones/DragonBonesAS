@@ -48,6 +48,8 @@
 	 */
 	public class BaseFactory extends EventDispatcher
 	{
+		protected static const _defaultDataParser:DataParser = new ObjectDataParser();
+		
 		/** 
 		 * @language zh_CN
 		 * Draw smoothing.
@@ -99,7 +101,7 @@
 				throw new Error(DragonBones.ABSTRACT_CLASS_ERROR);
 			}
 			
-			_dataParser = dataParser || ObjectDataParser.getInstance();
+			_dataParser = dataParser || _defaultDataParser;
 		}
 		
 		private var _delayID:uint = 0;
@@ -226,7 +228,16 @@
 				bone.inheritScale = boneData.inheritScale; 
 				bone.length = boneData.length;
 				bone.origin.copyFrom(boneData.transform);
-				armature.addBone(bone, boneData.parent? boneData.parent.name: null);
+				
+				if(boneData.parent)
+				{
+					armature.addBone(bone, boneData.parent.name);
+				}
+				else
+				{
+					armature.addBone(bone);
+				}
+				
 				
 				if (boneData.ik)
 				{
@@ -306,11 +317,6 @@
 					displayList.length = displayIndex + 1;
 				}
 				
-				if (!displayData.texture)
-				{
-					displayData.texture = _getTextureData(dataPackage.dataName, displayData.name);
-				}
-				
 				if (slot._replacedDisplayDataSet.length <= displayIndex)
 				{
 					slot._replacedDisplayDataSet.fixed = false;
@@ -325,16 +331,24 @@
 					const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName);
 					displayList[displayIndex] = childArmature;
 				}
-				else if (
-					displayData.mesh ||
-					(displayIndex < slot._displayDataSet.displays.length && slot._displayDataSet.displays[displayIndex].mesh)
-				)
-				{
-					displayList[displayIndex] = slot.MeshDisplay;
-				}
 				else
 				{
-					displayList[displayIndex] = slot.rawDisplay;
+					if (!displayData.texture)
+					{
+						displayData.texture = _getTextureData(dataPackage.dataName, displayData.name);
+					}
+					
+					if (
+						displayData.mesh ||
+						(displayIndex < slot._displayDataSet.displays.length && slot._displayDataSet.displays[displayIndex].mesh)
+					)
+					{
+						displayList[displayIndex] = slot.MeshDisplay;
+					}
+					else
+					{
+						displayList[displayIndex] = slot.rawDisplay;
+					}
 				}
 				
 				slot.displayList = displayList;

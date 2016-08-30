@@ -21,6 +21,7 @@ package dragonBones.starling
 	
 	import starling.core.Starling;
 	import starling.display.Image;
+	import starling.textures.SubTexture;
 	import starling.textures.Texture;
 	
 	use namespace dragonBones_internal;
@@ -213,8 +214,14 @@ package dragonBones.starling
 		public function getTextureDisplay(textureName:String, dragonBonesName:String = null):Image 
 		{
 			const textureData:StarlingTextureData = this._getTextureData(dragonBonesName, textureName) as StarlingTextureData;
-			if (textureData) 
+			if (textureData)
 			{
+				if (!textureData.texture)
+				{
+					const textureAtlasTexture:Texture = (textureData.parent as StarlingTextureAtlasData).texture;
+					textureData.texture = new SubTexture(textureAtlasTexture, textureData.region, false, null, textureData.rotated);
+				}
+				
 				return new Image(textureData.texture);
 			}
 			

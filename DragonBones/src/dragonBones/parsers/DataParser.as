@@ -292,10 +292,9 @@
 		/** 
 		 * @private 
 		 */
-		public function parseTextureAtlasData(rawData:*, textureAtlasData:TextureAtlasData, scale:Number = 0, rawScale:Number = 0):TextureAtlasData
+		public function parseTextureAtlasData(rawData:*, textureAtlasData:TextureAtlasData, scale:Number = 0, rawScale:Number = 0):void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
-			return null;
 		}
 		
 		private function _getTimelineFrameMatrix(animation:AnimationData, timeline:BoneTimelineData, position:Number, transform:Transform):void 
@@ -419,9 +418,9 @@
 			}
 		}
 		
-		protected function _mergeFrameToAnimationTimeline(frame:FrameData, actions:Vector.<ActionData>, events:Vector.<EventData>):void 
+		protected function _mergeFrameToAnimationTimeline(framePositon:Number, actions:Vector.<ActionData>, events:Vector.<EventData>):void 
 		{
-			const frameStart:uint = uint(frame.position * this._armature.frameRate); // uint()
+			const frameStart:uint = Math.floor(framePositon * this._armature.frameRate); // uint()
 			const frames:Vector.<FrameData> = this._animation.frames;
 			
 			frames.fixed = false;

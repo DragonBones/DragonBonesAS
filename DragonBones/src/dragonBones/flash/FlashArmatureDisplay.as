@@ -118,6 +118,19 @@ package dragonBones.flash
 		/**
 		 * @inheritDoc
 		 */
+		public function dispose():void
+		{
+			if (_armature)
+			{
+				advanceTimeBySelf(false);
+				_armature.dispose();
+				_armature = null;
+			}
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
 		public function removeEvent(type:String, listener:Function):void
 		{
 			this.removeEventListener(type, listener);
@@ -135,19 +148,6 @@ package dragonBones.flash
 			else 
 			{
 				_clock.remove(this._armature);
-			}
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function dispose():void
-		{
-			if (_armature)
-			{
-				advanceTimeBySelf(false);
-				_armature.dispose();
-				_armature = null;
 			}
 		}
 		

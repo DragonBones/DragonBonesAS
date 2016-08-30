@@ -143,16 +143,8 @@
 			_ikChain = 0;
 			_ikChainIndex = 0;
 			_ik = null;
-			
-			if (_bones.length)
-			{
-				_bones.length = 0;
-			}
-			
-			if (_slots.length)
-			{
-				_slots.length = 0;
-			}
+			_bones.length = 0;
+			_slots.length = 0;
 		}
 		
 		/**

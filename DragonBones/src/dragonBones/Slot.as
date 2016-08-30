@@ -293,7 +293,7 @@
 		/**
 		 * @private
 		 */
-		protected function _onUpdateDisplay():void
+		protected function _initDisplay(value:*):void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
@@ -301,7 +301,15 @@
 		/**
 		 * @private
 		 */
-		protected function _initDisplay(value:*):void
+		protected function _disposeDisplay(value:*):void
+		{
+			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
+		}
+		
+		/**
+		 * @private
+		 */
+		protected function _onUpdateDisplay():void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
@@ -326,14 +334,6 @@
 		 * @private
 		 */
 		protected function _removeDisplay():void
-		{
-			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
-		}
-		
-		/**
-		 * @private
-		 */
-		protected function _disposeDisplay(value:*):void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
@@ -508,7 +508,7 @@
 						if (_childArmature.cacheFrameRate == 0) // Set child armature frameRate.
 						{
 							const cacheFrameRate:uint = this._armature.cacheFrameRate;
-							if (cacheFrameRate) 
+							if (cacheFrameRate != 0) 
 							{
 								_childArmature.cacheFrameRate = cacheFrameRate;
 							}

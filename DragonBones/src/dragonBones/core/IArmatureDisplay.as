@@ -19,18 +19,18 @@ package dragonBones.core
 		
 		/**
 		 * @language zh_CN
+		 * 释放显示对象和骨架。 (骨架会回收到内存池)
+		 * @version DragonBones 4.5
+		 */
+		function dispose():void;
+		
+		/**
+		 * @language zh_CN
 		 * 由显示容器来更新骨架和动画。
 		 * @param on 开启或关闭显示容器对骨架与动画的更新。
 		 * @version DragonBones 4.5
 		 */
 		function advanceTimeBySelf(on:Boolean):void;
-		
-		/**
-		 * @language zh_CN
-		 * 释放显示对象和骨架。 (骨架会回收到内存池)
-		 * @version DragonBones 4.5
-		 */
-		function dispose():void;
 		
 		/**
 		 * @language zh_CN

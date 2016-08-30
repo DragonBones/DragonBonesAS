@@ -110,21 +110,6 @@ package dragonBones.starling
 		/**
 		 * @inheritDoc
 		 */
-		public function advanceTimeBySelf(on:Boolean):void
-		{
-			if (on)
-			{
-				_clock.add(this._armature);
-			} 
-			else 
-			{
-				_clock.remove(this._armature);
-			}
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
 		override public function dispose():void
 		{
 			if (_armature)
@@ -135,6 +120,21 @@ package dragonBones.starling
 			}
 			
 			super.dispose();
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function advanceTimeBySelf(on:Boolean):void
+		{
+			if (on)
+			{
+				_clock.add(this._armature);
+			} 
+			else 
+			{
+				_clock.remove(this._armature);
+			}
 		}
 		
 		/**

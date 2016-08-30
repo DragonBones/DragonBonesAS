@@ -113,7 +113,7 @@
 		[inline]
 		protected static function _getParameter(rawData:Array, index:uint, defaultValue:*):*
 		{
-			if (rawData && rawData.length > index)
+			if (rawData.length > index)
 			{
 				return rawData[index];
 			}
@@ -231,7 +231,6 @@
 			
 			if (this._isOldData) // Support 2.x ~ 3.x data.
 			{
-				bone.inheritRotation = true;
 				bone.inheritScale = false;
 			}
 			
@@ -884,7 +883,7 @@
 				const actions:Vector.<ActionData> = new Vector.<ActionData>();
 				_parseActionData(rawData, actions, bone, slot);
 				
-				this._mergeFrameToAnimationTimeline(frame, actions, null); // Merge actions and events to animation timeline.
+				this._mergeFrameToAnimationTimeline(frame.position, actions, null); // Merge actions and events to animation timeline.
 			}
 			
 			if ((EVENT in rawData) || (SOUND in rawData))
@@ -892,7 +891,7 @@
 				const events:Vector.<EventData> = new Vector.<EventData>();
 				_parseEventData(rawData, events, bone, null);
 				
-				this._mergeFrameToAnimationTimeline(frame, null, events); // Merge actions and events to animation timeline.
+				this._mergeFrameToAnimationTimeline(frame.position, null, events); // Merge actions and events to animation timeline.
 			}
 			
 			return frame;
@@ -938,7 +937,7 @@
 				const actions:Vector.<ActionData> = new Vector.<ActionData>();
 				_parseActionData(rawData, actions, slot.parent, slot);
 				
-				this._mergeFrameToAnimationTimeline(frame, actions, null); // Merge actions and events to animation timeline.
+				this._mergeFrameToAnimationTimeline(frame.position, actions, null); // Merge actions and events to animation timeline.
 			}
 			
 			return frame;
@@ -1147,11 +1146,12 @@
 			{
 				for (var i:uint = 0, l:uint = actionsObject.length; i < l; ++i) 
 				{
-					const actionObject:Array = (actionsObject[i] is Array ? actionsObject[i] : null);
+					const actionObject:* = actionsObject[i];
+					const isArray:Boolean = actionObject is Array;
 					const actionDataB:ActionData = BaseObject.borrowObject(ActionData) as ActionData;
-					const animationName:String = actionObject ? null : actionsObject[i]["gotoAndPlay"];
+					const animationName:String = isArray? _getParameter(actionObject, 1, null): _getString(actionObject, "gotoAndPlay", null);
 					
-					if (actionObject) 
+					if (isArray) 
 					{
 						const actionType:String = actionObject[0];
 						if (actionType is String) 
@@ -1172,44 +1172,44 @@
 					{
 						case DragonBones.ACTION_TYPE_PLAY:
 							actionDataB.data = [
-								actionObject? _getParameter(actionObject, 1, null): animationName, // animationName
-								_getParameter(actionObject, 2, -1), // playTimes
+								animationName, // animationName
+								isArray? _getParameter(actionObject, 2, -1): -1, // playTimes
 							];
 							break;
 						
 						case DragonBones.ACTION_TYPE_STOP:
 							actionDataB.data = [
-								actionObject? _getParameter(actionObject, 1, null): animationName, // animationName
+								animationName, // animationName
 							];
 							break;
 						
 						case DragonBones.ACTION_TYPE_GOTO_AND_PLAY:
 							actionDataB.data = [
-								actionObject? _getParameter(actionObject, 1, null): animationName, // animationName
-								_getParameter(actionObject, 2, 0), // time
-								_getParameter(actionObject, 3, -1) // playTimes
+								animationName, // animationName
+								isArray? _getParameter(actionObject, 2, 0): 0, // time
+								isArray? _getParameter(actionObject, 3, -1): -1 // playTimes
 							];
 							break;
 						
 						case DragonBones.ACTION_TYPE_GOTO_AND_STOP:
 							actionDataB.data = [
-								actionObject? _getParameter(actionObject, 1, null): animationName, // animationName
-								_getParameter(actionObject, 2, 0), // time
+								animationName, // animationName
+								isArray? _getParameter(actionObject, 2, 0): 0, // time
 							];
 							break;
 						
 						case DragonBones.ACTION_TYPE_FADE_IN:
 							actionDataB.data = [
-								actionObject? _getParameter(actionObject, 1, null): animationName, // animationName
-								_getParameter(actionObject, 2, -1), // fadeInTime
-								_getParameter(actionObject, 3, -1) // playTimes
+								animationName, // animationName
+								isArray? _getParameter(actionObject, 2, -1): -1, // fadeInTime
+								isArray? _getParameter(actionObject, 3, -1): -1 // playTimes
 							];
 							break;
 						
 						case DragonBones.ACTION_TYPE_FADE_OUT:
 							actionDataB.data = [
-								actionObject? _getParameter(actionObject, 1, null): animationName, // animationName
-								_getParameter(actionObject, 2, 0) // fadeOutTime
+								animationName, // animationName
+								isArray? _getParameter(actionObject, 2, 0): 0 // fadeOutTime
 							];
 							break;
 					}
@@ -1343,7 +1343,7 @@
 		/**
 		 * @inheritDoc
 		 */
-		override public function parseTextureAtlasData(rawData:*, textureAtlasData:TextureAtlasData, scale:Number = 0, rawScale:Number = 0):TextureAtlasData
+		override public function parseTextureAtlasData(rawData:*, textureAtlasData:TextureAtlasData, scale:Number = 0, rawScale:Number = 0):void
 		{
 			if (rawData)
 			{
@@ -1388,15 +1388,11 @@
  						textureAtlasData.addTexture(textureData);
 					}
 				}
-				
-				return textureAtlasData;
 			}
 			else
 			{
 				throw new ArgumentError();
 			}
-			
-			return null;
 		}
 		
 		/**
