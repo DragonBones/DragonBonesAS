@@ -371,14 +371,10 @@
 					animationState = fadeIn(defaultAnimation.name, 0, playTimes, 0, null, AnimationFadeOutMode.All);
 				}
 			}
-			else if (!_isPlaying)
+			else if (!_isPlaying || !_lastAnimationState.isPlaying)
 			{
 				_isPlaying = true;
-				
-				if (_lastAnimationState) 
-				{
-					_lastAnimationState.play();
-				}
+				_lastAnimationState.play();
 			}
 			else
 			{

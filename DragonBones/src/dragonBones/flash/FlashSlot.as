@@ -220,6 +220,17 @@ package dragonBones.flash
 					{
 						const meshDisplay:Shape = this._meshDisplay as Shape;
 						
+						if (this._meshData != rawDisplayData.mesh && rawDisplayData && rawDisplayData != currentDisplayData) 
+						{
+							this._pivotX = rawDisplayData.transform.x - currentDisplayData.transform.x;
+							this._pivotY = rawDisplayData.transform.y - currentDisplayData.transform.y;
+						}
+						else 
+						{
+							this._pivotX = 0;
+							this._pivotY = 0;
+						}
+						
 						if (_pach)
 						{
 							_pach.uvtData.fixed = false;
@@ -263,9 +274,6 @@ package dragonBones.flash
 						}
 						
 						meshDisplay.graphics.clear();
-						
-						this._pivotX = 0;
-						this._pivotY = 0;
 						
 						if (texture)
 						{
@@ -334,8 +342,8 @@ package dragonBones.flash
 							_helpMatrix.b = -scale;
 							_helpMatrix.c = scale;
 							_helpMatrix.d = 0;
-							_helpMatrix.tx = -this._pivotX - currentTextureData.region.y;
-							_helpMatrix.ty = -this._pivotY + currentTextureData.region.x + height;
+							_helpMatrix.tx = - currentTextureData.region.y;
+							_helpMatrix.ty = currentTextureData.region.x + height;
 						}
 						else
 						{
@@ -343,8 +351,8 @@ package dragonBones.flash
 							_helpMatrix.b = 0;
 							_helpMatrix.c = 0;
 							_helpMatrix.d = scale;
-							_helpMatrix.tx = -this._pivotX - currentTextureData.region.x;
-							_helpMatrix.ty = -this._pivotY - currentTextureData.region.y;
+							_helpMatrix.tx = - currentTextureData.region.x;
+							_helpMatrix.ty = - currentTextureData.region.y;
 						}
 						
 						frameDisplay.graphics.clear();
@@ -352,7 +360,7 @@ package dragonBones.flash
 						if (texture)
 						{
 							frameDisplay.graphics.beginBitmapFill(texture, _helpMatrix, false, true);
-							frameDisplay.graphics.drawRect(-this._pivotX, -this._pivotY, width, height);
+							frameDisplay.graphics.drawRect(0, 0, width, height);
 						}
 					}
 					
@@ -456,7 +464,16 @@ package dragonBones.flash
 		 */
 		override protected function _updateTransform():void
 		{
-			_renderDisplay.transform.matrix = this.globalTransformMatrix;
+			const displayMatrix:Matrix = _helpMatrix;
+			
+			displayMatrix.a = this.globalTransformMatrix.a;
+			displayMatrix.b = this.globalTransformMatrix.b;
+			displayMatrix.c = this.globalTransformMatrix.c;
+			displayMatrix.d = this.globalTransformMatrix.d;
+			displayMatrix.tx = this.globalTransformMatrix.tx - (displayMatrix.a * this._pivotX + displayMatrix.c * this._pivotY);
+			displayMatrix.ty = this.globalTransformMatrix.ty - (displayMatrix.b * this._pivotX + displayMatrix.d * this._pivotY);
+			
+			_renderDisplay.transform.matrix = displayMatrix;
 		}
 	}
 }

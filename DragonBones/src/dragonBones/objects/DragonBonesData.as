@@ -8,7 +8,7 @@ package dragonBones.objects
 	 * @see dragonBones.objects.ArmatureData
 	 * @version DragonBones 3.0
 	 */
-	public final class DragonBonesData extends BaseObject
+	public class DragonBonesData extends BaseObject
 	{
 		/**
 		 * @language zh_CN
@@ -30,11 +30,6 @@ package dragonBones.objects
 		 * @version DragonBones 3.0
 		 */
 		public var name:String;
-		
-		/**
-		 * @private
-		 */
-		public var userData:Object;
 		
 		/**
 		 * @language zh_CN
@@ -65,7 +60,6 @@ package dragonBones.objects
 			autoSearch = false;
 			frameRate = 0;
 			name = null;
-			userData = null;
 			
 			var i:String = null;
 			for (i in armatures)

@@ -4,6 +4,7 @@
 	import flash.geom.Rectangle;
 	
 	import dragonBones.Slot;
+	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DisplayData;
 	
@@ -165,37 +166,32 @@
 		/**
 		 * @private
 		 */
-		private static const BLEND_MODE_LIST:Vector.<String> = Vector.<String>(
-			[
-				BlendMode.NORMAL,
-				BlendMode.ADD,
-				null,
-				null,
-				null,
-				BlendMode.ERASE,
-				null,
-				null,
-				null,
-				null,
-				BlendMode.MULTIPLY,
-				null,
-				BlendMode.SCREEN,
-				null
-			]
-		);
-		
-		/**
-		 * @private
-		 */
 		override protected function _updateBlendMode():void
 		{
-			if (this._blendMode < BLEND_MODE_LIST.length)
+			switch (this._blendMode) 
 			{
-				const blendMode:String = BLEND_MODE_LIST[this._blendMode];
-				if (blendMode)
-				{
-					_renderDisplay.blendMode = blendMode;
-				}
+				case DragonBones.BLEND_MODE_NORMAL:
+					_renderDisplay.blendMode = BlendMode.NORMAL;
+					break;
+				
+				case DragonBones.BLEND_MODE_ADD:
+					_renderDisplay.blendMode = BlendMode.ADD;
+					break;
+				
+				case DragonBones.BLEND_MODE_ERASE:
+					_renderDisplay.blendMode = BlendMode.ERASE;
+					break;
+				
+				case DragonBones.BLEND_MODE_MULTIPLY:
+					_renderDisplay.blendMode = BlendMode.MULTIPLY;
+					break;
+				
+				case DragonBones.BLEND_MODE_SCREEN:
+					_renderDisplay.blendMode = BlendMode.SCREEN;
+					break;
+				
+				default:
+					break;
 			}
 		}
 		
@@ -246,8 +242,16 @@
 					if (this._meshData && this._display == this._meshDisplay)
 					{
 						// TODO
-						this._pivotX = 0;
-						this._pivotY = 0;
+						if (this._meshData != rawDisplayData.mesh && rawDisplayData && rawDisplayData != currentDisplayData) 
+						{
+							this._pivotX = rawDisplayData.transform.x - currentDisplayData.transform.x;
+							this._pivotY = rawDisplayData.transform.y - currentDisplayData.transform.y;
+						}
+						else 
+						{
+							this._pivotX = 0;
+							this._pivotY = 0;
+						}
 					}
 					else
 					{

@@ -588,7 +588,7 @@
 			const prevMeshData:MeshData = _meshData;
 			var rawMeshData:MeshData = null;
 			
-			if (_meshDisplay && _displayIndex >= 0)
+			if (_display && _display == _meshDisplay && _displayIndex >= 0)
 			{
 				rawMeshData = (_displayDataSet && _displayIndex < _displayDataSet.displays.length) ? _displayDataSet.displays[_displayIndex].mesh : null;
 				const replaceDisplayData:DisplayData = (_displayIndex < _replacedDisplayDataSet.length) ? _replacedDisplayDataSet[_displayIndex] : null;
@@ -867,7 +867,7 @@
 		 */
 		public function invalidUpdate():void
 		{
-			_originDirty = true;
+			_displayDirty = true;
 		}
 		
 		/**

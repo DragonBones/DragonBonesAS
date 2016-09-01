@@ -11,7 +11,7 @@ package dragonBones.objects
 	 * @see dragonBones.Slot
 	 * @version DragonBones 3.0
 	 */
-	public final class SlotData extends BaseObject
+	public class SlotData extends BaseObject
 	{
 		/**
 		 * @private

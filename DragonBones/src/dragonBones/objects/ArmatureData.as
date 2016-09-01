@@ -10,7 +10,7 @@ package dragonBones.objects
 	 * @see dragonBones.Armature
 	 * @version DragonBones 3.0
 	 */
-	public final class ArmatureData extends BaseObject
+	public class ArmatureData extends BaseObject
 	{
 		private static function _onSortSlots(a:SlotData, b:SlotData):int
 		{
@@ -47,11 +47,6 @@ package dragonBones.objects
 		 * @private
 		 */
 		public var parent:DragonBonesData;
-		
-		/**
-		 * @private
-		 */
-		public var userData:Object;
 		
 		/**
 		 * @private
@@ -121,7 +116,6 @@ package dragonBones.objects
 			type = 0;
 			name = null;
 			parent = null;
-			userData = null;
 			aabb.x = 0;
 			aabb.y = 0;
 			aabb.width = 0;

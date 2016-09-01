@@ -9,7 +9,7 @@ package dragonBones.objects
 	 * @see dragonBones.Bone
 	 * @version DragonBones 3.0
 	 */
-	public final class BoneData extends BaseObject
+	public class BoneData extends BaseObject
 	{
 		/**
 		 * @private

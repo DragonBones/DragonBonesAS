@@ -115,6 +115,9 @@
 			
 			slot.name = slotData.name;
 			slot._rawDisplay = new Image(null);
+			slot._indexData = new IndexData();
+			slot._vertexData = new VertexData();
+			slot._meshDisplay = new Mesh(slot._vertexData, slot._indexData);
 			
 			for each (var displayData:DisplayData in slotDisplayDataSet.displays)
 			{
@@ -133,13 +136,6 @@
 						if (!displayData.texture)
 						{
 							displayData.texture = this._getTextureData(dataPackage.dataName, displayData.name);
-						}
-						
-						if (!slot._meshDisplay)
-						{
-							slot._indexData = new IndexData();
-							slot._vertexData = new VertexData();
-							slot._meshDisplay = new Mesh(slot._vertexData, slot._indexData);
 						}
 						
 						displayList.push(slot._meshDisplay);

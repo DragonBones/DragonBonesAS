@@ -5,6 +5,7 @@
 	
 	import dragonBones.Bone;
 	import dragonBones.Slot;
+	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DisplayData;
 	
@@ -176,37 +177,32 @@
 		/**
 		 * @private
 		 */
-		private static const BLEND_MODE_LIST:Vector.<String> = Vector.<String>(
-			[
-				BlendMode.NORMAL,
-				BlendMode.ADD,
-				null,
-				null,
-				null,
-				BlendMode.ERASE,
-				null,
-				null,
-				null,
-				null,
-				BlendMode.MULTIPLY,
-				null,
-				BlendMode.SCREEN,
-				null
-			]
-		);
-		
-		/**
-		 * @private
-		 */
 		override protected function _updateBlendMode():void
 		{
-			if (this._blendMode < BLEND_MODE_LIST.length)
+			switch (this._blendMode) 
 			{
-				const blendMode:String = BLEND_MODE_LIST[this._blendMode];
-				if (blendMode)
-				{
-					_renderDisplay.blendMode = blendMode;
-				}
+				case DragonBones.BLEND_MODE_NORMAL:
+					_renderDisplay.blendMode = BlendMode.NORMAL;
+					break;
+				
+				case DragonBones.BLEND_MODE_ADD:
+					_renderDisplay.blendMode = BlendMode.ADD;
+					break;
+				
+				case DragonBones.BLEND_MODE_ERASE:
+					_renderDisplay.blendMode = BlendMode.ERASE;
+					break;
+				
+				case DragonBones.BLEND_MODE_MULTIPLY:
+					_renderDisplay.blendMode = BlendMode.MULTIPLY;
+					break;
+				
+				case DragonBones.BLEND_MODE_SCREEN:
+					_renderDisplay.blendMode = BlendMode.SCREEN;
+					break;
+				
+				default:
+					break;
 			}
 		}
 		
@@ -257,6 +253,17 @@
 						const meshDisplay:Mesh = this._meshDisplay as Mesh;
 						const meshStyle:MeshStyle = meshDisplay.style;
 						
+						if (this._meshData != rawDisplayData.mesh && rawDisplayData && rawDisplayData != currentDisplayData) 
+						{
+							this._pivotX = rawDisplayData.transform.x - currentDisplayData.transform.x;
+							this._pivotY = rawDisplayData.transform.y - currentDisplayData.transform.y;
+						}
+						else 
+						{
+							this._pivotX = 0;
+							this._pivotY = 0;
+						}
+						
 						_indexData.clear();
 						_vertexData.clear();
 						
@@ -273,9 +280,6 @@
 							meshStyle.setTexCoords(iH, this._meshData.uvs[i], this._meshData.uvs[i + 1]);
 							meshStyle.setVertexPosition(iH, this._meshData.vertices[i], this._meshData.vertices[i + 1]);
 						}
-						
-						this._pivotX = 0;
-						this._pivotY = 0;
 						
 						meshDisplay.texture = texture;
 						//meshDisplay.readjustSize();
@@ -429,8 +433,8 @@
 				displayMatrix.b = this.globalTransformMatrix.b;
 				displayMatrix.c = this.globalTransformMatrix.c;
 				displayMatrix.d = this.globalTransformMatrix.d;
-				displayMatrix.tx = this.globalTransformMatrix.tx - (this.globalTransformMatrix.a * this._pivotX + this.globalTransformMatrix.c * this._pivotY);
-				displayMatrix.ty = this.globalTransformMatrix.ty - (this.globalTransformMatrix.b * this._pivotX + this.globalTransformMatrix.d * this._pivotY);
+				displayMatrix.tx = this.globalTransformMatrix.tx - (displayMatrix.a * this._pivotX + displayMatrix.c * this._pivotY);
+				displayMatrix.ty = this.globalTransformMatrix.ty - (displayMatrix.b * this._pivotX + displayMatrix.d * this._pivotY);
 				
 				_renderDisplay.setRequiresRedraw();
 			}
