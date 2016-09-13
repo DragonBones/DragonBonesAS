@@ -64,7 +64,7 @@ package dragonBones.objects
 		/**
 		 * @private
 		 */
-		public const actions: Vector.<ActionData> = new Vector.<ActionData>();
+		public const actions: Vector.<ActionData> = new Vector.<ActionData>(0, true);
 		
 		/**
 		 * @private
@@ -93,7 +93,9 @@ package dragonBones.objects
 					actionData.returnToPool();
 				}
 				
+				actions.fixed = false;
 				actions.length = 0;
+				actions.fixed = true;
 			}
 		}
 	}
