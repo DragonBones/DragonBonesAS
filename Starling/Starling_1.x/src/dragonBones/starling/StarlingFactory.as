@@ -226,7 +226,7 @@ package dragonBones.starling
 		 * @language zh_CN
 		 * 获取带有指定贴图的显示对象。
 		 * @param textureName 指定的贴图名称。
-		 * @param dragonBonesName 指定的龙骨数据名称，如果未设置，将检索所有的龙骨数据。
+		 * @param textureAtlasName 指定的贴图集数据名称，如果未设置，将检索所有的贴图集数据。
 		 * @version DragonBones 3.0
 		 */
 		public function getTextureDisplay(textureName:String, textureAtlasName:String = null):Image 

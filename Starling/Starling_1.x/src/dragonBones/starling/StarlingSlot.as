@@ -232,11 +232,7 @@
 					const textureAtlasTexture:Texture = (currentTextureData.parent as StarlingTextureAtlasData).texture;
 					if (textureAtlasTexture)
 					{
-						if (!currentTextureData.texture)
-						{
-							currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, null, currentTextureData.rotated);
-						}
-						else if (this._armature._replacedTexture)
+						if (currentTextureData.texture)
 						{
 							const texture:Texture = (this._armature._replacedTexture as starling.textures.Texture) || currentTextureData.texture.parent;
 							if (currentTextureData.texture.parent != texture)
@@ -244,6 +240,10 @@
 								currentTextureData.texture.dispose();
 								currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, null, currentTextureData.rotated);
 							}
+						}
+						else
+						{
+							currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, null, currentTextureData.rotated);
 						}
 					}
 					

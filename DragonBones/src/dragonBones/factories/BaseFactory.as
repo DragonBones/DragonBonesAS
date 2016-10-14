@@ -170,6 +170,7 @@
 		{
 			var dragonBonesData:DragonBonesData = null;
 			var armatureData:ArmatureData = null;
+			
 			if (dragonBonesName)
 			{
 				dragonBonesData = _dragonBonesDataMap[dragonBonesName];
@@ -329,9 +330,9 @@
 				}
 				else
 				{
-					if (!displayData.texture)
+					if (!displayData.texture || dataPackage.textureAtlasName)
 					{
-						displayData.texture = _getTextureData(dataPackage.textureAtlasName, displayData.name);
+						displayData.texture = _getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.name);
 					}
 					
 					if (
@@ -708,7 +709,7 @@
 		):Boolean
 		{
 			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
-			if (_fillBuildArmaturePackage(dataPackage, fromDragonBonesDataName, fromArmatreName, fromSkinName, fromDragonBonesDataName))
+			if (_fillBuildArmaturePackage(dataPackage, fromDragonBonesDataName, fromArmatreName, fromSkinName, null))
 			{
 				const fromArmatureData:ArmatureData = dataPackage.armature;
 				if (ifRemoveOriginalAnimationList)
@@ -776,7 +777,7 @@
 		public function replaceSlotDisplay(dragonBonesName:String, armatureName:String, slotName:String, displayName:String, slot:Slot, displayIndex:int = -1):void
 		{
 			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
-			if (_fillBuildArmaturePackage(dataPackage, dragonBonesName, armatureName, null, dragonBonesName))
+			if (_fillBuildArmaturePackage(dataPackage, dragonBonesName, armatureName, null, null))
 			{
 				const slotDisplayDataSet:SlotDisplayDataSet = dataPackage.skin.getSlot(slotName);
 				if (slotDisplayDataSet)
@@ -805,7 +806,7 @@
 		public function replaceSlotDisplayList(dragonBonesName:String, armatureName:String, slotName:String, slot:Slot):void
 		{
 			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
-			if (_fillBuildArmaturePackage(dataPackage, dragonBonesName, armatureName, null, dragonBonesName))
+			if (_fillBuildArmaturePackage(dataPackage, dragonBonesName, armatureName, null, null))
 			{
 				const slotDisplayDataSet:SlotDisplayDataSet = dataPackage.skin.getSlot(slotName);
 				if (slotDisplayDataSet)
