@@ -1,12 +1,7 @@
 package dragonBones.starling
 {
-	import flash.display.Shape;
-	import flash.events.Event;
-	import flash.utils.getTimer;
-	
 	import dragonBones.Armature;
 	import dragonBones.animation.Animation;
-	import dragonBones.animation.WorldClock;
 	import dragonBones.core.IArmatureDisplay;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.EventObject;
@@ -22,16 +17,6 @@ package dragonBones.starling
 	{
 		public static const useDefaultStarlingEvent:Boolean = false;
 		
-		private static const _enterFrameHelper:Shape = new Shape();
-		private static const _clock:WorldClock = new WorldClock();
-		private static function _clockHandler(event:Event):void 
-		{
-			const time:Number = getTimer() * 0.001;
-			const passedTime:Number = time - _clock.time;
-			_clock.advanceTime(passedTime);
-			_clock.time = time;
-		}
-		
 		/**
 		 * @private
 		 */
@@ -43,12 +28,6 @@ package dragonBones.starling
 		public function StarlingArmatureDisplay()
 		{
 			super();
-			
-			if (!_enterFrameHelper.hasEventListener(Event.ENTER_FRAME))
-			{
-				_clock.time = getTimer() * 0.001;
-				_enterFrameHelper.addEventListener(Event.ENTER_FRAME, _clockHandler, false, -999999);
-			}
 		}
 		
 		/**
@@ -129,11 +108,11 @@ package dragonBones.starling
 		{
 			if (on)
 			{
-				_clock.add(this._armature);
+				StarlingFactory._clock.add(this._armature);
 			} 
 			else 
 			{
-				_clock.remove(this._armature);
+				StarlingFactory._clock.remove(this._armature);
 			}
 		}
 		

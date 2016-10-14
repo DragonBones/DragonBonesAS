@@ -20,8 +20,8 @@ package dragonBones.objects
 		public const weights:Vector.<Vector.<Number>> = new Vector.<Vector.<Number>>(0, true); // vertices bones
 		public const boneVertices:Vector.<Vector.<Number>> = new Vector.<Vector.<Number>>(0, true); // vertices bones * 2
 		
-		public const bones:Vector.<BoneData> = new Vector.<BoneData>(); // bones
-		public const inverseBindPose:Vector.<Matrix> = new Vector.<Matrix>(); // bones
+		public const bones:Vector.<BoneData> = new Vector.<BoneData>(0, true); // bones
+		public const inverseBindPose:Vector.<Matrix> = new Vector.<Matrix>(0, true); // bones
 		
 		public function MeshData()
 		{

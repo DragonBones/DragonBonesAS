@@ -216,20 +216,11 @@ package dragonBones.flash
 						textureAtlasTexture ||
 						currentTextureData.texture;
 					
+					this._updatePivot(rawDisplayData, currentDisplayData, currentTextureData);
+					
 					if (this._meshData && this._display == this._meshDisplay)
 					{
 						const meshDisplay:Shape = this._meshDisplay as Shape;
-						
-						if (this._meshData != rawDisplayData.mesh && rawDisplayData && rawDisplayData != currentDisplayData) 
-						{
-							this._pivotX = rawDisplayData.transform.x - currentDisplayData.transform.x;
-							this._pivotY = rawDisplayData.transform.y - currentDisplayData.transform.y;
-						}
-						else 
-						{
-							this._pivotX = 0;
-							this._pivotY = 0;
-						}
 						
 						if (_pach)
 						{
@@ -292,37 +283,8 @@ package dragonBones.flash
 					}
 					else
 					{
-						const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
-						
-						var width:Number = rect.width;
-						var height:Number = rect.height;
-						if (currentTextureData.rotated)
-						{
-							width = rect.height;
-							height = rect.width;
-						}
-						
-						this._pivotX = currentDisplayData.pivot.x;
-						this._pivotY = currentDisplayData.pivot.y;
-						
-						if (currentDisplayData.isRelativePivot)
-						{
-							this._pivotX = width * this._pivotX;
-							this._pivotY = height * this._pivotY;
-						}
-						
-						if (currentTextureData.frame)
-						{
-							this._pivotX += currentTextureData.frame.x;
-							this._pivotY += currentTextureData.frame.y;
-						}
-						
-						if (rawDisplayData && rawDisplayData != currentDisplayData)
-						{
-							this._pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
-							this._pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
-						}
-						
+						var width:Number = 0;
+						var height:Number = 0;
 						if (currentTextureData.rotated)
 						{
 							width = currentTextureData.region.height;

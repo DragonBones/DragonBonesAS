@@ -80,7 +80,7 @@
 				const tweenRotate:Number = currentFrame.tweenRotate;
 				if (tweenRotate == tweenRotate)
 				{
-					if (tweenRotate)
+					if (tweenRotate != 0)
 					{
 						if (tweenRotate > 0 ? nextTransform.skewY >= _currentTransform.skewY : nextTransform.skewY <= _currentTransform.skewY) {
 							const rotate:int = tweenRotate > 0? tweenRotate - 1: tweenRotate + 1;

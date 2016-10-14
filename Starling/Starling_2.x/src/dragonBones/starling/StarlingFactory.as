@@ -5,10 +5,10 @@
 	import dragonBones.Armature;
 	import dragonBones.Slot;
 	import dragonBones.animation.Animation;
+	import dragonBones.animation.WorldClock;
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.events.EventObject;
 	import dragonBones.factories.BaseFactory;
 	import dragonBones.factories.BuildArmaturePackage;
 	import dragonBones.objects.ActionData;
@@ -18,8 +18,10 @@
 	import dragonBones.parsers.DataParser;
 	import dragonBones.textures.TextureAtlasData;
 	
+	import starling.core.Starling;
 	import starling.display.Image;
 	import starling.display.Mesh;
+	import starling.events.EnterFrameEvent;
 	import starling.rendering.IndexData;
 	import starling.rendering.VertexData;
 	import starling.textures.SubTexture;
@@ -34,6 +36,21 @@
 	 */
 	public final class StarlingFactory extends BaseFactory
 	{
+		/**
+		 * @private
+		 */
+		private static const _eventManager:StarlingArmatureDisplay = new StarlingArmatureDisplay();
+		
+		/**
+		 * @private
+		 */
+		dragonBones_internal static const _clock:WorldClock = new WorldClock();
+		
+		private static function _clockHandler(event:EnterFrameEvent):void 
+		{
+			_clock.advanceTime(event.passedTime);
+		}
+		
 		/**
 		 * @language zh_CN
 		 * 一个可以直接使用的全局工厂实例.
@@ -51,11 +68,6 @@
 		public function StarlingFactory(dataParser:DataParser = null)
 		{
 			super(this, dataParser);
-			
-			if (!EventObject._soundEventManager) 
-			{
-				EventObject._soundEventManager = new StarlingArmatureDisplay();
-			}
 		}
 		
 		/**
@@ -88,6 +100,11 @@
 		 */
 		override protected function _generateArmature(dataPackage:BuildArmaturePackage):Armature
 		{
+			if (Starling.current && !Starling.current.stage.hasEventListener(EnterFrameEvent.ENTER_FRAME))
+			{
+				Starling.current.stage.addEventListener(EnterFrameEvent.ENTER_FRAME, _clockHandler);
+			}
+			
 			const armature:Armature = BaseObject.borrowObject(Armature) as Armature;
 			const armatureDisplay:StarlingArmatureDisplay = new StarlingArmatureDisplay();
 			
@@ -95,6 +112,7 @@
 			armature._skinData = dataPackage.skin;
 			armature._animation = BaseObject.borrowObject(Animation) as Animation;
 			armature._display = armatureDisplay;
+			armature._eventManager = _eventManager;
 			
 			armatureDisplay._armature = armature;
 			armature._animation._armature = armature;
@@ -124,9 +142,9 @@
 				switch (displayData.type)
 				{
 					case DragonBones.DISPLAY_TYPE_IMAGE:
-						if (!displayData.texture)
+						if (!displayData.texture || dataPackage.textureAtlasName)
 						{
-							displayData.texture = this._getTextureData(dataPackage.dataName, displayData.name);
+							displayData.texture = this._getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.name);
 						}
 						
 						displayList.push(slot._rawDisplay);
@@ -135,14 +153,14 @@
 					case DragonBones.DISPLAY_TYPE_MESH:
 						if (!displayData.texture)
 						{
-							displayData.texture = this._getTextureData(dataPackage.dataName, displayData.name);
+							displayData.texture = this._getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.name);
 						}
 						
 						displayList.push(slot._meshDisplay);
 						break;
 					
 					case DragonBones.DISPLAY_TYPE_ARMATURE:
-						const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName);
+						const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName, null, dataPackage.textureAtlasName);
 						if (childArmature) 
 						{
 							if (!slot.inheritAnimation)
@@ -184,13 +202,14 @@
 		 * @param armatureName 骨架数据名称。
 		 * @param dragonBonesName 龙骨数据名称，如果未设置，将检索所有的龙骨数据，当多个数据中包含同名的骨架数据时，可能无法创建出准确的骨架。
 		 * @param skinName 皮肤名称，如果未设置，则使用默认皮肤。
+		 * @param textureAtlasName 贴图集数据名称，如果未设置，则使用龙骨数据名称。
 		 * @return 骨架的显示容器。
 		 * @see dragonBones.core.IArmatureDisplayContainer
 		 * @version DragonBones 4.5
 		 */
-		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null):StarlingArmatureDisplay
+		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null, textureAtlasName:String = null):StarlingArmatureDisplay
 		{
-			const armature:Armature = this.buildArmature(armatureName, dragonBonesName, skinName);
+			const armature:Armature = this.buildArmature(armatureName, dragonBonesName, skinName, textureAtlasName);
 			const armatureDisplay:StarlingArmatureDisplay = armature? (armature.display as StarlingArmatureDisplay): null;
 			if (armatureDisplay)
 			{
@@ -207,9 +226,9 @@
 		 * @param dragonBonesName 指定的龙骨数据名称，如果未设置，将检索所有的龙骨数据。
 		 * @version DragonBones 3.0
 		 */
-		public function getTextureDisplay(textureName:String, dragonBonesName:String = null):Image 
+		public function getTextureDisplay(textureName:String, textureAtlasName:String = null):Image 
 		{
-			const textureData:StarlingTextureData = this._getTextureData(dragonBonesName, textureName) as StarlingTextureData;
+			const textureData:StarlingTextureData = this._getTextureData(textureAtlasName, textureName) as StarlingTextureData;
 			if (textureData)
 			{
 				if (!textureData.texture)
@@ -231,7 +250,7 @@
 		 */
 		public function get soundEventManager(): StarlingArmatureDisplay
 		{
-			return EventObject._soundEventManager as StarlingArmatureDisplay;
+			return _eventManager;
 		}
 	}
 }

@@ -229,71 +229,32 @@
 				
 				if (currentTextureData)
 				{
-					if (!currentTextureData.texture)
+					const textureAtlasTexture:Texture = (currentTextureData.parent as StarlingTextureAtlasData).texture;
+					if (textureAtlasTexture)
 					{
-						const textureAtlasTexture:Texture = (currentTextureData.parent as StarlingTextureAtlasData).texture;
-						if (textureAtlasTexture)
+						if (!currentTextureData.texture)
 						{
 							currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, null, currentTextureData.rotated);
 						}
+						else if (this._armature._replacedTexture)
+						{
+							const texture:Texture = (this._armature._replacedTexture as starling.textures.Texture) || currentTextureData.texture.parent;
+							if (currentTextureData.texture.parent != texture)
+							{
+								currentTextureData.texture.dispose();
+								currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, null, currentTextureData.rotated);
+							}
+						}
 					}
 					
-					const texture:Texture = (this._armature._replacedTexture as Texture) || currentTextureData.texture;
+					this._updatePivot(rawDisplayData, currentDisplayData, currentTextureData);
+					
 					if (this._meshData && this._display == this._meshDisplay)
 					{
-						// TODO
-						if (this._meshData != rawDisplayData.mesh && rawDisplayData && rawDisplayData != currentDisplayData) 
-						{
-							this._pivotX = rawDisplayData.transform.x - currentDisplayData.transform.x;
-							this._pivotY = rawDisplayData.transform.y - currentDisplayData.transform.y;
-						}
-						else 
-						{
-							this._pivotX = 0;
-							this._pivotY = 0;
-						}
 					}
 					else
 					{
-						const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
-						
-						var width:Number = rect.width;
-						var height:Number = rect.height;
-						if (currentTextureData.rotated)
-						{
-							width = rect.height;
-							height = rect.width;
-						}
-						
-						this._pivotX = currentDisplayData.pivot.x;
-						this._pivotY = currentDisplayData.pivot.y;
-						
-						if (currentDisplayData.isRelativePivot)
-						{
-							this._pivotX = width * this._pivotX;
-							this._pivotY = height * this._pivotY;
-						}
-						
-						if (currentTextureData.frame)
-						{
-							this._pivotX += currentTextureData.frame.x;
-							this._pivotY += currentTextureData.frame.y;
-						}
-						
-						if (rawDisplayData && rawDisplayData != currentDisplayData)
-						{
-							this._pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
-							this._pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
-						}
-						
-						if (texture)
-						{
-							frameDisplay.texture = texture;
-						}
-						else
-						{
-							frameDisplay.texture = getEmptyTexture();
-						}
+						frameDisplay.texture = currentTextureData.texture || getEmptyTexture();
 						
 						frameDisplay.readjustSize();
 					}

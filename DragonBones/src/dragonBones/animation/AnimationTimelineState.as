@@ -69,8 +69,7 @@
 				
 				if (
 					(eventData.type == DragonBones.EVENT_TYPE_SOUND? 
-						(EventObject._soundEventManager || eventDispatcher):
-						eventDispatcher
+						this._armature._eventManager: eventDispatcher
 					).hasEvent(eventType)
 				)
 				{
@@ -104,7 +103,7 @@
 		
 		override public function update(time:Number):void
 		{
-			const prevTime:uint = this._currentTime;
+			const prevTime:Number = this._currentTime;
 			const prevPlayTimes:uint = this._currentPlayTimes;
 			
 			if (!this._isCompleted && this._setCurrentTime(time)) 
@@ -124,7 +123,7 @@
 					}
 				}
 				
-				if (this._keyFrameCount)
+				if (this._keyFrameCount > 0)
 				{
 					const currentFrameIndex:uint = this._keyFrameCount > 1 ? Math.floor(this._currentTime * this._frameRate) : 0;
 					const currentFrame:FrameData = this._timeline.frames[currentFrameIndex];

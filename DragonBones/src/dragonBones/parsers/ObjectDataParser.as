@@ -132,11 +132,12 @@
 		/**
 		 * @private
 		 */
-		protected function _parseArmature(rawData:Object):ArmatureData
+		protected function _parseArmature(rawData:Object, scale:Number):ArmatureData
 		{
 			const armature:ArmatureData = BaseObject.borrowObject(ArmatureData) as ArmatureData;
 			armature.name = _getString(rawData, NAME, null);
 			armature.frameRate = _getNumber(rawData, FRAME_RATE, this._data.frameRate) || this._data.frameRate;
+			armature.scale = scale;
 			
 			if (TYPE in rawData && rawData[TYPE] is String) 
 			{
@@ -222,7 +223,7 @@
 			bone.inheritTranslation = _getBoolean(rawData, INHERIT_TRANSLATION, true);
 			bone.inheritRotation = _getBoolean(rawData, INHERIT_ROTATION, true);
 			bone.inheritScale = _getBoolean(rawData, INHERIT_SCALE, true);
-			bone.length = _getNumber(rawData, LENGTH, 0) * this._armatureScale;
+			bone.length = _getNumber(rawData, LENGTH, 0) * this._armature.scale;
 			
 			if (TRANSFORM in rawData)
 			{
@@ -407,8 +408,8 @@
 			{
 				const transformObject:Object = rawData[TRANSFORM];
 				display.isRelativePivot = false;
-				display.pivot.x = _getNumber(transformObject, PIVOT_X, 0) * this._armatureScale;
-				display.pivot.y = _getNumber(transformObject, PIVOT_Y, 0) * this._armatureScale;
+				display.pivot.x = _getNumber(transformObject, PIVOT_X, 0) * this._armature.scale;
+				display.pivot.y = _getNumber(transformObject, PIVOT_Y, 0) * this._armature.scale;
 			}
 			else
 			{
@@ -478,6 +479,8 @@
 				mesh.boneVertices.fixed = false;
 				mesh.boneVertices.length = numVertices;
 				mesh.boneVertices.fixed = true;
+				mesh.bones.fixed = false;
+				mesh.inverseBindPose.fixed = false;
 				
 				if (SLOT_POSE in rawData)
 				{
@@ -486,8 +489,8 @@
 					mesh.slotPose.b = rawSlotPose[1];
 					mesh.slotPose.c = rawSlotPose[2];
 					mesh.slotPose.d = rawSlotPose[3];
-					mesh.slotPose.tx = rawSlotPose[4];
-					mesh.slotPose.ty = rawSlotPose[5];
+					mesh.slotPose.tx = rawSlotPose[4] * this._armature.scale;
+					mesh.slotPose.ty = rawSlotPose[5] * this._armature.scale;
 				}
 				
 				if (BONE_POSE in rawData)
@@ -501,8 +504,8 @@
 						boneMatrix.b = rawBonePose[i + 2];
 						boneMatrix.c = rawBonePose[i + 3];
 						boneMatrix.d = rawBonePose[i + 4];
-						boneMatrix.tx = rawBonePose[i + 5];
-						boneMatrix.ty = rawBonePose[i + 6];
+						boneMatrix.tx = rawBonePose[i + 5] * this._armature.scale;
+						boneMatrix.ty = rawBonePose[i + 6] * this._armature.scale;
 						boneMatrix.invert();
 					}
 				}
@@ -515,8 +518,8 @@
 				const iN:uint = i + 1;
 				const vertexIndex:uint = i / 2;
 				
-				var x:Number = mesh.vertices[i] = rawVertices[i] * this._armatureScale;
-				var y:Number = mesh.vertices[iN] = rawVertices[iN] * this._armatureScale;
+				var x:Number = mesh.vertices[i] = rawVertices[i] * this._armature.scale;
+				var y:Number = mesh.vertices[iN] = rawVertices[iN] * this._armature.scale;
 				mesh.uvs[i] = rawUVs[i];
 				mesh.uvs[iN] = rawUVs[iN];
 				
@@ -968,8 +971,8 @@
 				}
 				else
 				{
-					x = rawVertices[i - offset] * this._armatureScale;
-					y = rawVertices[i + 1 - offset] * this._armatureScale;
+					x = rawVertices[i - offset] * this._armature.scale;
+					y = rawVertices[i + 1 - offset] * this._armature.scale;
 				}
 				
 				if (this._mesh.skinned)
@@ -1264,8 +1267,8 @@
 		 */
 		protected function _parseTransform(rawData:Object, transform:Transform):void
 		{
-			transform.x = _getNumber(rawData, X, 0) * this._armatureScale;
-			transform.y = _getNumber(rawData, Y, 0) * this._armatureScale;
+			transform.x = _getNumber(rawData, X, 0) * this._armature.scale;
+			transform.y = _getNumber(rawData, Y, 0) * this._armature.scale;
 			transform.skewX = _getNumber(rawData, SKEW_X, 0) * DragonBones.ANGLE_TO_RADIAN;
 			transform.skewY = _getNumber(rawData, SKEW_Y, 0) * DragonBones.ANGLE_TO_RADIAN;
 			transform.scaleX = _getNumber(rawData, SCALE_X, 1);
@@ -1305,8 +1308,6 @@
 					this._isGlobalTransform = false;
 				}
 				
-				this._armatureScale = scale;
-				
 				if (version == DATA_VERSION || version == DATA_VERSION_4_0 || this._isOldData)
 				{
 					const data:DragonBonesData = BaseObject.borrowObject(DragonBonesData) as DragonBonesData;
@@ -1319,7 +1320,7 @@
 						
 						for each (var armatureObject:Object in rawData[ARMATURE])
 						{
-							data.addArmature(_parseArmature(armatureObject));
+							data.addArmature(_parseArmature(armatureObject, scale));
 						}
 						
 						this._data = null;

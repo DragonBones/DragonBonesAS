@@ -2,14 +2,14 @@ package dragonBones.starling
 {
 	import dragonBones.textures.TextureData;
 	
-	import starling.textures.Texture;
+	import starling.textures.SubTexture;
 	
 	/**
 	 * @private
 	 */
 	public final class StarlingTextureData extends TextureData
 	{
-		public var texture:Texture = null;
+		public var texture:SubTexture = null;
 		
 		public function StarlingTextureData()
 		{

@@ -5,7 +5,6 @@ package dragonBones.events
 	import dragonBones.Slot;
 	import dragonBones.animation.AnimationState;
 	import dragonBones.core.BaseObject;
-	import dragonBones.core.dragonBones_internal;
 	
 	/**
 	 * @language zh_CN
@@ -14,11 +13,6 @@ package dragonBones.events
 	 */
 	public class EventObject extends BaseObject
 	{
-		/**
-		 * @private RenderFactory
-		 */
-		dragonBones_internal static var _soundEventManager:IEventDispatcher = null;
-		
 		/**
 		 * @language zh_CN
 		 * 动画开始。

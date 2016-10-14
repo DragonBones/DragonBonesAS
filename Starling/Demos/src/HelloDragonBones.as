@@ -6,7 +6,8 @@
 	 * 2. factory.parseDragonBonesData();
 	 *    factory.parseTextureAtlasData();
 	 * 3. armatureDisplay = factory.buildArmatureDisplay("armatureName");
-	 * 4. addChild(armatureDisplay);
+	 * 4. armatureDisplay.animation.play("animationName");
+	 * 5. addChild(armatureDisplay);
 	 */
 	
 	import flash.display.Sprite;
@@ -180,10 +181,8 @@
 	}
 }
 
-
 import flash.display.Sprite;
 import flash.events.Event;
-import flash.events.MouseEvent;
 
 import dragonBones.events.EventObject;
 import dragonBones.flash.FlashArmatureDisplay;
@@ -200,7 +199,6 @@ class FlashRender extends flash.display.Sprite
 	private var _armatureIndex: uint = 0;
 	private var _animationIndex: uint = 0;
 	private var _armatureDisplay: FlashArmatureDisplay = null;
-	private const _factory: FlashFactory = new FlashFactory();
 	
 	public function FlashRender()
 	{
@@ -217,10 +215,10 @@ class FlashRender extends flash.display.Sprite
 	private function _addToStageHandler(event: flash.events.Event): void
 	{
 		// Parse data.
-		dragonBonesData = _factory.parseDragonBonesData(
+		dragonBonesData = FlashFactory.factory.parseDragonBonesData(
 			JSON.parse(new HelloDragonBones.DBDataA())
 		);
-		_factory.parseTextureAtlasData(
+		FlashFactory.factory.parseTextureAtlasData(
 			JSON.parse(new HelloDragonBones.TADataA1()),
 			new HelloDragonBones.TextureA1()
 		);
@@ -270,7 +268,7 @@ class FlashRender extends flash.display.Sprite
 		const armatureName: String = armatureNames[_armatureIndex];
 		
 		// Build armature display. (buildArmatureDisplay will advanceTime animation by Armature Display)
-		_armatureDisplay = _factory.buildArmatureDisplay(armatureName);
+		_armatureDisplay = FlashFactory.factory.buildArmatureDisplay(armatureName);
 		// _armatureDisplay.armature.cacheFrameRate = 24; // Cache animation.
 		
 		// Add animation listener.
@@ -351,7 +349,6 @@ class StarlingRender extends starling.display.Sprite
 	private var _armatureIndex: uint = 0;
 	private var _animationIndex: uint = 0;
 	private var _armatureDisplay: StarlingArmatureDisplay = null;
-	private const _factory: StarlingFactory = new StarlingFactory();
 	
 	public function StarlingRender()
 	{
@@ -368,10 +365,10 @@ class StarlingRender extends starling.display.Sprite
 	private function _addToStageHandler(event: starling.events.Event): void
 	{
 		// Parse data.
-		dragonBonesData = _factory.parseDragonBonesData(
+		dragonBonesData = StarlingFactory.factory.parseDragonBonesData(
 			JSON.parse(new HelloDragonBones.DBDataA())
 		);
-		_factory.parseTextureAtlasData(
+		StarlingFactory.factory.parseTextureAtlasData(
 			JSON.parse(new HelloDragonBones.TADataA1()),
 			new HelloDragonBones.TextureA1()
 		);
@@ -422,7 +419,7 @@ class StarlingRender extends starling.display.Sprite
 		const armatureName: String = armatureNames[_armatureIndex];
 		
 		// Build armature display. (buildArmatureDisplay will advanceTime animation by Armature Display)
-		_armatureDisplay = _factory.buildArmatureDisplay(armatureName);
+		_armatureDisplay = StarlingFactory.factory.buildArmatureDisplay(armatureName);
 		// _armatureDisplay.armature.cacheFrameRate = 24; // Cache animation.
 		
 		// Add animation listener.

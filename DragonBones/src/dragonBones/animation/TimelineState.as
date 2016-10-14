@@ -3,21 +3,18 @@
 	import dragonBones.Armature;
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
-	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.FrameData;
 	import dragonBones.objects.TimelineData;
-	
-	use namespace dragonBones_internal;
 	
 	/**
 	 * @private
 	 */
 	public class TimelineState extends BaseObject
 	{
-		dragonBones_internal var _isCompleted:Boolean;
-		dragonBones_internal var _currentPlayTimes:uint;
-		dragonBones_internal var _currentTime:Number;
-		dragonBones_internal var _timeline:TimelineData;
+		internal var _isCompleted:Boolean;
+		internal var _currentPlayTimes:uint;
+		internal var _currentTime:Number;
+		internal var _timeline:TimelineData;
 		
 		protected var _isReverse:Boolean;
 		protected var _hasAsynchronyTimeline:Boolean;
@@ -49,7 +46,7 @@
 		override protected function _onClear():void
 		{
 			_isCompleted = false;
-			_currentPlayTimes = -1;
+			_currentPlayTimes = 0;
 			_currentTime = -1;
 			_timeline = null;
 			
@@ -135,8 +132,6 @@
 				currentPlayTimes = _animationState._timeline._currentPlayTimes;
 			}
 			
-			_currentPlayTimes = currentPlayTimes;
-			
 			if (_currentTime == value)
 			{
 				return false;
@@ -144,6 +139,7 @@
 			
 			_isReverse = _currentTime > value && _currentPlayTimes == currentPlayTimes;
 			_currentTime = value;
+			_currentPlayTimes = currentPlayTimes;
 			
 			return true;
 		}

@@ -25,11 +25,6 @@ package dragonBones.objects
 		public var frameRate:uint;
 		
 		/**
-		 * @private
-		 */
-		public var cacheFrameRate:uint;
-		
-		/**
 		 * @language zh_CN
 		 * 骨架类型。
 		 * @version DragonBones 3.0
@@ -90,6 +85,16 @@ package dragonBones.objects
 		 */
 		public const actions: Vector.<ActionData> = new Vector.<ActionData>(0, true);
 		
+		/**
+		 * @private
+		 */
+		public var cacheFrameRate:uint;
+		
+		/**
+		 * @private
+		 */
+		public var scale:Number;
+		
 		private var _boneDirty:Boolean;
 		private var _slotDirty:Boolean;
 		private var _defaultSkin:SkinData;
@@ -112,7 +117,6 @@ package dragonBones.objects
 		override protected function _onClear():void
 		{
 			frameRate = 0;
-			cacheFrameRate = 0;
 			type = 0;
 			name = null;
 			parent = null;
@@ -158,6 +162,9 @@ package dragonBones.objects
 				actions.length = 0;
 				actions.fixed = true;	
 			}
+			
+			cacheFrameRate = 0;
+			scale = 1;
 			
 			_boneDirty = false;
 			_slotDirty = false;

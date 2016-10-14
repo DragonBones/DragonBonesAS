@@ -10,6 +10,7 @@ package dragonBones.factories
 	public final class BuildArmaturePackage
 	{
 		public var dataName:String = null;
+		public var textureAtlasName:String = null;
 		public var data:DragonBonesData = null;
 		public var armature:ArmatureData = null;
 		public var skin:SkinData = null;

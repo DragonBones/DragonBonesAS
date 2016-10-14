@@ -123,11 +123,11 @@
 		/** 
 		 * @private
 		 */
-		protected function _getTextureData(dragonBonesName:String, textureName:String):TextureData
+		protected function _getTextureData(textureAtlasName:String, textureName:String):TextureData
 		{
 			var i:uint = 0, l:uint = 0;
 			var textureData:TextureData = null;
-			var textureAtlasDataList:Vector.<TextureAtlasData> = _textureAtlasDataMap[dragonBonesName];
+			var textureAtlasDataList:Vector.<TextureAtlasData> = _textureAtlasDataMap[textureAtlasName];
 			
 			if (textureAtlasDataList)
 			{
@@ -166,7 +166,7 @@
 		/** 
 		 * @private
 		 */
-		protected function _fillBuildArmaturePackage(dragonBonesName:String, armatureName:String, skinName:String, dataPackage:BuildArmaturePackage):Boolean
+		protected function _fillBuildArmaturePackage(dataPackage:BuildArmaturePackage, dragonBonesName:String, armatureName:String, skinName:String, textureAtlasName:String):Boolean
 		{
 			var dragonBonesData:DragonBonesData = null;
 			var armatureData:ArmatureData = null;
@@ -199,6 +199,7 @@
 			if (armatureData)
 			{
 				dataPackage.dataName = dragonBonesName;
+				dataPackage.textureAtlasName = textureAtlasName;
 				dataPackage.data = dragonBonesData;
 				dataPackage.armature = armatureData;
 				dataPackage.skin = armatureData.getSkin(skinName);
@@ -221,7 +222,6 @@
 			{
 				const boneData:BoneData = bones[i];
 				const bone:Bone = BaseObject.borrowObject(Bone) as Bone;
-				
 				bone.name = boneData.name;
 				bone.inheritTranslation = boneData.inheritTranslation; 
 				bone.inheritRotation = boneData.inheritRotation; 
@@ -289,10 +289,6 @@
 					slot._setBlendMode(slotData.blendMode);
 					slot._setColor(slotData.color);
 					
-					slot._replacedDisplayDataSet.fixed = false;
-					slot._replacedDisplayDataSet.length = slot._displayDataSet.displays.length;
-					slot._replacedDisplayDataSet.fixed = true;
-					
 					armature.addSlot(slot, slotData.parent.name);
 				}
 			}
@@ -328,14 +324,14 @@
 				
 				if (displayData.type == DragonBones.DISPLAY_TYPE_ARMATURE)
 				{
-					const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName);
+					const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName, null, dataPackage.textureAtlasName);
 					displayList[displayIndex] = childArmature;
 				}
 				else
 				{
 					if (!displayData.texture)
 					{
-						displayData.texture = _getTextureData(dataPackage.dataName, displayData.name);
+						displayData.texture = _getTextureData(dataPackage.textureAtlasName, displayData.name);
 					}
 					
 					if (
@@ -395,7 +391,7 @@
 		 * @see dragonBones.objects.DragonBonesData
 		 * @version DragonBones 4.5
 		 */
-		public function parseDragonBonesData(rawData:Object, dragonBonesName:String = null):DragonBonesData
+		public function parseDragonBonesData(rawData:Object, dragonBonesName:String = null, scale:Number = 1):DragonBonesData
 		{
 			var isComplete:Boolean = true;
 			if (rawData is ByteArray)
@@ -416,7 +412,7 @@
 				}
 			}
 			
-			const dragonBonesData:DragonBonesData = _dataParser.parseDragonBonesData(rawData);
+			const dragonBonesData:DragonBonesData = _dataParser.parseDragonBonesData(rawData, scale);
 			addDragonBonesData(dragonBonesData, dragonBonesName);
 			
 			if (isComplete)
@@ -673,14 +669,15 @@
 		 * @param armatureName 骨架数据名称。
 		 * @param dragonBonesName 龙骨数据名称，如果未设置，将检索所有的龙骨数据，当多个龙骨数据中包含同名的骨架数据时，可能无法创建出准确的骨架。
 		 * @param skinName 皮肤名称，如果未设置，则使用默认皮肤。
+		 * @param textureAtlasName 贴图集数据名称，如果未设置，则使用龙骨数据。
 		 * @return 骨架。
 		 * @see dragonBones.Armature
 		 * @version DragonBones 3.0
 		 */
-		public function buildArmature(armatureName:String, dragonBonesName:String = null, skinName:String = null):Armature
+		public function buildArmature(armatureName:String, dragonBonesName:String = null, skinName:String = null, textureAtlasName:String = null):Armature
 		{
 			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
-			if (_fillBuildArmaturePackage(dragonBonesName, armatureName, skinName, dataPackage))
+			if (_fillBuildArmaturePackage(dataPackage, dragonBonesName, armatureName, skinName, textureAtlasName))
 			{
 				const armature:Armature = _generateArmature(dataPackage);
 				_buildBones(dataPackage, armature);
@@ -711,7 +708,7 @@
 		):Boolean
 		{
 			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
-			if (_fillBuildArmaturePackage(fromDragonBonesDataName, fromArmatreName, fromSkinName, dataPackage))
+			if (_fillBuildArmaturePackage(dataPackage, fromDragonBonesDataName, fromArmatreName, fromSkinName, fromDragonBonesDataName))
 			{
 				const fromArmatureData:ArmatureData = dataPackage.armature;
 				if (ifRemoveOriginalAnimationList)
@@ -779,7 +776,7 @@
 		public function replaceSlotDisplay(dragonBonesName:String, armatureName:String, slotName:String, displayName:String, slot:Slot, displayIndex:int = -1):void
 		{
 			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
-			if (_fillBuildArmaturePackage(dragonBonesName, armatureName, null, dataPackage))
+			if (_fillBuildArmaturePackage(dataPackage, dragonBonesName, armatureName, null, dragonBonesName))
 			{
 				const slotDisplayDataSet:SlotDisplayDataSet = dataPackage.skin.getSlot(slotName);
 				if (slotDisplayDataSet)
@@ -808,7 +805,7 @@
 		public function replaceSlotDisplayList(dragonBonesName:String, armatureName:String, slotName:String, slot:Slot):void
 		{
 			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
-			if (_fillBuildArmaturePackage(dragonBonesName, armatureName, null, dataPackage))
+			if (_fillBuildArmaturePackage(dataPackage, dragonBonesName, armatureName, null, dragonBonesName))
 			{
 				const slotDisplayDataSet:SlotDisplayDataSet = dataPackage.skin.getSlot(slotName);
 				if (slotDisplayDataSet)

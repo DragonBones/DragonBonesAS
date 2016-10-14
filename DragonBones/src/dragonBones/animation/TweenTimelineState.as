@@ -176,7 +176,7 @@ package dragonBones.animation
 					const tweenDuration:Number = next.tweens[i] - current.tweens[i];
 					result.tweens[i] = tweenDuration;
 					
-					if (tweenDuration != 0)
+					if (tweenDuration > 0)
 					{
 						tweenType = TWEEN_TYPE_ALWAYS;
 					}

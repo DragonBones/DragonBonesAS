@@ -265,7 +265,6 @@
 		protected var _animationTweenEasing:Number = 0;
 		protected const _timelinePivot:Point = new Point();
 		
-		protected var _armatureScale:Number = 1;
 		protected const _helpPoint:Point = new Point();
 		protected const _helpTransformA:Transform = new Transform();
 		protected const _helpTransformB:Transform = new Transform();

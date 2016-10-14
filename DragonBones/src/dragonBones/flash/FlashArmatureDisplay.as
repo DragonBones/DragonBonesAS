@@ -2,13 +2,10 @@ package dragonBones.flash
 {
 	import flash.display.Shape;
 	import flash.display.Sprite;
-	import flash.events.Event;
-	import flash.utils.getTimer;
 	
 	import dragonBones.Armature;
 	import dragonBones.Bone;
 	import dragonBones.animation.Animation;
-	import dragonBones.animation.WorldClock;
 	import dragonBones.core.IArmatureDisplay;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.EventObject;
@@ -20,16 +17,6 @@ package dragonBones.flash
 	 */
 	public class FlashArmatureDisplay extends Sprite implements IArmatureDisplay
 	{
-		private static const _enterFrameHelper:Shape = new Shape();
-		private static const _clock:WorldClock = new WorldClock();
-		private static function _clockHandler(event:Event):void 
-		{
-			const time:Number = getTimer() * 0.001;
-			const passedTime:Number = time - _clock.time;
-			_clock.advanceTime(passedTime);
-			_clock.time = time;
-		}
-		
 		/**
 		 * @private
 		 */
@@ -43,12 +30,6 @@ package dragonBones.flash
 		public function FlashArmatureDisplay()
 		{
 			super();
-			
-			if (!_enterFrameHelper.hasEventListener(Event.ENTER_FRAME))
-			{
-				_clock.time = getTimer() * 0.001;
-				_enterFrameHelper.addEventListener(Event.ENTER_FRAME, _clockHandler, false, -999999);
-			}
 		}
 		
 		/**
@@ -143,11 +124,11 @@ package dragonBones.flash
 		{
 			if (on)
 			{
-				_clock.add(this._armature);
+				FlashFactory._clock.add(this._armature);
 			} 
 			else 
 			{
-				_clock.remove(this._armature);
+				FlashFactory._clock.remove(this._armature);
 			}
 		}
 		

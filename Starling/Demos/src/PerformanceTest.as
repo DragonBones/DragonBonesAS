@@ -53,7 +53,6 @@ class StarlingRender extends Sprite
 	private var _removingArmature: Boolean = false;
 	private var _dragonBonesData: DragonBonesData = null;
 	private var _text:TextField = null;
-	private const _factory: StarlingFactory = new StarlingFactory();
 	private const _armatures: Vector.<Armature> = new Vector.<Armature>();
 
 	public function StarlingRender()
@@ -69,10 +68,10 @@ class StarlingRender extends Sprite
 		_text.autoSize = "center";
 		this.addChild(_text);
 		
-		_dragonBonesData = _factory.parseDragonBonesData(
+		_dragonBonesData = StarlingFactory.factory.parseDragonBonesData(
 			JSON.parse(new DBDataA())
 		);
-		_factory.parseTextureAtlasData(
+		StarlingFactory.factory.parseTextureAtlasData(
 			JSON.parse(new TADataA1()),
 			new TextureA1()
 		);
@@ -151,15 +150,15 @@ class StarlingRender extends Sprite
 
 	private function _addArmature(): void
 	{
-		const armature: Armature = _factory.buildArmature(_dragonBonesData.armatureNames[0]);
+		const armature: Armature = StarlingFactory.factory.buildArmature(_dragonBonesData.armatureNames[0]);
 		const armatureDisplay: StarlingArmatureDisplay = armature.display as StarlingArmatureDisplay;
 
 		armatureDisplay.scaleX = armatureDisplay.scaleY = 0.7;
 		this.addChild(armatureDisplay);
 
 		armature.cacheFrameRate = 24;
-		//armature.animation.play(armature.animation.animationNames[0], 0);
-		const animationName:String = armature.animation.animationNames[Math.floor(Math.random() * armature.animation.animationNames.length)];
+		const animationName:String = armature.animation.animationNames[0];
+		//const animationName:String = armature.animation.animationNames[Math.floor(Math.random() * armature.animation.animationNames.length)];
 		armature.animation.play(animationName, 0);
 		WorldClock.clock.add(armature);
 

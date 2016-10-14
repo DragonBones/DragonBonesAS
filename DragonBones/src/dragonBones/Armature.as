@@ -7,6 +7,7 @@ package dragonBones
 	import dragonBones.core.IArmatureDisplay;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.events.EventObject;
+	import dragonBones.events.IEventDispatcher;
 	import dragonBones.objects.ActionData;
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.SkinData;
@@ -71,6 +72,11 @@ package dragonBones
 		 * @private Slot
 		 */
 		dragonBones_internal var _replacedTexture:*;
+		
+		/**
+		 * @private Slot
+		 */
+		dragonBones_internal var _eventManager:IEventDispatcher;
 		
 		/**
 		 * @private
@@ -170,6 +176,7 @@ package dragonBones
 			
 			_parent = null;
 			_replacedTexture = null;
+			_eventManager = null;
 			
 			_delayDispose = false;
 			_lockDispose = false;
@@ -184,7 +191,7 @@ package dragonBones
 		private function _sortBones():void
 		{
 			const total:uint = _bones.length;
-			if (!total)
+			if (total <= 0)
 			{
 				return;
 			}
@@ -284,7 +291,7 @@ package dragonBones
 			{
 				_bonesDirty = true;
 				_bones.fixed = false;
-				_bones[_bones.length] = value;
+				_bones.push(value);
 				_animation._timelineStateDirty = true;
 			}
 		}
@@ -313,7 +320,7 @@ package dragonBones
 			{
 				_slotsDirty = true;
 				_slots.fixed = false;
-				_slots[_slots.length] = value;
+				_slots.push(value);
 				_animation._timelineStateDirty = true;
 			}
 		}
@@ -448,9 +455,9 @@ package dragonBones
 					{
 						const event:EventObject = _events[i];
 						
-						if (EventObject._soundEventManager && event.type == EventObject.SOUND_EVENT)
+						if (event.type == EventObject.SOUND_EVENT)
 						{
-							EventObject._soundEventManager._dispatchEvent(event);
+							_eventManager._dispatchEvent(event);
 						}
 						else
 						{

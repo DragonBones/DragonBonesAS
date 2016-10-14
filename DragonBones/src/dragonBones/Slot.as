@@ -2,6 +2,7 @@
 {
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
+	import flash.geom.Rectangle;
 	
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.TransformObject;
@@ -12,6 +13,7 @@
 	import dragonBones.objects.SlotData;
 	import dragonBones.objects.SlotDisplayDataSet;
 	import dragonBones.objects.SlotTimelineData;
+	import dragonBones.textures.TextureData;
 	
 	use namespace dragonBones_internal;
 	
@@ -430,6 +432,61 @@
 		/**
 		 * @private
 		 */
+		protected function _updatePivot(rawDisplayData:DisplayData, currentDisplayData:DisplayData, currentTextureData:TextureData):void
+		{
+			const isReplaceDisplay:Boolean = rawDisplayData && rawDisplayData != currentDisplayData;
+			if (_meshData && _display == _meshDisplay)
+			{
+				if (_meshData != rawDisplayData.mesh && isReplaceDisplay) 
+				{
+					_pivotX = rawDisplayData.transform.x - currentDisplayData.transform.x;
+					_pivotY = rawDisplayData.transform.y - currentDisplayData.transform.y;
+				}
+				else 
+				{
+					_pivotX = 0;
+					_pivotY = 0;
+				}
+			}
+			else
+			{
+				_pivotX = currentDisplayData.pivot.x;
+				_pivotY = currentDisplayData.pivot.y;
+				
+				if (currentDisplayData.isRelativePivot)
+				{
+					const scale:Number = this._armature.armatureData.scale;
+					const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
+					
+					var width:Number = rect.width * scale;
+					var height:Number = rect.height * scale;
+					if (currentTextureData.rotated)
+					{
+						width = rect.height;
+						height = rect.width;
+					}
+					
+					this._pivotX *= width;
+					this._pivotY *= height;
+				}
+				
+				if (currentTextureData.frame)
+				{
+					this._pivotX += currentTextureData.frame.x;
+					this._pivotY += currentTextureData.frame.y;
+				}
+				
+				if (isReplaceDisplay)
+				{
+					this._pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
+					this._pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
+				}
+			}
+		}
+		
+		/**
+		 * @private
+		 */
 		protected function _updateDisplay():void
 		{	
 			const prevDisplay:* = _display || _rawDisplay;
@@ -778,7 +835,7 @@
 					_displayList.fixed = true;
 				}
 				
-				for (var i:uint = 0, l:uint = _displayList.length; i < l; ++i)
+				for (var i:uint = 0, l:uint = value.length; i < l; ++i)
 				{
 					const eachDisplay:* = value[i];
 					if (eachDisplay && eachDisplay != _rawDisplay && eachDisplay != _meshDisplay && 
@@ -790,7 +847,7 @@
 					_displayList[i] = eachDisplay;
 				}
 			}
-			else if (_displayList.length)
+			else if (_displayList.length > 0)
 			{
 				_displayList.fixed = false;
 				_displayList.length = 0;
@@ -924,7 +981,7 @@
 			
 			for each (var eachDisplay:* in backupDisplayList)
 			{
-				if (eachDisplay != _rawDisplay && _displayList.indexOf(eachDisplay) < 0)
+				if (eachDisplay && eachDisplay != _rawDisplay && _displayList.indexOf(eachDisplay) < 0)
 				{
 					if (disposeDisplayList.indexOf(eachDisplay) < 0)
 					{

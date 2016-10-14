@@ -2,14 +2,16 @@
 {
 	import flash.display.BitmapData;
 	import flash.display.Shape;
+	import flash.events.Event;
+	import flash.utils.getTimer;
 	
 	import dragonBones.Armature;
 	import dragonBones.Slot;
 	import dragonBones.animation.Animation;
+	import dragonBones.animation.WorldClock;
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.events.EventObject;
 	import dragonBones.factories.BaseFactory;
 	import dragonBones.factories.BuildArmaturePackage;
 	import dragonBones.objects.ActionData;
@@ -29,6 +31,25 @@
 	public class FlashFactory extends BaseFactory
 	{
 		/**
+		 * @private
+		 */
+		private static const _eventManager:FlashArmatureDisplay = new FlashArmatureDisplay();
+		
+		
+		/**
+		 * @private
+		 */
+		dragonBones_internal static const _clock:WorldClock = new WorldClock();
+		
+		private static function _clockHandler(event:Event):void 
+		{
+			const time:Number = getTimer() * 0.001;
+			const passedTime:Number = time - _clock.time;
+			_clock.advanceTime(passedTime);
+			_clock.time = time;
+		}
+		
+		/**
 		 * @language zh_CN
 		 * 一个可以直接使用的全局工厂实例.
 		 * @version DragonBones 4.7
@@ -44,9 +65,10 @@
 		{
 			super(this, dataParser);
 			
-			if (!EventObject._soundEventManager) 
+			if (!_eventManager.hasEventListener(Event.ENTER_FRAME))
 			{
-				EventObject._soundEventManager = new FlashArmatureDisplay();
+				_clock.time = getTimer() * 0.001;
+				_eventManager.addEventListener(Event.ENTER_FRAME, _clockHandler, false, -999999);
 			}
 		}
 		
@@ -82,6 +104,7 @@
 			armature._skinData = dataPackage.skin;
 			armature._animation = dragonBones.core.BaseObject.borrowObject(Animation) as Animation;
 			armature._display = armatureDisplayContainer;
+			armature._eventManager = _eventManager;
 			
 			armature._animation._armature = armature;
 			armatureDisplayContainer._armature = armature;
@@ -110,25 +133,25 @@
 				switch (displayData.type)
 				{
 					case DragonBones.DISPLAY_TYPE_IMAGE:
-						if (!displayData.texture)
+						if (!displayData.texture || dataPackage.textureAtlasName)
 						{
-							displayData.texture = this._getTextureData(dataPackage.dataName, displayData.name);
+							displayData.texture = this._getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.name);
 						}
 						
 						displayList[displayIndex] = slot._rawDisplay;
 						break;
 					
 					case DragonBones.DISPLAY_TYPE_MESH:
-						if (!displayData.texture)
+						if (!displayData.texture || dataPackage.textureAtlasName)
 						{
-							displayData.texture = this._getTextureData(dataPackage.dataName, displayData.name);
+							displayData.texture = this._getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.name);
 						}
 						
 						displayList[displayIndex] = slot._meshDisplay;
 						break;
 					
 					case DragonBones.DISPLAY_TYPE_ARMATURE:
-						const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName);
+						const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName, null, dataPackage.textureAtlasName);
 						if (childArmature) 
 						{
 							if (!slot.inheritAnimation)
@@ -172,13 +195,14 @@
 		 * @param armatureName 骨架数据名称。
 		 * @param dragonBonesName 龙骨数据名称，如果未设置，将检索所有的龙骨数据，当多个数据中包含同名的骨架数据时，可能无法创建出准确的骨架。
 		 * @param skinName 皮肤名称，如果未设置，则使用默认皮肤。
+		 * @param textureAtlasName 贴图集数据名称，如果未设置，则使用龙骨数据名称。
 		 * @return 骨架的显示容器。
 		 * @see dragonBones.core.IArmatureDisplayContainer
 		 * @version DragonBones 4.5
 		 */
-		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null):FlashArmatureDisplay
+		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null, textureAtlasName:String = null):FlashArmatureDisplay
 		{
-			const armature:Armature = this.buildArmature(armatureName, dragonBonesName, skinName);
+			const armature:Armature = this.buildArmature(armatureName, dragonBonesName, skinName, textureAtlasName);
 			const armatureDisplay:FlashArmatureDisplay = armature? (armature.display as FlashArmatureDisplay): null;
 			if (armatureDisplay)
 			{
@@ -195,7 +219,7 @@
 		 */
 		public function get soundEventManager(): FlashArmatureDisplay
 		{
-			return EventObject._soundEventManager as FlashArmatureDisplay;
+			return _eventManager;
 		}
 	}
 }

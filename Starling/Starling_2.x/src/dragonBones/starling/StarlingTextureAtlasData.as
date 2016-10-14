@@ -4,6 +4,7 @@ package dragonBones.starling
 	import dragonBones.textures.TextureAtlasData;
 	import dragonBones.textures.TextureData;
 	
+	import starling.textures.SubTexture;
 	import starling.textures.Texture;
 	import starling.textures.TextureAtlas;
 	
@@ -16,7 +17,7 @@ package dragonBones.starling
 			{
 				const textureData:StarlingTextureData = textureAtlasData.generateTexture() as StarlingTextureData;
 				textureData.name = textureName;
-				textureData.texture = textureAtlas.getTexture(textureName);
+				textureData.texture = textureAtlas.getTexture(textureName) as SubTexture;
 				textureData.rotated = textureAtlas.getRotation(textureName);
 				textureData.region.copyFrom(textureAtlas.getRegion(textureName));
 				//textureData.frame = textureAtlas.getFrame(textureName);

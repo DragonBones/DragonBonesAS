@@ -290,7 +290,7 @@
 						
 						animationState._advanceTime(passedTime, weightLeft, animationIndex);
 						
-						if (animationState._weightResult != 0)
+						if (animationState._weightResult > 0)
 						{
 							layerTotalWeight += animationState._weightResult;
 							animationIndex++;
@@ -461,6 +461,7 @@
 			_animationStates.push(_lastAnimationState);
 			_animationStateDirty = true;
 			_time = 0;
+			_armature._cacheFrameIndex = -1;
 			
 			if (_animationStates.length > 1)
 			{
@@ -485,7 +486,7 @@
 				}
 			}
 			
-			if (fadeInTime == 0)
+			if (fadeInTime <= 0)
 			{
 				_armature.advanceTime(0);
 			}
@@ -546,7 +547,7 @@
 			const animationData:AnimationData = _animations[animationName];
 			if (animationData)
 			{
-				_time = animationData.duration * Math.max(progress, 0);
+				_time = animationData.duration * (progress > 0? progress: 0);
 			}
 			
 			return fadeIn(animationName, 0, playTimes, 0, null, AnimationFadeOutMode.All);

@@ -86,44 +86,44 @@
 		public var fadeTotalTime:Number;
 		
 		/**
-		 * @private Animation
+		 * @private
 		 */
-		dragonBones_internal var _isFadeOutComplete:Boolean;
+		internal var _isFadeOutComplete:Boolean;
 		
 		/**
-		 * @private Animation
+		 * @private
 		 */
-		dragonBones_internal var _layer:int;
+		internal var _layer:int;
 		
 		/**
-		 * @private TimelineState
+		 * @private
 		 */
-		dragonBones_internal var _position:Number;
+		internal var _position:Number;
 		
 		/**
-		 * @private TimelineState
+		 * @private
 		 */
-		dragonBones_internal var _duration:Number;
+		internal var _duration:Number;
 		
 		/**
-		 * @private Animation, TimelineState
+		 * @private
 		 */
-		dragonBones_internal var _weightResult:Number;
+		internal var _weightResult:Number;
 		
 		/**
-		 * @private Animation, TimelineState
+		 * @private
 		 */
-		dragonBones_internal var _fadeProgress:Number;
+		internal var _fadeProgress:Number;
 		
 		/**
-		 * @private Animation TimelineState
+		 * @private
 		 */
-		dragonBones_internal var _group:String;
+		internal var _group:String;
 		
 		/**
-		 * @private TimelineState
+		 * @private
 		 */
-		dragonBones_internal var _timeline:AnimationTimelineState;
+		internal var _timeline:AnimationTimelineState;
 		
 		/**
 		 * @private
@@ -390,7 +390,7 @@
 		 * @private
 		 */
 		[inline]
-		dragonBones_internal function _isDisabled(slot:Slot):Boolean
+		internal function _isDisabled(slot:Slot):Boolean
 		{
 			if (
 				displayControl && 
@@ -410,7 +410,7 @@
 		/**
 		 * @private
 		 */
-		dragonBones_internal function _fadeIn(
+		internal function _fadeIn(
 			armature:Armature, clip:AnimationData, animationName:String, 
 			playTimes:uint, position:Number, duration:Number, time:Number, timeScale:Number, fadeInTime:Number, 
 			pausePlayhead:Boolean
@@ -429,7 +429,7 @@
 			_duration = duration;
 			_time = time;
 			_isPausePlayhead = pausePlayhead;
-			if (fadeTotalTime == 0)
+			if (fadeTotalTime <= 0)
 			{
 				_fadeProgress = 0.999999;
 			}
@@ -443,7 +443,7 @@
 		/**
 		 * @private
 		 */
-		dragonBones_internal function _updateTimelineStates():void
+		internal function _updateTimelineStates():void
 		{
 			var time:Number = _time;
 			if (!_animationData.hasAsynchronyTimeline)
@@ -548,7 +548,7 @@
 		/**
 		 * @private
 		 */
-		dragonBones_internal function _updateFFDTimelineStates():void
+		internal function _updateFFDTimelineStates():void
 		{
 			var time:Number = _time;
 			if (!_animationData.hasAsynchronyTimeline)
@@ -625,7 +625,7 @@
 		/**
 		 * @private
 		 */
-		dragonBones_internal function _getBoneTimelineState(name:String):BoneTimelineState
+		internal function _getBoneTimelineState(name:String):BoneTimelineState
 		{
 			for each (var boneTimelineState:BoneTimelineState in _boneTimelines)
 			{
@@ -641,7 +641,7 @@
 		/**
 		 * @private
 		 */
-		dragonBones_internal function _advanceTime(passedTime:Number, weightLeft:Number, index:int):void
+		internal function _advanceTime(passedTime:Number, weightLeft:Number, index:int):void
 		{
 			// Update fade time. (Still need to be update even if the passedTime is zero)
 			_advanceFadeTime(passedTime);
@@ -794,7 +794,7 @@
 			{
 				_isFadeOut = true;
 				
-				if (fadeOutTime == 0 || _fadeProgress <= 0)
+				if (fadeOutTime <= 0 || _fadeProgress <= 0)
 				{
 					_fadeProgress = 0.000001;
 				}
@@ -863,7 +863,7 @@
 						currentBone.contains(bone)
 					) // Add recursive mixing.
 					{
-						_boneMask.push(boneName)
+						_boneMask.push(boneName);
 					}
 				}
 			}
