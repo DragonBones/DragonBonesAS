@@ -180,9 +180,6 @@ package dragonBones.core
 		 * @private
 		 */
 		public static const NO_TWEEN:Number = 100;
-		
-		public static const VERSION:String = "4.7.1";
-		
 		/**
 		 * @private
 		 */
@@ -191,6 +188,8 @@ package dragonBones.core
 		 * @private
 		 */
 		public static const ABSTRACT_METHOD_ERROR:String = "Abstract method needs to be implemented in subclass.";
+		
+		public static const VERSION:String = "4.7.2";
 		
 		/**
 		 * @private

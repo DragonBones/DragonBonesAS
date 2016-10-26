@@ -88,6 +88,11 @@
 		/**
 		 * @private
 		 */
+		internal var _isFading:Boolean;
+		
+		/**
+		 * @private
+		 */
 		internal var _isFadeOutComplete:Boolean;
 		
 		/**
@@ -248,6 +253,7 @@
 			autoFadeOutTime = -1;
 			fadeTotalTime = 0;
 			
+			_isFading = false;
 			_isFadeOutComplete = false;
 			_layer = 0;
 			_position = 0;
@@ -333,6 +339,8 @@
 			{
 				_fadeProgress = fadeProgress;
 				
+				_isFading = true;
+				
 				const eventDispatcher:IEventDispatcher = _armature._display;
 				var event:EventObject = null;
 				
@@ -383,6 +391,10 @@
 						}
 					}
 				}
+			}
+			else
+			{
+				_isFading = false;
 			}
 		}
 		

@@ -450,12 +450,12 @@
 			}
 			else
 			{
+				const scale:Number = this._armature.armatureData.scale;
 				_pivotX = currentDisplayData.pivot.x;
 				_pivotY = currentDisplayData.pivot.y;
 				
 				if (currentDisplayData.isRelativePivot)
 				{
-					const scale:Number = this._armature.armatureData.scale;
 					const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
 					
 					var width:Number = rect.width * scale;
@@ -472,8 +472,8 @@
 				
 				if (currentTextureData.frame)
 				{
-					this._pivotX += currentTextureData.frame.x;
-					this._pivotY += currentTextureData.frame.y;
+					this._pivotX += currentTextureData.frame.x * scale;
+					this._pivotY += currentTextureData.frame.y * scale;
 				}
 				
 				if (isReplaceDisplay)

@@ -159,8 +159,7 @@ package dragonBones.animation
 				
 				slot._blendIndex++;
 				
-				const fadeProgress:Number = this._animationState._fadeProgress;
-				if (fadeProgress < 1)
+				if (this._animationState._isFading)
 				{
 					slot._ffdDirty = true;
 				}

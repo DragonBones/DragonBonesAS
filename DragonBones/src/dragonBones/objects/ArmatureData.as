@@ -99,6 +99,7 @@ package dragonBones.objects
 		private var _slotDirty:Boolean;
 		private var _defaultSkin:SkinData;
 		private var _defaultAnimation:AnimationData;
+		private const _animationNames:Vector.<String> = new Vector.<String>();
 		private const _sortedBones:Vector.<BoneData> = new Vector.<BoneData>(0, true);
 		private const _sortedSlots:Vector.<SlotData> = new Vector.<SlotData>(0, true);
 		private const _bonesChildren:Object = {};
@@ -170,6 +171,7 @@ package dragonBones.objects
 			_slotDirty = false;
 			_defaultSkin = null;
 			_defaultAnimation = null;
+			_animationNames.length = 0;
 			
 			if (_sortedBones.length)
 			{
@@ -363,6 +365,7 @@ package dragonBones.objects
 			if (value && value.name && !animations[value.name])
 			{
 				animations[value.name] = value;
+				_animationNames.push(value.name);
 				
 				if (!_defaultAnimation)
 				{
@@ -473,6 +476,14 @@ package dragonBones.objects
 		public function get defaultAnimation():AnimationData
 		{
 			return _defaultAnimation;
+		}
+		
+		/**
+		 * @private
+		 */
+		public function get animationNames():Vector.<String>
+		{
+			return _animationNames;
 		}
 	}
 }

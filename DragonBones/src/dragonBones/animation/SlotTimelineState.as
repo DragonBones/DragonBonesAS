@@ -208,9 +208,10 @@
 				const weight:Number = this._animationState._weightResult;
 				if (weight > 0)
 				{
-					const fadeProgress:Number = this._animationState._fadeProgress;
-					if (fadeProgress < 1)
+					if (this._animationState._isFading)
 					{
+						const fadeProgress:Number = this._animationState._fadeProgress;
+						
 						_slotColor.alphaMultiplier += (_color.alphaMultiplier - _slotColor.alphaMultiplier) * fadeProgress;
 						_slotColor.redMultiplier += (_color.redMultiplier - _slotColor.redMultiplier) * fadeProgress;
 						_slotColor.greenMultiplier += (_color.greenMultiplier - _slotColor.greenMultiplier) * fadeProgress;

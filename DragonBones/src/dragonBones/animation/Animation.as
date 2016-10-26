@@ -22,7 +22,7 @@
 		 */
 		protected static function _sortAnimationState(a:AnimationState, b:AnimationState):int
 		{
-			return a.layer > b.layer? 1: -1;
+			return a.layer > b.layer? -1: 1;
 		}
 		
 		/**
@@ -71,11 +71,6 @@
 		/**
 		 * @private
 		 */
-		protected const _animationNames:Vector.<String> = new Vector.<String>();
-		
-		/**
-		 * @private
-		 */
 		protected const _animationStates:Vector.<AnimationState> = new Vector.<AnimationState>;
 		
 		/**
@@ -110,7 +105,6 @@
 			_isPlaying = false;
 			_time = 0;
 			_lastAnimationState = null;
-			_animationNames.length = 0;
 			_animationStates.length = 0;
 		}
 		
@@ -724,7 +718,7 @@
 		 */
 		public function get animationNames():Vector.<String>
 		{
-			return _animationNames;
+			return _armature.armatureData.animationNames;
 		}
 		
 		/**
@@ -749,14 +743,11 @@
 				delete _animations[i];
 			}
 			
-			_animationNames.length = 0;
-			
 			if (value)
 			{
 				for (var animationName:String in value)
 				{
 					_animations[animationName] = value[animationName];
-					_animationNames.push(animationName);
 				}
 			}
 		}
@@ -809,7 +800,7 @@
 		 */
 		public function get animationList():Vector.<String>
 		{
-			return _animationNames;
+			return this.animationNames;
 		}
 	}
 }
