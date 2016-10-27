@@ -140,7 +140,6 @@ class StarlingRender extends starling.display.Sprite
 	
 	private function _addToStageHandler(event: starling.events.Event): void
 	{
-		
 		StarlingFactory.factory.parseDragonBonesData(
 			JSON.parse(new MultiResolutionTextureAtlas.DBDataA()), "DBData"
 		);

@@ -204,9 +204,11 @@
 				dataPackage.data = dragonBonesData;
 				dataPackage.armature = armatureData;
 				dataPackage.skin = armatureData.getSkin(skinName);
-				if (!dataPackage.skin) {
+				if (!dataPackage.skin) 
+				{
 					dataPackage.skin = armatureData.defaultSkin;
 				}
+				
 				return true;
 			}
 			

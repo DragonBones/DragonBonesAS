@@ -95,7 +95,7 @@
 		/**
 		 * @private
 		 */
-		private var _ikChainIndex:uint;
+		private var _ikChainIndex:int;
 		
 		/**
 		 * @private
@@ -135,13 +135,13 @@
 			this.length = 0;
 			
 			_transformDirty = 2; // Update
-			_blendIndex = 0;
+			_blendIndex = -1;
 			_cacheFrames = null;
 			_animationPose.identity();
 			
 			_visible = true; //
 			_ikChain = 0;
-			_ikChainIndex = 0;
+			_ikChainIndex = -1;
 			_ik = null;
 			_bones.length = 0;
 			_slots.length = 0;
@@ -612,7 +612,7 @@
 		/**
 		 * @private
 		 */
-		public function get ikChainIndex():uint
+		public function get ikChainIndex():int
 		{
 			return _ikChainIndex;
 		}

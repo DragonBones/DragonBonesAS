@@ -3,6 +3,7 @@
 	import flash.display.BitmapData;
 	import flash.display.Shape;
 	import flash.events.Event;
+	import flash.geom.Matrix;
 	import flash.utils.getTimer;
 	
 	import dragonBones.Armature;
@@ -210,6 +211,70 @@
 			}
 			
 			return armatureDisplay;
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 获取带有指定贴图的显示对象。
+		 * @param textureName 指定的贴图名称。
+		 * @param textureAtlasName 指定的贴图集数据名称，如果未设置，将检索所有的贴图集数据。
+		 * @version DragonBones 3.0
+		 */
+		public function getTextureDisplay(textureName:String, textureAtlasName:String = null):Shape 
+		{
+			const textureData:FlashTextureData = this._getTextureData(textureAtlasName, textureName) as FlashTextureData;
+			if (textureData)
+			{
+				//if (!textureData.texture)
+				//{
+					//const textureAtlasTexture:Texture = (textureData.parent as StarlingTextureAtlasData).texture;
+					//textureData.texture = new SubTexture(textureAtlasTexture, textureData.region, false, null, textureData.rotated);
+				//}
+				
+				
+				var width:Number = 0;
+				var height:Number = 0;
+				if (textureData.rotated)
+				{
+					width = textureData.region.height;
+					height = textureData.region.width;
+				}
+				else
+				{
+					height = textureData.region.height;
+					width = textureData.region.width;
+				}
+				
+				const scale:Number = 1 / textureData.parent.scale;
+				const helpMatrix:Matrix = new Matrix();
+				
+				if (textureData.rotated)
+				{
+					helpMatrix.a = 0;
+					helpMatrix.b = -scale;
+					helpMatrix.c = scale;
+					helpMatrix.d = 0;
+					helpMatrix.tx = - textureData.region.y;
+					helpMatrix.ty = textureData.region.x + height;
+				}
+				else
+				{
+					helpMatrix.a = scale;
+					helpMatrix.b = 0;
+					helpMatrix.c = 0;
+					helpMatrix.d = scale;
+					helpMatrix.tx = - textureData.region.x;
+					helpMatrix.ty = - textureData.region.y;
+				}
+				
+				const shape:Shape = new Shape();
+				shape.graphics.beginBitmapFill((textureData.parent as FlashTextureAtlasData).texture, helpMatrix, false, true);
+				shape.graphics.drawRect(0, 0, width, height);
+				
+				return shape;
+			}
+			
+			return null;
 		}
 		
 		/**
