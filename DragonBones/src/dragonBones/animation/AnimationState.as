@@ -14,7 +14,7 @@
 	import dragonBones.objects.SlotTimelineData;
 	
 	use namespace dragonBones_internal;
-
+	
 	/**
 	 * @language zh_CN
 	 * 动画状态，播放动画时产生，可以对单个动画的播放进行更细致的控制和调节。
@@ -59,7 +59,7 @@
 		/**
 		 * @language zh_CN
 		 * 播放速度。 [(-N~0): 倒转播放, 0: 停止播放, (0~1): 慢速播放, 1: 正常播放, (1~N): 快速播放]
-         * @default 1
+		 * @default 1
 		 * @version DragonBones 3.0
 		 */
 		public var timeScale:Number;
@@ -67,15 +67,15 @@
 		/**
 		 * @language zh_CN
 		 * 进行动画混合时的权重。
-         * @default 1
+		 * @default 1
 		 * @version DragonBones 3.0
 		 */
 		public var weight:Number;
 		
 		/**
 		 * @language zh_CN
-         * 自动淡出时需要的时间，当设置一个大于等于 0 的值，动画状态将会在播放完成后自动淡出。 (以秒为单位)
-         * @default -1
+		 * 自动淡出时需要的时间，当设置一个大于等于 0 的值，动画状态将会在播放完成后自动淡出。 (以秒为单位)
+		 * @default -1
 		 * @version DragonBones 3.0
 		 */
 		public var autoFadeOutTime:Number;
@@ -88,12 +88,7 @@
 		/**
 		 * @private
 		 */
-		internal var _isFading:Boolean;
-		
-		/**
-		 * @private
-		 */
-		internal var _isFadeOutComplete:Boolean;
+		internal var _fadeState:int;
 		
 		/**
 		 * @private
@@ -143,11 +138,6 @@
 		/**
 		 * @private
 		 */
-		private var _isFadeOut:Boolean;
-		
-		/**
-		 * @private
-		 */
 		private var _fadeTime:Number;
 		
 		/**
@@ -169,6 +159,11 @@
 		 * @private
 		 */
 		private var _animationData:AnimationData;
+		
+		/**
+		 * @private
+		 */
+		private var _zOrderTimeline: ZOrderTimelineState;
 		
 		/**
 		 * @private
@@ -244,6 +239,16 @@
 				_ffdTimelines.fixed = true;
 			}
 			
+			if (_timeline)
+			{
+				_timeline.returnToPool();
+			}
+			
+			if (_zOrderTimeline)
+			{
+				_zOrderTimeline.returnToPool();
+			}
+			
 			displayControl = true;
 			additiveBlending = false;
 			actionEnabled = false;
@@ -253,29 +258,23 @@
 			autoFadeOutTime = -1;
 			fadeTotalTime = 0;
 			
-			_isFading = false;
-			_isFadeOutComplete = false;
+			_fadeState = 0;
 			_layer = 0;
 			_position = 0;
 			_duration = 0;
 			_weightResult = 0;
 			_fadeProgress = 0;
 			_group = null;
-			
-			if (_timeline)
-			{
-				_timeline.returnToPool();
-				_timeline = null;
-			}
+			_timeline = null;
 			
 			_isPlaying = true;
 			_isPausePlayhead = false;
-			_isFadeOut = false;
 			_fadeTime = 0;
 			_time = 0;
 			_name = null;
 			_armature = null;
 			_animationData = null;
+			_zOrderTimeline = null;
 			
 			if (_boneMask.length)
 			{
@@ -285,177 +284,7 @@
 			}
 		}
 		
-		/**
-		 * @private
-		 */
-		private function _advanceFadeTime(passedTime:Number):void
-		{
-			if (passedTime < 0)
-			{
-				passedTime = -passedTime;
-			}
-			
-			_fadeTime += passedTime;
-			
-			var fadeProgress:Number = 0;
-			if (_fadeTime >= fadeTotalTime) // Fade complete.
-			{
-				// fadeProgress = _isFadeOut? 0: 1;
-				if (_isFadeOut)
-				{
-					fadeProgress = 0;
-				}
-				else
-				{
-					fadeProgress = 1;
-				}
-			}
-			else if (_fadeTime > 0) // Fading.
-			{
-				// fadeProgress = _isFadeOut? (1 - _fadeTime / fadeTotalTime): (_fadeTime / fadeTotalTime);
-				if (_isFadeOut)
-				{
-					fadeProgress = 1 - _fadeTime / fadeTotalTime;
-				}
-				else
-				{
-					fadeProgress = _fadeTime / fadeTotalTime;
-				}
-			}
-			else // Before fade.
-			{
-				// fadeProgress = _isFadeOut? 1: 0;
-				if (_isFadeOut)
-				{
-					fadeProgress = 1;
-				}
-				else
-				{
-					fadeProgress = 0;
-				}
-			}
-			
-			if (_fadeProgress != fadeProgress)
-			{
-				_fadeProgress = fadeProgress;
-				
-				_isFading = true;
-				
-				const eventDispatcher:IEventDispatcher = _armature._display;
-				var event:EventObject = null;
-				
-				if (_fadeTime <= passedTime)
-				{
-					if (_isFadeOut)
-					{
-						if (eventDispatcher.hasEvent(EventObject.FADE_OUT))
-						{
-							event = BaseObject.borrowObject(EventObject) as EventObject;
-							event.animationState = this;
-							_armature._bufferEvent(event, EventObject.FADE_OUT);
-						}
-					}
-					else
-					{
-						if (eventDispatcher.hasEvent(EventObject.FADE_IN))
-						{
-							event = BaseObject.borrowObject(EventObject) as EventObject;
-							event.animationState = this;
-							_armature._bufferEvent(event, EventObject.FADE_IN);
-						}
-					}
-				}
-				
-				if (_fadeTime >= fadeTotalTime)
-				{
-					if (_isFadeOut)
-					{
-						_isFadeOutComplete = true;
-						
-						if (eventDispatcher.hasEvent(EventObject.FADE_OUT_COMPLETE))
-						{
-							event = BaseObject.borrowObject(EventObject) as EventObject;
-							event.animationState = this;
-							_armature._bufferEvent(event, EventObject.FADE_OUT_COMPLETE);
-						}
-					}
-					else
-					{
-						_isPausePlayhead = false;
-						
-						if (eventDispatcher.hasEvent(EventObject.FADE_IN_COMPLETE))
-						{
-							event = BaseObject.borrowObject(EventObject) as EventObject;
-							event.animationState = this;
-							_armature._bufferEvent(event, EventObject.FADE_IN_COMPLETE);
-						}
-					}
-				}
-			}
-			else
-			{
-				_isFading = false;
-			}
-		}
-		
-		/**
-		 * @private
-		 */
-		[inline]
-		internal function _isDisabled(slot:Slot):Boolean
-		{
-			if (
-				displayControl && 
-				(
-					!slot.displayController || 
-					slot.displayController == _name || 
-					slot.displayController == _group
-				)
-			)
-			{
-				return false;
-			}
-			
-			return true;
-		}
-		
-		/**
-		 * @private
-		 */
-		internal function _fadeIn(
-			armature:Armature, clip:AnimationData, animationName:String, 
-			playTimes:uint, position:Number, duration:Number, time:Number, timeScale:Number, fadeInTime:Number, 
-			pausePlayhead:Boolean
-		):void
-		{
-			_armature = armature;
-			_animationData = clip;
-			_name = animationName;
-			
-			actionEnabled = AnimationState.stateActionEnabled;
-			this.playTimes = playTimes;
-			this.timeScale = timeScale;
-			fadeTotalTime = fadeInTime;
-			
-			_position = position;
-			_duration = duration;
-			_time = time;
-			_isPausePlayhead = pausePlayhead;
-			if (fadeTotalTime <= 0)
-			{
-				_fadeProgress = 0.999999;
-			}
-			
-			_timeline = BaseObject.borrowObject(AnimationTimelineState) as AnimationTimelineState;
-			_timeline.fadeIn(_armature, this, _animationData, _time);
-			
-			_updateTimelineStates();
-		}
-		
-		/**
-		 * @private
-		 */
-		internal function _updateTimelineStates():void
+		private function _updateTimelineStates():void
 		{
 			var time:Number = _time;
 			if (!_animationData.hasAsynchronyTimeline)
@@ -529,7 +358,7 @@
 				const parentTimelineName:String = slot.parent.name;
 				const slotTimelineData:SlotTimelineData = _animationData.getSlotTimeline(slotTimelineName);
 				
-				if (slotTimelineData && containsBoneMask(parentTimelineName) && !_isFadeOut) // 当动画状态已经开始淡出, SlotTimelineState 将不在同步更新
+				if (slotTimelineData && containsBoneMask(parentTimelineName) && _fadeState <= 0) // 当动画状态已经开始淡出, SlotTimelineState 将不在同步更新
 				{
 					slotTimelineState = slotTimelineStates[slotTimelineName];
 					if (slotTimelineState)
@@ -555,6 +384,172 @@
 			_slotTimelines.fixed = true;
 			
 			_updateFFDTimelineStates();
+		}
+		
+		private function _advanceFadeTime(passedTime:Number):void
+		{
+			if (passedTime < 0)
+			{
+				passedTime = -passedTime;
+			}
+			
+			_fadeTime += passedTime;
+			
+			var fadeProgress:Number = 0;
+			if (_fadeTime >= fadeTotalTime) // Fade complete.
+			{
+				// fadeProgress = _isFadeOut? 0: 1;
+				if (_fadeState > 0)
+				{
+					fadeProgress = 0;
+				}
+				else
+				{
+					fadeProgress = 1;
+				}
+			}
+			else if (_fadeTime > 0) // Fading.
+			{
+				// fadeProgress = _isFadeOut? (1 - _fadeTime / fadeTotalTime): (_fadeTime / fadeTotalTime);
+				if (_fadeState > 0)
+				{
+					fadeProgress = 1 - _fadeTime / fadeTotalTime;
+				}
+				else
+				{
+					fadeProgress = _fadeTime / fadeTotalTime;
+				}
+			}
+			else // Before fade.
+			{
+				// fadeProgress = _isFadeOut? 1: 0;
+				if (_fadeState > 0)
+				{
+					fadeProgress = 1;
+				}
+				else
+				{
+					fadeProgress = 0;
+				}
+			}
+			
+			if (_fadeProgress != fadeProgress)
+			{
+				_fadeProgress = fadeProgress;
+				
+				const eventDispatcher:IEventDispatcher = _armature._display;
+				var event:EventObject = null;
+				
+				if (_fadeTime <= passedTime)
+				{
+					if (_fadeState > 0)
+					{
+						if (eventDispatcher.hasEvent(EventObject.FADE_OUT))
+						{
+							event = BaseObject.borrowObject(EventObject) as EventObject;
+							event.animationState = this;
+							_armature._bufferEvent(event, EventObject.FADE_OUT);
+						}
+					}
+					else
+					{
+						if (eventDispatcher.hasEvent(EventObject.FADE_IN))
+						{
+							event = BaseObject.borrowObject(EventObject) as EventObject;
+							event.animationState = this;
+							_armature._bufferEvent(event, EventObject.FADE_IN);
+						}
+					}
+				}
+				
+				if (_fadeTime >= fadeTotalTime)
+				{
+					if (_fadeState > 0)
+					{
+						_isPausePlayhead = true;
+						
+						if (eventDispatcher.hasEvent(EventObject.FADE_OUT_COMPLETE))
+						{
+							event = BaseObject.borrowObject(EventObject) as EventObject;
+							event.animationState = this;
+							_armature._bufferEvent(event, EventObject.FADE_OUT_COMPLETE);
+						}
+					}
+					else
+					{
+						_isPausePlayhead = false;
+						_fadeState = 0;
+						
+						if (eventDispatcher.hasEvent(EventObject.FADE_IN_COMPLETE))
+						{
+							event = BaseObject.borrowObject(EventObject) as EventObject;
+							event.animationState = this;
+							_armature._bufferEvent(event, EventObject.FADE_IN_COMPLETE);
+						}
+					}
+				}
+			}
+		}
+		
+		/**
+		 * @private
+		 */
+		[inline]
+		internal function _isDisabled(slot:Slot):Boolean
+		{
+			if (
+				displayControl && 
+				(
+					!slot.displayController || 
+					slot.displayController == _name || 
+					slot.displayController == _group
+				)
+			)
+			{
+				return false;
+			}
+			
+			return true;
+		}
+		
+		/**
+		 * @private
+		 */
+		internal function _fadeIn(
+			armature:Armature, clip:AnimationData, animationName:String, 
+			playTimes:uint, position:Number, duration:Number, time:Number, timeScale:Number, fadeInTime:Number, 
+			pausePlayhead:Boolean
+		):void
+		{
+			_armature = armature;
+			_animationData = clip;
+			_name = animationName;
+			
+			actionEnabled = AnimationState.stateActionEnabled;
+			this.playTimes = playTimes;
+			this.timeScale = timeScale;
+			fadeTotalTime = fadeInTime;
+			
+			_fadeState = -1;
+			_position = position;
+			_duration = duration;
+			_time = time;
+			_isPausePlayhead = pausePlayhead;
+			if (fadeTotalTime <= 0)
+			{
+				_fadeProgress = 0.999999;
+			}
+			
+			_timeline = BaseObject.borrowObject(AnimationTimelineState) as AnimationTimelineState;
+			_timeline.fadeIn(_armature, this, _animationData, _time);
+			
+			if (_animationData.zOrderTimeline) 
+			{
+				_zOrderTimeline = BaseObject.borrowObject(ZOrderTimelineState)as ZOrderTimelineState;
+				_zOrderTimeline.fadeIn(_armature, this, _animationData.zOrderTimeline, _time);
+			}
+			
+			_updateTimelineStates();
 		}
 		
 		/**
@@ -656,7 +651,10 @@
 		internal function _advanceTime(passedTime:Number, weightLeft:Number, index:int):void
 		{
 			// Update fade time. (Still need to be update even if the passedTime is zero)
-			_advanceFadeTime(passedTime);
+			if (_fadeState != 0)
+			{
+				_advanceFadeTime(passedTime);
+			}
 			
 			// Update time.
 			passedTime *= timeScale;
@@ -682,6 +680,11 @@
 				if (!_animationData.hasAsynchronyTimeline)
 				{
 					time = _timeline._currentTime;
+				}
+				
+				if (_zOrderTimeline) 
+				{
+					_zOrderTimeline.update(time);
 				}
 				
 				var i:uint = 0, l:uint = 0;
@@ -794,7 +797,7 @@
 			
 			_isPausePlayhead = pausePlayhead;
 			
-			if (_isFadeOut)
+			if (_fadeState > 0)
 			{
 				if (fadeOutTime > fadeOutTime - _fadeTime)
 				{
@@ -804,7 +807,7 @@
 			}
 			else
 			{
-				_isFadeOut = true;
+				_fadeState = 1;
 				
 				if (fadeOutTime <= 0 || _fadeProgress <= 0)
 				{
@@ -1047,6 +1050,11 @@
 			
 			_time = value;
 			_timeline.setCurrentTime(_time);
+			
+			if (_zOrderTimeline) 
+			{
+				_zOrderTimeline._isCompleted = false;
+			}
 			
 			var i:uint = 0, l:uint = 0;
 			for (i = 0, l = _boneTimelines.length; i < l; ++i) 

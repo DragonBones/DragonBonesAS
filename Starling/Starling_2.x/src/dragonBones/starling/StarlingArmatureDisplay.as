@@ -30,6 +30,11 @@ package dragonBones.starling
 		/**
 		 * @private
 		 */
+		dragonBones_internal const _subTextures:Object = {};
+		
+		/**
+		 * @private
+		 */
 		public function StarlingArmatureDisplay()
 		{
 			super();
@@ -40,6 +45,17 @@ package dragonBones.starling
 		 */
 		public function _onClear():void
 		{
+			for (var i:String in _subTextures) 
+			{
+				//th._subTextures[i].dispose();
+				delete _subTextures[i];
+			}
+			
+			if (_armature)
+			{
+				advanceTimeBySelf(false);
+			}
+			
 			_armature = null;
 		}
 		
@@ -64,6 +80,18 @@ package dragonBones.starling
 		 */
 		public function _debugDraw():void
 		{
+		}
+		
+		/**
+		 * @private
+		 */
+		public function _onReplaceTexture(texture:Object):void 
+		{
+			for (var i:String in _subTextures) 
+			{
+				//th._subTextures[i].dispose();
+				delete _subTextures[i];
+			}
 		}
 		
 		/**

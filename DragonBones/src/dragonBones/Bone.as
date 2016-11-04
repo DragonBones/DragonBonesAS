@@ -320,51 +320,8 @@
 		 */
 		override dragonBones_internal function _setArmature(value:Armature):void
 		{
-			if (this._armature == value)
-			{
-				return;
-			}
-			
-			_ik = null;
-			
-			var oldSlots:Vector.<Slot> = null;
-			var oldBones:Vector.<Bone> = null;
-			
-			if (this._armature)
-			{
-				oldSlots = getSlots();
-				oldBones = getBones();
-				this._armature._removeBoneFromBoneList(this);
-			}
-			
 			this._armature = value;
-			
-			if (this._armature)
-			{
-				this._armature._addBoneToBoneList(this);
-			}
-			
-			if (oldSlots)
-			{
-				for each (var slot:Slot in oldSlots)
-				{
-					if (slot.parent == this)
-					{
-						slot._setArmature(this._armature);
-					}
-				}
-			}
-			
-			if (oldBones)
-			{
-				for each (var bone:Bone in oldBones)
-				{
-					if (bone.parent == this)
-					{
-						bone._setArmature(this._armature);
-					}
-				}
-			}
+			this._armature._addBoneToBoneList(this);
 		}
 		
 		/**

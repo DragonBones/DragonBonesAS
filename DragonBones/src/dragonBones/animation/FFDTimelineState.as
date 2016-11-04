@@ -159,7 +159,7 @@ package dragonBones.animation
 				
 				slot._blendIndex++;
 				
-				if (this._animationState._isFading)
+				if (this._animationState._fadeState != 0)
 				{
 					slot._ffdDirty = true;
 				}

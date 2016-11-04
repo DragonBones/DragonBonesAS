@@ -20,7 +20,7 @@
 		/**
 		 * @private
 		 */
-		protected static function _sortAnimationState(a:AnimationState, b:AnimationState):int
+		private static function _sortAnimationState(a:AnimationState, b:AnimationState):int
 		{
 			return a.layer > b.layer? -1: 1;
 		}
@@ -39,39 +39,15 @@
 		dragonBones_internal var _animationStateDirty:Boolean;
 		
 		/**
-		 * @private
-		 */
-		dragonBones_internal var _timelineStateDirty:Boolean;
-		
-		/**
 		 * @private Factory
 		 */
 		dragonBones_internal var _armature:Armature;
 		
-		/**
-		 * @private
-		 */
-		protected var _isPlaying:Boolean;
-		
-		/**
-		 * @private
-		 */
-		protected var _time:Number;
-		
-		/**
-		 * @private
-		 */
-		protected var _lastAnimationState:AnimationState;
-		
-		/**
-		 * @private
-		 */
-		protected const _animations:Object = {};
-		
-		/**
-		 * @private
-		 */
-		protected const _animationStates:Vector.<AnimationState> = new Vector.<AnimationState>;
+		private var _isPlaying:Boolean;
+		private var _time:Number;
+		private var _lastAnimationState:AnimationState;
+		private const _animations:Object = {};
+		private const _animationStates:Vector.<AnimationState> = new Vector.<AnimationState>;
 		
 		/**
 		 * @private
@@ -99,7 +75,6 @@
 			timeScale = 1;
 			
 			_animationStateDirty = false;
-			_timelineStateDirty = false;
 			_armature = null;
 			
 			_isPlaying = false;
@@ -108,10 +83,7 @@
 			_animationStates.length = 0;
 		}
 		
-		/**
-		 * @private
-		 */
-		protected function _fadeOut(fadeOutTime:Number, layer:int, group:String, fadeOutMode:int, pauseFadeOut:Boolean):void
+		private function _fadeOut(fadeOutTime:Number, layer:int, group:String, fadeOutMode:int, pauseFadeOut:Boolean):void
 		{
 			var i:uint = 0, l:uint = _animationStates.length;
 			var animationState:AnimationState = null;
@@ -209,7 +181,7 @@
 			if (animationStateCount == 1)
 			{
 				animationState = _animationStates[0];
-				if (animationState._isFadeOutComplete) // 如果动画状态淡出完毕, 则删除动画状态
+				if (animationState._fadeState > 0 && animationState._fadeProgress <= 0) // 如果动画状态淡出完毕, 则删除动画状态
 				{
 					animationState.returnToPool();
 					_animationStates.length = 0;
@@ -218,11 +190,6 @@
 				}
 				else
 				{
-					if (_timelineStateDirty)
-					{
-						animationState._updateTimelineStates();
-					}
-					
 					animationState._advanceTime(passedTime, 1, 0);
 				}
 			}
@@ -236,7 +203,7 @@
 				for (var i:uint = 0, r:uint = 0; i < animationStateCount; ++i)
 				{
 					animationState = _animationStates[i];
-					if (animationState._isFadeOutComplete)
+					if (animationState._fadeState > 0 && animationState._fadeProgress <= 0)
 					{
 						r++;
 						animationState.returnToPool();
@@ -277,11 +244,6 @@
 							layerTotalWeight = 0;
 						}
 						
-						if (_timelineStateDirty)
-						{
-							animationState._updateTimelineStates();
-						}
-						
 						animationState._advanceTime(passedTime, weightLeft, animationIndex);
 						
 						if (animationState._weightResult > 0)
@@ -297,8 +259,6 @@
 					}
 				}
 			}
-			
-			_timelineStateDirty = false;
 		}
 		
 		/**
@@ -407,12 +367,14 @@
 			if (!animationData)
 			{
 				_time = 0;
+				
 				trace(
 					"Non-existent animation.",
 					"DragonBones: " + _armature.armatureData.parent.name,
 					"Armature: " + _armature.name,
 					"Animation: " + animationName
 				);
+				
 				return null;
 			}
 			
@@ -750,57 +712,6 @@
 					_animations[animationName] = value[animationName];
 				}
 			}
-		}
-		
-		/**
-		 * @deprecated
-		 * @see #play()
-		 * @see #fadeIn()
-		 * @see #gotoAndPlayByTime()
-		 * @see #gotoAndPlayByFrame()
-		 * @see #gotoAndPlayByProgress()
-		 */
-		public function gotoAndPlay(
-			animationName:String,
-			fadeInTime:Number = -1,
-			duration:Number = -1,
-			playTimes:int = -1,
-			layer:int = 0,
-			group:String = null,
-			fadeOutMode:int = AnimationFadeOutMode.SameLayerAndGroup,
-			pauseFadeOut:Boolean = true,
-			pauseFadeIn:Boolean = true
-		):AnimationState
-		{
-			const animationState:AnimationState = this.fadeIn(animationName, fadeInTime, playTimes, layer, group, fadeOutMode, false, true, pauseFadeOut, pauseFadeIn);
-			if (animationState && duration > 0)
-			{
-				animationState.timeScale = animationState.totalTime / duration;
-			}
-			
-			return animationState;
-		}
-		
-		/**
-		 * @deprecated
-		 * @see #gotoAndStopByTime()
-		 * @see #gotoAndStopByFrame()
-		 * @see #gotoAndStopByProgress()
-		 */
-		public function gotoAndStop(animationName:String, time:Number = 0):AnimationState
-		{
-			return gotoAndStopByTime(animationName, time);
-		}
-		
-		/**
-		 * @deprecated
-		 * @see #animationNames
-		 * @see #animations
-		 * @version DragonBones 3.0
-		 */
-		public function get animationList():Vector.<String>
-		{
-			return this.animationNames;
 		}
 	}
 }

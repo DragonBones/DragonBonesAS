@@ -208,7 +208,7 @@
 				const weight:Number = this._animationState._weightResult;
 				if (weight > 0)
 				{
-					if (this._animationState._isFading)
+					if (this._animationState._fadeState != 0)
 					{
 						const fadeProgress:Number = this._animationState._fadeProgress;
 						

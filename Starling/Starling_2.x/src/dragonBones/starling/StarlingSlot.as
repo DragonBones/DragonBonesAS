@@ -1,7 +1,6 @@
 ﻿package dragonBones.starling
 {
 	import flash.geom.Matrix;
-	import flash.geom.Rectangle;
 	
 	import dragonBones.Bone;
 	import dragonBones.Slot;
@@ -51,6 +50,13 @@
 		public function StarlingSlot()
 		{
 			super(this);
+		}
+		
+		private function _createTexture(textureData:StarlingTextureData, textureAtlas:Texture): SubTexture
+		{
+			const texture:SubTexture = new SubTexture(textureAtlas, textureData.region, false, null, textureData.rotated);
+			
+			return texture;
 		}
 		
 		/**
@@ -139,32 +145,10 @@
 		/**
 		 * @private
 		 */
-		override dragonBones_internal function _getDisplayZIndex():int
+		override protected function _updateZOrder():void
 		{
 			const container:StarlingArmatureDisplay = this._armature._display as StarlingArmatureDisplay;
-			return container.getChildIndex(_renderDisplay);
-		}
-		
-		/**
-		 * @private
-		 */
-		override dragonBones_internal function _setDisplayZIndex(value:int):void
-		{
-			const container:StarlingArmatureDisplay = this._armature.display as StarlingArmatureDisplay;
-			const index:int = container.getChildIndex(_renderDisplay);
-			if (index == value)
-			{
-				return;
-			}
-			
-			if (index < value)
-			{
-				container.addChildAt(_renderDisplay, value);
-			}
-			else
-			{
-				container.addChildAt(_renderDisplay, value + 1);
-			}
+			container.addChildAt(this._renderDisplay, this._zOrder);
 		}
 		
 		/**
@@ -230,8 +214,6 @@
 		 */
 		override protected function _updateFrame():void
 		{
-			const frameDisplay:Image = this._rawDisplay as Image; // TODO
-			
 			if (this._display && this._displayIndex >= 0)
 			{
 				const rawDisplayData:DisplayData = this._displayIndex < this._displayDataSet.displays.length? this._displayDataSet.displays[this._displayIndex]: null;
@@ -241,82 +223,97 @@
 				
 				if (currentTextureData)
 				{
-					const textureAtlasTexture:Texture = (currentTextureData.parent as StarlingTextureAtlasData).texture;
-					if (textureAtlasTexture)
+					const currentTextureAtlasData:StarlingTextureAtlasData = currentTextureData.parent as StarlingTextureAtlasData;
+					const replacedTextureAtlas:Texture = this._armature.replacedTexture as Texture;
+					const currentTextureAtlas:Texture = (replacedTextureAtlas && currentDisplayData.texture.parent == rawDisplayData.texture.parent) ?
+						replacedTextureAtlas : currentTextureAtlasData.texture;
+					
+					if (currentTextureAtlas)
 					{
-						if (currentTextureData.texture)
+						var currentTexture:SubTexture = currentTextureData.texture;
+						
+						if (currentTextureAtlas == replacedTextureAtlas) {
+							const armatureDisplay:StarlingArmatureDisplay = this._armature._display as StarlingArmatureDisplay;
+							const textureName:String = currentTextureData.name;
+							currentTexture = armatureDisplay._subTextures[textureName];
+							if (!currentTexture) {
+								currentTexture = _createTexture(currentTextureData, currentTextureAtlas);
+								armatureDisplay._subTextures[textureName] = currentTexture;
+							}
+						}
+						else if (!currentTextureData.texture) {
+							currentTexture = _createTexture(currentTextureData, currentTextureAtlas);
+							currentTextureData.texture = currentTexture;
+						}
+						
+						this._updatePivot(rawDisplayData, currentDisplayData, currentTextureData);
+						
+						if (this._meshData && this._display == this._meshDisplay)
 						{
-							const texture:Texture = (this._armature._replacedTexture as starling.textures.Texture) || currentTextureData.texture.parent;
-							if (currentTextureData.texture.parent != texture)
+							const meshDisplay:Mesh = this._meshDisplay as Mesh;
+							const meshStyle:MeshStyle = meshDisplay.style;
+							
+							_indexData.clear();
+							_vertexData.clear();
+							
+							var i:uint = 0, l:uint = 0;
+							
+							for (i = 0, l = this._meshData.vertexIndices.length; i < l; ++i)
 							{
-								currentTextureData.texture.dispose();
-								currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, null, currentTextureData.rotated);
+								_indexData.setIndex(i, this._meshData.vertexIndices[i]);
+							}
+							
+							for (i = 0, l = this._meshData.uvs.length; i < l; i += 2)
+							{
+								const iH:uint = uint(i / 2);
+								meshStyle.setTexCoords(iH, this._meshData.uvs[i], this._meshData.uvs[i + 1]);
+								meshStyle.setVertexPosition(iH, this._meshData.vertices[i], this._meshData.vertices[i + 1]);
+							}
+							
+							meshDisplay.texture = currentTexture;
+							//meshDisplay.readjustSize();
+							
+							if (this._meshData.skinned)
+							{
+								const transformationMatrix:Matrix = meshDisplay.transformationMatrix;
+								transformationMatrix.identity();
+								meshDisplay.transformationMatrix = transformationMatrix;
 							}
 						}
 						else
 						{
-							currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, null, currentTextureData.rotated);
+							const frameDisplay:Image = this._rawDisplay as Image;
+							frameDisplay.texture = currentTexture;
+							frameDisplay.readjustSize();
 						}
+						
+						this._updateVisible();
+						
+						return;
 					}
-					
-					this._updatePivot(rawDisplayData, currentDisplayData, currentTextureData);
-					
-					if (this._meshData && this._display == this._meshDisplay)
-					{
-						const meshDisplay:Mesh = this._meshDisplay as Mesh;
-						const meshStyle:MeshStyle = meshDisplay.style;
-						
-						_indexData.clear();
-						_vertexData.clear();
-						
-						var i:uint = 0, l:uint = 0;
-						
-						for (i = 0, l = this._meshData.vertexIndices.length; i < l; ++i)
-						{
-							_indexData.setIndex(i, this._meshData.vertexIndices[i]);
-						}
-						
-						for (i = 0, l = this._meshData.uvs.length; i < l; i += 2)
-						{
-							const iH:uint = uint(i / 2);
-							meshStyle.setTexCoords(iH, this._meshData.uvs[i], this._meshData.uvs[i + 1]);
-							meshStyle.setVertexPosition(iH, this._meshData.vertices[i], this._meshData.vertices[i + 1]);
-						}
-						
-						meshDisplay.texture = currentTextureData.texture;
-						//meshDisplay.readjustSize();
-						
-						if (this._meshData.skinned)
-						{
-							const transformationMatrix:Matrix = meshDisplay.transformationMatrix;
-							transformationMatrix.identity();
-							meshDisplay.transformationMatrix = transformationMatrix;
-						}
-					}
-					else
-					{
-						frameDisplay.texture = currentTextureData.texture;
-						frameDisplay.readjustSize();
-					}
-					
-					this._updateVisible();
-					
-					return;
 				}
 			}
 			
 			this._pivotX = 0;
 			this._pivotY = 0;
 			
-			frameDisplay.visible = false;
-			frameDisplay.texture = null;
-			if (frameDisplay is Image)
+			if (this._meshData && this._display == this._meshDisplay)
 			{
-				frameDisplay.readjustSize();
+				const meshDisplayB:Mesh = this._meshDisplay as Mesh;
+				meshDisplayB.visible = false;
+				meshDisplayB.texture = null;
+				meshDisplayB.x = this.origin.x;
+				meshDisplayB.y = this.origin.y;
 			}
-			
-			frameDisplay.x = this.origin.x;
-			frameDisplay.y = this.origin.y;
+			else
+			{
+				const frameDisplayB:Image = this._rawDisplay as Image;
+				frameDisplayB.visible = false;
+				frameDisplayB.texture = null;
+				frameDisplayB.readjustSize();
+				frameDisplayB.x = this.origin.x;
+				frameDisplayB.y = this.origin.y;
+			}
 		}
 		
 		/**
@@ -404,8 +401,8 @@
 				displayMatrix.b = this.globalTransformMatrix.b;
 				displayMatrix.c = this.globalTransformMatrix.c;
 				displayMatrix.d = this.globalTransformMatrix.d;
-				displayMatrix.tx = this.globalTransformMatrix.tx - (displayMatrix.a * this._pivotX + displayMatrix.c * this._pivotY);
-				displayMatrix.ty = this.globalTransformMatrix.ty - (displayMatrix.b * this._pivotX + displayMatrix.d * this._pivotY);
+				displayMatrix.tx = this.globalTransformMatrix.tx - (this.globalTransformMatrix.a * this._pivotX + this.globalTransformMatrix.c * this._pivotY);
+				displayMatrix.ty = this.globalTransformMatrix.ty - (this.globalTransformMatrix.b * this._pivotX + this.globalTransformMatrix.d * this._pivotY);
 				
 				_renderDisplay.setRequiresRedraw();
 			}

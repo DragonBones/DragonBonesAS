@@ -2,11 +2,13 @@
 {
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.TransformObject;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.geom.Transform;
 	import dragonBones.objects.ActionData;
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.MeshData;
@@ -30,6 +32,13 @@
 	 */
 	public class Slot extends TransformObject
 	{
+		private static const _helpPoint:Point = new Point();
+		
+		/**
+		 * @private
+		 */
+		protected static const _helpMatrix:Matrix = new Matrix();
+		
 		/**
 		 * @language zh_CN
          * 子骨架是否继承父骨架的动画。 [true: 继承, false: 不继承]
@@ -48,16 +57,6 @@
 		 * @version DragonBones 4.5
 		 */
 		public var displayController:String;
-		
-		/**
-		 * @private SlotTimelineState
-		 */
-		dragonBones_internal var _colorDirty:Boolean;
-		
-		/**
-		 * @private FFDTimelineState
-		 */
-		dragonBones_internal var _ffdDirty:Boolean;
 		
 		/**
 		 * @private
@@ -127,7 +126,17 @@
 		/**
 		 * @private
 		 */
+		dragonBones_internal var _zOrderDirty:Boolean;
+		
+		/**
+		 * @private
+		 */
 		protected var _displayDirty:Boolean;
+		
+		/**
+		 * @private SlotTimelineState
+		 */
+		dragonBones_internal var _colorDirty:Boolean;
 		
 		/**
 		 * @private
@@ -143,6 +152,11 @@
 		 * @private
 		 */
 		protected var _transformDirty:Boolean;
+		
+		/**
+		 * @private FFDTimelineState
+		 */
+		dragonBones_internal var _ffdDirty:Boolean;
 		
 		/**
 		 * @private
@@ -343,15 +357,7 @@
 		/**
 		 * @private
 		 */
-		dragonBones_internal function _getDisplayZIndex():int
-		{
-			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
-		}
-		
-		/**
-		 * @private
-		 */
-		dragonBones_internal function _setDisplayZIndex(value:int):void
+		protected function _updateZOrder():void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
@@ -434,19 +440,11 @@
 		 */
 		protected function _updatePivot(rawDisplayData:DisplayData, currentDisplayData:DisplayData, currentTextureData:TextureData):void
 		{
-			const isReplaceDisplay:Boolean = rawDisplayData && rawDisplayData != currentDisplayData;
+			const isReplaceDisplay:Boolean = rawDisplayData && rawDisplayData != currentDisplayData && (!_meshData || _meshData != rawDisplayData.mesh);
 			if (_meshData && _display == _meshDisplay)
 			{
-				if (_meshData != rawDisplayData.mesh && isReplaceDisplay) 
-				{
-					_pivotX = rawDisplayData.transform.x - currentDisplayData.transform.x;
-					_pivotY = rawDisplayData.transform.y - currentDisplayData.transform.y;
-				}
-				else 
-				{
-					_pivotX = 0;
-					_pivotY = 0;
-				}
+				_pivotX = 0;
+				_pivotY = 0;
 			}
 			else
 			{
@@ -475,12 +473,21 @@
 					this._pivotX += currentTextureData.frame.x * scale;
 					this._pivotY += currentTextureData.frame.y * scale;
 				}
+			}
+			
+			if (isReplaceDisplay) 
+			{
+				rawDisplayData.transform.toMatrix(_helpMatrix);
+				_helpMatrix.invert();
+				Transform.transformPoint(_helpMatrix, 0, 0, _helpPoint);
+				_pivotX -= _helpPoint.x;
+				_pivotY -= _helpPoint.y;
 				
-				if (isReplaceDisplay)
-				{
-					this._pivotX += rawDisplayData.transform.x - currentDisplayData.transform.x;
-					this._pivotY += rawDisplayData.transform.y - currentDisplayData.transform.y;
-				}
+				currentDisplayData.transform.toMatrix(_helpMatrix);
+				_helpMatrix.invert();
+				Transform.transformPoint(_helpMatrix, 0, 0, _helpPoint);
+				_pivotX += Slot._helpPoint.x;
+				_pivotY += Slot._helpPoint.y;
 			}
 		}
 		
@@ -612,29 +619,11 @@
 		 */
 		override dragonBones_internal function _setArmature(value:Armature):void
 		{
-			if (this._armature == value)
-			{
-				return;
-			}
-			
-			if (this._armature)
-			{
-				this._armature._removeSlotFromSlotList(this);
-			}
-			
 			this._armature = value;
+			this._armature._addSlotToSlotList(this);
 			
 			_onUpdateDisplay(); // Update renderDisplay.
-			
-			if (this._armature)
-			{
-				this._armature._addSlotToSlotList(this);
-				_addDisplay();
-			}
-			else
-			{
-				_removeDisplay();
-			}
+			_addDisplay();
 		}
 		
 		/**
@@ -722,6 +711,12 @@
 		dragonBones_internal function _update(cacheFrameIndex:int):void
 		{
 			_blendIndex = 0;
+			
+			if (_zOrderDirty)
+			{
+				_zOrderDirty = false;
+				_updateZOrder();
+			}
 			
 			if (_displayDirty)
 			{

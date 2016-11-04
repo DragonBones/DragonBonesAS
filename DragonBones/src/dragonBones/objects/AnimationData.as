@@ -67,6 +67,11 @@
 		/**
 		 * @private
 		 */
+		public var zOrderTimeline:ZOrderTimelineData;
+		
+		/**
+		 * @private
+		 */
 		public const boneTimelines:Object = {};
 		
 		/**
@@ -131,6 +136,7 @@
 			cacheTimeToFrameScale = 0;
 			name = null;
 			animation = null;
+			zOrderTimeline = null;
 			
 			if (cachedFrames.length)
 			{

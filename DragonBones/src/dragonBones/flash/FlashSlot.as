@@ -10,6 +10,7 @@ package dragonBones.flash
 	
 	import dragonBones.Bone;
 	import dragonBones.Slot;
+	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.DisplayData;
 	
@@ -22,8 +23,6 @@ package dragonBones.flash
 	 */
 	public class FlashSlot extends Slot
 	{
-		private static const _helpMatrix:Matrix = new Matrix();
-		
 		private var _renderDisplay:DisplayObject;
 		
 		private var _meshTexture:BitmapData;
@@ -112,33 +111,10 @@ package dragonBones.flash
 		/**
 		 * @private
 		 */
-		override dragonBones_internal function _getDisplayZIndex():int
-		{
-			const container:FlashArmatureDisplay = this._armature._display as FlashArmatureDisplay;
-			return container.getChildIndex(_renderDisplay);
-		}
-		
-		/**
-		 * @private
-		 */
-		override dragonBones_internal function _setDisplayZIndex(value:int):void
+		override protected function _updateZOrder():void
 		{
 			const container:FlashArmatureDisplay = this._armature.display as FlashArmatureDisplay;
-			const index:int = container.getChildIndex(_renderDisplay);
-			if (index == value)
-			{
-				return;
-			}
-			
-			// container.addChildAt(_renderDisplay, index < value? value: value + 1);
-			if (index < value)
-			{
-				container.addChildAt(_renderDisplay, value);
-			}
-			else
-			{
-				container.addChildAt(_renderDisplay, value + 1);
-			}
+			container.addChildAt(this._renderDisplay, this._zOrder);
 		}
 		
 		/**
@@ -210,11 +186,10 @@ package dragonBones.flash
 				
 				if (currentTextureData)
 				{
-					const textureAtlasTexture:BitmapData = (currentTextureData.parent as FlashTextureAtlasData).texture;
-					const texture:BitmapData = 
-						(this._armature._replacedTexture as BitmapData) ||
-						textureAtlasTexture ||
-						currentTextureData.texture;
+					const rawTextureAtlas:BitmapData = (currentTextureData.parent as FlashTextureAtlasData).texture;
+					const replacedTextureAtlas:BitmapData = this._armature.replacedTexture as BitmapData;
+					const currentTextureAtlas:BitmapData = (currentDisplayData.texture.parent == rawDisplayData.texture.parent && replacedTextureAtlas) ?
+						replacedTextureAtlas : rawTextureAtlas;
 					
 					this._updatePivot(rawDisplayData, currentDisplayData, currentTextureData);
 					
@@ -250,13 +225,14 @@ package dragonBones.flash
 						{
 							const u:Number = this._meshData.uvs[i];
 							const v:Number = this._meshData.uvs[i + 1];
-							_pach.uvtData[i] = (currentTextureData.region.x + u * currentTextureData.region.width) / textureAtlasTexture.width;
-							_pach.uvtData[i + 1] = (currentTextureData.region.y + v * currentTextureData.region.height) / textureAtlasTexture.height;
+							_pach.uvtData[i] = (currentTextureData.region.x + u * currentTextureData.region.width) / rawTextureAtlas.width;
+							_pach.uvtData[i + 1] = (currentTextureData.region.y + v * currentTextureData.region.height) / rawTextureAtlas.height;
 						}
 						
-						for (i = 0, l = _pach.vertices.length; i < l; ++i)
+						for (i = 0, l = _pach.vertices.length; i < l; i += 2)
 						{
-							_pach.vertices[i] = this._meshData.vertices[i];
+							_pach.vertices[i] = this._meshData.vertices[i] - this._pivotX;
+							_pach.vertices[i + 1] = this._meshData.vertices[i + 1] - this._pivotY;
 						}
 						
 						for (i = 0, l = _pach.indices.length; i < l; ++i)
@@ -266,11 +242,15 @@ package dragonBones.flash
 						
 						meshDisplay.graphics.clear();
 						
-						if (texture)
+						if (currentTextureAtlas)
 						{
-							_meshTexture = texture;
-							meshDisplay.graphics.beginBitmapFill(texture, null, false, true);
+							_meshTexture = currentTextureAtlas;
+							meshDisplay.graphics.beginBitmapFill(currentTextureAtlas, null, false, true);
 							meshDisplay.graphics.drawTriangles(_pach.vertices, _pach.indices, _pach.uvtData);
+						}
+						else
+						{
+							_meshTexture = null;
 						}
 						
 						if (this._meshData.skinned)
@@ -304,8 +284,8 @@ package dragonBones.flash
 							_helpMatrix.b = -scale;
 							_helpMatrix.c = scale;
 							_helpMatrix.d = 0;
-							_helpMatrix.tx = - currentTextureData.region.y;
-							_helpMatrix.ty = currentTextureData.region.x + height;
+							_helpMatrix.tx = -this._pivotX - currentTextureData.region.y;
+							_helpMatrix.ty = -this._pivotY + currentTextureData.region.x + height;
 						}
 						else
 						{
@@ -313,16 +293,16 @@ package dragonBones.flash
 							_helpMatrix.b = 0;
 							_helpMatrix.c = 0;
 							_helpMatrix.d = scale;
-							_helpMatrix.tx = - currentTextureData.region.x;
-							_helpMatrix.ty = - currentTextureData.region.y;
+							_helpMatrix.tx = -this._pivotX - currentTextureData.region.x;
+							_helpMatrix.ty = -this._pivotY - currentTextureData.region.y;
 						}
 						
 						frameDisplay.graphics.clear();
 						
-						if (texture)
+						if (currentTextureAtlas)
 						{
-							frameDisplay.graphics.beginBitmapFill(texture, _helpMatrix, false, true);
-							frameDisplay.graphics.drawRect(0, 0, width, height);
+							frameDisplay.graphics.beginBitmapFill(currentTextureAtlas, _helpMatrix, false, true);
+							frameDisplay.graphics.drawRect(-this._pivotX, -this._pivotY, width, height);
 						}
 					}
 					
@@ -396,8 +376,8 @@ package dragonBones.flash
 						iF += 2;
 					}
 					
-					_pach.vertices[i] = xG;
-					_pach.vertices[i + 1] = yG;
+					_pach.vertices[i] = xG - this._pivotX;
+					_pach.vertices[i + 1] = yG - this._pivotY;
 				}
 				
 				meshDisplay.graphics.beginBitmapFill(_meshTexture, null, false, true);
@@ -412,8 +392,8 @@ package dragonBones.flash
 				{
 					xG = vertices[i] + this._ffdVertices[i];
 					yG = vertices[i + 1] + this._ffdVertices[i + 1];
-					_pach.vertices[i] = xG;
-					_pach.vertices[i + 1] = yG;
+					_pach.vertices[i] = xG - this._pivotX;
+					_pach.vertices[i + 1] = yG - this._pivotY;
 				}
 				
 				meshDisplay.graphics.beginBitmapFill(_meshTexture, null, true, true);
@@ -426,16 +406,7 @@ package dragonBones.flash
 		 */
 		override protected function _updateTransform():void
 		{
-			const displayMatrix:Matrix = _helpMatrix;
-			
-			displayMatrix.a = this.globalTransformMatrix.a;
-			displayMatrix.b = this.globalTransformMatrix.b;
-			displayMatrix.c = this.globalTransformMatrix.c;
-			displayMatrix.d = this.globalTransformMatrix.d;
-			displayMatrix.tx = this.globalTransformMatrix.tx - (displayMatrix.a * this._pivotX + displayMatrix.c * this._pivotY);
-			displayMatrix.ty = this.globalTransformMatrix.ty - (displayMatrix.b * this._pivotX + displayMatrix.d * this._pivotY);
-			
-			_renderDisplay.transform.matrix = displayMatrix;
+			_renderDisplay.transform.matrix = this.globalTransformMatrix;
 		}
 	}
 }

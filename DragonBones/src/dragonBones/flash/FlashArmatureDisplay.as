@@ -37,6 +37,11 @@ package dragonBones.flash
 		 */
 		public function _onClear():void
 		{
+			if (_armature)
+			{
+				advanceTimeBySelf(false);
+			}
+			
 			_armature = null;
 			_debugDrawer = null;
 		}
@@ -78,6 +83,13 @@ package dragonBones.flash
 				_debugDrawer.graphics.moveTo(startX, startY);
 				_debugDrawer.graphics.lineTo(endX, endY);
 			}
+		}
+		
+		/**
+		 * @private
+		 */
+		public function _onReplaceTexture(texture:Object):void 
+		{
 		}
 		
 		/**

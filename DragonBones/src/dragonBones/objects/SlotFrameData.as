@@ -15,7 +15,6 @@ package dragonBones.objects
 		}
 		
 		public var displayIndex:int;
-		public var zOrder:int;
 		public var color:ColorTransform;
 		
 		public function SlotFrameData()
@@ -31,7 +30,6 @@ package dragonBones.objects
 			super._onClear();
 			
 			displayIndex = 0;
-			zOrder = 0;
 			color = null;
 		}
 	}

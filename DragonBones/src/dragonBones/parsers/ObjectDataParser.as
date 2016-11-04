@@ -27,6 +27,8 @@
 	import dragonBones.objects.SlotTimelineData;
 	import dragonBones.objects.TimelineData;
 	import dragonBones.objects.TweenFrameData;
+	import dragonBones.objects.ZOrderFrameData;
+	import dragonBones.objects.ZOrderTimelineData;
 	import dragonBones.textures.TextureAtlasData;
 	import dragonBones.textures.TextureData;
 	
@@ -275,7 +277,7 @@
 			slot.name = _getString(rawData, NAME, null);
 			slot.parent = this._armature.getBone(_getString(rawData, PARENT, null));
 			slot.displayIndex = _getNumber(rawData, DISPLAY_INDEX, 0);
-			slot.zOrder = _getNumber(rawData, Z_ORDER, zOrder); // 如果未标识 zOrder 则使用队列顺序
+			slot.zOrder = _getNumber(rawData, Z, zOrder); // Support 2.x ~ 3.x data.
 			
 			if (COLOR in rawData)
 			{
@@ -605,6 +607,13 @@
 			
 			_parseTimeline(rawData, animation, _parseAnimationFrame);
 			
+			
+			if (Z_ORDER in rawData) 
+			{
+				animation.zOrderTimeline = BaseObject.borrowObject(ZOrderTimelineData) as ZOrderTimelineData;
+				this._parseTimeline(rawData[Z_ORDER], animation.zOrderTimeline, _parseZOrderFrame);
+			}
+			
 			if (BONE in rawData)
 			{
 				for each (var boneTimelineObject:Object in rawData[BONE])
@@ -851,6 +860,58 @@
 		/**
 		 * @private
 		 */
+		protected function _parseZOrderFrame(rawData:Object, frameStart:uint, frameCount:uint):ZOrderFrameData 
+		{
+			const frame:ZOrderFrameData = BaseObject.borrowObject(ZOrderFrameData) as ZOrderFrameData;
+			
+			_parseFrame(rawData, frame, frameStart, frameCount);
+			
+			const zOrder:Array = rawData[Z_ORDER] as Array;
+			if (zOrder && zOrder.length > 0) {
+				const slotCount:uint = this._armature.sortedSlots.length;
+				const unchanged:Vector.<int> = new Vector.<int>(slotCount - zOrder.length / 2);
+				
+				frame.zOrder.length = slotCount;
+				for (var i:uint = 0, l:uint = slotCount; i < l; ++i) {
+					frame.zOrder[i] = -1;
+				}
+				
+				var originalIndex:int = 0;
+				var unchangedIndex:int = 0;
+				for (i = 0, l = zOrder.length; i < l; i += 2) 
+				{
+					const slotIndex:int = zOrder[i];
+					const offset:int = zOrder[i + 1];
+					
+					while (originalIndex != slotIndex) 
+					{
+						unchanged[unchangedIndex++] = originalIndex++;
+					}
+					
+					frame.zOrder[originalIndex + offset] = originalIndex++;
+				}
+				
+				while (originalIndex < slotCount) 
+				{
+					unchanged[unchangedIndex++] = originalIndex++;
+				}
+				
+				i = slotCount;
+				while (i--) 
+				{
+					if (frame.zOrder[i] == -1) 
+					{
+						frame.zOrder[i] = unchanged[--unchangedIndex];
+					}
+				}
+			}
+			
+			return frame;
+		}
+		
+		/**
+		 * @private
+		 */
 		protected function _parseBoneFrame(rawData:Object, frameStart:uint, frameCount:uint):BoneFrameData
 		{
 			const frame:BoneFrameData = BaseObject.borrowObject(BoneFrameData) as BoneFrameData;
@@ -907,7 +968,6 @@
 		{
 			const frame:SlotFrameData = BaseObject.borrowObject(SlotFrameData) as SlotFrameData;
 			frame.displayIndex = _getNumber(rawData, DISPLAY_INDEX, 0);
-			//frame.zOrder = _getNumber(rawData, Z_ORDER, -1); // TODO zorder
 			
 			_parseTweenFrame(rawData, frame, frameStart, frameCount);
 			

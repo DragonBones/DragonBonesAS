@@ -56,6 +56,7 @@
 		protected static const SKIN:String = "skin";
 		protected static const DISPLAY:String = "display";
 		protected static const ANIMATION:String = "animation";
+		protected static const Z_ORDER:String = "zOrder";
 		protected static const FFD:String = "ffd";
 		protected static const FRAME:String = "frame";
 		
@@ -74,7 +75,6 @@
 		protected static const LENGTH:String = "length";
 		protected static const DATA:String = "data";
 		protected static const DISPLAY_INDEX:String = "displayIndex";
-		protected static const Z_ORDER:String = "z";
 		protected static const BLEND_MODE:String = "blendMode";
 		protected static const INHERIT_TRANSLATION:String = "inheritTranslation";
 		protected static const INHERIT_ROTATION:String = "inheritRotation";
@@ -130,12 +130,10 @@
 		protected static const TIMELINE:String = "timeline";
 		protected static const PIVOT_X:String = "pX";
 		protected static const PIVOT_Y:String = "pY";
+		protected static const Z:String = "z";
 		protected static const LOOP:String = "loop";
 		protected static const AUTO_TWEEN:String = "autoTween";
 		protected static const HIDE:String = "hide";
-		
-		protected static const RECTANGLE:String = "rectangle";
-		protected static const ELLIPSE:String = "ellipse";
 		
 		protected static function _getArmatureType(value:String):int
 		{

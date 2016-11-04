@@ -18,6 +18,11 @@ package dragonBones.core
 		function _debugDraw():void;
 		
 		/**
+		 * @private
+		 */
+		function _onReplaceTexture(texture:Object):void;
+		
+		/**
 		 * @language zh_CN
 		 * 释放显示对象和骨架。 (骨架会回收到内存池)
 		 * @version DragonBones 4.5

@@ -1,7 +1,6 @@
 ﻿package dragonBones.starling
 {
 	import flash.geom.Matrix;
-	import flash.geom.Rectangle;
 	
 	import dragonBones.Slot;
 	import dragonBones.core.DragonBones;
@@ -51,6 +50,13 @@
 		public function StarlingSlot()
 		{
 			super(this);
+		}
+		
+		private function _createTexture(textureData:StarlingTextureData, textureAtlas:Texture): SubTexture
+		{
+			const texture:SubTexture = new SubTexture(textureAtlas, textureData.region, false, null, textureData.rotated);
+			
+			return texture;
 		}
 		
 		/**
@@ -127,32 +133,10 @@
 		/**
 		 * @private
 		 */
-		override dragonBones_internal function _getDisplayZIndex():int
+		override protected function _updateZOrder():void
 		{
 			const container:StarlingArmatureDisplay = this._armature._display as StarlingArmatureDisplay;
-			return container.getChildIndex(_renderDisplay);
-		}
-		
-		/**
-		 * @private
-		 */
-		override dragonBones_internal function _setDisplayZIndex(value:int):void
-		{
-			const container:StarlingArmatureDisplay = this._armature.display as StarlingArmatureDisplay;
-			const index:int = container.getChildIndex(_renderDisplay);
-			if (index == value)
-			{
-				return;
-			}
-			
-			if (index < value)
-			{
-				container.addChildAt(_renderDisplay, value);
-			}
-			else
-			{
-				container.addChildAt(_renderDisplay, value + 1);
-			}
+			container.addChildAt(this._renderDisplay, this._zOrder);
 		}
 		
 		/**
@@ -226,42 +210,47 @@
 				const replacedDisplayData:DisplayData = this._displayIndex < this._replacedDisplayDataSet.length? this._replacedDisplayDataSet[this._displayIndex]: null;
 				const currentDisplayData:DisplayData = replacedDisplayData || rawDisplayData;
 				const currentTextureData:StarlingTextureData = currentDisplayData.texture as StarlingTextureData;
-				
 				if (currentTextureData)
 				{
-					const textureAtlasTexture:Texture = (currentTextureData.parent as StarlingTextureAtlasData).texture;
-					if (textureAtlasTexture)
+					const currentTextureAtlasData:StarlingTextureAtlasData = currentTextureData.parent as StarlingTextureAtlasData;
+					const replacedTextureAtlas:Texture = this._armature.replacedTexture as Texture;
+					const currentTextureAtlas:Texture = (replacedTextureAtlas && currentDisplayData.texture.parent == rawDisplayData.texture.parent) ?
+						replacedTextureAtlas : currentTextureAtlasData.texture;
+					
+					if (currentTextureAtlas)
 					{
-						if (currentTextureData.texture)
-						{
-							const texture:Texture = (this._armature._replacedTexture as starling.textures.Texture) || currentTextureData.texture.parent;
-							if (currentTextureData.texture.parent != texture)
-							{
-								currentTextureData.texture.dispose();
-								currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, null, currentTextureData.rotated);
+						var currentTexture:SubTexture = currentTextureData.texture;
+						
+						if (currentTextureAtlas == replacedTextureAtlas) {
+							const armatureDisplay:StarlingArmatureDisplay = this._armature._display as StarlingArmatureDisplay;
+							const textureName:String = currentTextureData.name;
+							currentTexture = armatureDisplay._subTextures[textureName];
+							if (!currentTexture) {
+								currentTexture = _createTexture(currentTextureData, currentTextureAtlas);
+								armatureDisplay._subTextures[textureName] = currentTexture;
 							}
+						}
+						else if (!currentTextureData.texture) {
+							currentTexture = _createTexture(currentTextureData, currentTextureAtlas);
+							currentTextureData.texture = currentTexture;
+						}
+						
+						this._updatePivot(rawDisplayData, currentDisplayData, currentTextureData);
+						
+						if (this._meshData && this._display == this._meshDisplay)
+						{
+							// TODO
 						}
 						else
 						{
-							currentTextureData.texture = new SubTexture(textureAtlasTexture, currentTextureData.region, false, null, currentTextureData.rotated);
+							frameDisplay.texture = currentTexture;
+							frameDisplay.readjustSize();
 						}
-					}
-					
-					this._updatePivot(rawDisplayData, currentDisplayData, currentTextureData);
-					
-					if (this._meshData && this._display == this._meshDisplay)
-					{
-					}
-					else
-					{
-						frameDisplay.texture = currentTextureData.texture || getEmptyTexture();
 						
-						frameDisplay.readjustSize();
+						this._updateVisible();
+						
+						return;
 					}
-					
-					this._updateVisible();
-					
-					return;
 				}
 			}
 			

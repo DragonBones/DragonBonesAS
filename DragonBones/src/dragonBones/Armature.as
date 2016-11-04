@@ -11,6 +11,7 @@ package dragonBones
 	import dragonBones.objects.ActionData;
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.SkinData;
+	import dragonBones.objects.SlotData;
 	
 	use namespace dragonBones_internal;
 	
@@ -26,6 +27,11 @@ package dragonBones
 	 */
 	public final class Armature extends BaseObject implements IAnimateble
 	{
+		private static function _onSortSlots(a:Slot, b:Slot):int 
+		{
+			return a._zOrder > b._zOrder ? 1 : -1;
+		}
+		
 		/**
 		 * @language zh_CN
 		 * 可以用于存储临时数据。
@@ -155,6 +161,16 @@ package dragonBones
 				event.returnToPool();
 			}
 			
+			if (_animation)
+			{
+				_animation.returnToPool();
+			}
+			
+			if (_display)
+			{
+				_display._onClear();
+			}
+			
 			userData = null;
 			
 			_bonesDirty = false;
@@ -162,25 +178,15 @@ package dragonBones
 			_armatureData = null;
 			_skinData = null;
 			
-			if (_animation)
-			{
-				_animation.returnToPool();
-				_animation = null;
-			}
-			
-			if (_display)
-			{
-				_display._onClear();
-				_display = null;
-			}
-			
+			_animation = null;
+			_display = null;
 			_parent = null;
-			_replacedTexture = null;
 			_eventManager = null;
 			
 			_delayDispose = false;
 			_lockDispose = false;
 			_slotsDirty = false;
+			_replacedTexture = null;
 			_actions.length = 0;
 			_events.length = 0;
 		}
@@ -244,6 +250,7 @@ package dragonBones
 		 */
 		private function _sortSlots():void
 		{
+			_slots.sort(_onSortSlots);
 		}
 		
 		/**
@@ -292,22 +299,6 @@ package dragonBones
 				_bonesDirty = true;
 				_bones.fixed = false;
 				_bones.push(value);
-				_animation._timelineStateDirty = true;
-			}
-		}
-		
-		/**
-		 * @private
-		 */
-		dragonBones_internal function _removeBoneFromBoneList(value:Bone):void
-		{
-			var index:int = _bones.indexOf(value);
-			if (index >= 0)
-			{
-				_bones.fixed = false;
-				_bones.splice(index, 1);
-				_bones.fixed = true;
-				_animation._timelineStateDirty = true;
 			}
 		}
 		
@@ -321,23 +312,31 @@ package dragonBones
 				_slotsDirty = true;
 				_slots.fixed = false;
 				_slots.push(value);
-				_animation._timelineStateDirty = true;
 			}
 		}
 		
 		/**
 		 * @private
 		 */
-		dragonBones_internal function _removeSlotFromSlotList(value:Slot):void
+		dragonBones_internal function _sortZOrder(slotIndices: Vector.<int>):void 
 		{
-			var index:int = _slots.indexOf(value);
-			if (index >= 0)
+			const sortedSlots:Vector.<SlotData> = _armatureData.sortedSlots;
+			const isOriginal:Boolean = slotIndices.length < 1;
+			
+			for (var i:uint = 0, l:uint = sortedSlots.length; i < l; ++i) 
 			{
-				_slots.fixed = false;
-				_slots.splice(index, 1);
-				_slots.fixed = true;
-				_animation._timelineStateDirty = true;
+				const slotIndex:int = isOriginal? i: slotIndices[i];
+				const slotData:SlotData = sortedSlots[slotIndex];
+				const slot:Slot = getSlot(slotData.name);
+				
+				if (slot && slot._zOrder != i) 
+				{
+					slot._zOrder = i;
+					slot._zOrderDirty = true;
+				}
 			}
+			
+			_slotsDirty = true;
 		}
 		
 		/**
@@ -356,6 +355,31 @@ package dragonBones
 			value.type = type;
 			value.armature = this;
 			_events.push(value);
+		}
+		
+		/**
+		 * @private
+		 */
+		dragonBones_internal function _addBone(value:Bone, parentName:String = null):void
+		{
+			if (value)
+			{
+				value._setArmature(this);
+				value._setParent(parentName? getBone(parentName): null);
+			}
+		}
+		
+		/**
+		 * @private
+		 */
+		dragonBones_internal function _addSlot(value:Slot, parentName:String):void
+		{
+			const bone:Bone = getBone(parentName);
+			if (bone)
+			{
+				value._setArmature(this);
+				value._setParent(bone);
+			}
 		}
 		
 		/**
@@ -567,6 +591,42 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
+		 * 获取指定名称的骨骼。
+		 * @param name 骨骼的名称。
+		 * @return 骨骼。
+		 * @see dragonBones.Bone
+		 * @version DragonBones 3.0
+		 */
+		public function getBone(name:String):Bone
+		{
+			for each(var bone:Bone in _bones)
+			{
+				if (bone.name == name)
+				{
+					return bone;
+				}
+			}
+			
+			return null;
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 通过显示对象获取骨骼。
+		 * @param display 显示对象。
+		 * @return 包含这个显示对象的骨骼。
+		 * @see dragonBones.Bone
+		 * @version DragonBones 3.0
+		 */
+		public function getBoneByDisplay(display:Object):Bone
+		{
+			const slot:Slot = getSlotByDisplay(display);
+			
+			return slot? slot.parent: null;
+		}
+		
+		/**
+		 * @language zh_CN
 		 * 获取指定名称的插槽。
 		 * @param name 插槽的名称。
 		 * @return 插槽。
@@ -612,135 +672,13 @@ package dragonBones
 		
 		/**
 		 * @language zh_CN
-		 * 将一个指定的插槽添加到骨架中。
-		 * @param value 需要添加的插槽。
-		 * @param parentName 需要添加到的父骨骼名称。
-		 * @see dragonBones.Slot
-		 * @version DragonBones 3.0
-		 */
-		public function addSlot(value:Slot, parentName:String):void
-		{
-			const bone:Bone = getBone(parentName);
-			if (bone)
-			{
-				value._setArmature(this);
-				value._setParent(bone);
-			}
-			else
-			{
-				throw new ArgumentError();
-			}
-		}
-		
-		/**
-		 * @language zh_CN
-		 * 将一个指定的插槽从骨架中移除。
-		 * @param bone 需要移除的插槽
-		 * @see dragonBones.Slot
-		 * @version DragonBones 3.0
-		 */
-		public function removeSlot(value:Slot):void
-		{
-			if (value && value.armature == this)
-			{
-				value._setParent(null);
-				value._setArmature(null);
-			}
-			else
-			{
-				throw new ArgumentError();
-			}
-		}
-		
-		/**
-		 * @language zh_CN
-		 * 获取指定名称的骨骼。
-		 * @param name 骨骼的名称。
-		 * @return 骨骼。
-		 * @see dragonBones.Bone
-		 * @version DragonBones 3.0
-		 */
-		public function getBone(name:String):Bone
-		{
-			for each(var bone:Bone in _bones)
-			{
-				if (bone.name == name)
-				{
-					return bone;
-				}
-			}
-			
-			return null;
-		}
-		/**
-		 * @language zh_CN
-		 * 通过显示对象获取骨骼。
-		 * @param display 显示对象。
-		 * @return 包含这个显示对象的骨骼。
-		 * @see dragonBones.Bone
-		 * @version DragonBones 3.0
-		 */
-		public function getBoneByDisplay(display:Object):Bone
-		{
-			const slot:Slot = getSlotByDisplay(display);
-			
-			return slot? slot.parent: null;
-		}
-		
-		/**
-		 * @language zh_CN
-		 * 将一个指定的骨骼添加到骨架中。
-		 * @param value 需要添加的骨骼。
-		 * @param parentName 需要添加到父骨骼的名称，如果未设置，则添加到骨架根部。
-		 * @see dragonBones.Bone
-		 * @version DragonBones 3.0
-		 */
-		public function addBone(value:Bone, parentName:String = null):void
-		{
-			if (value)
-			{
-				value._setArmature(this);
-				value._setParent(parentName? getBone(parentName): null);
-			}
-			else
-			{
-				throw new ArgumentError();
-			}
-			
-		}
-		
-		/**
-		 * @language zh_CN
-		 * 将一个指定的骨骼从骨架中移除。
-		 * @param value 需要移除的骨骼
-		 * @see dragonBones.Bone
-		 * @version DragonBones 3.0
-		 */
-		public function removeBone(value:Bone):void
-		{
-			if (value && value.armature == this)
-			{
-				value._setParent(null);
-				value._setArmature(null);
-			}
-			else
-			{
-				throw new ArgumentError();
-			}
-		}
-		
-		/**
-		 * @language zh_CN
 		 * 替换骨架的主贴图，根据渲染引擎的不同，提供不同的贴图数据。
+		 * @param texture 贴图。
 		 * @version DragonBones 4.5
 		 */
 		public function replaceTexture(texture:Object):void
 		{
-			_replacedTexture = texture;
-			for each (var slot:Slot in _slots)
-			{
-				slot.invalidUpdate();
-			}
+			replacedTexture = texture;
 		}
 		
 		/**
@@ -850,6 +788,25 @@ package dragonBones
 						childArmature.cacheFrameRate = value;
 					}
 				}
+			}
+		}
+		
+		/**
+		 * @language zh_CN
+		 * 替换骨架的主贴图，根据渲染引擎的不同，提供不同的贴图数据。
+		 * @version DragonBones 4.5
+		 */
+		public function get replacedTexture():Object 
+		{
+			return _replacedTexture;
+		}
+		public function set replacedTexture(value:Object):void
+		{
+			_replacedTexture = value;
+			
+			for (var i:uint = 0, l:uint = _slots.length; i < l; ++i) 
+			{
+				_slots[i].invalidUpdate();
 			}
 		}
 		

@@ -234,11 +234,11 @@
 				
 				if(boneData.parent)
 				{
-					armature.addBone(bone, boneData.parent.name);
+					armature._addBone(bone, boneData.parent.name);
 				}
 				else
 				{
-					armature.addBone(bone);
+					armature._addBone(bone);
 				}
 				
 				
@@ -292,7 +292,7 @@
 					slot._setBlendMode(slotData.blendMode);
 					slot._setColor(slotData.color);
 					
-					armature.addSlot(slot, slotData.parent.name);
+					armature._addSlot(slot, slotData.parent.name);
 				}
 			}
 		}
@@ -706,7 +706,7 @@
 		 * @version DragonBones 4.5
 		 */
 		public function copyAnimationsToArmature(
-			toArmature:Armature, fromArmatreName:String, fromSkinName:String = null, 
+			toArmature:Armature, fromArmatreName:String, fromSkinName:String = null,
 			fromDragonBonesDataName:String = null, ifRemoveOriginalAnimationList:Boolean = true
 		):Boolean
 		{
