@@ -6,13 +6,12 @@ package dragonBones.flash
 	import flash.display.GraphicsTrianglePath;
 	import flash.display.Shape;
 	import flash.geom.Matrix;
-	import flash.geom.Rectangle;
 	
 	import dragonBones.Bone;
 	import dragonBones.Slot;
-	import dragonBones.core.DragonBones;
+	import dragonBones.core.BaseObject;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.objects.DisplayData;
+	import dragonBones.enum.BlendMode;
 	
 	use namespace dragonBones_internal;
 	
@@ -24,10 +23,8 @@ package dragonBones.flash
 	public class FlashSlot extends Slot
 	{
 		private var _renderDisplay:DisplayObject;
-		
 		private var _meshTexture:BitmapData;
-		private var _pach:GraphicsTrianglePath;
-		
+		private var _path:GraphicsTrianglePath;
 		/**
 		 * @language zh_CN
 		 * 创建一个空的插槽。
@@ -37,7 +34,6 @@ package dragonBones.flash
 		{
 			super(this);
 		}
-		
 		/**
 		 * @inheritDoc
 		 */
@@ -47,59 +43,46 @@ package dragonBones.flash
 			
 			_renderDisplay = null;
 			_meshTexture = null;
-			_pach = null;
+			_path = null;
 		}
-		
-		// Abstract method
-		
 		/**
 		 * @private
 		 */
-		override protected function _initDisplay(value:*):void
+		override protected function _initDisplay(value:Object):void
 		{
 		}
-		
 		/**
 		 * @private
 		 */
-		override protected function _disposeDisplay(value:*):void
+		override protected function _disposeDisplay(value:Object):void
 		{
 		}
-		
 		/**
 		 * @private
 		 */
 		override protected function _onUpdateDisplay():void
 		{
-			if (!this._rawDisplay)
-			{
-				this._rawDisplay = new Shape();
-			}
-			
-			_renderDisplay = (this._display || this._rawDisplay) as DisplayObject;
+			_renderDisplay = (_display? _display : _rawDisplay) as DisplayObject;
 		}
-		
 		/**
 		 * @private
 		 */
 		override protected function _addDisplay():void
 		{
-			const container:FlashArmatureDisplay = this._armature._display as FlashArmatureDisplay;
+			const container:FlashArmatureDisplay = _armature.display as FlashArmatureDisplay;
 			container.addChild(_renderDisplay);
 		}
-		
 		/**
 		 * @private
 		 */
-		override protected function _replaceDisplay(prevDisplay:*):void
+		override protected function _replaceDisplay(prevDisplay:Object):void
 		{
-			const container:FlashArmatureDisplay = this._armature.display as FlashArmatureDisplay;
+			const container:FlashArmatureDisplay = _armature.display as FlashArmatureDisplay;
 			const displayObject:DisplayObject = prevDisplay as DisplayObject;
 			container.addChild(_renderDisplay);
 			container.swapChildren(_renderDisplay, displayObject);
 			container.removeChild(displayObject);
 		}
-		
 		/**
 		 * @private
 		 */
@@ -107,161 +90,186 @@ package dragonBones.flash
 		{
 			_renderDisplay.parent.removeChild(_renderDisplay);
 		}
-		
 		/**
 		 * @private
 		 */
 		override protected function _updateZOrder():void
 		{
-			const container:FlashArmatureDisplay = this._armature.display as FlashArmatureDisplay;
-			container.addChildAt(this._renderDisplay, this._zOrder);
+			const container:FlashArmatureDisplay = _armature.display as FlashArmatureDisplay;
+			container.addChildAt(_renderDisplay, _zOrder);
 		}
-		
 		/**
 		 * @private
 		 */
 		override dragonBones_internal function _updateVisible():void
 		{
-			_renderDisplay.visible = this._parent.visible;
+			_renderDisplay.visible = _parent.visible;
 		}
-		
-		/**
-		 * @private
-		 */
-		private static const BLEND_MODE_LIST:Vector.<String> = Vector.<String>(
-			[
-				BlendMode.NORMAL,
-				BlendMode.ADD,
-				BlendMode.ALPHA,
-				BlendMode.DARKEN,
-				BlendMode.DIFFERENCE,
-				BlendMode.ERASE,
-				BlendMode.HARDLIGHT,
-				BlendMode.INVERT,
-				BlendMode.LAYER,
-				BlendMode.LIGHTEN,
-				BlendMode.MULTIPLY,
-				BlendMode.OVERLAY,
-				BlendMode.SCREEN,
-				BlendMode.SUBTRACT
-			]
-		);
-		
 		/**
 		 * @private
 		 */
 		override protected function _updateBlendMode():void
 		{
-			if (this._blendMode < BLEND_MODE_LIST.length)
+			switch (_blendMode) 
 			{
-				const blendMode:String = BLEND_MODE_LIST[this._blendMode];
-				if (blendMode)
-				{
-					_renderDisplay.blendMode = blendMode;
-				}
+				case dragonBones.enum.BlendMode.Normal:
+					_renderDisplay.blendMode = flash.display.BlendMode.NORMAL;
+					break;
+				
+				case dragonBones.enum.BlendMode.Add:
+					_renderDisplay.blendMode = flash.display.BlendMode.ADD;
+					break;
+				
+				case dragonBones.enum.BlendMode.Alpha:
+					_renderDisplay.blendMode = flash.display.BlendMode.ALPHA;
+					break;
+				
+				case dragonBones.enum.BlendMode.Darken:
+					_renderDisplay.blendMode = flash.display.BlendMode.DARKEN;
+					break;
+				
+				case dragonBones.enum.BlendMode.Difference:
+					_renderDisplay.blendMode = flash.display.BlendMode.DIFFERENCE;
+					break;
+				
+				case dragonBones.enum.BlendMode.Erase:
+					_renderDisplay.blendMode = flash.display.BlendMode.ERASE;
+					break;
+				
+				case dragonBones.enum.BlendMode.HardLight:
+					_renderDisplay.blendMode = flash.display.BlendMode.HARDLIGHT;
+					break;
+				
+				case dragonBones.enum.BlendMode.Invert:
+					_renderDisplay.blendMode = flash.display.BlendMode.INVERT;
+					break;
+				
+				case dragonBones.enum.BlendMode.Layer:
+					_renderDisplay.blendMode = flash.display.BlendMode.LAYER;
+					break;
+				
+				case dragonBones.enum.BlendMode.Lighten:
+					_renderDisplay.blendMode = flash.display.BlendMode.LIGHTEN;
+					break;
+				
+				case dragonBones.enum.BlendMode.Multiply:
+					_renderDisplay.blendMode = flash.display.BlendMode.MULTIPLY;
+					break;
+				
+				case dragonBones.enum.BlendMode.Overlay:
+					_renderDisplay.blendMode = flash.display.BlendMode.OVERLAY;
+					break;
+				
+				case dragonBones.enum.BlendMode.Screen:
+					_renderDisplay.blendMode = flash.display.BlendMode.SCREEN;
+					break;
+				
+				case dragonBones.enum.BlendMode.Subtract:
+					_renderDisplay.blendMode = flash.display.BlendMode.SUBTRACT;
+					break;
+				
+				default:
+					break;
 			}
 		}
-		
 		/**
 		 * @private
 		 */
 		override protected function _updateColor():void
 		{
-			_renderDisplay.transform.colorTransform = this._colorTransform;
+			_renderDisplay.transform.colorTransform = _colorTransform;
 		}
-		
 		/**
 		 * @private
 		 */
 		override protected function _updateFrame():void
 		{
-			const frameDisplay:Shape = _renderDisplay as Shape;
+			const isMeshDisplay:Boolean = _meshData && _renderDisplay === _meshDisplay;
+			var currentTextureData:FlashTextureData = _textureData as FlashTextureData;
 			
-			if (this._display && this._displayIndex >= 0)
+			if (_displayIndex >= 0 && _display && currentTextureData)
 			{
-				const rawDisplayData:DisplayData = this._displayIndex < this._displayDataSet.displays.length? this._displayDataSet.displays[this._displayIndex]: null;
-				const replacedDisplayData:DisplayData = this._displayIndex < this._replacedDisplayDataSet.length? this._replacedDisplayDataSet[this._displayIndex]: null;
-				const currentDisplayData:DisplayData = replacedDisplayData || rawDisplayData;
-				const currentTextureData:FlashTextureData = currentDisplayData.texture as FlashTextureData;
+				var currentTextureAtlasData:FlashTextureAtlasData = currentTextureData.parent as FlashTextureAtlasData;
 				
-				if (currentTextureData)
+				// Update replaced texture atlas.
+				if (_armature.replacedTexture && _displayData && currentTextureAtlasData === _displayData.texture.parent) 
 				{
-					const rawTextureAtlas:BitmapData = (currentTextureData.parent as FlashTextureAtlasData).texture;
-					const replacedTextureAtlas:BitmapData = this._armature.replacedTexture as BitmapData;
-					const currentTextureAtlas:BitmapData = (currentDisplayData.texture.parent == rawDisplayData.texture.parent && replacedTextureAtlas) ?
-						replacedTextureAtlas : rawTextureAtlas;
-					
-					this._updatePivot(rawDisplayData, currentDisplayData, currentTextureData);
-					
-					if (this._meshData && this._display == this._meshDisplay)
+					currentTextureAtlasData = _armature._replaceTextureAtlasData as FlashTextureAtlasData;
+					if (!currentTextureAtlasData) 
 					{
-						const meshDisplay:Shape = this._meshDisplay as Shape;
+						currentTextureAtlasData = BaseObject.borrowObject(FlashTextureAtlasData) as FlashTextureAtlasData;
+						currentTextureAtlasData.copyFrom(_textureData.parent);
+						currentTextureAtlasData.texture = _armature.replacedTexture as BitmapData;
+						_armature._replaceTextureAtlasData = currentTextureAtlasData;
+					}
+					
+					currentTextureData = currentTextureAtlasData.getTexture(currentTextureData.name) as FlashTextureData;
+				}
+				
+				const currentTextureAtlas:BitmapData = currentTextureAtlasData.texture;
+				if (currentTextureAtlas)
+				{
+					const textureAtlasWidth:Number = currentTextureAtlasData.width > 0.0 ? currentTextureAtlasData.width : currentTextureAtlas.width;
+					const textureAtlasHeight:Number = currentTextureAtlasData.height > 0.0 ? currentTextureAtlasData.height : currentTextureAtlas.height;
+					
+					if (isMeshDisplay) // Mesh.
+					{
+						var meshDisplay:Shape = _renderDisplay as Shape;
 						
-						if (_pach)
+						if (_path)
 						{
-							_pach.uvtData.fixed = false;
-							_pach.vertices.fixed = false;
-							_pach.indices.fixed = false;
+							_path.uvtData.fixed = false;
+							_path.vertices.fixed = false;
+							_path.indices.fixed = false;
 							
-							_pach.uvtData.length = this._meshData.uvs.length;
-							_pach.vertices.length = this._meshData.vertices.length;
-							_pach.indices.length = this._meshData.vertexIndices.length;
+							_path.uvtData.length = _meshData.uvs.length;
+							_path.vertices.length = _meshData.vertices.length;
+							_path.indices.length = _meshData.vertexIndices.length;
 							
-							_pach.uvtData.fixed = true;
-							_pach.vertices.fixed = true;
-							_pach.indices.fixed = true;
+							_path.uvtData.fixed = true;
+							_path.vertices.fixed = true;
+							_path.indices.fixed = true;
 						}
 						else
 						{
-							_pach = new GraphicsTrianglePath(
-								new Vector.<Number>(this._meshData.uvs.length, true),
-								new Vector.<int>(this._meshData.vertexIndices.length, true),
-								new Vector.<Number>(this._meshData.vertices.length, true)
+							_path = new GraphicsTrianglePath(
+								new Vector.<Number>(_meshData.uvs.length, true),
+								new Vector.<int>(_meshData.vertexIndices.length, true),
+								new Vector.<Number>(_meshData.vertices.length, true)
 							);
 						}
 						
 						var i:uint = 0, l:uint = 0;
-						for (i = 0, l = _pach.uvtData.length; i < l; i += 2)
+						for (i = 0, l = _path.uvtData.length; i < l; i += 2)
 						{
-							const u:Number = this._meshData.uvs[i];
-							const v:Number = this._meshData.uvs[i + 1];
-							_pach.uvtData[i] = (currentTextureData.region.x + u * currentTextureData.region.width) / rawTextureAtlas.width;
-							_pach.uvtData[i + 1] = (currentTextureData.region.y + v * currentTextureData.region.height) / rawTextureAtlas.height;
+							const u:Number = _meshData.uvs[i];
+							const v:Number = _meshData.uvs[i + 1];
+							_path.uvtData[i] = (currentTextureData.region.x + u * currentTextureData.region.width) / textureAtlasWidth;
+							_path.uvtData[i + 1] = (currentTextureData.region.y + v * currentTextureData.region.height) / textureAtlasHeight;
 						}
 						
-						for (i = 0, l = _pach.vertices.length; i < l; i += 2)
+						for (i = 0, l = _path.vertices.length; i < l; i += 2)
 						{
-							_pach.vertices[i] = this._meshData.vertices[i] - this._pivotX;
-							_pach.vertices[i + 1] = this._meshData.vertices[i + 1] - this._pivotY;
+							_path.vertices[i] = _meshData.vertices[i] - _pivotX;
+							_path.vertices[i + 1] = _meshData.vertices[i + 1] - _pivotY;
 						}
 						
-						for (i = 0, l = _pach.indices.length; i < l; ++i)
+						for (i = 0, l = _path.indices.length; i < l; ++i)
 						{
-							_pach.indices[i] = this._meshData.vertexIndices[i];
+							_path.indices[i] = _meshData.vertexIndices[i];
 						}
 						
 						meshDisplay.graphics.clear();
 						
 						if (currentTextureAtlas)
 						{
-							_meshTexture = currentTextureAtlas;
 							meshDisplay.graphics.beginBitmapFill(currentTextureAtlas, null, false, true);
-							meshDisplay.graphics.drawTriangles(_pach.vertices, _pach.indices, _pach.uvtData);
-						}
-						else
-						{
-							_meshTexture = null;
+							meshDisplay.graphics.drawTriangles(_path.vertices, _path.indices, _path.uvtData);
 						}
 						
-						if (this._meshData.skinned)
-						{
-							//const transformationMatrix:Matrix = meshDisplay.transform.matrix;
-							//transformationMatrix.identity();
-							//meshDisplay.transform.matrix = transformationMatrix;
-							meshDisplay.transform.matrix = null;
-						}
+						_meshTexture = currentTextureAtlas;
 					}
-					else
+					else // Normal texture.
 					{
 						var width:Number = 0;
 						var height:Number = 0;
@@ -284,8 +292,8 @@ package dragonBones.flash
 							_helpMatrix.b = -scale;
 							_helpMatrix.c = scale;
 							_helpMatrix.d = 0;
-							_helpMatrix.tx = -this._pivotX - currentTextureData.region.y;
-							_helpMatrix.ty = -this._pivotY + currentTextureData.region.x + height;
+							_helpMatrix.tx = -_pivotX - currentTextureData.region.y;
+							_helpMatrix.ty = -_pivotY + currentTextureData.region.x + height;
 						}
 						else
 						{
@@ -293,51 +301,61 @@ package dragonBones.flash
 							_helpMatrix.b = 0;
 							_helpMatrix.c = 0;
 							_helpMatrix.d = scale;
-							_helpMatrix.tx = -this._pivotX - currentTextureData.region.x;
-							_helpMatrix.ty = -this._pivotY - currentTextureData.region.y;
+							_helpMatrix.tx = -_pivotX - currentTextureData.region.x;
+							_helpMatrix.ty = -_pivotY - currentTextureData.region.y;
 						}
 						
-						frameDisplay.graphics.clear();
+						var normalDisplay:Shape = _renderDisplay as Shape;
+						
+						normalDisplay.graphics.clear();
 						
 						if (currentTextureAtlas)
 						{
-							frameDisplay.graphics.beginBitmapFill(currentTextureAtlas, _helpMatrix, false, true);
-							frameDisplay.graphics.drawRect(-this._pivotX, -this._pivotY, width, height);
+							normalDisplay.graphics.beginBitmapFill(currentTextureAtlas, _helpMatrix, false, true);
+							normalDisplay.graphics.drawRect(-_pivotX, -_pivotY, width, height);
 						}
 					}
 					
-					this._updateVisible(); //
+					_updateVisible();
 					
 					return;
 				}
 			}
 			
-			this._pivotX = 0;
-			this._pivotY = 0;
-			
-			frameDisplay.graphics.clear();
-			frameDisplay.visible = false; //
-			frameDisplay.x = this.origin.x;
-			frameDisplay.y = this.origin.y;
+			if (isMeshDisplay)
+			{
+				meshDisplay = _renderDisplay as Shape;
+				meshDisplay.graphics.clear();
+				meshDisplay.visible = false;
+				meshDisplay.x = 0.0;
+				meshDisplay.y = 0.0;
+			}
+			else
+			{
+				normalDisplay = _renderDisplay as Shape;
+				normalDisplay.graphics.clear();
+				normalDisplay.visible = false;
+				normalDisplay.x = 0.0;
+				normalDisplay.y = 0.0;
+			}
 		}
-		
 		/**
 		 * @private
 		 */
 		override protected function _updateMesh():void
 		{
-			const meshDisplay:Shape = this._meshDisplay as Shape;
+			const meshDisplay:Shape = _renderDisplay as Shape;
 			
 			if (!_meshTexture)
 			{
 				return;	
 			}
 			
-			const hasFFD:Boolean = this._ffdVertices.length > 0;
+			const hasFFD:Boolean = _ffdVertices.length > 0;
 			
-			var i:uint = 0, iH:uint = 0, iF:uint = 0, l:uint = this._meshData.vertices.length;
+			var i:uint = 0, iH:uint = 0, iF:uint = 0, l:uint = _meshData.vertices.length;
 			var xG:Number = 0, yG:Number = 0;
-			if (this._meshData.skinned)
+			if (_meshData.skinned)
 			{
 				meshDisplay.graphics.clear();
 				
@@ -345,23 +363,23 @@ package dragonBones.flash
 				{
 					iH = i / 2;
 					
-					const boneIndices:Vector.<uint> = this._meshData.boneIndices[iH];
-					const boneVertices:Vector.<Number> = this._meshData.boneVertices[iH];
-					const weights:Vector.<Number> = this._meshData.weights[iH];
+					const boneIndices:Vector.<uint> = _meshData.boneIndices[iH];
+					const boneVertices:Vector.<Number> = _meshData.boneVertices[iH];
+					const weights:Vector.<Number> = _meshData.weights[iH];
 					
 					xG = 0, yG = 0;
 					
 					for (var iB:uint = 0, lB:uint = boneIndices.length; iB < lB; ++iB)
 					{
-						const bone:Bone = this._meshBones[boneIndices[iB]];
+						const bone:Bone = _meshBones[boneIndices[iB]];
 						const matrix:Matrix = bone.globalTransformMatrix;
 						const weight:Number = weights[iB];
 						
 						var xL:Number = 0, yL:Number = 0;
 						if (hasFFD)
 						{
-							xL = boneVertices[iB * 2] + this._ffdVertices[iF];
-							yL = boneVertices[iB * 2 + 1] + this._ffdVertices[iF + 1];
+							xL = boneVertices[iB * 2] + _ffdVertices[iF];
+							yL = boneVertices[iB * 2 + 1] + _ffdVertices[iF + 1];
 						}
 						else
 						{
@@ -376,37 +394,43 @@ package dragonBones.flash
 						iF += 2;
 					}
 					
-					_pach.vertices[i] = xG - this._pivotX;
-					_pach.vertices[i + 1] = yG - this._pivotY;
+					_path.vertices[i] = xG - _pivotX;
+					_path.vertices[i + 1] = yG - _pivotY;
 				}
 				
 				meshDisplay.graphics.beginBitmapFill(_meshTexture, null, false, true);
-				meshDisplay.graphics.drawTriangles(_pach.vertices, _pach.indices, _pach.uvtData);
+				meshDisplay.graphics.drawTriangles(_path.vertices, _path.indices, _path.uvtData);
 			}
 			else if (hasFFD)
 			{
 				meshDisplay.graphics.clear();
 				
-				const vertices:Vector.<Number> = this._meshData.vertices;
+				const vertices:Vector.<Number> = _meshData.vertices;
 				for (i = 0; i < l; i += 2)
 				{
-					xG = vertices[i] + this._ffdVertices[i];
-					yG = vertices[i + 1] + this._ffdVertices[i + 1];
-					_pach.vertices[i] = xG - this._pivotX;
-					_pach.vertices[i + 1] = yG - this._pivotY;
+					xG = vertices[i] + _ffdVertices[i];
+					yG = vertices[i + 1] + _ffdVertices[i + 1];
+					_path.vertices[i] = xG - _pivotX;
+					_path.vertices[i + 1] = yG - _pivotY;
 				}
 				
 				meshDisplay.graphics.beginBitmapFill(_meshTexture, null, true, true);
-				meshDisplay.graphics.drawTriangles(_pach.vertices, _pach.indices, _pach.uvtData);
+				meshDisplay.graphics.drawTriangles(_path.vertices, _path.indices, _path.uvtData);
 			}
 		}
-		
 		/**
 		 * @private
 		 */
-		override protected function _updateTransform():void
+		override protected function _updateTransform(isSkinnedMesh: Boolean):void
 		{
-			_renderDisplay.transform.matrix = this.globalTransformMatrix;
+			if (isSkinnedMesh)
+			{
+				_renderDisplay.transform.matrix = null;
+			}
+			else
+			{
+				_renderDisplay.transform.matrix = globalTransformMatrix;
+			}
 		}
 	}
 }

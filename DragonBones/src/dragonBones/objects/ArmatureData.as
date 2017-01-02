@@ -1,8 +1,12 @@
 package dragonBones.objects
 {
+	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
 	
+	import dragonBones.animation.Animation;
 	import dragonBones.core.BaseObject;
+	import dragonBones.enum.ArmatureType;
+	import dragonBones.geom.Transform;
 	
 	/**
 	 * @language zh_CN
@@ -16,94 +20,86 @@ package dragonBones.objects
 		{
 			return a.zOrder > b.zOrder? 1: -1;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 动画帧率。
 		 * @version DragonBones 3.0
 		 */
 		public var frameRate:uint;
-		
 		/**
-		 * @language zh_CN
-		 * 骨架类型。
-		 * @version DragonBones 3.0
+		 * @private
 		 */
 		public var type:int;
-		
+		/**
+		 * @private
+		 */
+		public var cacheFrameRate:uint;
+		/**
+		 * @private
+		 */
+		public var scale:Number;
 		/**
 		 * @language zh_CN
 		 * 数据名称。
 		 * @version DragonBones 3.0
 		 */
 		public var name:String;
-		
-		/**
-		 * @private
-		 */
-		public var parent:DragonBonesData;
-		
 		/**
 		 * @private
 		 */
 		public const aabb:Rectangle = new Rectangle();
-		
 		/**
 		 * @language zh_CN
-		 * 所有的骨骼数据。
+		 * 所有骨骼数据。
 		 * @see dragonBones.objects.BoneData
 		 * @version DragonBones 3.0
 		 */
 		public const bones:Object = {};
-		
 		/**
 		 * @language zh_CN
-		 * 所有的插槽数据。
+		 * 所有插槽数据。
 		 * @see dragonBones.objects.SlotData
 		 * @version DragonBones 3.0
 		 */
 		public const slots:Object = {};
-		
 		/**
 		 * @language zh_CN
-		 * 所有的皮肤数据。
+		 * 所有皮肤数据。
 		 * @see dragonBones.objects.SkinData
 		 * @version DragonBones 3.0
 		 */
 		public const skins:Object = {};
-		
 		/**
 		 * @language zh_CN
-		 * 所有的动画数据。
+		 * 所有动画数据。
 		 * @see dragonBones.objects.AnimationData
 		 * @version DragonBones 3.0
 		 */
 		public const animations:Object = {};
-		
 		/**
 		 * @private
 		 */
-		public const actions: Vector.<ActionData> = new Vector.<ActionData>(0, true);
-		
+		public const actions: Vector.<ActionData> = new Vector.<ActionData>();
+		/**
+		 * @language zh_CN
+		 * 所属的龙骨数据。
+		 * @see dragonBones.DragonBonesData
+		 * @version DragonBones 4.5
+		 */
+		public var parent:DragonBonesData;
 		/**
 		 * @private
 		 */
-		public var cacheFrameRate:uint;
-		
-		/**
-		 * @private
-		 */
-		public var scale:Number;
+		public var userData: CustomData;
 		
 		private var _boneDirty:Boolean;
 		private var _slotDirty:Boolean;
+		private const _animationNames:Vector.<String> = new Vector.<String>();
+		private const _sortedBones:Vector.<BoneData> = new Vector.<BoneData>();
+		private const _sortedSlots:Vector.<SlotData> = new Vector.<SlotData>();
+		private const _bonesChildren:Object = {};
 		private var _defaultSkin:SkinData;
 		private var _defaultAnimation:AnimationData;
-		private const _animationNames:Vector.<String> = new Vector.<String>();
-		private const _sortedBones:Vector.<BoneData> = new Vector.<BoneData>(0, true);
-		private const _sortedSlots:Vector.<SlotData> = new Vector.<SlotData>(0, true);
-		private const _bonesChildren:Object = {};
-		
 		/**
 		 * @private
 		 */
@@ -111,86 +107,74 @@ package dragonBones.objects
 		{
 			super(this);
 		}
-		
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
 		override protected function _onClear():void
 		{
+			for (var k:String in bones)
+			{
+				(bones[k] as BoneData).returnToPool();
+				delete bones[k];
+			}
+			
+			for (k in slots)
+			{
+				(slots[k] as SlotData).returnToPool();
+				delete slots[k];
+			}
+			
+			for (k in skins)
+			{
+				(skins[k] as SkinData).returnToPool();
+				delete skins[k];
+			}
+			
+			for (k in animations)
+			{
+				(animations[k] as AnimationData).returnToPool();
+				delete animations[k];
+			}
+			
+			for (var i:uint = 0, l:uint = actions.length; i < l; ++i)
+			{
+				actions[i].returnToPool();
+			}
+			
+			for (k in _bonesChildren)
+			{
+				delete _bonesChildren[k];
+			}
+			
+			if (userData) 
+			{
+				userData.returnToPool();
+			}
+			
 			frameRate = 0;
-			type = 0;
-			name = null;
-			parent = null;
-			aabb.x = 0;
-			aabb.y = 0;
-			aabb.width = 0;
-			aabb.height = 0;
-			
-			var i:String = null;
-			
-			for (i in bones)
-			{
-				(bones[i] as BoneData).returnToPool();
-				delete bones[i];
-			}
-			
-			for (i in slots)
-			{
-				(slots[i] as SlotData).returnToPool();
-				delete slots[i];
-			}
-			
-			for (i in skins)
-			{
-				(skins[i] as SkinData).returnToPool();
-				delete skins[i];
-			}
-			
-			for (i in animations)
-			{
-				(animations[i] as AnimationData).returnToPool();
-				delete animations[i];
-			}
-			
-			if (actions.length) 
-			{
-				for each (var actionData:ActionData in actions) 
-				{
-					actionData.returnToPool();
-				}
-				
-				actions.fixed = false;
-				actions.length = 0;
-				actions.fixed = true;	
-			}
-			
+			type = ArmatureType.None;
 			cacheFrameRate = 0;
-			scale = 1;
+			scale = 1.0;
+			name = null;
+			aabb.x = 0.0;
+			aabb.y = 0.0;
+			aabb.width = 0.0;
+			aabb.height = 0.0;
+			//bones.clear();
+			//slots.clear();
+			//skins.clear();
+			//animations.clear();
+			actions.length = 0;
+			parent = null;
+			userData = null;
 			
 			_boneDirty = false;
 			_slotDirty = false;
+			_animationNames.length = 0;
+			_sortedBones.length = 0;
+			_sortedSlots.length = 0;
 			_defaultSkin = null;
 			_defaultAnimation = null;
-			_animationNames.length = 0;
-			
-			if (_sortedBones.length)
-			{
-				_sortedBones.fixed = false;
-				_sortedBones.length = 0;
-				_sortedBones.fixed = true;	
-			}
-			
-			if (_sortedSlots.length)
-			{
-				_sortedSlots.fixed = false;
-				_sortedSlots.length = 0;
-				_sortedSlots.fixed = true;	
-			}
-			
-			for (i in _bonesChildren)
-			{
-				delete _bonesChildren[i];
-			}
 		}
 		
 		private function _sortBones():void
@@ -248,26 +232,61 @@ package dragonBones.objects
 		{
 			_sortedSlots.sort(_onSortSlots);
 		}
-		
 		/**
 		 * @private
 		 */
 		public function cacheFrames(value:uint):void
 		{
-			if (cacheFrameRate == value)
+			if (cacheFrameRate > 0) 
 			{
 				return;
 			}
 			
-			cacheFrameRate = value;
+			cacheFrameRate = frameRate;
 			
-			const frameScale:Number = cacheFrameRate / frameRate;
-			for each (var animation:AnimationData in animations)
+			for each (var animation:Animation in animations) 
 			{
-				animation.cacheFrames(frameScale);
+				animations.cacheFrames(cacheFrameRate);
 			}
 		}
-		
+		/**
+		 * @private
+		 */
+		public function setCacheFrame(globalTransformMatrix: Matrix, transform: Transform): Number {
+			const dataArray:Vector.<Number> = parent.cachedFrames;
+			const arrayOffset:uint = dataArray.length;
+			
+			dataArray.length += 10;
+			dataArray[arrayOffset] = globalTransformMatrix.a;
+			dataArray[arrayOffset + 1] = globalTransformMatrix.b;
+			dataArray[arrayOffset + 2] = globalTransformMatrix.c;
+			dataArray[arrayOffset + 3] = globalTransformMatrix.d;
+			dataArray[arrayOffset + 4] = globalTransformMatrix.tx;
+			dataArray[arrayOffset + 5] = globalTransformMatrix.ty;
+			dataArray[arrayOffset + 6] = transform.skewX;
+			dataArray[arrayOffset + 7] = transform.skewY;
+			dataArray[arrayOffset + 8] = transform.scaleX;
+			dataArray[arrayOffset + 9] = transform.scaleY;
+			
+			return arrayOffset;
+		}
+		/**
+		 * @private
+		 */
+		public function getCacheFrame(globalTransformMatrix: Matrix, transform: Transform, arrayOffset: Number): void {
+			const dataArray:Vector.<Number> = parent.cachedFrames;
+			
+			globalTransformMatrix.a = dataArray[arrayOffset];
+			globalTransformMatrix.b = dataArray[arrayOffset + 1];
+			globalTransformMatrix.c = dataArray[arrayOffset + 2];
+			globalTransformMatrix.d = dataArray[arrayOffset + 3];
+			globalTransformMatrix.tx = dataArray[arrayOffset + 4];
+			globalTransformMatrix.ty = dataArray[arrayOffset + 5];
+			transform.skewX = dataArray[arrayOffset + 6];
+			transform.skewY = dataArray[arrayOffset + 7];
+			transform.scaleX = dataArray[arrayOffset + 8];
+			transform.scaleY = dataArray[arrayOffset + 9];
+		}
 		/**
 		 * @private
 		 */
@@ -291,22 +310,17 @@ package dragonBones.objects
 				const children:Vector.<BoneData> = _bonesChildren[value.name];
 				if (children)
 				{
-					for each (var child:BoneData in children)
+					for (var i:uint = 0, l :uint= children.length; i < l; ++i)
 					{
-						child.parent = value;
+						children[i].parent = value;
 					}
 					
 					delete _bonesChildren[value.name];
 				}
 				
 				bones[value.name] = value;
-				
-				if (_sortedBones.fixed)
-				{
-					_sortedBones.fixed = false;
-				}
-				
 				_sortedBones.push(value);
+				
 				_boneDirty = true;
 			}
 			else
@@ -314,7 +328,6 @@ package dragonBones.objects
 				throw new ArgumentError();
 			}
 		}
-		
 		/**
 		 * @private
 		 */
@@ -323,13 +336,8 @@ package dragonBones.objects
 			if (value && value.name && !slots[value.name])
 			{
 				slots[value.name] = value;
-				
-				if (_sortedSlots.fixed)
-				{
-					_sortedSlots.fixed = false;
-				}
-				
 				_sortedSlots.push(value);
+				
 				_slotDirty = true;
 			}
 			else
@@ -337,7 +345,6 @@ package dragonBones.objects
 				throw new ArgumentError();
 			}
 		}
-		
 		/**
 		 * @private
 		 */
@@ -346,6 +353,7 @@ package dragonBones.objects
 			if (value && value.name && !skins[value.name])
 			{
 				skins[value.name] = value;
+				
 				if (!_defaultSkin)
 				{
 					_defaultSkin = value;
@@ -356,7 +364,6 @@ package dragonBones.objects
 				throw new ArgumentError();
 			}
 		}
-		
 		/**
 		 * @private
 		 */
@@ -377,10 +384,9 @@ package dragonBones.objects
 				throw new ArgumentError();
 			}
 		}
-		
 		/**
 		 * @language zh_CN
-		 * 获取指定名称的骨骼数据。
+		 * 获取骨骼数据。
 		 * @param name 骨骼数据名称。
 		 * @see dragonBones.objects.BoneData
 		 * @version DragonBones 3.0
@@ -389,10 +395,9 @@ package dragonBones.objects
 		{
 			return bones[name] as BoneData;
 		}
-		
 		/**
 		 * @language zh_CN
-		 * 获取指定名称的插槽数据。
+		 * 获取插槽数据。
 		 * @param name 插槽数据名称。
 		 * @see dragonBones.objects.SlotData
 		 * @version DragonBones 3.0
@@ -401,22 +406,16 @@ package dragonBones.objects
 		{
 			return slots[name] as SlotData;
 		}
-		
 		/**
-		 * @language zh_CN
-		 * 获取指定名称的皮肤数据。
-		 * @param name 皮肤数据名称。
-		 * @see dragonBones.objects.SkinData
-		 * @version DragonBones 3.0
+		 * @private
 		 */
 		public function getSkin(name:String):SkinData
 		{
 			return name? (skins[name] as SkinData): _defaultSkin;
 		}
-		
 		/**
 		 * @language zh_CN
-		 * 获取指定名称的动画数据。
+		 * 获取动画数据。
 		 * @param name 动画数据名称。
 		 * @see dragonBones.objects.AnimationData
 		 * @version DragonBones 3.0
@@ -425,7 +424,16 @@ package dragonBones.objects
 		{
 			return name? (animations[name] as AnimationData): _defaultAnimation;
 		}
-		
+		/**
+		 * @language zh_CN
+		 * 所有动画数据名称。
+		 * @see #armatures
+		 * @version DragonBones 3.0
+		 */
+		public function get animationNames(): Vector.<String> 
+		{
+			return _animationNames;
+		}
 		/**
 		 * @private
 		 */
@@ -435,12 +443,10 @@ package dragonBones.objects
 			{
 				_boneDirty = false;
 				_sortBones();
-				_sortedBones.fixed = true;
 			}
 			
 			return _sortedBones;
 		}
-		
 		/**
 		 * @private
 		 */
@@ -450,23 +456,17 @@ package dragonBones.objects
 			{
 				_slotDirty = false;
 				_sortSlots();
-				_sortedSlots.fixed = true;
 			}
 			
 			return _sortedSlots;
 		}
-		
 		/**
-		 * @language zh_CN
-		 * 获取默认的皮肤数据。
-		 * @see dragonBones.objects.SkinData
-		 * @version DragonBones 4.5
+		 * @private
 		 */
 		public function get defaultSkin():SkinData
 		{
 			return _defaultSkin;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 获取默认的动画数据。
@@ -476,14 +476,6 @@ package dragonBones.objects
 		public function get defaultAnimation():AnimationData
 		{
 			return _defaultAnimation;
-		}
-		
-		/**
-		 * @private
-		 */
-		public function get animationNames():Vector.<String>
-		{
-			return _animationNames;
 		}
 	}
 }

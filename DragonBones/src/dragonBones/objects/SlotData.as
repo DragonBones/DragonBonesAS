@@ -3,7 +3,7 @@ package dragonBones.objects
 	import flash.geom.ColorTransform;
 	
 	import dragonBones.core.BaseObject;
-	import dragonBones.core.DragonBones;
+	import dragonBones.enum.BlendMode;
 	
 	/**
 	 * @language zh_CN
@@ -17,7 +17,6 @@ package dragonBones.objects
 		 * @private
 		 */
 		public static const DEFAULT_COLOR:ColorTransform = new ColorTransform();
-		
 		/**
 		 * @private
 		 */
@@ -25,29 +24,28 @@ package dragonBones.objects
 		{
 			return new ColorTransform();
 		}
-		
 		/**
 		 * @private
 		 */
 		public var displayIndex:int;
-		
 		/**
 		 * @private
 		 */
 		public var zOrder:int;
-		
 		/**
 		 * @private
 		 */
 		public var blendMode:int;
-		
 		/**
 		 * @language zh_CN
 		 * 数据名称。
 		 * @version DragonBones 3.0
 		 */
 		public var name:String;
-		
+		/**
+		 * @private
+		 */
+		public const actions: Vector.<ActionData> = new Vector.<ActionData>();
 		/**
 		 * @language zh_CN
 		 * 所属的父骨骼数据。
@@ -55,17 +53,14 @@ package dragonBones.objects
 		 * @version DragonBones 3.0
 		 */
 		public var parent:BoneData;
-		
 		/**
 		 * @private
 		 */
 		public var color:ColorTransform;
-		
 		/**
 		 * @private
 		 */
-		public const actions: Vector.<ActionData> = new Vector.<ActionData>(0, true);
-		
+		public var userData: CustomData;
 		/**
 		 * @private
 		 */
@@ -73,30 +68,29 @@ package dragonBones.objects
 		{
 			super(this);
 		}
-		
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
 		override protected function _onClear():void
 		{
-			displayIndex = 0;
+			for (var i:uint = 0, l:uint = actions.length; i < l; ++i)
+			{
+				actions[i].returnToPool();
+			}
+			
+			if (userData) 
+			{
+				userData.returnToPool();
+			}
+			
+			displayIndex = -1;
 			zOrder = 0;
-			blendMode = DragonBones.BLEND_MODE_NORMAL;
+			blendMode = BlendMode.None;
 			name = null;
+			actions.length = 0;
 			parent = null;
 			color = null;
-			
-			if (actions.length) 
-			{
-				for each (var actionData:ActionData in actions) 
-				{
-					actionData.returnToPool();
-				}
-				
-				actions.fixed = false;
-				actions.length = 0;
-				actions.fixed = true;
-			}
+			userData = null;
 		}
 	}
 }

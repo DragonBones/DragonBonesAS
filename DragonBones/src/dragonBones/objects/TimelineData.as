@@ -8,21 +8,18 @@ package dragonBones.objects
 	 */
 	public class TimelineData extends BaseObject
 	{
-		/**
-		 * @private
-		 */
 		public var scale:Number;
-		
 		/**
 		 * @private
 		 */
 		public var offset:Number;
-		
 		/**
 		 * @private
 		 */
-		public const frames:Vector.<FrameData> = new Vector.<FrameData>(0, true);
-		
+		public const frames:Vector.<FrameData> = new Vector.<FrameData>();
+		/**
+		 * @private
+		 */
 		public function TimelineData(self:TimelineData)
 		{
 			super(this);
@@ -32,32 +29,28 @@ package dragonBones.objects
 				throw new Error(DragonBones.ABSTRACT_CLASS_ERROR);
 			}
 		}
-		
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
 		override protected function _onClear():void
 		{
-			scale = 1;
-			offset = 0;
+			scale = 1.0;
+			offset = 0.0;
 			
-			if (frames.length)
+			var prevFrame:FrameData = null;
+			for (var i:uint = 0, l:uint = frames.length; i < l; ++i) // Find key frame data.
 			{
-				var prevFrame:FrameData = null;
-				for each (var frame:FrameData in frames)
+				const frame:FrameData = frames[i];
+				if (prevFrame && frame !== prevFrame)
 				{
-					if (prevFrame && frame != prevFrame)
-					{
-						prevFrame.returnToPool();
-					}
-					
-					prevFrame = frame;
+					prevFrame.returnToPool();
 				}
 				
-				frames.fixed = false;
-				frames.length = 0;
-				frames.fixed = true;
+				prevFrame = frame;
 			}
+			
+			frames.fixed = false;
+			frames.length = 0;
 		}
 	}
 }

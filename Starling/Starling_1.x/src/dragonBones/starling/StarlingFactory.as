@@ -4,18 +4,16 @@ package dragonBones.starling
 	
 	import dragonBones.Armature;
 	import dragonBones.Slot;
-	import dragonBones.animation.Animation;
 	import dragonBones.animation.WorldClock;
 	import dragonBones.core.BaseObject;
-	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.enum.DisplayType;
 	import dragonBones.factories.BaseFactory;
 	import dragonBones.factories.BuildArmaturePackage;
 	import dragonBones.objects.ActionData;
 	import dragonBones.objects.DisplayData;
-	import dragonBones.objects.MeshData;
+	import dragonBones.objects.SkinSlotData;
 	import dragonBones.objects.SlotData;
-	import dragonBones.objects.SlotDisplayDataSet;
 	import dragonBones.parsers.DataParser;
 	import dragonBones.textures.TextureAtlasData;
 	
@@ -37,24 +35,24 @@ package dragonBones.starling
 		/**
 		 * @private
 		 */
-		private static const _eventManager:StarlingArmatureDisplay = new StarlingArmatureDisplay();
-		
+		protected static const _eventManager:StarlingArmatureDisplay = new StarlingArmatureDisplay();
 		/**
 		 * @private
 		 */
 		dragonBones_internal static const _clock:WorldClock = new WorldClock();
-		
-		private static function _clockHandler(event:EnterFrameEvent):void 
-		{
-			_clock.advanceTime(event.passedTime);
-		}
-		
 		/**
 		 * @language zh_CN
 		 * 一个可以直接使用的全局工厂实例.
 		 * @version DragonBones 4.7
 		 */
 		public static const factory:StarlingFactory = new StarlingFactory();
+		/**
+		 * @private
+		 */
+		protected static function _clockHandler(event:EnterFrameEvent):void 
+		{
+			_clock.advanceTime(event.passedTime);
+		}
 		
 		public var generateMipMaps:Boolean = true;
 		
@@ -67,7 +65,6 @@ package dragonBones.starling
 		{
 			super(this, dataParser);
 		}
-		
 		/**
 		 * @private
 		 */
@@ -100,7 +97,6 @@ package dragonBones.starling
 			
 			return textureAtlasData;
 		}
-		
 		/**
 		 * @private
 		 */
@@ -113,67 +109,61 @@ package dragonBones.starling
 			
 			const armature:Armature = BaseObject.borrowObject(Armature) as Armature;
 			const armatureDisplay:StarlingArmatureDisplay = new StarlingArmatureDisplay();
-			
-			armature._armatureData = dataPackage.armature;
-			armature._skinData = dataPackage.skin;
-			armature._animation = BaseObject.borrowObject(Animation) as Animation;
-			armature._display = armatureDisplay;
-			armature._eventManager = _eventManager;
-			
 			armatureDisplay._armature = armature;
-			armature._animation._armature = armature;
 			
-			armature.animation.animations = dataPackage.armature.animations;
+			armature._init(
+				dataPackage.armature, dataPackage.skin,
+				armatureDisplay, armatureDisplay, _eventManager
+			);
 			
 			return armature;
 		}
-		
 		/**
 		 * @private
 		 */
-		override protected function _generateSlot(dataPackage:BuildArmaturePackage, slotDisplayDataSet:SlotDisplayDataSet):Slot
+		override protected function _generateSlot(dataPackage:BuildArmaturePackage, skinSlotData:SkinSlotData, armature:Armature):Slot
 		{
 			const slot:Slot = BaseObject.borrowObject(StarlingSlot) as StarlingSlot;
-			const slotData:SlotData = slotDisplayDataSet.slot;
-			const displayList:Vector.<*> = new Vector.<*>();
+			const slotData:SlotData = skinSlotData.slot;
+			const displayList:Vector.<Object> = new Vector.<Object>(skinSlotData.displays.length, true);
 			
-			slot.name = slotData.name;
-			slot._rawDisplay = new Image(StarlingSlot.getEmptyTexture());
+			slot._init(skinSlotData, new Image(StarlingSlot.getEmptyTexture()), null);
 			
-			for each (var displayData:DisplayData in slotDisplayDataSet.displays)
+			for (var i:uint = 0, l:uint = skinSlotData.displays.length; i < l; ++i) 
 			{
+				const displayData:DisplayData = skinSlotData.displays[i];
 				switch (displayData.type)
 				{
-					case DragonBones.DISPLAY_TYPE_IMAGE:
+					case DisplayType.Image:
 						if (!displayData.texture || dataPackage.textureAtlasName)
 						{
-							displayData.texture = this._getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.name);
+							displayData.texture = _getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.name);
 						}
 						
-						displayList.push(slot._rawDisplay);
+						displayList[i] = slot.rawDisplay;
 						break;
 					
-					case DragonBones.DISPLAY_TYPE_MESH:
+					case DisplayType.Mesh:
 						if (!displayData.texture || dataPackage.textureAtlasName)
 						{
-							displayData.texture = this._getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.name);
+							displayData.texture = _getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.name);
 						}
 						
-						displayList.push(slot._rawDisplay);
+						displayList[i] = slot.rawDisplay;
 						break;
 					
-					case DragonBones.DISPLAY_TYPE_ARMATURE:
+					case DisplayType.Armature:
 						const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName, null, dataPackage.textureAtlasName);
 						if (childArmature) 
 						{
-							if (!slot.inheritAnimation)
+							if (!childArmature.inheritAnimation)
 							{
 								const actions:Vector.<ActionData> = slotData.actions.length > 0? slotData.actions: childArmature.armatureData.actions;
 								if (actions.length > 0) 
 								{
-									for (var i:uint = 0, l:uint = actions.length; i < l; ++i) 
+									for each (var action:ActionData in actions) 
 									{
-										childArmature._bufferAction(actions[i]);
+										childArmature._bufferAction(action);
 									}
 								} 
 								else 
@@ -185,11 +175,11 @@ package dragonBones.starling
 							displayData.armature = childArmature.armatureData; // 
 						}
 						
-						displayList.push(childArmature);
+						displayList[i] = childArmature;
 						break;
 					
 					default:
-						displayList.push(null);
+						displayList[i] = null;
 						break;
 				}
 			}
@@ -198,7 +188,6 @@ package dragonBones.starling
 			
 			return slot;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 创建一个指定名称的骨架，并使用骨架的显示容器来更新骨架动画。
@@ -212,16 +201,15 @@ package dragonBones.starling
 		 */
 		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null, textureAtlasName:String = null):StarlingArmatureDisplay
 		{
-			const armature:Armature = this.buildArmature(armatureName, dragonBonesName, skinName, textureAtlasName);
-			const armatureDisplay:StarlingArmatureDisplay = armature? (armature.display as StarlingArmatureDisplay): null;
-			if (armatureDisplay)
+			const armature:Armature = buildArmature(armatureName, dragonBonesName, skinName, textureAtlasName);
+			if (armature)
 			{
-				armatureDisplay.advanceTimeBySelf(true);
+				_clock.add(armature);
+				return armature.display as StarlingArmatureDisplay;
 			}
 			
-			return armatureDisplay;
+			return null;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 获取带有指定贴图的显示对象。
@@ -231,7 +219,7 @@ package dragonBones.starling
 		 */
 		public function getTextureDisplay(textureName:String, textureAtlasName:String = null):Image 
 		{
-			const textureData:StarlingTextureData = this._getTextureData(textureAtlasName, textureName) as StarlingTextureData;
+			const textureData:StarlingTextureData = _getTextureData(textureAtlasName, textureName) as StarlingTextureData;
 			if (textureData)
 			{
 				if (!textureData.texture)
@@ -245,7 +233,6 @@ package dragonBones.starling
 			
 			return null;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 获取全局声音事件管理器。

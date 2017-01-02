@@ -11,13 +11,11 @@
 	 */
 	public class TimelineState extends BaseObject
 	{
-		internal var _isCompleted:Boolean;
+		internal var _playState: int; // -1 start 0 play 1 complete
 		internal var _currentPlayTimes:uint;
 		internal var _currentTime:Number;
-		internal var _timeline:TimelineData;
+		internal var _timelineData:TimelineData;
 		
-		protected var _isReverse:Boolean;
-		protected var _hasAsynchronyTimeline:Boolean;
 		protected var _frameRate:uint;
 		protected var _keyFrameCount:uint;
 		protected var _frameCount:uint;
@@ -40,156 +38,157 @@
 			}
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
 		override protected function _onClear():void
 		{
-			_isCompleted = false;
+			_playState = -1;
 			_currentPlayTimes = 0;
 			_currentTime = -1;
-			_timeline = null;
+			_timelineData = null;
 			
-			_isReverse = false;
-			_hasAsynchronyTimeline = false;
 			_frameRate = 0;
 			_keyFrameCount =0;
 			_frameCount = 0;
-			_position = 0;
-			_duration = 0;
-			_animationDutation = 0;
-			_timeScale = 1;
-			_timeOffset = 0;
+			_position = 0.0;
+			_duration = 0.0
+			_animationDutation = 0.0
+			_timeScale = 1.0
+			_timeOffset = 0.0
 			_currentFrame = null;
 			_armature = null;
 			_animationState = null;
 		}
 		
-		protected function _onUpdateFrame(isUpdate:Boolean):void {}
+		protected function _onUpdateFrame():void {}
+		protected function _onArriveAtFrame():void {}
 		
-		protected function _onArriveAtFrame(isUpdate:Boolean):void {}
-		
-		protected function _setCurrentTime(value:Number):Boolean
+		protected function _setCurrentTime(passedTime:Number, normalizedTime:Number):Boolean
 		{
+			const prevState:int = _playState;
 			var currentPlayTimes:uint = 0;
+			var currentTime:Number = normalizedTime;
 			
-			if (_keyFrameCount == 1 && this != _animationState._timeline)
+			if (_keyFrameCount === 1 && this !== _animationState._timeline) 
 			{
-				_isCompleted = true;
+				_playState = _animationState._timeline._playState >= 0 ? 1 : -1;
 				currentPlayTimes = 1;
 			}
-			else if (_hasAsynchronyTimeline)
+			else if (normalizedTime < 0.0 || _timeScale !== 1.0 || _timeOffset !== 0.0)  // Scale and offset.
 			{
 				const playTimes:uint = _animationState.playTimes;
-				const totalTimes:Number = playTimes * _duration;
+				const totalTime:Number = playTimes * _duration;
 				
-				value *= _timeScale;
-				if (_timeOffset != 0)
+				currentTime = passedTime * _timeScale;
+				if (_timeOffset !== 0.0) 
 				{
-					value += _timeOffset * _animationDutation;
+					currentTime += _timeOffset * _animationDutation;
 				}
 				
-				if (playTimes > 0 && (value >= totalTimes || value <= -totalTimes))
-				{	
-					_isCompleted = true;
+				if (playTimes > 0 && (currentTime >= totalTime || currentTime <= -totalTime)) 
+				{
+					if (_playState <= 0 && _animationState._playheadState === 3) 
+					{
+						_playState = 1;
+					}
+					
 					currentPlayTimes = playTimes;
 					
-					if (value < 0)
+					if (currentTime < 0.0) 
 					{
-						value = 0;
+						currentTime = 0.0;
 					}
-					else
+					else 
 					{
-						value = _duration;
+						currentTime = _duration;
 					}
 				}
-				else
+				else 
 				{
-					_isCompleted = false;
-					
-					if (value < 0)
+					if (_playState !== 0 && _animationState._playheadState === 3) 
 					{
-						currentPlayTimes = uint(-value / _duration);
-						value = _duration - (-value % _duration);
-					}
-					else
-					{
-						currentPlayTimes = uint(value / _duration);
-						value %= _duration;
+						_playState = 0;
 					}
 					
-					if (playTimes > 0 && currentPlayTimes > playTimes)
+					if (currentTime < 0.0) 
 					{
-						currentPlayTimes = playTimes;
+						currentTime = -currentTime;
+						currentPlayTimes = Math.floor(currentTime / _duration);
+						currentTime = _duration - (currentTime % _duration);
+					}
+					else 
+					{
+						currentPlayTimes = Math.floor(currentTime / _duration);
+						currentTime %= _duration;
 					}
 				}
-				
-				value += _position;
 			}
-			else
+			else 
 			{
-				_isCompleted = _animationState._timeline._isCompleted;
+				_playState = _animationState._timeline._playState;
 				currentPlayTimes = _animationState._timeline._currentPlayTimes;
 			}
 			
-			if (_currentTime == value)
+			currentTime += _position;
+			
+			if (_currentPlayTimes === currentPlayTimes && _currentTime === currentTime) 
 			{
 				return false;
 			}
 			
-			_isReverse = _currentTime > value && _currentPlayTimes == currentPlayTimes;
-			_currentTime = value;
+			// Clear frame flag when timeline start or loopComplete.
+			if (
+				(prevState < 0 && _playState !== prevState) ||
+				(_playState <= 0 && _currentPlayTimes !== currentPlayTimes)
+			) 
+			{
+				_currentFrame = null;
+			}
+			
 			_currentPlayTimes = currentPlayTimes;
+			_currentTime = currentTime;
 			
 			return true;
 		}
 		
-		public function invalidUpdate():void
-		{
-			_timeScale = this == _animationState._timeline? 1: (1 / _timeline.scale);
-			_timeOffset = this == _animationState._timeline? 0: _timeline.offset;
-		}
-		
-		public function fadeIn(armature:Armature, animationState:AnimationState, timelineData:TimelineData, time:Number):void
+		public function _init(armature: Armature, animationState: AnimationState, timelineData: TimelineData): void 
 		{
 			_armature = armature;
 			_animationState = animationState;
-			_timeline = timelineData;
+			_timelineData = timelineData;
 			
-			const isMainTimeline:Boolean = this == _animationState._timeline;
+			const isMainTimeline:Boolean = this === _animationState._timeline;
 			
-			_hasAsynchronyTimeline = isMainTimeline || _animationState.animationData.hasAsynchronyTimeline;
 			_frameRate = _armature.armatureData.frameRate;
-			_keyFrameCount = _timeline.frames.length;
+			_keyFrameCount = _timelineData.frames.length;
 			_frameCount = _animationState.animationData.frameCount;
 			_position = _animationState._position;
 			_duration = _animationState._duration;
 			_animationDutation = _animationState.animationData.duration;
-			_timeScale = isMainTimeline? 1: (1 / _timeline.scale);
-			_timeOffset = isMainTimeline? 0: _timeline.offset;
+			_timeScale = isMainTimeline ? 1.0 : (1.0 / _timelineData.scale);
+			_timeOffset = isMainTimeline ? 0.0 : _timelineData.offset;
 		}
 		
 		public function fadeOut():void {}
 		
-		public function update(time:Number):void
+		public function invalidUpdate():void
 		{
-			if (!_isCompleted && _setCurrentTime(time))
+			_timeScale = this == _animationState._timeline? 1: (1 / _timelineData.scale);
+			_timeOffset = this == _animationState._timeline? 0: _timelineData.offset;
+		}
+		
+		public function update(passedTime:Number, normalizedTime: Number):void
+		{
+			if (_playState <= 0 && _setCurrentTime(passedTime, normalizedTime)) 
 			{
-				//const currentFrameIndex:uint = _keyFrameCount > 1? _currentTime * _timeToFrameSccale: 0;
-				var currentFrameIndex:uint = 0;
-				if (_keyFrameCount > 1)
-				{
-					currentFrameIndex = uint(_currentTime * _frameRate);
-				}
+				const currentFrameIndex:uint = _keyFrameCount > 1 ? uint(_currentTime * _frameRate) : 0;
+				const currentFrame:FrameData = _timelineData.frames[currentFrameIndex];
 				
-				const currentFrame:FrameData = _timeline.frames[currentFrameIndex];
-				if (_currentFrame != currentFrame)
+				if (_currentFrame !== currentFrame) 
 				{
 					_currentFrame = currentFrame;
-					_onArriveAtFrame(true);
+					_onArriveAtFrame();
 				}
 				
-				_onUpdateFrame(true);
+				_onUpdateFrame();
 			}
 		}
 	}

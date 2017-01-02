@@ -16,15 +16,12 @@ package dragonBones.objects
 			super(this);
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
 		override protected function _onClear():void
 		{
 			super._onClear();
 			
 			tweenScale = false;
-			tweenRotate = 0;
+			tweenRotate = 0.0;
 			transform.identity();
 		}
 	}

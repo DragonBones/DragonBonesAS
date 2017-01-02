@@ -8,13 +8,14 @@
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.TransformObject;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.enum.BlendMode;
 	import dragonBones.geom.Transform;
 	import dragonBones.objects.ActionData;
+	import dragonBones.objects.BoundingBoxData;
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.MeshData;
+	import dragonBones.objects.SkinSlotData;
 	import dragonBones.objects.SlotData;
-	import dragonBones.objects.SlotDisplayDataSet;
-	import dragonBones.objects.SlotTimelineData;
 	import dragonBones.textures.TextureData;
 	
 	use namespace dragonBones_internal;
@@ -32,24 +33,17 @@
 	 */
 	public class Slot extends TransformObject
 	{
-		private static const _helpPoint:Point = new Point();
-		
+		/**
+		 * @private
+		 */
+		protected static const _helpPoint:Point = new Point();
 		/**
 		 * @private
 		 */
 		protected static const _helpMatrix:Matrix = new Matrix();
-		
 		/**
 		 * @language zh_CN
-         * 子骨架是否继承父骨架的动画。 [true: 继承, false: 不继承]
-         * @default true
-		 * @version DragonBones 4.5
-		 */
-		public var inheritAnimation:Boolean;
-		
-		/**
-		 * @language zh_CN
-         * 显示对象受到控制的对象，应设置为动画状态的名称或组名称，设置为 null 则表示受所有的动画状态控制。
+         * 显示对象受到控制的动画状态或混合组名称，设置为 null 则表示受所有的动画状态控制。
          * @default null
 		 * @see dragonBones.animation.AnimationState#displayControl
 		 * @see dragonBones.animation.AnimationState#name
@@ -57,137 +51,130 @@
 		 * @version DragonBones 4.5
 		 */
 		public var displayController:String;
-		
-		/**
-		 * @private
-		 */
-		dragonBones_internal var _blendIndex:int;
-		
-		/**
-		 * @private
-		 */
-		dragonBones_internal var _zOrder:int;
-		
-		/**
-		 * @private
-		 */
-		dragonBones_internal var _pivotX:Number;
-		
-		/**
-		 * @private
-		 */
-		dragonBones_internal var _pivotY:Number;
-		
-		/**
-		 * @private Factory
-		 */
-		dragonBones_internal var _displayDataSet:SlotDisplayDataSet;
-		
-		/**
-		 * @private
-		 */
-		dragonBones_internal var _meshData:MeshData;
-		
-		/**
-		 * @private
-		 */
-		dragonBones_internal var _childArmature:Armature;
-		
-		/**
-		 * @private Factory
-		 */
-		dragonBones_internal var _rawDisplay:*;
-		
-		/**
-		 * @private Factory
-		 */
-		dragonBones_internal var _meshDisplay:*;
-		
-		/**
-		 * @private BoneTimelineState
-		 */
-		dragonBones_internal var _cacheFrames:Vector.<Matrix>;
-		
-		/**
-		 * @private SlotTimelineState
-		 */
-		dragonBones_internal const _colorTransform:ColorTransform = new ColorTransform();
-		
-		/**
-		 * @private FFDTimelineState
-		 */
-		dragonBones_internal const _ffdVertices:Vector.<Number> = new Vector.<Number>(0, true);
-		
-		/**
-		 * @private Factory
-		 */
-		dragonBones_internal const _replacedDisplayDataSet:Vector.<DisplayData> = new Vector.<DisplayData>(0, true);
-		
-		/**
-		 * @private
-		 */
-		dragonBones_internal var _zOrderDirty:Boolean;
-		
 		/**
 		 * @private
 		 */
 		protected var _displayDirty:Boolean;
-		
 		/**
-		 * @private SlotTimelineState
+		 * @private
 		 */
-		dragonBones_internal var _colorDirty:Boolean;
-		
+		protected var _zOrderDirty:Boolean;
 		/**
 		 * @private
 		 */
 		protected var _blendModeDirty:Boolean;
-		
 		/**
 		 * @private
 		 */
-		protected var _originDirty:Boolean;
-		
+		dragonBones_internal var _colorDirty:Boolean;
+		/**
+		 * @private
+		 */
+		dragonBones_internal var _meshDirty:Boolean;
+		/**
+		 * @private
+		 */
+		protected var _originalDirty:Boolean;
 		/**
 		 * @private
 		 */
 		protected var _transformDirty:Boolean;
-		
-		/**
-		 * @private FFDTimelineState
-		 */
-		dragonBones_internal var _ffdDirty:Boolean;
-		
 		/**
 		 * @private
 		 */
-		protected var _displayIndex:int;
-		
+		dragonBones_internal var _updateState:int;
 		/**
 		 * @private
 		 */
 		protected var _blendMode:int;
-		
 		/**
 		 * @private
 		 */
-		protected var _display:*;
-		
+		protected var _displayIndex:int;
+		/**
+		 * @private
+		 */
+		dragonBones_internal var _zOrder:int;
+		/**
+		 * @private
+		 */
+		protected var _cachedFrameIndex:int;
+		/**
+		 * @private
+		 */
+		dragonBones_internal var _pivotX:Number;
+		/**
+		 * @private
+		 */
+		dragonBones_internal var _pivotY:Number;
 		/**
 		 * @private
 		 */
 		protected const _localMatrix:Matrix = new Matrix();
-		
 		/**
 		 * @private
 		 */
-		protected const _displayList:Vector.<*> = new Vector.<*>(0, true);
-		
+		dragonBones_internal const _colorTransform:ColorTransform = new ColorTransform();
 		/**
 		 * @private
 		 */
-		protected const _meshBones:Vector.<Bone> = new Vector.<Bone>(0, true);
-		
+		dragonBones_internal const _ffdVertices:Vector.<Number> = new Vector.<Number>();
+		/**
+		 * @private
+		 */
+		protected const _displayList:Vector.<Object> = new Vector.<Object>();
+		/**
+		 * @private
+		 */
+		dragonBones_internal const _replacedDisplayDatas:Vector.<DisplayData> = new Vector.<DisplayData>();
+		/**
+		 * @private
+		 */
+		protected const _meshBones:Vector.<Bone> = new Vector.<Bone>();
+		/**
+		 * @private
+		 */
+		protected var _skinSlotData:SkinSlotData;
+		/**
+		 * @private
+		 */
+		protected var _displayData:DisplayData;
+		/**
+		 * @private
+		 */
+		protected var _replacedDisplayData:DisplayData;
+		/**
+		 * @private
+		 */
+		protected var _textureData:TextureData;
+		/**
+		 * @private
+		 */
+		dragonBones_internal var _meshData:MeshData;
+		/**
+		 * @private
+		 */
+		protected var _boundingBoxData:BoundingBoxData;
+		/**
+		 * @private
+		 */
+		protected var _rawDisplay:Object;
+		/**
+		 * @private
+		 */
+		protected var _meshDisplay:Object;
+		/**
+		 * @private
+		 */
+		protected var _display:Object;
+		/**
+		 * @private
+		 */
+		dragonBones_internal var _childArmature:Armature;
+		/**
+		 * @private BoneTimelineState
+		 */
+		dragonBones_internal var _cachedFrameIndices:Vector.<Number>;
 		/**
 		 * @private
 		 */
@@ -200,17 +187,17 @@
 				throw new Error(DragonBones.ABSTRACT_CLASS_ERROR);
 			}
 		}
-		
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
 		override protected function _onClear():void
 		{
 			super._onClear();
 			
-			const disposeDisplayList:Vector.<*> = new Vector.<*>();
-			for each (var eachDisplay:* in _displayList)
+			const disposeDisplayList:Vector.<Object> = new Vector.<Object>();
+			for (var i:uint = 0, l:uint = _displayList.length; i < l; ++i) 
 			{
+				var eachDisplay:Object = _displayList[i];
 				if (
 					eachDisplay != _rawDisplay && eachDisplay != _meshDisplay &&
 					disposeDisplayList.indexOf(eachDisplay) < 0
@@ -220,8 +207,9 @@
 				}
 			}
 			
-			for each (eachDisplay in disposeDisplayList)
+			for (i = 0, l = disposeDisplayList.length; i < l; ++i) 
 			{
+				eachDisplay = disposeDisplayList[i];
 				if (eachDisplay is Armature)
 				{
 					(eachDisplay as Armature).dispose();
@@ -242,86 +230,60 @@
 				_disposeDisplay(_rawDisplay);
 			}
 			
-			inheritAnimation = true;
 			displayController = null;
 			
+			_displayDirty = false;
+			_zOrderDirty = false;
+			_blendModeDirty = false;
 			_colorDirty = false;
-			_ffdDirty = false;
-			_blendIndex = 0;
+			_meshDirty = false;
+			_originalDirty = false;
+			_transformDirty = false;
+			_updateState = -1;
+			_blendMode = BlendMode.Normal;
+			_displayIndex = -1;
 			_zOrder = 0;
-			_pivotX = 0;
-			_pivotY = 0;
-			_displayDataSet = null;
-			_meshData = null;
-			_childArmature = null;
-			_rawDisplay = null;
-			_meshDisplay = null;
-			_cacheFrames = null;
-			_colorTransform.alphaMultiplier = 1;
-			_colorTransform.redMultiplier = 1;
-			_colorTransform.greenMultiplier = 1;
-			_colorTransform.blueMultiplier = 1;
+			_pivotX = 0.0;
+			_pivotY = 0.0;
+			_localMatrix.identity();
+			_colorTransform.alphaMultiplier = 1.0;
+			_colorTransform.redMultiplier = 1.0;
+			_colorTransform.greenMultiplier = 1.0;
+			_colorTransform.blueMultiplier = 1.0;
 			_colorTransform.alphaOffset = 0;
 			_colorTransform.redOffset = 0;
 			_colorTransform.greenOffset = 0;
 			_colorTransform.blueOffset = 0;
-			
-			if (_ffdVertices.length)
-			{
-				_ffdVertices.fixed = false;
-				_ffdVertices.length = 0;
-				_ffdVertices.fixed = true;
-			}
-			
-			if (_replacedDisplayDataSet.length)
-			{
-				_replacedDisplayDataSet.fixed = false;
-				_replacedDisplayDataSet.length = 0;
-				_replacedDisplayDataSet.fixed = true;
-			}
-			
-			_displayDirty = false;
-			_blendModeDirty = false;
-			_originDirty = false;
-			_transformDirty = false;
-			_displayIndex = 0;
-			_blendMode = DragonBones.BLEND_MODE_NORMAL;
+			_ffdVertices.length = 0;
+			_displayList.length = 0;
+			_replacedDisplayDatas.length = 0;
+			_meshBones.length = 0;
+			_skinSlotData = null;
+			_displayData = null;
+			_replacedDisplayData = null;
+			_textureData = null;
+			_meshData = null;
+			_boundingBoxData = null;
+			_rawDisplay = null;
+			_meshDisplay = null;
 			_display = null;
-			_localMatrix.identity();
-			
-			if (_displayList.length)
-			{
-				_displayList.fixed = false;
-				_displayList.length = 0;
-				_displayList.fixed = true;
-			}
-			
-			if (_meshBones.length)
-			{
-				_meshBones.fixed = false;
-				_meshBones.length = 0;
-				_meshBones.fixed = true;
-			}
+			_childArmature = null;
+			_cachedFrameIndices = null;
 		}
-		
-		// Abstract method
-		
 		/**
 		 * @private
 		 */
-		protected function _initDisplay(value:*):void
+		protected function _initDisplay(value:Object):void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
-		
 		/**
 		 * @private
 		 */
-		protected function _disposeDisplay(value:*):void
+		protected function _disposeDisplay(value:Object):void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
-		
 		/**
 		 * @private
 		 */
@@ -329,7 +291,6 @@
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
-		
 		/**
 		 * @private
 		 */
@@ -337,15 +298,13 @@
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
-		
 		/**
 		 * @private
 		 */
-		protected function _replaceDisplay(value:*):void
+		protected function _replaceDisplay(value:Object):void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
-		
 		/**
 		 * @private
 		 */
@@ -353,7 +312,6 @@
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
-		
 		/**
 		 * @private
 		 */
@@ -361,7 +319,6 @@
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
-		
 		/**
 		 * @private
 		 */
@@ -369,7 +326,6 @@
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
-		
 		/**
 		 * @private
 		 */
@@ -377,7 +333,6 @@
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
-		
 		/**
 		 * @private
 		 */
@@ -385,7 +340,6 @@
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
-		
 		/**
 		 * @private
 		 */
@@ -393,7 +347,6 @@
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
-		
 		/**
 		 * @private
 		 */
@@ -401,7 +354,6 @@
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
-		
 		/**
 		 * @private
 		 */
@@ -409,20 +361,17 @@
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
-		
 		/**
 		 * @private
 		 */
-		protected function _updateTransform():void
+		protected function _updateTransform(isSkinnedMesh: Boolean):void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
-		
 		/**
 		 * @private
 		 */
-		[inline]
-		final private function _isMeshBonesUpdate():Boolean
+		protected function _isMeshBonesUpdate():Boolean
 		{
 			for (var i:uint = 0, l:uint = _meshBones.length; i < l; ++i)
 			{
@@ -434,69 +383,196 @@
 			
 			return false;
 		}
-		
 		/**
 		 * @private
 		 */
-		protected function _updatePivot(rawDisplayData:DisplayData, currentDisplayData:DisplayData, currentTextureData:TextureData):void
+		protected function _updateDisplayData(): void 
 		{
-			const isReplaceDisplay:Boolean = rawDisplayData && rawDisplayData != currentDisplayData && (!_meshData || _meshData != rawDisplayData.mesh);
-			if (_meshData && _display == _meshDisplay)
+			const prevDisplayData:DisplayData = _displayData;
+			const prevReplaceDisplayData:DisplayData = _replacedDisplayData;
+			const prevMeshData:MeshData = _meshData;
+			
+			if (_displayIndex >= 0 && _displayIndex < _skinSlotData.displays.length) 
 			{
-				_pivotX = 0;
-				_pivotY = 0;
+				_displayData = _skinSlotData.displays[_displayIndex];
 			}
-			else
+			else 
 			{
-				const scale:Number = this._armature.armatureData.scale;
-				_pivotX = currentDisplayData.pivot.x;
-				_pivotY = currentDisplayData.pivot.y;
-				
-				if (currentDisplayData.isRelativePivot)
+				_displayData = null;
+			}
+			
+			if (_displayIndex >= 0 && _displayIndex < _replacedDisplayDatas.length) 
+			{
+				_replacedDisplayData = _replacedDisplayDatas[_displayIndex];
+			}
+			else 
+			{
+				_replacedDisplayData = null;
+			}
+			
+			if (_displayData !== prevDisplayData || _replacedDisplayData !== prevReplaceDisplayData) 
+			{
+				const currentDisplayData:DisplayData = _replacedDisplayData ? _replacedDisplayData : _displayData;
+				const currentDisplay:Object = _displayIndex >= 0 && _displayIndex < _displayList.length ? _displayList[_displayIndex] : null;
+				if (currentDisplayData && currentDisplay === _rawDisplay || currentDisplay === _meshDisplay) 
 				{
-					const rect:Rectangle = currentTextureData.frame || currentTextureData.region;
-					
-					var width:Number = rect.width * scale;
-					var height:Number = rect.height * scale;
-					if (currentTextureData.rotated)
+					_textureData = _replacedDisplayData ? _replacedDisplayData.texture : _displayData.texture;
+					if (currentDisplay === _meshDisplay) 
 					{
-						width = rect.height;
-						height = rect.width;
+						if (_replacedDisplayData && _replacedDisplayData.mesh) 
+						{
+							_meshData = _replacedDisplayData.mesh;
+						}
+						else 
+						{
+							_meshData = _displayData.mesh;
+						}
+					}
+					else 
+					{
+						_meshData = null;
 					}
 					
-					this._pivotX *= width;
-					this._pivotY *= height;
+					// Update pivot offset.
+					if (_meshData) 
+					{
+						_pivotX = 0.0;
+						_pivotY = 0.0;
+					}
+					else if (_textureData) 
+					{
+						const scale:Number = _armature.armatureData.scale;
+						_pivotX = currentDisplayData.pivot.x;
+						_pivotY = currentDisplayData.pivot.y;
+						
+						if (currentDisplayData.isRelativePivot) 
+						{
+							const rect:Rectangle = _textureData.frame ? _textureData.frame : _textureData.region;
+							var width:Number = rect.width * scale;
+							var height:Number = rect.height * scale;
+							
+							if (_textureData.rotated) 
+							{
+								width = rect.height;
+								height = rect.width;
+							}
+							
+							_pivotX *= width;
+							_pivotY *= height;
+						}
+						
+						if (_textureData.frame) 
+						{
+							_pivotX += _textureData.frame.x * scale;
+							_pivotY += _textureData.frame.y * scale;
+						}
+					}
+					else 
+					{
+						_pivotX = 0.0;
+						_pivotY = 0.0;
+					}
+					
+					if (
+						_displayData && currentDisplayData !== _displayData &&
+						(!_meshData || _meshData !== _displayData.mesh)
+					) 
+					{
+						_displayData.transform.toMatrix(_helpMatrix);
+						_helpMatrix.invert();
+						Transform.transformPoint(_helpMatrix, 0.0, 0.0, _helpPoint);
+						_pivotX -= _helpPoint.x;
+						_pivotY -= _helpPoint.y;
+						
+						currentDisplayData.transform.toMatrix(_helpMatrix);
+						_helpMatrix.invert();
+						Transform.transformPoint(_helpMatrix, 0.0, 0.0, _helpPoint);
+						_pivotX += _helpPoint.x;
+						_pivotY += _helpPoint.y;
+					}
+					
+					if (_meshData !== prevMeshData) // Update mesh bones and ffd vertices.
+					{
+						if (_meshData && _displayData && _meshData === _displayData.mesh) 
+						{
+							if (_meshData.skinned) 
+							{
+								_meshBones.length = _meshData.bones.length;
+								
+								for (var i:uint = 0, l:uint = _meshBones.length; i < l; ++i) 
+								{
+									_meshBones[i] = _armature.getBone(_meshData.bones[i].name);
+								}
+								
+								var ffdVerticesCount:uint = 0;
+								for (i = 0, l = _meshData.boneIndices.length; i < l; ++i) 
+								{
+									ffdVerticesCount += _meshData.boneIndices[i].length;
+								}
+								
+								_ffdVertices.length = ffdVerticesCount * 2;
+							}
+							else 
+							{
+								_meshBones.length = 0;
+								_ffdVertices.length = _meshData.vertices.length;
+							}
+							
+							for (i = 0, l = _ffdVertices.length; i < l; ++i) 
+							{
+								_ffdVertices[i] = 0.0;
+							}
+							
+							_meshDirty = true;
+						}
+						else 
+						{
+							_meshBones.length = 0;
+							_ffdVertices.length = 0;
+						}
+					}
+				}
+				else 
+				{
+					_textureData = null;
+					_meshData = null;
+					_pivotX = 0.0;
+					_pivotY = 0.0;
+					_meshBones.length = 0;
+					_ffdVertices.length = 0;
 				}
 				
-				if (currentTextureData.frame)
+				_originalDirty = true;
+				if (_displayData) 
 				{
-					this._pivotX += currentTextureData.frame.x * scale;
-					this._pivotY += currentTextureData.frame.y * scale;
+					origin = _displayData.transform;
+				}
+				else if (_replacedDisplayData) 
+				{
+					origin = _replacedDisplayData.transform;
 				}
 			}
 			
-			if (isReplaceDisplay) 
+			// Update bounding box data.
+			if (_replacedDisplayData) 
 			{
-				rawDisplayData.transform.toMatrix(_helpMatrix);
-				_helpMatrix.invert();
-				Transform.transformPoint(_helpMatrix, 0, 0, _helpPoint);
-				_pivotX -= _helpPoint.x;
-				_pivotY -= _helpPoint.y;
-				
-				currentDisplayData.transform.toMatrix(_helpMatrix);
-				_helpMatrix.invert();
-				Transform.transformPoint(_helpMatrix, 0, 0, _helpPoint);
-				_pivotX += Slot._helpPoint.x;
-				_pivotY += Slot._helpPoint.y;
+				_boundingBoxData = _replacedDisplayData.boundingBox;
+			}
+			else if (_displayData) 
+			{
+				_boundingBoxData = _displayData.boundingBox;
+			}
+			else 
+			{
+				_boundingBoxData = null;
 			}
 		}
-		
 		/**
 		 * @private
 		 */
 		protected function _updateDisplay():void
 		{	
-			const prevDisplay:* = _display || _rawDisplay;
+			const prevDisplay:Object = _display || _rawDisplay;
 			const prevChildArmature:Armature = _childArmature;
 			
 			if (_displayIndex >= 0 && _displayIndex < _displayList.length)
@@ -518,8 +594,7 @@
 				_childArmature = null;
 			}
 			
-			const currentDisplay:* = _display || _rawDisplay;
-			
+			const currentDisplay:Object = _display || _rawDisplay;
 			if (currentDisplay != prevDisplay)
 			{
 				_onUpdateDisplay();
@@ -537,16 +612,7 @@
 				_colorDirty = true;
 			}
 			
-			// Update origin.
-			if (_displayDataSet && _displayIndex >= 0 && _displayIndex < _displayDataSet.displays.length)
-			{
-				this.origin.copyFrom(_displayDataSet.displays[_displayIndex].transform);
-				_originDirty = true;
-			}
-			
-			// Update meshData.
-			_updateMeshData(false);
-			
+			// Update frame.
 			if (currentDisplay == _rawDisplay || currentDisplay == _meshDisplay)
 			{
 				_updateFrame();
@@ -558,7 +624,8 @@
 				if (prevChildArmature)
 				{
 					prevChildArmature._parent = null; // Update child armature parent.
-					if (inheritAnimation)
+					prevChildArmature.clock = null;
+					if (prevChildArmature.inheritAnimation)
 					{
 						prevChildArmature.animation.reset();
 					}
@@ -567,23 +634,22 @@
 				if (_childArmature)
 				{
 					_childArmature._parent = this; // Update child armature parent.
-					if (inheritAnimation)
+					_childArmature.clock = _armature.clock;
+					if (prevChildArmature.inheritAnimation)
 					{
 						if (_childArmature.cacheFrameRate == 0) // Set child armature frameRate.
 						{
-							const cacheFrameRate:uint = this._armature.cacheFrameRate;
+							const cacheFrameRate:uint = _armature.cacheFrameRate;
 							if (cacheFrameRate != 0) 
 							{
 								_childArmature.cacheFrameRate = cacheFrameRate;
 							}
 						}
 						
-						const slotData:SlotData = this._armature.armatureData.getSlot(this.name);
-						const actions:Vector.<ActionData> = slotData.actions.length > 0? slotData.actions: _childArmature.armatureData.actions;
+						const actions:Vector.<ActionData> = _skinSlotData.slot.actions.length > 0? _skinSlotData.slot.actions: _childArmature.armatureData.actions;
 						if (actions.length > 0) 
 						{
-							for (var i:uint = 0, l:uint = actions.length; i < l; ++i) 
-							{
+							for (var i:uint = 0, l:uint = actions.length; i < l; ++i) {
 								_childArmature._bufferAction(actions[i]);
 							}
 						} 
@@ -595,244 +661,236 @@
 				}
 			}
 		}
-		
 		/**
 		 * @private
 		 */
 		protected function _updateLocalTransformMatrix():void
 		{
-			this.global.copyFrom(this.origin).add(this.offset).toMatrix(_localMatrix);
+			if (origin) 
+			{
+				global.copyFrom(origin).add(offset).toMatrix(_localMatrix);
+			}
+			else 
+			{
+				global.copyFrom(offset).toMatrix(_localMatrix);
+			}
 		}
-		
 		/**
 		 * @private
 		 */
 		protected function _updateGlobalTransformMatrix():void
 		{
-			this.globalTransformMatrix.copyFrom(_localMatrix);
-			this.globalTransformMatrix.concat(this._parent.globalTransformMatrix);
-			this.global.fromMatrix(this.globalTransformMatrix);
+			globalTransformMatrix.copyFrom(_localMatrix);
+			globalTransformMatrix.concat(_parent.globalTransformMatrix);
+			global.fromMatrix(globalTransformMatrix);
 		}
-		
 		/**
-		 * @inheritDoc
+		 * @private
+		 */
+		dragonBones_internal function _init(skinSlotData: SkinSlotData, rawDisplay: Object, meshDisplay: Object): void {
+			if (_skinSlotData) 
+			{
+				return;
+			}
+			
+			_skinSlotData = skinSlotData;
+			
+			const slotData:SlotData = _skinSlotData.slot;
+			
+			name = slotData.name;
+			
+			_zOrder = slotData.zOrder;
+			_blendMode = slotData.blendMode;
+			_colorTransform.alphaMultiplier = slotData.color.alphaMultiplier;
+			_colorTransform.redMultiplier = slotData.color.redMultiplier;
+			_colorTransform.greenMultiplier = slotData.color.greenMultiplier;
+			_colorTransform.blueMultiplier = slotData.color.blueMultiplier;
+			_colorTransform.alphaOffset = slotData.color.alphaOffset;
+			_colorTransform.redOffset = slotData.color.redOffset;
+			_colorTransform.greenOffset = slotData.color.greenOffset;
+			_colorTransform.blueOffset = slotData.color.blueOffset;
+			_rawDisplay = rawDisplay;
+			_meshDisplay = meshDisplay;
+			
+			_blendModeDirty = true;
+			_colorDirty = true;
+		}
+		/**
+		 * @private
 		 */
 		override dragonBones_internal function _setArmature(value:Armature):void
 		{
-			this._armature = value;
-			this._armature._addSlotToSlotList(this);
-			
-			_onUpdateDisplay(); // Update renderDisplay.
-			_addDisplay();
-		}
-		
-		/**
-		 * @private Armature
-		 */
-		dragonBones_internal function _updateMeshData(isTimelineUpdate:Boolean):void
-		{
-			const prevMeshData:MeshData = _meshData;
-			var rawMeshData:MeshData = null;
-			
-			if (_display && _display == _meshDisplay && _displayIndex >= 0)
+			if (_armature === value) 
 			{
-				rawMeshData = (_displayDataSet && _displayIndex < _displayDataSet.displays.length) ? _displayDataSet.displays[_displayIndex].mesh : null;
-				const replaceDisplayData:DisplayData = (_displayIndex < _replacedDisplayDataSet.length) ? _replacedDisplayDataSet[_displayIndex] : null;
-				const replaceMeshData:MeshData = replaceDisplayData? replaceDisplayData.mesh : null;
-				_meshData = replaceMeshData || rawMeshData;
-			}
-			else
-			{
-				_meshData = null;
+				return;
 			}
 			
-			if (_meshData != prevMeshData)
+			if (_armature) 
 			{
-				if (_meshData && _meshData == rawMeshData)
-				{
-					var i:uint = 0, l:uint = 0;
-					
-					_meshBones.fixed = false;
-					_ffdVertices.fixed = false;
-					
-					if (_meshData.skinned)
-					{
-						_meshBones.length = _meshData.bones.length;
-						
-						for (i = 0, l = _meshBones.length; i < l; ++i)
-						{
-							_meshBones[i] = this._armature.getBone(_meshData.bones[i].name);
-						}
-						
-						var ffdVerticesCount:uint = 0;
-						for (i = 0, l = _meshData.boneIndices.length; i < l; ++i)
-						{
-							ffdVerticesCount += _meshData.boneIndices[i].length;
-						}
-						
-						_ffdVertices.length = ffdVerticesCount * 2;
-					}
-					else
-					{
-						_meshBones.length = 0;
-						_ffdVertices.length = _meshData.vertices.length;
-					}
-					
-					for (i = 0, l = _ffdVertices.length; i < l; ++i) 
-					{
-						_ffdVertices[i] = 0;
-					}
-					
-					_meshBones.fixed = true;
-					_ffdVertices.fixed = true;
-					_ffdDirty = true;
-				}
-				else
-				{
-					_meshBones.fixed = false;
-					_meshBones.length = 0;
-					_meshBones.fixed = true;
-					
-					_ffdVertices.fixed = false;
-					_ffdVertices.length = 0;
-					_ffdVertices.fixed = true;
-				}
-				
-				if (isTimelineUpdate)
-				{
-					_armature.animation._updateFFDTimelineStates();
-				}
+				_armature._removeSlotFromSlotList(this);
+			}
+			
+			_armature = value;
+			
+			_onUpdateDisplay();
+			
+			if (_armature) 
+			{
+				_armature._addSlotToSlotList(this);
+				_addDisplay();
+			}
+			else 
+			{
+				_removeDisplay();
 			}
 		}
-		
 		/**
-		 * @private Armature
+		 * @private
 		 */
 		dragonBones_internal function _update(cacheFrameIndex:int):void
 		{
-			_blendIndex = 0;
+			_updateState = -1;
 			
-			if (_zOrderDirty)
-			{
-				_zOrderDirty = false;
-				_updateZOrder();
-			}
-			
-			if (_displayDirty)
+			if (_displayDirty) 
 			{
 				_displayDirty = false;
 				_updateDisplay();
 			}
 			
-			if (!_display)
+			if (_zOrderDirty) 
+			{
+				_zOrderDirty = false;
+				_updateZOrder();
+			}
+			
+			if (!_display) 
 			{
 				return;
 			}
 			
-			if (_blendModeDirty)
+			if (_blendModeDirty) 
 			{
 				_blendModeDirty = false;
 				_updateBlendMode();
 			}
 			
-			if (_colorDirty)
+			if (_colorDirty) 
 			{
 				_colorDirty = false;
 				_updateColor();
 			}
 			
-			if (_meshData)
+			if (_originalDirty) 
 			{
-				if (_ffdDirty || (_meshData.skinned && _isMeshBonesUpdate()))
-				{
-					_ffdDirty = false;
-					
-					_updateMesh();
-				}
-				
-				if (_meshData.skinned)
-				{
-					return;
-				}
-			}
-			
-			if (_originDirty)
-			{
-				_originDirty = false;
+				_originalDirty = false;
 				_transformDirty = true;
 				_updateLocalTransformMatrix();
 			}
 			
-			if (cacheFrameIndex >= 0)
+			if (_meshData && _displayData && _meshData === _displayData.mesh) 
 			{
-				const cacheFrame:Matrix = _cacheFrames[cacheFrameIndex];
+				if (_meshDirty || (_meshData.skinned && _isMeshBonesUpdate())) 
+				{
+					_meshDirty = false;
+					
+					_updateMesh();
+				}
 				
-				if (this.globalTransformMatrix == cacheFrame) // Same cache
+				if (_meshData.skinned) 
 				{
-					_transformDirty = false;
+					if (_transformDirty) 
+					{
+						_transformDirty = false;
+						_updateTransform(true);
+					}
+					
+					return;
 				}
-				else if (cacheFrame) // has been Cached
-				{
-					_transformDirty = true;
-					this.globalTransformMatrix = cacheFrame;
-				}
-				else if (_transformDirty || this._parent._transformDirty != 0)
-				{
-					_transformDirty = true;
-					this.globalTransformMatrix = this._globalTransformMatrix;
-				}
-				else if (this.globalTransformMatrix != this._globalTransformMatrix) // Same cache but not cached yet
-				{
-					_transformDirty = false;
-					_cacheFrames[cacheFrameIndex] = this.globalTransformMatrix;
-				}
-				else
-				{
-					_transformDirty = true;
-					this.globalTransformMatrix = this._globalTransformMatrix;
-				}
-			}
-			else if (_transformDirty || this._parent._transformDirty != 0)
-			{
-				_transformDirty = true;
-				this.globalTransformMatrix = this._globalTransformMatrix;
 			}
 			
-			if (_transformDirty)
+			if (cacheFrameIndex >= 0 && _cachedFrameIndices) 
+			{
+				const cachedFrameIndex:int = _cachedFrameIndices[cacheFrameIndex];
+				if (cachedFrameIndex >= 0 && _cachedFrameIndex === cachedFrameIndex) // Same cache.
+				{
+					_transformDirty = false;
+				}
+				else if (cachedFrameIndex >= 0) // Has been Cached.
+				{
+					_transformDirty = true;
+					_cachedFrameIndex = cachedFrameIndex;
+				}
+				else if (_transformDirty || _parent._transformDirty !== 0) // Dirty.
+				{
+					_transformDirty = true;
+					_cachedFrameIndex = -1;
+				}
+				else if (_cachedFrameIndex >= 0) // Same cache, but not set index yet.
+				{
+					_transformDirty = false;
+					_cachedFrameIndices[cacheFrameIndex] = _cachedFrameIndex;
+				}
+				else // Dirty.
+				{
+					_transformDirty = true;
+					_cachedFrameIndex = -1;
+				}
+			}
+			else if (_transformDirty || _parent._transformDirty !== 0) // Dirty.
+			{
+				cacheFrameIndex = -1;
+				_transformDirty = true;
+				_cachedFrameIndex = -1;
+			}
+			
+			if (_transformDirty) 
 			{
 				_transformDirty = false;
 				
-				if (this.globalTransformMatrix == this._globalTransformMatrix)
+				if (_cachedFrameIndex < 0) 
 				{
 					_updateGlobalTransformMatrix();
 					
-					if (cacheFrameIndex >= 0 && !_cacheFrames[cacheFrameIndex])
+					if (cacheFrameIndex >= 0) 
 					{
-						this.globalTransformMatrix = SlotTimelineData.cacheFrame(_cacheFrames, cacheFrameIndex, this._globalTransformMatrix);
+						_cachedFrameIndex = _cachedFrameIndices[cacheFrameIndex] = _armature._armatureData.setCacheFrame(globalTransformMatrix, global);
 					}
 				}
+				else 
+				{
+					_armature._armatureData.getCacheFrame(globalTransformMatrix, global, _cachedFrameIndex);
+				}
 				
-				_updateTransform();
+				_updateTransform(false);
 			}
 		}
-		
 		/**
-		 * @private Factory
+		 * @private
 		 */
-		dragonBones_internal function _setDisplayList(value:Vector.<*>):Boolean
+		dragonBones_internal function _updateTransformAndMatrix(): void 
+		{
+			if (_updateState < 0) 
+			{
+				_updateState = 0;
+				_updateLocalTransformMatrix();
+				_updateGlobalTransformMatrix();
+			}
+		}
+		/**
+		 * @private
+		 */
+		dragonBones_internal function _setDisplayList(value:Vector.<Object>):Boolean
 		{
 			if (value && value.length)
 			{
 				if (_displayList.length != value.length)
 				{
-					_displayList.fixed = false;
 					_displayList.length = value.length;
-					_displayList.fixed = true;
 				}
 				
 				for (var i:uint = 0, l:uint = value.length; i < l; ++i)
 				{
-					const eachDisplay:* = value[i];
+					const eachDisplay:Object = value[i];
 					if (eachDisplay && eachDisplay != _rawDisplay && eachDisplay != _meshDisplay && 
 						!(eachDisplay is Armature) && _displayList.indexOf(eachDisplay) < 0)
 					{
@@ -844,9 +902,7 @@
 			}
 			else if (_displayList.length > 0)
 			{
-				_displayList.fixed = false;
 				_displayList.length = 0;
-				_displayList.fixed = true;
 			}
 			
 			if (_displayIndex >= 0 && _displayIndex < _displayList.length)
@@ -858,11 +914,15 @@
 				_displayDirty = _display != null;
 			}
 			
+			if (_displayDirty)
+			{
+				_updateDisplayData();
+			}
+			
 			return _displayDirty;
 		}
-		
 		/**
-		 * @private Factory
+		 * @private
 		 */
 		dragonBones_internal function _setDisplayIndex(value:int):Boolean
 		{
@@ -874,27 +934,27 @@
 			_displayIndex = value;
 			_displayDirty = true;
 			
-			return _displayDirty;
-		}
-		
-		/**
-		 * @private Factory
-		 */
-		dragonBones_internal function _setBlendMode(value:int):Boolean
-		{
-			if (_blendMode == value)
-			{
-				return false;
-			}
-			
-			_blendMode = value;
-			_blendModeDirty = true;
+			_updateDisplayData();
 			
 			return true;
 		}
-		
 		/**
-		 * @private Factory
+		 * @private
+		 */
+		dragonBones_internal function _setZorder(value: Number): Boolean 
+		{
+			if (_zOrder === value) 
+			{
+				//return false;
+			}
+			
+			_zOrder = value;
+			_zOrderDirty = true;
+			
+			return true;
+		}
+		/**
+		 * @private
 		 */
 		dragonBones_internal function _setColor(value:ColorTransform):Boolean
 		{
@@ -911,7 +971,110 @@
 			
 			return true;
 		}
-		
+		/**
+		 * @language zh_CN
+		 * 判断指定的点是否在插槽的自定义包围盒内。
+		 * @param x 点的水平坐标。（骨架内坐标系）
+		 * @param y 点的垂直坐标。（骨架内坐标系）
+		 * @param color 指定的包围盒颜色。 [0: 与所有包围盒进行判断, N: 仅当包围盒的颜色为 N 时才进行判断]
+		 * @version DragonBones 5.0
+		 */
+		public function containsPoint(x: Number, y: Number, color: uint = 0x000000): Boolean 
+		{
+			if (!_boundingBoxData || (color && _boundingBoxData.color !== color)) 
+			{
+				return false;
+			}
+			
+			_updateTransformAndMatrix();
+			
+			_helpMatrix.copyFrom(globalTransformMatrix);
+			_helpMatrix.invert();
+			Transform.transformPoint(_helpMatrix, x, y, _helpPoint);
+			
+			return _boundingBoxData.containsPoint(_helpPoint.x, _helpPoint.y);
+		}
+		/**
+		 * @language zh_CN
+		 * 判断指定的线段与插槽的自定义包围盒是否相交。
+		 * @param xA 线段起点的水平坐标。（骨架内坐标系）
+		 * @param yA 线段起点的垂直坐标。（骨架内坐标系）
+		 * @param xB 线段终点的水平坐标。（骨架内坐标系）
+		 * @param yB 线段终点的垂直坐标。（骨架内坐标系）
+		 * @param color 指定的包围盒颜色。 [0: 与所有包围盒进行判断, N: 仅当包围盒的颜色为 N 时才进行判断]
+		 * @param intersectionPointA 线段从起点到终点与包围盒相交的第一个交点。（骨架内坐标系）
+		 * @param intersectionPointB 线段从终点到起点与包围盒相交的第一个交点。（骨架内坐标系）
+		 * @param normalRadians 碰撞点处包围盒切线的法线弧度。 [x: 第一个碰撞点处切线的法线弧度, y: 第二个碰撞点处切线的法线弧度]
+		 * @returns 相交的情况。 [-1: 不相交且线段在包围盒内, 0: 不相交, 1: 相交且有一个交点且终点在包围盒内, 2: 相交且有一个交点且起点在包围盒内, 3: 相交且有两个交点, N: 相交且有 N 个交点]
+		 * @version DragonBones 5.0
+		 */
+		public function intersectsSegment(
+			xA: Number, yA: Number, xB: Number, yB: Number,
+			color: uint = 0x000000,
+			intersectionPointA: Point = null,
+			intersectionPointB: Point = null,
+			normalRadians: Point = null
+		): int {
+			if (!_boundingBoxData || (color && _boundingBoxData.color !== color)) 
+			{
+				return 0;
+			}
+			
+			_updateTransformAndMatrix();
+			
+			_helpMatrix.copyFrom(globalTransformMatrix);
+			_helpMatrix.invert();
+			Transform.transformPoint(_helpMatrix, xA, yA, _helpPoint);
+			xA = _helpPoint.x;
+			yA = _helpPoint.y;
+			Transform.transformPoint(_helpMatrix, xB, yB, _helpPoint);
+			xB = _helpPoint.x;
+			yB = _helpPoint.y;
+			
+			const intersectionCount:int = _boundingBoxData.intersectsSegment(xA, yA, xB, yB, intersectionPointA, intersectionPointB, normalRadians);
+			if (intersectionCount > 0) 
+			{
+				if (intersectionCount === 1 || intersectionCount === 2) 
+				{
+					if (intersectionPointA) 
+					{
+						Transform.transformPoint(globalTransformMatrix, intersectionPointA.x, intersectionPointA.y, intersectionPointA);
+						if (intersectionPointB) 
+						{
+							intersectionPointB.x = intersectionPointA.x;
+							intersectionPointB.y = intersectionPointA.y;
+						}
+					}
+					else if (intersectionPointB) 
+					{
+						Transform.transformPoint(globalTransformMatrix, intersectionPointB.x, intersectionPointB.y, intersectionPointB);
+					}
+				}
+				else 
+				{
+					if (intersectionPointA) 
+					{
+						Transform.transformPoint(globalTransformMatrix, intersectionPointA.x, intersectionPointA.y, intersectionPointA);
+					}
+					
+					if (intersectionPointB) 
+					{
+						Transform.transformPoint(globalTransformMatrix, intersectionPointB.x, intersectionPointB.y, intersectionPointB);
+					}
+				}
+				
+				if (normalRadians) 
+				{
+					Transform.transformPoint(globalTransformMatrix, Math.cos(normalRadians.x), Math.sin(normalRadians.x), _helpPoint, true);
+					normalRadians.x = Math.atan2(_helpPoint.y, _helpPoint.x);
+					
+					Transform.transformPoint(globalTransformMatrix, Math.cos(normalRadians.y), Math.sin(normalRadians.y), _helpPoint, true);
+					normalRadians.y = Math.atan2(_helpPoint.y, _helpPoint.x);
+				}
+			}
+			
+			return intersectionCount;
+		}
 		/**
 		 * @language zh_CN
 		 * 在下一帧更新显示对象的状态。
@@ -921,7 +1084,20 @@
 		{
 			_displayDirty = true;
 		}
-		
+		/**
+		 * @private
+		 */
+		public function get skinSlotData(): SkinSlotData 
+		{
+			return _skinSlotData;
+		}
+		/**
+		 * @private
+		 */
+		public function get boundingBoxData(): BoundingBoxData 
+		{
+			return _boundingBoxData;
+		}
 		/**
 		 * @private
 		 */
@@ -929,15 +1105,13 @@
 		{
 			return _rawDisplay;
 		}
-		
 		/**
 		 * @private
 		 */
-		public function get MeshDisplay():Object
+		public function get meshDisplay():Object
 		{
 			return _meshDisplay;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 此时显示的显示对象在显示列表中的索引。
@@ -954,28 +1128,28 @@
 				_update(-1);
 			}
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 包含显示对象或子骨架的显示列表。
 		 * @version DragonBones 3.0
 		 */
-		public function get displayList():Vector.<*>
+		public function get displayList():Vector.<Object>
 		{
 			return _displayList.concat();
 		}
-		public function set displayList(value:Vector.<*>):void
+		public function set displayList(value:Vector.<Object>):void
 		{
-			const backupDisplayList:Vector.<*> = _displayList.concat();
-			const disposeDisplayList:Vector.<*> = new Vector.<*>();
+			const backupDisplayList:Vector.<Object> = _displayList.concat();
+			const disposeDisplayList:Vector.<Object> = new Vector.<Object>();
 			
 			if (_setDisplayList(value))
 			{
 				_update(-1);
 			}
 			
-			for each (var eachDisplay:* in backupDisplayList)
+			for (var i:uint = 0, l:uint = backupDisplayList.length; i < l; ++i) 
 			{
+				var eachDisplay:Object = backupDisplayList[i];
 				if (eachDisplay && eachDisplay != _rawDisplay && _displayList.indexOf(eachDisplay) < 0)
 				{
 					if (disposeDisplayList.indexOf(eachDisplay) < 0)
@@ -985,8 +1159,9 @@
 				}
 			}
 			
-			for each (eachDisplay in disposeDisplayList)
+			for (i = 0, l = disposeDisplayList.length; i < l; ++i) 
 			{
+				eachDisplay = disposeDisplayList[i];
 				if (eachDisplay is Armature)
 				{
 					(eachDisplay as Armature).dispose();
@@ -997,25 +1172,24 @@
 				}
 			}
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 此时显示的显示对象。
 		 * @version DragonBones 3.0
 		 */
-		public function get display():*
+		public function get display():Object
 		{
 			return _display;
 		}
-		public function set display(value:*):void
+		public function set display(value:Object):void
 		{
-			if (_display == value)
+			if (_display === value)
 			{
 				return;
 			}
 			
 			const displayListLength:uint = _displayList.length;
-			if (_displayIndex < 0 && displayListLength == 0)  // Emprty
+			if (_displayIndex < 0 && displayListLength === 0)  // Emprty
 			{
 				_displayIndex = 0;
 			}
@@ -1026,19 +1200,16 @@
 			}
 			else
 			{
-				const replaceDisplayList:Vector.<*> = displayList; // copy
+				const replaceDisplayList:Vector.<Object> = displayList; // copy
 				if (displayListLength <= _displayIndex)
 				{
-					replaceDisplayList.fixed = false;
 					replaceDisplayList.length = _displayIndex + 1;
-					replaceDisplayList.fixed = true;
 				}
 				
 				replaceDisplayList[_displayIndex] = value;
 				displayList = replaceDisplayList;
 			}
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 此时显示的子骨架。
@@ -1051,14 +1222,9 @@
 		}
 		public function set childArmature(value:Armature):void
 		{
-			if (_childArmature == value)
+			if (_childArmature === value)
 			{
 				return;
-			}
-			
-			if (value)
-			{
-				value.display.advanceTimeBySelf(false); // Stop child armature self advanceTime.
 			}
 
 			display = value;

@@ -2,10 +2,10 @@ package dragonBones.animation
 {
 	import dragonBones.Armature;
 	import dragonBones.Slot;
-	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
 	import dragonBones.objects.ExtensionFrameData;
+	import dragonBones.objects.FFDTimelineData;
 	import dragonBones.objects.TimelineData;
 	
 	use namespace dragonBones_internal;
@@ -17,151 +17,161 @@ package dragonBones.animation
 	{
 		public var slot:Slot;
 		
+		private var _ffdDirty:Boolean;
 		private var _tweenFFD:int;
+		private const _ffdVertices:Vector.<Number> = new Vector.<Number>();
+		private const _durationFFDVertices:Vector.<Number> = new Vector.<Number>();
 		private var _slotFFDVertices:Vector.<Number>;
-		private var _durationFFDFrame:ExtensionFrameData;
-		private const _ffdVertices:Vector.<Number> = new Vector.<Number>(0, true);
 		
 		public function FFDTimelineState()
 		{
 			super(this);
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
 		override protected function _onClear():void
 		{
 			super._onClear();
 			
 			slot = null;
 			
+			_ffdDirty = false;
 			_tweenFFD = TWEEN_TYPE_NONE;
+			_ffdVertices.fixed = false;
+			_durationFFDVertices.fixed = false;
+			_ffdVertices.length = 0;
+			_durationFFDVertices.length = 0;
 			_slotFFDVertices = null;
-			
-			if (_durationFFDFrame)
-			{
-				_durationFFDFrame.returnToPool();
-				_durationFFDFrame = null;
-			}
-			
-			if (_ffdVertices.length)
-			{
-				_ffdVertices.fixed = false;
-				_ffdVertices.length = 0;
-				_ffdVertices.fixed = true;
-			}
 		}
 		
-		override protected function _onArriveAtFrame(isUpdate:Boolean):void
+		override protected function _onArriveAtFrame():void
 		{
-			super._onArriveAtFrame(isUpdate);
+			super._onArriveAtFrame();
 			
-			const currentFrame:ExtensionFrameData = this._currentFrame as ExtensionFrameData;
+			if (slot.displayIndex >= 0 && _animationState._isDisabled(slot)) 
+			{
+				_tweenEasing = DragonBones.NO_TWEEN;
+				_curve = null;
+				_tweenFFD = TWEEN_TYPE_NONE;
+				return;
+			}
+			
+			const currentFrame:ExtensionFrameData = _currentFrame as ExtensionFrameData;
 			
 			_tweenFFD = TWEEN_TYPE_NONE;
 			
-			if (this._tweenEasing != DragonBones.NO_TWEEN || this._curve)
-			{
-				_tweenFFD = this._updateExtensionKeyFrame(currentFrame, currentFrame.next as ExtensionFrameData, _durationFFDFrame);
-			}
-			
-			if (_tweenFFD == TWEEN_TYPE_NONE)
+			if (_tweenEasing !== DragonBones.NO_TWEEN || _curve)
 			{
 				const currentFFDVertices:Vector.<Number> = currentFrame.tweens;
-				for (var i:uint = 0, l:uint = currentFFDVertices.length; i < l; ++i)
+				const nextFFDVertices:Vector.<Number> = (currentFrame.next as ExtensionFrameData).tweens;
+				for (var i:uint = 0, l:uint = currentFFDVertices.length; i < l; ++i) 
 				{
-					if (_slotFFDVertices[i] != currentFFDVertices[i])
+					const duration:Number = nextFFDVertices[i] - currentFFDVertices[i];
+					_durationFFDVertices[i] = duration;
+					if (duration !== 0.0) 
 					{
-						_tweenFFD = TWEEN_TYPE_ONCE;
-						break;
+						_tweenFFD = TWEEN_TYPE_ALWAYS;
 					}
+				}
+			}
+			
+			if (_tweenFFD === TWEEN_TYPE_NONE)
+			{
+				_tweenFFD = TWEEN_TYPE_ONCE;
+				for (i = 0, l = _durationFFDVertices.length; i < l; ++i)
+				{
+					_durationFFDVertices[i] = 0.0;
 				}
 			}
 		}
 		
-		override protected function _onUpdateFrame(isUpdate:Boolean):void
+		override protected function _onUpdateFrame():void
 		{
-			super._onUpdateFrame(isUpdate);
+			super._onUpdateFrame();
 			
-			var tweenProgress:Number = 0;
+			var tweenProgress:Number = 0.0;
 			
-			if (_tweenFFD != TWEEN_TYPE_NONE)
+			if (_tweenFFD !== TWEEN_TYPE_NONE && slot.parent._blendLayer >= _animationState._layer)
 			{
-				if (_tweenFFD == TWEEN_TYPE_ONCE)
+				if (_tweenFFD === TWEEN_TYPE_ONCE)
 				{
 					_tweenFFD = TWEEN_TYPE_NONE;
-					tweenProgress = 0;
+					tweenProgress = 0.0;
 				}
 				else
 				{
-					tweenProgress = this._tweenProgress;
+					tweenProgress = _tweenProgress;
 				}
 				
-				const currentFFDVertices:Vector.<Number> = (this._currentFrame as ExtensionFrameData).tweens;
-				const nextFFDVertices:Vector.<Number> = _durationFFDFrame.tweens;
+				const currentFFDVertices:Vector.<Number> = (_currentFrame as ExtensionFrameData).tweens;
 				for (var i:uint = 0, l:uint = currentFFDVertices.length; i < l; ++i)
 				{
-					_ffdVertices[i] = currentFFDVertices[i] + nextFFDVertices[i] * tweenProgress;
+					_ffdVertices[i] = currentFFDVertices[i] + _durationFFDVertices[i] * tweenProgress;
 				}
 				
-				slot._ffdDirty = true;
+				_ffdDirty = true;
 			}
 		}
 		
-		override public function fadeIn(armature:Armature, animationState:AnimationState, timelineData:TimelineData, time:Number):void
+		override public function _init(armature:Armature, animationState:AnimationState, timelineData:TimelineData):void
 		{
-			super.fadeIn(armature, animationState, timelineData, time);
+			super._init(armature, animationState, timelineData);
 			
 			_slotFFDVertices = slot._ffdVertices;
-			_durationFFDFrame = BaseObject.borrowObject(ExtensionFrameData) as ExtensionFrameData;
-			_durationFFDFrame.tweens.fixed = false;
-			_durationFFDFrame.tweens.length = _slotFFDVertices.length;
-			_durationFFDFrame.tweens.fixed = true;
-			_ffdVertices.fixed = false;
-			_ffdVertices.length = _slotFFDVertices.length;
-			_ffdVertices.fixed = true;
 			
-			var i:uint = 0, l:uint = 0;
-			for (i = 0, l = this._durationFFDFrame.tweens.length; i < l; ++i) {
-				_durationFFDFrame.tweens[i] = 0;
+			_ffdVertices.length = (_timelineData.frames[0] as ExtensionFrameData).tweens.length;
+			_durationFFDVertices.length = _ffdVertices.length;
+			_ffdVertices.fixed = true;
+			_durationFFDVertices.fixed = true;
+			
+			for (var i:uint = 0, l:uint = _ffdVertices.length; i < l; ++i) 
+			{
+				_ffdVertices[i] = 0.0;
 			}
 			
-			for (i = 0, l = this._ffdVertices.length; i < l; ++i) {
-				_ffdVertices[i] = 0;
+			for (i = 0, l = _durationFFDVertices.length; i < l; ++i) 
+			{
+				_durationFFDVertices[i] = 0.0;
 			}
 		}
 		
-		override public function update(time:Number):void
+		override public function fadeOut():void
 		{
-			super.update(time);
+			_tweenFFD = TWEEN_TYPE_NONE;
+		}
+		
+		override public function update(passedTime: Number, normalizedTime: Number):void
+		{
+			super.update(passedTime, normalizedTime);
 			
-			// Blend animation.
-			const weight:Number = this._animationState._weightResult;
-			if (weight > 0)
+			if (slot._meshData !== (_timelineData as FFDTimelineData).display.mesh) 
 			{
-				var i:uint = 0, l:uint = _ffdVertices.length;
-				
-				if (slot._blendIndex == 0)
+				return;
+			}
+			
+			// Fade animation.
+			if (_tweenFFD !== TWEEN_TYPE_NONE || _ffdDirty)
+			{
+				if (_animationState._fadeState !== 0 || _animationState._subFadeState !== 0)
 				{
+					const fadeProgress:Number = Math.pow(_animationState._fadeProgress, 4.0);
+					
+					for (var i:uint = 0, l:uint = _ffdVertices.length; i < l; ++i)
+					{
+						_slotFFDVertices[i] += (_ffdVertices[i] - _slotFFDVertices[i]) * fadeProgress;
+					}
+					
+					slot._meshDirty = true;
+				}
+				else if (_ffdDirty)
+				{
+					_ffdDirty = false;
+					
 					for (i = 0, l = _ffdVertices.length; i < l; ++i)
 					{
-						_slotFFDVertices[i] = _ffdVertices[i] * weight;
+						_slotFFDVertices[i] = _ffdVertices[i];
 					}
-				}
-				else
-				{
-					for (i = 0, l = _ffdVertices.length; i < l; ++i)
-					{
-						_slotFFDVertices[i] += _ffdVertices[i] * weight;
-					}
-				}
-				
-				slot._blendIndex++;
-				
-				if (this._animationState._fadeState != 0)
-				{
-					slot._ffdDirty = true;
+					
+					slot._meshDirty = true;
 				}
 			}
 		}

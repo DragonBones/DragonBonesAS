@@ -6,14 +6,14 @@ package dragonBones.starling
 	
 	public final class StarlingEvent extends Event
 	{
-		public function StarlingEvent(data:EventObject)
+		public function StarlingEvent(type:String, data:EventObject)
 		{
-			super(data.type, false, data);
+			super(false, data);
 		}
 		
 		public function get eventObject():EventObject
 		{
-			return this.data as EventObject;
+			return data as EventObject;
 		}
 	}
 }

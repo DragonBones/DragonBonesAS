@@ -29,14 +29,12 @@ package dragonBones.starling
 			
 			return textureAtlasData;
 		}
-		
 		/**
 		 * @private
 		 */
 		public var disposeTexture:Boolean;
 		
 		public var texture:Texture;
-		
 		/**
 		 * @private
 		 */
@@ -44,12 +42,13 @@ package dragonBones.starling
 		{
 			super(this);
 		}
-		
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
 		override protected function _onClear():void
 		{
+			super._onClear();
+			
 			if (texture)
 			{
 				if (disposeTexture)
@@ -64,10 +63,7 @@ package dragonBones.starling
 			{
 				disposeTexture = false;
 			}
-			
-			super._onClear();
 		}
-		
 		/**
 		 * @private
 		 */

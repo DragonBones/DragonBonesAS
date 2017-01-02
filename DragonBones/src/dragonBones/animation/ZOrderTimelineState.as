@@ -15,9 +15,9 @@ package dragonBones.animation
 			super(this);
 		}
 		
-		override protected function _onArriveAtFrame(isUpdate:Boolean):void
+		override protected function _onArriveAtFrame():void
 		{
-			super._onArriveAtFrame(isUpdate);
+			super._onArriveAtFrame();
 			
 			_armature._sortZOrder((_currentFrame as ZOrderFrameData).zOrder);            
 		}

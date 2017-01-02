@@ -15,20 +15,11 @@ package dragonBones.geom
 		 */
 		public static function normalizeRadian(value:Number):Number
 		{
-			value = (value + Math.PI) % (Math.PI * 2);
-			// value += value > 0? -Math.PI: Math.PI;
-			if (value > 0)
-			{
-				value -= Math.PI;
-			}
-			else
-			{
-				value += Math.PI;
-			}
+			value = (value + Math.PI) % (Math.PI * 2.0);
+			value += value > 0.0? -Math.PI: Math.PI;
 			
 			return value;
 		}
-		
 		/**
 		 * @private
 		 */
@@ -43,56 +34,48 @@ package dragonBones.geom
 				result.y += matrix.ty;
 			}
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 水平位移。
 		 * @version DragonBones 3.0
 		 */
-		public var x:Number = 0;
-		
+		public var x:Number = 0.0;
 		/**
 		 * @language zh_CN
 		 * 垂直位移。
 		 * @version DragonBones 3.0
 		 */
-		public var y:Number = 0;
-		
+		public var y:Number = 0.0;
 		/**
 		 * @language zh_CN
 		 * 水平倾斜。 (以弧度为单位)
 		 * @version DragonBones 3.0
 		 */
-		public var skewX:Number = 0;
-		
+		public var skewX:Number = 0.0;
 		/**
 		 * @language zh_CN
 		 * 垂直倾斜。 (以弧度为单位)
 		 * @version DragonBones 3.0
 		 */
-		public var skewY:Number = 0;
-		
+		public var skewY:Number = 0.0;
 		/**
 		 * @language zh_CN
 		 * 水平缩放。
 		 * @version DragonBones 3.0
 		 */
-		public var scaleX:Number = 1;
-		
+		public var scaleX:Number = 1.0;
 		/**
 		 * @language zh_CN
 		 * 垂直缩放。
 		 * @version DragonBones 3.0
 		 */
-		public var scaleY:Number = 1;
-		
+		public var scaleY:Number = 1.0;
 		/**
 		 * @private
 		 */
 		public function Transform()
 		{
 		}
-		
 		/**
 		 * @private
 		 */
@@ -100,7 +83,6 @@ package dragonBones.geom
 		{
 			return "[object dragonBones.geom.Transform] x:" + x + " y:" + y + " skewX:" + skewX * 180 / Math.PI + " skewY:" + skewY * 180 / Math.PI + " scaleX:" + scaleX + " scaleY:" + scaleY;
 		}
-		
 		/**
 		 * @private
 		 */
@@ -116,31 +98,17 @@ package dragonBones.geom
 			
 			return this;
 		}
-		
-		/**
-		 * @private
-		 */
-		[inline]
-		final public function clone():Transform
-		{
-			const value:Transform = new Transform();
-			value.copyFrom(this);
-			
-			return value;
-		}
-		
 		/**
 		 * @private
 		 */
 		[inline]
 		final public function identity():Transform
 		{
-			x = y = skewX = skewY = 0;
-			scaleX = scaleY = 1;
+			x = y = skewX = skewY = 0.0;
+			scaleX = scaleY = 1.0;
 			
 			return this;
 		}
-		
 		/**
 		 * @private
 		 */
@@ -156,7 +124,6 @@ package dragonBones.geom
 			
 			return this;
 		}
-		
 		/**
 		 * @private
 		 */
@@ -172,7 +139,6 @@ package dragonBones.geom
 			
 			return this;
 		}
-		
 		/**
 		 * @private
 		 */
@@ -190,8 +156,15 @@ package dragonBones.geom
 			//skewY = Math.atan2(matrix.b, matrix.a);
 			skewX = Math.atan(-matrix.c / matrix.d);
 			skewY = Math.atan(matrix.b / matrix.a);
-			if (skewX != skewX) skewX = 0;
-			if (skewY != skewY) skewY = 0;
+			if (skewX !== skewX) 
+			{
+				skewX = 0.0;
+			}
+			
+			if (skewY !== skewY) 
+			{
+				skewY = 0.0;
+			}
 			
 			// scaleY = (skewX > -PI_Q && skewX < PI_Q)? matrix.d / Math.cos(skewX): -matrix.c / Math.sin(skewX);
 			if (skewX > -PI_Q && skewX < PI_Q)
@@ -213,13 +186,13 @@ package dragonBones.geom
 				scaleX = matrix.b / Math.sin(skewY);
 			}
 			
-			if (backupScaleX >=0 && scaleX < 0)
+			if (backupScaleX >= 0.0 && scaleX < 0.0)
 			{
 				scaleX = -scaleX;
 				skewY = skewY - Math.PI;
 			}
 			
-			if (backupScaleY >= 0 && scaleY < 0)
+			if (backupScaleY >= 0.0 && scaleY < 0.0)
 			{
 				scaleY = -scaleY;
 				skewX = skewX - Math.PI;
@@ -227,7 +200,6 @@ package dragonBones.geom
 			
 			return this;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 转换为矩阵。
@@ -236,16 +208,43 @@ package dragonBones.geom
 		[inline]
 		final public function toMatrix(matrix:Matrix):Transform
 		{
-			matrix.a = scaleX * Math.cos(skewY);
-			matrix.b = scaleX * Math.sin(skewY);
-			matrix.c = -scaleY * Math.sin(skewX);
-			matrix.d = scaleY * Math.cos(skewX);
+			if (skewX !== 0.0 || skewY !== 0.0) 
+			{
+				matrix.a = Math.cos(skewY);
+				matrix.b = Math.sin(skewY);
+				
+				if (skewX === skewY) 
+				{
+					matrix.c = -matrix.b;
+					matrix.d = matrix.a;
+				}
+				else 
+				{
+					matrix.c = -Math.sin(skewX);
+					matrix.d = Math.cos(skewX);
+				}
+				
+				if (scaleX !== 1.0 || scaleY !== 1.0) 
+				{
+					matrix.a *= scaleX;
+					matrix.b *= scaleX;
+					matrix.c *= scaleY;
+					matrix.d *= scaleY;
+				}
+			}
+			else 
+			{
+				matrix.a = scaleX;
+				matrix.b = 0.0;
+				matrix.c = 0.0;
+				matrix.d = scaleY;
+			}
+			
 			matrix.tx = x;
 			matrix.ty = y;
 			
 			return this;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 旋转。 (以弧度为单位)

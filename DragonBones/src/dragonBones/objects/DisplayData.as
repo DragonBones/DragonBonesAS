@@ -3,7 +3,7 @@ package dragonBones.objects
 	import flash.geom.Point;
 	
 	import dragonBones.core.BaseObject;
-	import dragonBones.core.DragonBones;
+	import dragonBones.enum.DisplayType;
 	import dragonBones.geom.Transform;
 	import dragonBones.textures.TextureData;
 	
@@ -13,39 +13,42 @@ package dragonBones.objects
 	public class DisplayData extends BaseObject
 	{
 		public var isRelativePivot:Boolean;
+		public var inheritAnimation:Boolean;
 		public var type:int;
 		public var name:String;
+		public var path:String;
+		public var share:String;
+		public const pivot:Point = new Point();
+		public const transform:Transform = new Transform();
 		public var texture:TextureData;
 		public var armature:ArmatureData;
 		public var mesh:MeshData;
-		public const pivot:Point = new Point();
-		public const transform:Transform = new Transform();
+		public var boundingBox: BoundingBoxData;
 		
 		public function DisplayData()
 		{
 			super(this);
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
 		override protected function _onClear():void
 		{
-			isRelativePivot = false;
-			type = DragonBones.DISPLAY_TYPE_IMAGE;
-			name = null;
-			texture = null;
-			armature = null;
-			
-			if (mesh)
+			if (boundingBox) 
 			{
-				mesh.returnToPool();
-				mesh = null;
+				boundingBox.returnToPool();
 			}
 			
-			pivot.x = 0;
-			pivot.y = 0;
+			isRelativePivot = false;
+			type = DisplayType.None;
+			name = null;
+			path = null;
+			share = null;
+			pivot.x = 0.0;
+			pivot.y = 0.0;
 			transform.identity();
+			texture = null;
+			armature = null;
+			mesh = null;
+			boundingBox = null;
 		}
 	}
 }

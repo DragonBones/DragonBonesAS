@@ -17,7 +17,7 @@ package dragonBones.flash
 		
 		override public function clone():Event
 		{
-			const event:FlashEvent = new FlashEvent(this.type, eventObject);
+			const event:FlashEvent = new FlashEvent(type, eventObject);
 			
 			return event;
 		}

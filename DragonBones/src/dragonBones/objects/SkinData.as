@@ -3,52 +3,31 @@ package dragonBones.objects
 	import dragonBones.core.BaseObject;
 	
 	/**
-	 * @language zh_CN
-	 * 皮肤数据。
-	 * @version DragonBones 3.0
+	 * @private
 	 */
 	public final class SkinData extends BaseObject
 	{
-		/**
-		 * @language zh_CN
-		 * 数据名称。
-		 * @version DragonBones 3.0
-		 */
 		public var name:String;
-		
-		/**
-		 * @private
-		 */
 		public const slots:Object = {};
 		
-		/**
-		 * @private
-		 */
 		public function SkinData()
 		{
 			super(this);
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
 		override protected function _onClear():void
 		{
-			name = null;
-			
-			var i:String = null;
-			
-			for (i in slots)
+			for (var k:String in slots)
 			{
-				(slots[i] as SlotDisplayDataSet).returnToPool();
-				delete slots[i];
+				(slots[k] as SkinSlotData).returnToPool();
+				delete slots[k];
 			}
+			
+			name = null;
+			//slots.clear();
 		}
 		
-		/**
-		 * @private
-		 */
-		public function addSlot(value:SlotDisplayDataSet):void
+		public function addSlot(value:SkinSlotData):void
 		{
 			if (value && value.slot && !slots[value.slot.name])
 			{
@@ -60,12 +39,9 @@ package dragonBones.objects
 			}
 		}
 		
-		/**
-		 * @private
-		 */
-		public function getSlot(name:String):SlotDisplayDataSet
+		public function getSlot(name:String):SkinSlotData
 		{
-			return slots[name] as SlotDisplayDataSet;
+			return slots[name] as SkinSlotData;
 		}
 	}
 }

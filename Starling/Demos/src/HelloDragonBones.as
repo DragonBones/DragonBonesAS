@@ -21,13 +21,13 @@
 	[SWF(width = "800", height = "600", frameRate = "60", backgroundColor = "#666666")]
 	public class HelloDragonBones extends Sprite
 	{
-		[Embed(source = "../assets/Ubbie/Ubbie.json", mimeType = "application/octet-stream")]
+		[Embed(source = "../assets/DragonBoy/DragonBoy.json", mimeType = "application/octet-stream")]
 		public static const DBDataA: Class;
 		
-		[Embed(source = "../assets/Ubbie/texture.json", mimeType = "application/octet-stream")]
+		[Embed(source = "../assets/DragonBoy/DragonBoy_texture_1.json", mimeType = "application/octet-stream")]
 		public static const TADataA1: Class;
 		
-		[Embed(source = "../assets/Ubbie/texture.png")]
+		[Embed(source = "../assets/DragonBoy/DragonBoy_texture_1.png")]
 		public static const TextureA1: Class;
 		
 		private var _isMoved:Boolean = false;
@@ -44,7 +44,7 @@
 		{
 			// Render init.
 			_flashInit();
-			_starlingInit();
+			//_starlingInit();
 			
 			// Add event listeners.
 			this.stage.addEventListener(MouseEvent.MOUSE_UP, _mouseHandler);

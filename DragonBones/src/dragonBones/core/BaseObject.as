@@ -35,7 +35,6 @@
 				}
 			}
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 设置每种对象池的最大缓存数量。
@@ -45,14 +44,11 @@
 		 */
 		public static function setMaxCount(objectConstructor:Class, maxCount:uint):void
 		{
-			var i:uint = 0, l:uint = 0;
-			var pool:Vector.<BaseObject> = null;
-			
 			if (objectConstructor)
 			{
 				_maxCountMap[objectConstructor] = maxCount;
 				
-				pool = _poolsMap[objectConstructor];
+				var pool:Vector.<BaseObject> = _poolsMap[objectConstructor];
 				if (pool && pool.length > maxCount)
 				{
 					pool.length = maxCount;
@@ -62,7 +58,7 @@
 			{
 				_defaultMaxCount = maxCount;
 				
-				for (var classType:* in _poolsMap)
+				for (var classType:Object in _poolsMap)
 				{
 					if (_maxCountMap[classType] == null)
 					{
@@ -77,20 +73,17 @@
 				}
 			}
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 清除所有对象池缓存的对象。
+         * @param objectConstructor 对象类。 (不设置则清除所有缓存)
 		 * @version DragonBones 4.5
 		 */
 		public static function clearPool(objectConstructor:Class = null):void
 		{
-			var pool:Vector.<BaseObject> = null;
-			var object:BaseObject = null;
-			
 			if (objectConstructor)
 			{
-				pool = _poolsMap[objectConstructor];
+				var pool:Vector.<BaseObject> = _poolsMap[objectConstructor];
 				if (pool && pool.length)
 				{
 					pool.length = 0;
@@ -104,7 +97,6 @@
 				}
 			}
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 从对象池中创建指定对象。
@@ -113,7 +105,7 @@
 		public static function borrowObject(objectConstructor:Class):BaseObject
 		{
 			const pool:Vector.<BaseObject> = _poolsMap[objectConstructor];
-			if (pool && pool.length)
+			if (pool && pool.length > 0)
 			{
 				return pool.pop();
 			}
@@ -124,14 +116,12 @@
 				return object;
 			}
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 对象的唯一标识。
 		 * @version DragonBones 4.5
 		 */
-		public const hashCode:uint = BaseObject._hashCode++;
-		
+		public const hashCode:uint = _hashCode++;
 		/**
 		 * @private
 		 */
@@ -142,12 +132,10 @@
 				throw new Error(DragonBones.ABSTRACT_CLASS_ERROR);
 			}
 		}
-		
 		/**
 		 * @private
 		 */
 		protected function _onClear():void {}
-		
 		/**
 		 * @language zh_CN
 		 * 清除数据并返还对象池。

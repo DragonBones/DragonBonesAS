@@ -8,87 +8,67 @@
 	public final class AnimationData extends TimelineData
 	{
 		/**
-		 * @private
-		 */
-		public var hasAsynchronyTimeline:Boolean;
-		
-		/**
 		 * @language zh_CN
 		 * 持续的帧数。
 		 * @version DragonBones 3.0
 		 */
 		public var frameCount:uint;
-		
 		/**
 		 * @language zh_CN
-		 * 循环播放的次数。 [0: 无限循环播放, [1~N]: 循环播放 N 次]
+		 * 播放次数。 [0: 无限循环播放, [1~N]: 循环播放 N 次]
 		 * @version DragonBones 3.0
 		 */
 		public var playTimes:uint;
-		
 		/**
 		 * @language zh_CN
-		 * 开始的时间。 (以秒为单位)
-		 * @version DragonBones 3.0
-		 */
-		public var position:Number;
-		
-		/**
-		 * @language zh_CN
-		 * 持续的时间。 (以秒为单位)
+		 * 持续时间。 (以秒为单位)
 		 * @version DragonBones 3.0
 		 */
 		public var duration:Number;
-		
 		/**
 		 * @language zh_CN
-		 * 淡入混合的时间。 (以秒为单位)
+		 * 淡入时间。 (以秒为单位)
 		 * @version DragonBones 3.0
 		 */
 		public var fadeInTime:Number;
-		
 		/**
 		 * @private
 		 */
-		public var cacheTimeToFrameScale:Number;
-		
+		public var cacheFrameRate:Number;
 		/**
 		 * @language zh_CN
 		 * 数据名称。
 		 * @version DragonBones 3.0
 		 */
 		public var name:String;
-		
-		/**
-		 * @private
-		 */
-		public var animation:AnimationData;
-		
 		/**
 		 * @private
 		 */
 		public var zOrderTimeline:ZOrderTimelineData;
-		
 		/**
 		 * @private
 		 */
 		public const boneTimelines:Object = {};
-		
 		/**
 		 * @private
 		 */
 		public const slotTimelines:Object = {};
-		
 		/**
 		 * @private
 		 */
-		public const ffdTimelines:Object = {}; // <skinName ,<slotName, <displayIndex, FFDTimelineData>>>
-		
+		public const ffdTimelines:Object = {}; // skinName ,slotName, mesh
 		/**
 		 * @private
 		 */
-		public const cachedFrames:Vector.<Boolean> = new Vector.<Boolean>(0, true);
-		
+		public const cachedFrames:Vector.<Boolean> = new Vector.<Boolean>();
+		/**
+		 * @private
+		 */
+		public const boneCachedFrameIndices: Object = {}; //Object<Vector.<Number>>
+		/**
+		 * @private
+		 */
+		public const slotCachedFrameIndices: Object = {}; //Object<Vector.<Number>>
 		/**
 		 * @private
 		 */
@@ -96,85 +76,93 @@
 		{
 			super(this);
 		}
-		
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
 		override protected function _onClear():void
 		{
 			super._onClear();
 			
-			var i:String = null;
-			for (i in boneTimelines)
+			for (var k:String in boneTimelines)
 			{
-				(boneTimelines[i] as BoneTimelineData).returnToPool();
-				delete boneTimelines[i];
+				(boneTimelines[k] as BoneTimelineData).returnToPool();
+				delete boneTimelines[k];
 			}
 			
-			for (i in slotTimelines)
+			for (k in slotTimelines)
 			{
-				(slotTimelines[i] as SlotTimelineData).returnToPool();
-				delete slotTimelines[i];
+				(slotTimelines[k] as SlotTimelineData).returnToPool();
+				delete slotTimelines[k];
 			}
 			
-			for (i in ffdTimelines) {
-				for (var j:String in ffdTimelines[i]) {
-					for (var k:String in ffdTimelines[i][j]) {
-						(ffdTimelines[i][j][k] as FFDTimelineData).returnToPool();
+			for (k in ffdTimelines) {
+				for (var kA:String in ffdTimelines[k]) 
+				{
+					for (var kB:String in ffdTimelines[k][kA]) 
+					{
+						(ffdTimelines[k][kA][kB] as FFDTimelineData).returnToPool();
 					}
 				}
 				
-				delete ffdTimelines[i];
+				delete ffdTimelines[k];
 			}
 			
-			hasAsynchronyTimeline = false;
+			for (k in boneCachedFrameIndices) 
+			{
+				// boneCachedFrameIndices[i].length = 0;
+				delete boneCachedFrameIndices[k];
+			}
+			
+			for (k in slotCachedFrameIndices) {
+				// slotCachedFrameIndices[i].length = 0;
+				delete slotCachedFrameIndices[k];
+			}
+			
+			if (zOrderTimeline) 
+			{
+				zOrderTimeline.returnToPool();
+			}
+			
 			frameCount = 0;
 			playTimes = 0;
-			position = 0;
-			duration = 0;
-			fadeInTime = 0;
-			cacheTimeToFrameScale = 0;
+			duration = 0.0;
+			fadeInTime = 0.0;
+			cacheFrameRate = 0.0;
 			name = null;
-			animation = null;
+			//boneTimelines.clear();
+			//slotTimelines.clear();
+			//ffdTimelines.clear();
+			cachedFrames.fixed = false;
+			cachedFrames.length = 0;
+			//boneCachedFrameIndices.clear();
+			//boneCachedFrameIndices.clear();
 			zOrderTimeline = null;
-			
-			if (cachedFrames.length)
-			{
-				cachedFrames.fixed = false;
-				cachedFrames.length = 0;
-				cachedFrames.fixed = true;
-			}
 		}
-		
 		/**
 		 * @private
 		 */
-		public function cacheFrames(value:Number):void
+		public function cacheFrames(frameRate:Number):void
 		{
-			if (animation)
+			if (cacheFrameRate > 0.0)
 			{
 				return;
 			}
 			
-			const cacheFrameCount:uint = Math.max(Math.floor((frameCount + 1) * scale * value), 1);
-			
-			cacheTimeToFrameScale = cacheFrameCount / (duration + 0.000001); //
-			cachedFrames.fixed = false;
-			cachedFrames.length = 0; // Clear vector 
+			cacheFrameRate = Math.max(Math.ceil(frameRate * scale), 1.0);
+			const cacheFrameCount:uint = Math.ceil(cacheFrameRate * duration) + 1; // uint
 			cachedFrames.length = cacheFrameCount;
 			cachedFrames.fixed = true;
 			
-			for each (var boneTimeline:BoneTimelineData in boneTimelines)
+			for (var k:String in boneTimelines) 
 			{
-				boneTimeline.cacheFrames(cacheFrameCount);
+				boneCachedFrameIndices[k] = new Vector.<Number>(cacheFrameCount, true);
 			}
 			
-			for each (var slotTimeline:SlotTimelineData in slotTimelines)
+			for (k in slotTimelines) 
 			{
-				slotTimeline.cacheFrames(cacheFrameCount);
+				slotCachedFrameIndices[k] = new Vector.<Number>(cacheFrameCount, true);
 			}
 		}
-		
 		/**
 		 * @private
 		 */
@@ -189,7 +177,6 @@
 				throw new ArgumentError();
 			}
 		}
-		
 		/**
 		 * @private
 		 */
@@ -204,7 +191,6 @@
 				throw new ArgumentError();
 			}
 		}
-		
 		/**
 		 * @private
 		 */
@@ -214,9 +200,9 @@
 			{
 				const skin:Object = ffdTimelines[value.skin.name] = ffdTimelines[value.skin.name] || {};
 				const slot:Object = skin[value.slot.slot.name] = skin[value.slot.slot.name] || {};
-				if (!slot[value.displayIndex])
+				if (!slot[value.display.name])
 				{
-					slot[value.displayIndex] = value;
+					slot[value.display.name] = value;
 				}
 				else
 				{
@@ -228,7 +214,6 @@
 				throw new ArgumentError();
 			}
 		}
-		
 		/**
 		 * @private
 		 */
@@ -236,7 +221,6 @@
 		{
 			return boneTimelines[name] as BoneTimelineData;
 		}
-		
 		/**
 		 * @private
 		 */
@@ -244,23 +228,32 @@
 		{
 			return slotTimelines[name] as SlotTimelineData;
 		}
-		
 		/**
 		 * @private
 		 */
-		public function getFFDTimeline(skinName:String, slotName:String, displayIndex:uint):FFDTimelineData
+		public function getFFDTimeline(skinName:String, slotName:String):Object
 		{
 			const skin:Object = ffdTimelines[skinName];
 			if (skin)
 			{
-				const slot:Object = skin[slotName];
-				if (slot)
-				{
-					return slot[displayIndex] as FFDTimelineData;
-				}
+				return skin[slotName];
 			}
 			
 			return null;
+		}
+		/**
+		 * @private
+		 */
+		public function getBoneCachedFrameIndices(name: String): Vector.<Number> 
+		{
+			return boneCachedFrameIndices[name];
+		}
+		/**
+		 * @private
+		 */
+		public function getSlotCachedFrameIndices(name: String): Vector.<Number> 
+		{
+			return slotCachedFrameIndices[name];
 		}
 	}
 }

@@ -1,16 +1,14 @@
 ﻿package dragonBones.animation
 {
-	import dragonBones.Armature;
 	import dragonBones.core.BaseObject;
-	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.enum.EventType;
 	import dragonBones.events.EventObject;
 	import dragonBones.events.IEventDispatcher;
 	import dragonBones.objects.ActionData;
 	import dragonBones.objects.AnimationFrameData;
 	import dragonBones.objects.EventData;
 	import dragonBones.objects.FrameData;
-	import dragonBones.objects.TimelineData;
 	
 	use namespace dragonBones_internal;
 	
@@ -19,189 +17,165 @@
 	 */
 	public final class AnimationTimelineState extends TimelineState
 	{
-		private var _isStarted:Boolean;
-		
 		public function AnimationTimelineState()
 		{
 			super(this);
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
-		override protected function _onClear():void
-		{
-			super._onClear();
-			
-			_isStarted = false;
-		}
-		
 		protected function _onCrossFrame(frame:FrameData):void
 		{
-			var i:uint = 0, l:uint = 0;
-			
-			if (this._animationState.actionEnabled)
+			if (_animationState.actionEnabled)
 			{
 				const actions:Vector.<ActionData> = (frame as AnimationFrameData).actions;
-				for (i = 0, l = actions.length; i < l; ++i)
+				for (var i:uint = 0, l:uint = actions.length; i < l; ++i)
 				{
-					this._armature._bufferAction(actions[i]);
+					_armature._bufferAction(actions[i]);
 				}
 			}
 			
-			const eventDispatcher:IEventDispatcher = _armature.display;
+			const eventDispatcher:IEventDispatcher = _armature.eventDispatcher;
 			const events:Vector.<EventData> = (frame as AnimationFrameData).events;
 			for (i = 0, l = events.length; i < l; ++i)
 			{
 				const eventData:EventData = events[i];
 				
 				var eventType:String = null;
-				switch (eventData.type)
+				switch (eventData.type) 
 				{
-					case DragonBones.EVENT_TYPE_FRAME:
+					case EventType.Frame:
 						eventType = EventObject.FRAME_EVENT;
 						break;
 					
-					case DragonBones.EVENT_TYPE_SOUND:
+					case EventType.Sound:
 						eventType = EventObject.SOUND_EVENT;
 						break;
 				}
 				
-				if (
-					(eventData.type == DragonBones.EVENT_TYPE_SOUND? 
-						this._armature._eventManager: eventDispatcher
-					).hasEvent(eventType)
-				)
+				if (eventDispatcher.hasEvent(eventType) || eventData.type === EventType.Sound) 
 				{
 					const eventObject:EventObject = BaseObject.borrowObject(EventObject) as EventObject;
+					eventObject.name = eventData.name;
+					eventObject.frame = frame as AnimationFrameData;
+					eventObject.data = eventData.data;
 					eventObject.animationState = _animationState;
 					
-					if (eventData.bone)
+					if (eventData.bone) 
 					{
 						eventObject.bone = _armature.getBone(eventData.bone.name);
 					}
 					
-					if (eventData.slot)
+					if (eventData.slot) 
 					{
 						eventObject.slot = _armature.getSlot(eventData.slot.name);
 					}
-					
-					eventObject.name = eventData.name;
-					eventObject.data = eventData.data;
 					
 					_armature._bufferEvent(eventObject, eventType);
 				}
 			}
 		}
 		
-		override public function fadeIn(armature:Armature, animationState:AnimationState, timelineData:TimelineData, time:Number):void
+		override public function update(passedTime:Number, normalizedTime:Number):void
 		{
-			super.fadeIn(armature, animationState, timelineData, time);
+			const prevState:int = _playState;
+			const prevPlayTimes:uint = _currentPlayTimes;
+			const prevTime:Number = _currentTime;
 			
-			this._currentTime = time;
-		}
-		
-		override public function update(time:Number):void
-		{
-			const prevTime:Number = this._currentTime;
-			const prevPlayTimes:uint = this._currentPlayTimes;
-			
-			if (!this._isCompleted && this._setCurrentTime(time)) 
+			if (_playState <= 0 && _setCurrentTime(passedTime, normalizedTime)) 
 			{
-				const eventDispatcher:IEventDispatcher = this._armature.display;
-				var eventObject:EventObject = null;
+				const eventDispatcher:IEventDispatcher = _armature.eventDispatcher;
 				
-				if (!_isStarted)
+				if (prevState < 0 && _playState !== prevState) 
 				{
-					_isStarted = true;
-					
-					if (eventDispatcher.hasEvent(EventObject.START))
+					if (eventDispatcher.hasEvent(EventObject.START)) 
 					{
-						eventObject = BaseObject.borrowObject(EventObject) as EventObject;
-						eventObject.animationState = this._animationState;
-						this._armature._bufferEvent(eventObject, EventObject.START);
+						var eventObject:EventObject = BaseObject.borrowObject(EventObject) as EventObject;
+						eventObject.animationState = _animationState;
+						_armature._bufferEvent(eventObject, EventObject.START);
 					}
 				}
 				
-				if (this._keyFrameCount > 0)
+				if (prevTime < 0.0) 
 				{
-					const currentFrameIndex:uint = this._keyFrameCount > 1 ? Math.floor(this._currentTime * this._frameRate) : 0;
-					const currentFrame:FrameData = this._timeline.frames[currentFrameIndex];
-					
-					if (this._currentFrame != currentFrame) 
+					return;
+				}
+				
+				if (_keyFrameCount > 1) 
+				{
+					const currentFrameIndex:uint = Math.floor(_currentTime * _frameRate);
+					const currentFrame:AnimationFrameData = _timelineData.frames[currentFrameIndex];
+					if (_currentFrame !== currentFrame) 
 					{
-						if (this._keyFrameCount > 1) 
+						const isReverse:Boolean = _currentPlayTimes === prevPlayTimes && prevTime > _currentTime;
+						var crossedFrame:AnimationFrameData = _currentFrame as AnimationFrameData;
+						_currentFrame = currentFrame;
+						
+						if (!crossedFrame) 
 						{
-							var crossedFrame:FrameData = this._currentFrame;
-							this._currentFrame = currentFrame;
+							const prevFrameIndex:uint = Math.floor(prevTime * _frameRate);
+							crossedFrame = _timelineData.frames[prevFrameIndex];
 							
-							if (!crossedFrame) 
+							if (isReverse) 
 							{
-								const prevFrameIndex:uint = Math.floor(prevTime * this._frameRate);
-								crossedFrame = this._timeline.frames[prevFrameIndex];
-								
-								if (this._isReverse) 
-								{
-								} 
-								else 
-								{
-									if (
-										prevTime <= crossedFrame.position || 
-										prevPlayTimes != this._currentPlayTimes
-									) 
-									{
-										crossedFrame = crossedFrame.prev;
-									}
-								}
 							}
-							
-							if (this._isReverse) 
-							{
-								while (crossedFrame != currentFrame) 
-								{
-									this._onCrossFrame(crossedFrame);
-									crossedFrame = crossedFrame.prev;
-								}
-							} 
 							else 
 							{
-								while (crossedFrame != currentFrame) 
+								if (
+									prevTime <= crossedFrame.position ||
+									prevPlayTimes !== _currentPlayTimes
+								) 
 								{
-									crossedFrame = crossedFrame.next;
-									this._onCrossFrame(crossedFrame);
+									crossedFrame = crossedFrame.prev as AnimationFrameData;
 								}
 							}
-						} 
+						}
+						
+						if (isReverse) 
+						{
+							while (crossedFrame !== currentFrame) 
+							{
+								_onCrossFrame(crossedFrame);
+								crossedFrame = crossedFrame.prev as AnimationFrameData;
+							}
+						}
 						else 
 						{
-							this._currentFrame = currentFrame;
-							this._onCrossFrame(this._currentFrame);
+							while (crossedFrame !== currentFrame) 
+							{
+								crossedFrame = crossedFrame.next as AnimationFrameData;
+								_onCrossFrame(crossedFrame);
+							}
 						}
 					}
 				}
-				
-				if (prevPlayTimes != this._currentPlayTimes)
+				else if (_keyFrameCount > 0 && !_currentFrame) 
 				{
-					if (eventDispatcher.hasEvent(EventObject.LOOP_COMPLETE))
+					_currentFrame = _timelineData.frames[0];
+					_onCrossFrame(_currentFrame);
+				}
+				
+				if (_currentPlayTimes !== prevPlayTimes) 
+				{
+					if (eventDispatcher.hasEvent(EventObject.LOOP_COMPLETE)) 
 					{
 						eventObject = BaseObject.borrowObject(EventObject) as EventObject;
-						eventObject.animationState = this._animationState;
-						this._armature._bufferEvent(eventObject, EventObject.LOOP_COMPLETE);
+						eventObject.animationState = _animationState;
+						_armature._bufferEvent(eventObject, EventObject.LOOP_COMPLETE);
 					}
 					
-					if (this._isCompleted && eventDispatcher.hasEvent(EventObject.COMPLETE))
+					if (_playState > 0 && eventDispatcher.hasEvent(EventObject.COMPLETE)) 
 					{
 						eventObject = BaseObject.borrowObject(EventObject) as EventObject;
-						eventObject.animationState = this._animationState;
-						this._armature._bufferEvent(eventObject, EventObject.COMPLETE);
+						eventObject.animationState = _animationState;
+						_armature._bufferEvent(eventObject, EventObject.COMPLETE);
 					}
 				}
 			}
 		}
 		
-		public function setCurrentTime(value: Number): void {
-			this._setCurrentTime(value);
-			this._currentFrame = null;
+		public function setCurrentTime(value: Number): void 
+		{
+			_setCurrentTime(value, -1.0);
+			_currentFrame = null;
 		}
 	}
 }

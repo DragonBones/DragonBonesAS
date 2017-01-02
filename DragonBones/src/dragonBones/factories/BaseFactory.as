@@ -18,13 +18,14 @@
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.enum.DisplayType;
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.BoneData;
 	import dragonBones.objects.DisplayData;
 	import dragonBones.objects.DragonBonesData;
 	import dragonBones.objects.SkinData;
+	import dragonBones.objects.SkinSlotData;
 	import dragonBones.objects.SlotData;
-	import dragonBones.objects.SlotDisplayDataSet;
 	import dragonBones.parsers.DataParser;
 	import dragonBones.parsers.ObjectDataParser;
 	import dragonBones.textures.TextureAtlasData;
@@ -48,47 +49,31 @@
 	 */
 	public class BaseFactory extends EventDispatcher
 	{
+		/**
+		 * @private
+		 */
 		protected static const _defaultDataParser:DataParser = new ObjectDataParser();
-		
-		/** 
-		 * @language zh_CN
-		 * Draw smoothing.
-		 * @version DragonBones 3.0
-		 */
-		public var smoothing:Boolean = true;
-		
-		/** 
-		 * @language zh_CN
-		 * Scale for texture.
-		 * @version DragonBones 3.0
-		 */
-		public var scaleForTexture:Number = 0;
-		
 		/**
 		 * @language zh_CN
-		 * 是否开启共享搜索。 [true: 开启, false: 不开启]
+		 * 是否开启共享搜索。
 		 * 如果开启，创建一个骨架时，可以从多个龙骨数据中寻找骨架数据，或贴图集数据中寻找贴图数据。 (通常在有共享导出的数据时开启)
-		 * @see dragonBones.objects.DragonBonesData#autoSearch
-		 * @see dragonBones.objects.TextureAtlasData#autoSearch
+		 * @see dragonBones.DragonBonesData#autoSearch
+		 * @see dragonBones.TextureAtlasData#autoSearch
 		 * @version DragonBones 4.5
 		 */
 		public var autoSearch:Boolean = false;
-		
-		/** 
-		 * @private 
-		 */
-		protected var _dataParser:DataParser = null;
-		
 		/** 
 		 * @private 
 		 */
 		protected const _dragonBonesDataMap:Object = {};
-		
 		/** 
 		 * @private 
 		 */
 		protected const _textureAtlasDataMap:Object = {};
-		
+		/** 
+		 * @private 
+		 */
+		protected var _dataParser:DataParser = null;
 		/** 
 		 * @private 
 		 */
@@ -103,37 +88,17 @@
 			
 			_dataParser = dataParser || _defaultDataParser;
 		}
-		
-		private var _delayID:uint = 0;
-		private const _decodeDataList:Vector.<DecodedData> = new Vector.<DecodedData>;
-		private function _loadTextureAtlasHandler(event:Event):void
-		{
-			const loaderInfo:LoaderInfo = event.target as LoaderInfo;
-			const decodeData:DecodedData = loaderInfo.loader as DecodedData;
-			loaderInfo.removeEventListener(Event.COMPLETE, _loadTextureAtlasHandler);
-			parseTextureAtlasData(decodeData.textureAtlasData, decodeData.content, decodeData.name, scaleForTexture || 0, 1);
-			decodeData.dispose();
-			_decodeDataList.splice(_decodeDataList.indexOf(decodeData), 1);
-			if (_decodeDataList.length == 0)
-			{
-				this.dispatchEvent(event);
-			}
-		}
-		
 		/** 
 		 * @private
 		 */
 		protected function _getTextureData(textureAtlasName:String, textureName:String):TextureData
 		{
-			var i:uint = 0, l:uint = 0;
-			var textureData:TextureData = null;
 			var textureAtlasDataList:Vector.<TextureAtlasData> = _textureAtlasDataMap[textureAtlasName];
-			
 			if (textureAtlasDataList)
 			{
-				for (i = 0, l = textureAtlasDataList.length; i < l; ++i)
+				for (var i:uint = 0, l:uint = textureAtlasDataList.length; i < l; ++i)
 				{
-					textureData = textureAtlasDataList[i].getTexture(textureName);
+					var textureData:TextureData = textureAtlasDataList[i].getTexture(textureName);
 					if (textureData)
 					{
 						return textureData;
@@ -162,7 +127,6 @@
 			
 			return null;
 		}
-		
 		/** 
 		 * @private
 		 */
@@ -214,7 +178,6 @@
 			
 			return false;
 		}
-		
 		/** 
 		 * @private
 		 */
@@ -225,12 +188,7 @@
 			{
 				const boneData:BoneData = bones[i];
 				const bone:Bone = BaseObject.borrowObject(Bone) as Bone;
-				bone.name = boneData.name;
-				bone.inheritTranslation = boneData.inheritTranslation; 
-				bone.inheritRotation = boneData.inheritRotation; 
-				bone.inheritScale = boneData.inheritScale; 
-				bone.length = boneData.length;
-				bone.origin.copyFrom(boneData.transform);
+				bone._init(boneData);
 				
 				if(boneData.parent)
 				{
@@ -241,7 +199,6 @@
 					armature._addBone(bone);
 				}
 				
-				
 				if (boneData.ik)
 				{
 					bone.ikBendPositive = boneData.bendPositive;
@@ -250,8 +207,7 @@
 				}
 			}
 		}
-		
-		/** 
+		/**
 		 * @private
 		 */
 		protected function _buildSlots(dataPackage:BuildArmaturePackage, armature:Armature):void
@@ -260,91 +216,83 @@
 			const defaultSkin:SkinData = dataPackage.armature.defaultSkin;
 			const slotDisplayDataSetMap:Object = {};
 			
-			var slotDisplayDataSet:SlotDisplayDataSet = null;
-			
-			for each (slotDisplayDataSet in defaultSkin.slots)
+			for each (var skinSlotData:SkinSlotData in defaultSkin.slots)
 			{
-				slotDisplayDataSetMap[slotDisplayDataSet.slot.name] = slotDisplayDataSet;
+				slotDisplayDataSetMap[skinSlotData.slot.name] = skinSlotData;
 			}
 			
 			if (currentSkin != defaultSkin)
 			{
-				for each (slotDisplayDataSet in currentSkin.slots)
+				for each (skinSlotData in currentSkin.slots)
 				{
-					slotDisplayDataSetMap[slotDisplayDataSet.slot.name] = slotDisplayDataSet;
+					slotDisplayDataSetMap[skinSlotData.slot.name] = skinSlotData;
 				}
 			}
 			
 			const slots:Vector.<SlotData> = dataPackage.armature.sortedSlots;
-			for each (var slotData:SlotData in slots)
+			for (var i:uint = 0, l:uint = slots.length; i < l; ++i) 
 			{
-				slotDisplayDataSet = slotDisplayDataSetMap[slotData.name];
-				if (!slotDisplayDataSet)
+				const slotData:SlotData = slots[i];
+				skinSlotData = slotDisplayDataSetMap[slotData.name];
+				if (!skinSlotData)
 				{
 					continue;
 				}
 				
-				const slot:Slot = _generateSlot(dataPackage, slotDisplayDataSet);
+				const slot:Slot = _generateSlot(dataPackage, skinSlotData, armature);
 				if (slot)
 				{
-					slot._displayDataSet = slotDisplayDataSet;
-					slot._setDisplayIndex(slotData.displayIndex);
-					slot._setBlendMode(slotData.blendMode);
-					slot._setColor(slotData.color);
-					
 					armature._addSlot(slot, slotData.parent.name);
+					slot._setDisplayIndex(slotData.displayIndex);
 				}
 			}
 		}
-		
-		/** 
+		/**
 		 * @private
 		 */
 		protected function _replaceSlotDisplay(dataPackage:BuildArmaturePackage, displayData:DisplayData, slot:Slot, displayIndex:int):void
 		{
-			if (displayIndex < 0)
+			if (displayIndex < 0) 
 			{
 				displayIndex = slot.displayIndex;
 			}
 			
-			if (displayIndex >= 0)
+			if (displayIndex >= 0) 
 			{
-				const displayList:Vector.<*> = slot.displayList; // copy
-				if (displayList.length <=  displayIndex)
+				const displayList:Vector.<Object> = slot.displayList; // Copy.
+				if (displayList.length <= displayIndex) 
 				{
-					displayList.fixed = false;
 					displayList.length = displayIndex + 1;
 				}
 				
-				if (slot._replacedDisplayDataSet.length <= displayIndex)
+				if (slot._replacedDisplayDatas.length <= displayIndex) 
 				{
-					slot._replacedDisplayDataSet.fixed = false;
-					slot._replacedDisplayDataSet.length = displayIndex + 1;
-					slot._replacedDisplayDataSet.fixed = true;
+					slot._replacedDisplayDatas.length = displayIndex + 1;
 				}
 				
-				slot._replacedDisplayDataSet[displayIndex] = displayData;
+				slot._replacedDisplayDatas[displayIndex] = displayData;
 				
-				if (displayData.type == DragonBones.DISPLAY_TYPE_ARMATURE)
+				if (displayData.type === DisplayType.Armature) 
 				{
-					const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName, null, dataPackage.textureAtlasName);
+					const childArmature:Armature = buildArmature(displayData.path, dataPackage.dataName, null, dataPackage.textureAtlasName);
 					displayList[displayIndex] = childArmature;
 				}
-				else
+				else 
 				{
-					if (!displayData.texture || dataPackage.textureAtlasName)
+					if (!displayData.texture || dataPackage.textureAtlasName) 
 					{
-						displayData.texture = _getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.name);
+						displayData.texture = _getTextureData(dataPackage.textureAtlasName ? dataPackage.textureAtlasName : dataPackage.dataName, displayData.path);
 					}
 					
+					const displayDatas:Vector.<DisplayData> = slot.skinSlotData.displays;
 					if (
 						displayData.mesh ||
-						(displayIndex < slot._displayDataSet.displays.length && slot._displayDataSet.displays[displayIndex].mesh)
-					)
+						(displayIndex < displayDatas.length && displayDatas[displayIndex].mesh)
+					) 
 					{
-						displayList[displayIndex] = slot.MeshDisplay;
+						displayList[displayIndex] = slot.meshDisplay;
 					}
-					else
+					else 
 					{
 						displayList[displayIndex] = slot.rawDisplay;
 					}
@@ -354,8 +302,7 @@
 				slot.invalidUpdate();
 			}
 		}
-		
-		/** 
+		/**
 		 * @private
 		 */
 		protected function _generateTextureAtlasData(textureAtlasData:TextureAtlasData, textureAtlas:Object):TextureAtlasData
@@ -363,8 +310,7 @@
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 			return null;
 		}
-		
-		/** 
+		/**
 		 * @private
 		 */
 		protected function _generateArmature(dataPackage:BuildArmaturePackage):Armature
@@ -372,16 +318,14 @@
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 			return null;
 		}
-		
 		/** 
 		 * @private
 		 */
-		protected function _generateSlot(dataPackage:BuildArmaturePackage, slotDisplayDataSet:SlotDisplayDataSet):Slot
+		protected function _generateSlot(dataPackage:BuildArmaturePackage, slotDisplayDataSet:SkinSlotData, armature:Armature):Slot
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 			return null;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 解析并添加龙骨数据。
@@ -394,8 +338,9 @@
 		 * @see dragonBones.objects.DragonBonesData
 		 * @version DragonBones 4.5
 		 */
-		public function parseDragonBonesData(rawData:Object, dragonBonesName:String = null, scale:Number = 1):DragonBonesData
+		public function parseDragonBonesData(rawData:Object, dragonBonesName:String = null, scale:Number = 1.0):DragonBonesData
 		{
+			//
 			var isComplete:Boolean = true;
 			if (rawData is ByteArray)
 			{
@@ -418,15 +363,15 @@
 			const dragonBonesData:DragonBonesData = _dataParser.parseDragonBonesData(rawData, scale);
 			addDragonBonesData(dragonBonesData, dragonBonesName);
 			
+			//
 			if (isComplete)
 			{
 				clearTimeout(_delayID);
-				_delayID = setTimeout(this.dispatchEvent, 30, new Event(Event.COMPLETE));
+				_delayID = setTimeout(dispatchEvent, 30, new Event(Event.COMPLETE));
 			}
 			
 			return dragonBonesData;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 解析并添加贴图集数据。
@@ -441,7 +386,7 @@
 		 * @see dragonBones.textures.TextureAtlasData
 		 * @version DragonBones 4.5
 		 */
-		public function parseTextureAtlasData(rawData:Object, textureAtlas:Object, name:String = null, scale:Number = 0, rawScale:Number = 0):TextureAtlasData
+		public function parseTextureAtlasData(rawData:Object, textureAtlas:Object, name:String = null, scale:Number = 0.0, rawScale:Number = 0.0):TextureAtlasData
 		{
 			const textureAtlasData:TextureAtlasData = _generateTextureAtlasData(null, null);
 			_dataParser.parseTextureAtlasData(rawData, textureAtlasData, scale, rawScale);
@@ -472,7 +417,6 @@
 			
 			return textureAtlasData;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 获取指定名称的龙骨数据。
@@ -488,7 +432,6 @@
 		{
 			return _dragonBonesDataMap[name] as DragonBonesData;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 添加龙骨数据。
@@ -526,7 +469,6 @@
 				throw new ArgumentError();
 			}
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 移除龙骨数据。
@@ -551,7 +493,6 @@
 				delete _dragonBonesDataMap[dragonBonesName];
 			}
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 获取指定名称的贴图集数据列表。
@@ -567,7 +508,6 @@
 		{
 			return _textureAtlasDataMap[dragonBonesName] as Vector.<TextureAtlasData>;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 添加贴图集数据。
@@ -602,7 +542,6 @@
 				throw new ArgumentError();
 			}
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 移除贴图集数据。
@@ -630,42 +569,38 @@
 				delete _textureAtlasDataMap[dragonBonesName];
 			}
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 清除所有的数据。
-		 * @param disposeData 是否释放数据。 [false: 不释放, true: 释放]
+		 * @param disposeData 是否释放数据。
 		 * @version DragonBones 4.5
 		 */
 		public function clear(disposeData:Boolean = true):void
 		{
-			var i:String = null;
-			
-			for (i in _dragonBonesDataMap)
+			for (var k:String  in _dragonBonesDataMap)
 			{
 				if (disposeData)
 				{
-					(_dragonBonesDataMap[i] as DragonBonesData).returnToPool();
+					(_dragonBonesDataMap[k] as DragonBonesData).returnToPool();
 				}
 				
-				delete _dragonBonesDataMap[i];
+				delete _dragonBonesDataMap[k];
 			}
 			
-			for (i in _textureAtlasDataMap)
+			for (k in _textureAtlasDataMap)
 			{
 				if (disposeData)
 				{
-					const textureAtlasDataList:Vector.<TextureAtlasData> = _textureAtlasDataMap[i];
-					for each (var textureAtlasData:TextureAtlasData in textureAtlasDataList)
+					const textureAtlasDataList:Vector.<TextureAtlasData> = _textureAtlasDataMap[k];
+					for (var i:uint = 0, l:uint = textureAtlasDataList.length; i < l; ++i) 
 					{
-						textureAtlasData.returnToPool();
+						textureAtlasDataList[i].returnToPool();
 					}
 				}
 				
-				delete _textureAtlasDataMap[i];
+				delete _textureAtlasDataMap[k];
 			}
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 创建一个指定名称的骨架。
@@ -686,13 +621,13 @@
 				_buildBones(dataPackage, armature);
 				_buildSlots(dataPackage, armature);
 				
-				armature.advanceTime(0); // Update armature pose.
+				armature.invalidUpdate(null, true);
+				armature.advanceTime(0.0); // Update armature pose.
 				return armature;
 			}
 			
 			return null;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 将指定骨架的动画替换成其他骨架的动画。 (通常这些骨架应该具有相同的骨架结构)
@@ -737,21 +672,23 @@
 				
 				if (dataPackage.skin)
 				{
-					for each(var toSlot:Slot in toArmature.getSlots())
+					const slots:Vector.<Slot> = toArmature.getSlots();
+					for (var i:uint = 0, l:uint = slots.length; i < l; ++i) 
 					{
-						const toSlotDisplayList:Vector.<*> = toSlot.displayList;
-						for (var i:uint = 0, l:uint = toSlotDisplayList.length; i < l; ++i)
+						const toSlot:Slot = slots[i];
+						const toSlotDisplayList:Vector.<Object> = toSlot.displayList;
+						for (var iA:uint = 0, lA:uint = toSlotDisplayList.length; iA < lA; ++iA)
 						{
-							const toDisplayObject:Object = toSlotDisplayList[i];
+							const toDisplayObject:Object = toSlotDisplayList[iA];
 							if (toDisplayObject is Armature)
 							{
 								const displays:Vector.<DisplayData> = dataPackage.skin.getSlot(toSlot.name).displays;
-								if (i < displays.length)
+								if (iA < displays.length)
 								{
-									const fromDisplayData:DisplayData = displays[i];
-									if (fromDisplayData.type == DragonBones.DISPLAY_TYPE_ARMATURE)
+									const fromDisplayData:DisplayData = displays[iA];
+									if (fromDisplayData.type == DisplayType.Armature)
 									{
-										copyAnimationsToArmature(toDisplayObject as Armature, fromDisplayData.name, fromSkinName, fromDragonBonesDataName, ifRemoveOriginalAnimationList);
+										copyAnimationsToArmature(toDisplayObject as Armature, fromDisplayData.path, fromSkinName, fromDragonBonesDataName, ifRemoveOriginalAnimationList);
 									}
 								}
 							}
@@ -764,10 +701,9 @@
 			
 			return false;
 		}
-		
 		/**
 		 * @language zh_CN
-		 * 将指定插槽的显示对象替换为指定资源创造出的显示对象。
+         * 用指定资源替换插槽的显示对象。
 		 * @param dragonBonesName 指定的龙骨数据名称。
 		 * @param armatureName 指定的骨架名称。
 		 * @param slotName 指定的插槽名称。
@@ -781,12 +717,13 @@
 			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
 			if (_fillBuildArmaturePackage(dataPackage, dragonBonesName, armatureName, null, null))
 			{
-				const slotDisplayDataSet:SlotDisplayDataSet = dataPackage.skin.getSlot(slotName);
-				if (slotDisplayDataSet)
+				const skinSlotData:SkinSlotData = dataPackage.skin.getSlot(slotName);
+				if (skinSlotData)
 				{
-					for each (var displayData:DisplayData in slotDisplayDataSet.displays)
+					for (var i:uint = 0, l:uint = skinSlotData.displays.length; i < l; ++i) 
 					{
-						if (displayData.name == displayName)
+						const displayData:DisplayData = skinSlotData.displays[i];
+						if (displayData.name === displayName)
 						{
 							_replaceSlotDisplay(dataPackage, displayData, slot, displayIndex);
 							break;
@@ -795,10 +732,9 @@
 				}
 			}
 		}
-		
 		/**
 		 * @language zh_CN
-		 * 将指定插槽的显示对象列表替换为指定资源创造出的显示对象列表。
+         * 用指定资源列表替换插槽的显示对象列表。
 		 * @param dragonBonesName 指定的 DragonBonesData 名称。
 		 * @param armatureName 指定的骨架名称。
 		 * @param slotName 指定的插槽名称。
@@ -810,18 +746,17 @@
 			const dataPackage:BuildArmaturePackage = new BuildArmaturePackage();
 			if (_fillBuildArmaturePackage(dataPackage, dragonBonesName, armatureName, null, null))
 			{
-				const slotDisplayDataSet:SlotDisplayDataSet = dataPackage.skin.getSlot(slotName);
-				if (slotDisplayDataSet)
+				const skinSlotData:SkinSlotData = dataPackage.skin.getSlot(slotName);
+				if (skinSlotData)
 				{
-					var displayIndex:uint = 0;
-					for each (var displayData:DisplayData in slotDisplayDataSet.displays)
+					for (var i:uint = 0, l:uint = skinSlotData.displays.length; i < l; ++i) 
 					{
-						_replaceSlotDisplay(dataPackage, displayData, slot, displayIndex++);
+						const displayData:DisplayData = skinSlotData.displays[i];
+						_replaceSlotDisplay(dataPackage, displayData, slot, i);
 					}
 				}
 			}
 		}
-		
 		/** 
 		 * @private 
 		 */
@@ -829,13 +764,41 @@
 		{
 			return _dragonBonesDataMap;
 		}
-		
 		/** 
 		 * @private 
 		 */
 		public function get allTextureAtlasData():Object
 		{
 			return _textureAtlasDataMap;
+		}
+		
+		/** 
+		 * @language zh_CN
+		 * Draw smoothing.
+		 * @version DragonBones 3.0
+		 */
+		public var smoothing:Boolean = true;
+		/** 
+		 * @language zh_CN
+		 * Scale for texture.
+		 * @version DragonBones 3.0
+		 */
+		public var scaleForTexture:Number = 0;
+		
+		private var _delayID:uint = 0;
+		private const _decodeDataList:Vector.<DecodedData> = new Vector.<DecodedData>;
+		private function _loadTextureAtlasHandler(event:Event):void
+		{
+			const loaderInfo:LoaderInfo = event.target as LoaderInfo;
+			const decodeData:DecodedData = loaderInfo.loader as DecodedData;
+			loaderInfo.removeEventListener(Event.COMPLETE, _loadTextureAtlasHandler);
+			parseTextureAtlasData(decodeData.textureAtlasData, decodeData.content, decodeData.name, scaleForTexture || 0, 1);
+			decodeData.dispose();
+			_decodeDataList.splice(_decodeDataList.indexOf(decodeData), 1);
+			if (_decodeDataList.length == 0)
+			{
+				dispatchEvent(event);
+			}
 		}
 	}
 }

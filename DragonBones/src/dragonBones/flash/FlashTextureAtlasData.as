@@ -17,7 +17,7 @@ package dragonBones.flash
 			super(this);
 		}
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
 		override protected function _onClear():void
 		{

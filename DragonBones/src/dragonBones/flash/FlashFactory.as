@@ -8,17 +8,16 @@
 	
 	import dragonBones.Armature;
 	import dragonBones.Slot;
-	import dragonBones.animation.Animation;
 	import dragonBones.animation.WorldClock;
 	import dragonBones.core.BaseObject;
-	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.enum.DisplayType;
 	import dragonBones.factories.BaseFactory;
 	import dragonBones.factories.BuildArmaturePackage;
 	import dragonBones.objects.ActionData;
 	import dragonBones.objects.DisplayData;
+	import dragonBones.objects.SkinSlotData;
 	import dragonBones.objects.SlotData;
-	import dragonBones.objects.SlotDisplayDataSet;
 	import dragonBones.parsers.DataParser;
 	import dragonBones.textures.TextureAtlasData;
 	
@@ -34,29 +33,27 @@
 		/**
 		 * @private
 		 */
-		private static const _eventManager:FlashArmatureDisplay = new FlashArmatureDisplay();
-		
-		
+		protected static const _eventManager:FlashArmatureDisplay = new FlashArmatureDisplay();
 		/**
 		 * @private
 		 */
 		dragonBones_internal static const _clock:WorldClock = new WorldClock();
-		
-		private static function _clockHandler(event:Event):void 
-		{
-			const time:Number = getTimer() * 0.001;
-			const passedTime:Number = time - _clock.time;
-			_clock.advanceTime(passedTime);
-			_clock.time = time;
-		}
-		
 		/**
 		 * @language zh_CN
 		 * 一个可以直接使用的全局工厂实例.
 		 * @version DragonBones 4.7
 		 */
 		public static const factory:FlashFactory = new FlashFactory();
-		
+		/**
+		 * @private
+		 */
+		protected static function _clockHandler(event:Event):void 
+		{
+			const time:Number = getTimer() * 0.001;
+			const passedTime:Number = time - _clock.time;
+			_clock.advanceTime(passedTime);
+			_clock.time = time;
+		}
 		/**
 		 * @language zh_CN
 		 * 创建一个工厂。
@@ -65,14 +62,7 @@
 		public function FlashFactory(dataParser:DataParser = null)
 		{
 			super(this, dataParser);
-			
-			if (!_eventManager.hasEventListener(Event.ENTER_FRAME))
-			{
-				_clock.time = getTimer() * 0.001;
-				_eventManager.addEventListener(Event.ENTER_FRAME, _clockHandler, false, -999999);
-			}
 		}
-		
 		/**
 		 * @private
 		 */
@@ -92,77 +82,75 @@
 			
 			return textureAtlasData;
 		}
-		
 		/**
 		 * @private
 		 */
 		override protected function _generateArmature(dataPackage:BuildArmaturePackage):Armature
 		{
+			if (!_eventManager.hasEventListener(Event.ENTER_FRAME))
+			{
+				_clock.time = getTimer() * 0.001;
+				_eventManager.addEventListener(Event.ENTER_FRAME, _clockHandler, false, -999999);
+			}
+			
 			const armature:Armature = BaseObject.borrowObject(Armature) as Armature;
-			const armatureDisplayContainer:FlashArmatureDisplay = new FlashArmatureDisplay();
+			const armatureDisplay:FlashArmatureDisplay = new FlashArmatureDisplay();
+			armatureDisplay._armature = armature;
 			
-			armature._armatureData = dataPackage.armature;
-			armature._skinData = dataPackage.skin;
-			armature._animation = dragonBones.core.BaseObject.borrowObject(Animation) as Animation;
-			armature._display = armatureDisplayContainer;
-			armature._eventManager = _eventManager;
-			
-			armature._animation._armature = armature;
-			armatureDisplayContainer._armature = armature;
-			
-			armature.animation.animations = dataPackage.armature.animations;
+			armature._init(
+				dataPackage.armature, dataPackage.skin,
+				armatureDisplay, armatureDisplay, _eventManager
+			);
 			
 			return armature;
 		}
-		
 		/**
 		 * @private
 		 */
-		override protected function _generateSlot(dataPackage:BuildArmaturePackage, slotDisplayDataSet:SlotDisplayDataSet):Slot
+		override protected function _generateSlot(dataPackage:BuildArmaturePackage, skinSlotData:SkinSlotData, armature:Armature):Slot
 		{
 			const slot:FlashSlot = BaseObject.borrowObject(FlashSlot) as FlashSlot;
-			const slotData:SlotData = slotDisplayDataSet.slot;
-			const displayList:Vector.<*> = new Vector.<*>(slotDisplayDataSet.displays.length, true);
+			const slotData:SlotData = skinSlotData.slot;
+			const displayList:Vector.<Object> = new Vector.<Object>(skinSlotData.displays.length, true);
+			const slotDisplay:Shape = new Shape();
 			
-			slot.name = slotData.name;
-			slot._rawDisplay = new Shape();
-			slot._meshDisplay = slot._rawDisplay;
+			slot._init(skinSlotData, slotDisplay, slotDisplay);
 			
-			var displayIndex:uint = 0;
-			for each (var displayData:DisplayData in slotDisplayDataSet.displays)
+			for (var i:uint = 0, l:uint = skinSlotData.displays.length; i < l; ++i) 
 			{
+				const displayData:DisplayData = skinSlotData.displays[i];
 				switch (displayData.type)
 				{
-					case DragonBones.DISPLAY_TYPE_IMAGE:
+					case DisplayType.Image:
 						if (!displayData.texture || dataPackage.textureAtlasName)
 						{
-							displayData.texture = this._getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.name);
+							displayData.texture = _getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.path);
 						}
 						
-						displayList[displayIndex] = slot._rawDisplay;
+						displayList[i] = slot.rawDisplay;
 						break;
 					
-					case DragonBones.DISPLAY_TYPE_MESH:
+					case DisplayType.Mesh:
 						if (!displayData.texture || dataPackage.textureAtlasName)
 						{
-							displayData.texture = this._getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.name);
+							displayData.texture = _getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.path);
 						}
 						
-						displayList[displayIndex] = slot._meshDisplay;
+						displayList[i] = slot.meshDisplay;
 						break;
 					
-					case DragonBones.DISPLAY_TYPE_ARMATURE:
-						const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName, null, dataPackage.textureAtlasName);
+					case DisplayType.Armature:
+						const childArmature:Armature = buildArmature(displayData.path, dataPackage.dataName, null, dataPackage.textureAtlasName);
 						if (childArmature) 
 						{
-							if (!slot.inheritAnimation)
+							if (!childArmature.inheritAnimation)
 							{
 								const actions:Vector.<ActionData> = slotData.actions.length > 0? slotData.actions: childArmature.armatureData.actions;
 								if (actions.length > 0) 
 								{
-									for (var i:uint = 0, l:uint = actions.length; i < l; ++i) 
+									for each (var action:ActionData in actions) 
 									{
-										childArmature._bufferAction(actions[i]);
+										childArmature._bufferAction(action);
 									}
 								} 
 								else 
@@ -174,22 +162,19 @@
 							displayData.armature = childArmature.armatureData; // 
 						}
 						
-						displayList[displayIndex] = childArmature;
+						displayList[i] = childArmature;
 						break;
 					
 					default:
-						displayList[displayIndex] = null;
+						displayList[i] = null;
 						break;
 				}
-				
-				displayIndex++;
 			}
 			
 			slot._setDisplayList(displayList);
 			
 			return slot;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 创建一个指定名称的骨架，并使用骨架的显示容器来更新骨架动画。
@@ -203,16 +188,15 @@
 		 */
 		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null, textureAtlasName:String = null):FlashArmatureDisplay
 		{
-			const armature:Armature = this.buildArmature(armatureName, dragonBonesName, skinName, textureAtlasName);
-			const armatureDisplay:FlashArmatureDisplay = armature? (armature.display as FlashArmatureDisplay): null;
-			if (armatureDisplay)
+			const armature:Armature = buildArmature(armatureName, dragonBonesName, skinName, textureAtlasName);
+			if (armature)
 			{
-				armatureDisplay.advanceTimeBySelf(true);
+				_clock.add(armature);
+				return armature.display as FlashArmatureDisplay;
 			}
 			
-			return armatureDisplay;
+			return null;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 获取带有指定贴图的显示对象。
@@ -222,16 +206,9 @@
 		 */
 		public function getTextureDisplay(textureName:String, textureAtlasName:String = null):Shape 
 		{
-			const textureData:FlashTextureData = this._getTextureData(textureAtlasName, textureName) as FlashTextureData;
+			const textureData:FlashTextureData = _getTextureData(textureAtlasName, textureName) as FlashTextureData;
 			if (textureData)
 			{
-				//if (!textureData.texture)
-				//{
-					//const textureAtlasTexture:Texture = (textureData.parent as StarlingTextureAtlasData).texture;
-					//textureData.texture = new SubTexture(textureAtlasTexture, textureData.region, false, null, textureData.rotated);
-				//}
-				
-				
 				var width:Number = 0;
 				var height:Number = 0;
 				if (textureData.rotated)
@@ -276,7 +253,6 @@
 			
 			return null;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 获取全局声音事件管理器。

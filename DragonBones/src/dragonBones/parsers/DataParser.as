@@ -7,6 +7,11 @@
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.enum.ActionType;
+	import dragonBones.enum.ArmatureType;
+	import dragonBones.enum.BlendMode;
+	import dragonBones.enum.BoundingBoxType;
+	import dragonBones.enum.DisplayType;
 	import dragonBones.geom.Transform;
 	import dragonBones.objects.ActionData;
 	import dragonBones.objects.AnimationData;
@@ -18,9 +23,8 @@
 	import dragonBones.objects.DragonBonesData;
 	import dragonBones.objects.EventData;
 	import dragonBones.objects.FrameData;
-	import dragonBones.objects.MeshData;
 	import dragonBones.objects.SkinData;
-	import dragonBones.objects.SlotDisplayDataSet;
+	import dragonBones.objects.SkinSlotData;
 	import dragonBones.objects.TimelineData;
 	import dragonBones.textures.TextureAtlasData;
 	
@@ -34,7 +38,8 @@
 		protected static const DATA_VERSION_2_3:String = "2.3";
 		protected static const DATA_VERSION_3_0:String = "3.0";
 		protected static const DATA_VERSION_4_0:String = "4.0";
-		protected static const DATA_VERSION:String = "4.5";
+		protected static const DATA_VERSION_4_5:String = "4.5";
+		protected static const DATA_VERSION:String = "5.0";
 		
 		protected static const TEXTURE_ATLAS:String = "TextureAtlas";
 		protected static const SUB_TEXTURE:String = "SubTexture";
@@ -59,27 +64,34 @@
 		protected static const Z_ORDER:String = "zOrder";
 		protected static const FFD:String = "ffd";
 		protected static const FRAME:String = "frame";
+		protected static const ACTIONS:String = "actions";
+		protected static const EVENTS:String = "events";
+		protected static const INTS:String = "ints";
+		protected static const FLOATS:String = "floats";
+		protected static const STRINGS:String = "strings";
 		
 		protected static const PIVOT:String = "pivot";
 		protected static const TRANSFORM:String = "transform";
 		protected static const AABB:String = "aabb";
 		protected static const COLOR:String = "color";
-		protected static const FILTER:String = "filter";
 		
 		protected static const VERSION:String = "version";
-		protected static const IS_GLOBAL:String = "isGlobal";
+		protected static const COMPATIBLE_VERSION:String = "compatibleVersion";
 		protected static const FRAME_RATE:String = "frameRate";
 		protected static const TYPE:String = "type";
+		protected static const SUB_TYPE:String = "subType";
 		protected static const NAME:String = "name";
 		protected static const PARENT:String = "parent";
+		protected static const TARGET:String = "target";
+		protected static const SHARE:String = "share";
+		protected static const PATH:String = "path";
 		protected static const LENGTH:String = "length";
-		protected static const DATA:String = "data";
 		protected static const DISPLAY_INDEX:String = "displayIndex";
 		protected static const BLEND_MODE:String = "blendMode";
 		protected static const INHERIT_TRANSLATION:String = "inheritTranslation";
 		protected static const INHERIT_ROTATION:String = "inheritRotation";
 		protected static const INHERIT_SCALE:String = "inheritScale";
-		protected static const TARGET:String = "target";
+		protected static const INHERIT_ANIMATION:String = "inheritAnimation";
 		protected static const BEND_POSITIVE:String = "bendPositive";
 		protected static const CHAIN:String = "chain";
 		protected static const WEIGHT:String = "weight";
@@ -90,6 +102,7 @@
 		protected static const OFFSET:String = "offset";
 		protected static const POSITION:String = "position";
 		protected static const DURATION:String = "duration";
+		protected static const TWEEN_TYPE:String = "tweenType";
 		protected static const TWEEN_EASING:String = "tweenEasing";
 		protected static const TWEEN_ROTATE:String = "tweenRotate";
 		protected static const TWEEN_SCALE:String = "tweenScale";
@@ -97,7 +110,6 @@
 		protected static const EVENT:String = "event";
 		protected static const SOUND:String = "sound";
 		protected static const ACTION:String = "action";
-		protected static const ACTIONS:String = "actions";
 		protected static const DEFAULT_ACTIONS:String = "defaultActions";
 		
 		protected static const X:String = "x";
@@ -123,11 +135,9 @@
 		protected static const SLOT_POSE:String = "slotPose";
 		protected static const BONE_POSE:String = "bonePose";
 		
-		protected static const TWEEN:String = "tween";
-		protected static const KEY:String = "key";
-		
 		protected static const COLOR_TRANSFORM:String = "colorTransform";
 		protected static const TIMELINE:String = "timeline";
+		protected static const IS_GLOBAL:String = "isGlobal";
 		protected static const PIVOT_X:String = "pX";
 		protected static const PIVOT_Y:String = "pY";
 		protected static const Z:String = "z";
@@ -135,21 +145,23 @@
 		protected static const AUTO_TWEEN:String = "autoTween";
 		protected static const HIDE:String = "hide";
 		
+		protected static const DEFAULT_NAME:String = "__default";
+		
 		protected static function _getArmatureType(value:String):int
 		{
 			switch (value.toLowerCase())
 			{
 				case "stage":
-					return DragonBones.ARMATURE_TYPE_STAGE;
+					return ArmatureType.Stage;
 					
 				case "armature":
-					return DragonBones.ARMATURE_TYPE_ARMATURE;
+					return ArmatureType.Armature;
 					
 				case "movieclip":
-					return DragonBones.ARMATURE_TYPE_MOVIE_CLIP;
+					return ArmatureType.MovieClip;
 					
 				default:
-					return DragonBones.ARMATURE_TYPE_ARMATURE;
+					return ArmatureType.None;
 			}
 		}
 		
@@ -158,16 +170,37 @@
 			switch (value.toLowerCase())
 			{
 				case "image":
-					return DragonBones.DISPLAY_TYPE_IMAGE;
+					return DisplayType.Image;
 					
 				case "armature":
-					return DragonBones.DISPLAY_TYPE_ARMATURE;
+					return DisplayType.Armature;
 					
 				case "mesh":
-					return DragonBones.DISPLAY_TYPE_MESH;
+					return DisplayType.Mesh;
+					
+				case "boundingbox":
+					return DisplayType.BoundingBox;
 					
 				default:
-					return DragonBones.DISPLAY_TYPE_IMAGE;
+					return DisplayType.None;
+			}
+		}
+		
+		protected static function _getBoundingBoxType(value: String): int
+		{
+			switch (value.toLowerCase()) 
+			{
+				case "rectangle":
+					return BoundingBoxType.Rectangle;
+					
+				case "ellipse":
+					return BoundingBoxType.Ellipse;
+					
+				case "polygon":
+					return BoundingBoxType.Polygon;
+					
+				default:
+					return BoundingBoxType.None;
 			}
 		}
 		
@@ -176,49 +209,49 @@
 			switch (value.toLowerCase()) 
 			{
 				case "normal":
-					return DragonBones.BLEND_MODE_NORMAL;
+					return BlendMode.Normal;
 					
 				case "add":
-					return DragonBones.BLEND_MODE_ADD;
+					return BlendMode.Add;
 					
 				case "alpha":
-					return DragonBones.BLEND_MODE_ALPHA;
+					return BlendMode.Alpha;
 					
 				case "darken":
-					return DragonBones.BLEND_MODE_DARKEN;
+					return BlendMode.Darken;
 					
 				case "difference":
-					return DragonBones.BLEND_MODE_DIFFERENCE;
+					return BlendMode.Difference;
 					
 				case "erase":
-					return DragonBones.BLEND_MODE_ERASE;
+					return BlendMode.Erase;
 					
 				case "hardlight":
-					return DragonBones.BLEND_MODE_HARDLIGHT;
+					return BlendMode.HardLight;
 					
 				case "invert":
-					return DragonBones.BLEND_MODE_INVERT;
+					return BlendMode.Invert;
 					
 				case "layer":
-					return DragonBones.BLEND_MODE_LAYER;
+					return BlendMode.Layer;
 					
 				case "lighten":
-					return DragonBones.BLEND_MODE_LIGHTEN;
+					return BlendMode.Lighten;
 					
 				case "multiply":
-					return DragonBones.BLEND_MODE_MULTIPLY;
+					return BlendMode.Multiply;
 					
 				case "overlay":
-					return DragonBones.BLEND_MODE_OVERLAY;
+					return BlendMode.Overlay;
 					
 				case "screen":
-					return DragonBones.BLEND_MODE_SCREEN;
+					return BlendMode.Screen;
 					
 				case "subtract":
-					return DragonBones.BLEND_MODE_SUBTRACT;
+					return BlendMode.Subtract;
 					
 				default:
-					return DragonBones.BLEND_MODE_NORMAL;
+					return BlendMode.None;
 			}
 		}
 		
@@ -227,40 +260,17 @@
 			switch (value.toLowerCase())
 			{
 				case "play":
-					return DragonBones.ACTION_TYPE_PLAY;
-					
-				case "stop":
-					return DragonBones.ACTION_TYPE_STOP;
-					
-				case "gotoandplay":
-					return DragonBones.ACTION_TYPE_GOTO_AND_PLAY;
-					
-				case "gotoandstop":
-					return DragonBones.ACTION_TYPE_GOTO_AND_STOP;
-					
-				case "fadein":
-					return DragonBones.ACTION_TYPE_FADE_IN;
-					
-				case "fadeout":
-					return DragonBones.ACTION_TYPE_FADE_OUT;
+					return ActionType.Play;
 					
 				default:
-					return DragonBones.ACTION_TYPE_FADE_IN;
+					return ActionType.None;
 			}
 		}
-		
-		protected var _data:DragonBonesData = null;
-		protected var _armature:ArmatureData = null;
-		protected var _skin:SkinData = null;
-		protected var _slotDisplayDataSet:SlotDisplayDataSet = null;
-		protected var _mesh:MeshData = null;
-		protected var _animation:AnimationData = null;
-		protected var _timeline:TimelineData = null;
 		
 		protected var _isOldData:Boolean = false;
 		protected var _isGlobalTransform:Boolean = false;
 		protected var _isAutoTween:Boolean = false;
-		protected var _animationTweenEasing:Number = 0;
+		protected var _animationTweenEasing:Number = 0.0;
 		protected const _timelinePivot:Point = new Point();
 		
 		protected const _helpPoint:Point = new Point();
@@ -269,6 +279,13 @@
 		protected const _helpMatrix:Matrix = new Matrix();
 		protected const _rawBones:Vector.<BoneData> = new Vector.<BoneData>();
 		
+		protected var _data:DragonBonesData = null;
+		protected var _armature:ArmatureData = null;
+		protected var _skin:SkinData = null;
+		protected var _skinSlotData:SkinSlotData = null;
+		protected var _animation:AnimationData = null;
+		protected var _timeline:TimelineData = null;
+		
 		public function DataParser(self:DataParser)
 		{
 			if (self != this)
@@ -276,20 +293,18 @@
 				throw new Error(DragonBones.ABSTRACT_CLASS_ERROR);
 			}
 		}
-		
 		/** 
 		 * @private 
 		 */
-		public function parseDragonBonesData(rawData:*, scale:Number = 1):DragonBonesData
+		public function parseDragonBonesData(rawData:Object, scale:Number = 1):DragonBonesData
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 			return null;
 		}
-		
 		/** 
 		 * @private 
 		 */
-		public function parseTextureAtlasData(rawData:*, textureAtlasData:TextureAtlasData, scale:Number = 0, rawScale:Number = 0):void
+		public function parseTextureAtlasData(rawData:Object, textureAtlasData:TextureAtlasData, scale:Number = 0, rawScale:Number = 0):void
 		{
 			throw new Error(DragonBones.ABSTRACT_METHOD_ERROR);
 		}
@@ -337,7 +352,7 @@
 				transform.scaleY = frame.transform.scaleY + transform.scaleY * tweenProgress;
 			}
 			
-			transform.add(timeline.originTransform);
+			transform.add(timeline.originalTransform);
 		}
 		
 		protected function _globalToLocal(armature:ArmatureData):void // Support 2.x ~ 3.x data.
@@ -369,7 +384,7 @@
 					}
 					
 					const parentTimeline:BoneTimelineData = bone.parent? animation.getBoneTimeline(bone.parent.name): null;
-					_helpTransformB.copyFrom(timeline.originTransform);
+					_helpTransformB.copyFrom(timeline.originalTransform);
 					keyFrames.length = 0;
 					
 					for (var j:uint = 0, lJ:uint = timeline.frames.length; j < lJ; ++j) 
@@ -403,12 +418,12 @@
 						
 						if (j == 0) 
 						{
-							timeline.originTransform.copyFrom(frame.transform);
+							timeline.originalTransform.copyFrom(frame.transform);
 							frame.transform.identity();
 						} 
 						else 
 						{
-							frame.transform.minus(timeline.originTransform);
+							frame.transform.minus(timeline.originalTransform);
 						}
 					}
 				}
@@ -417,8 +432,8 @@
 		
 		protected function _mergeFrameToAnimationTimeline(framePositon:Number, actions:Vector.<ActionData>, events:Vector.<EventData>):void 
 		{
-			const frameStart:uint = Math.floor(framePositon * this._armature.frameRate); // uint()
-			const frames:Vector.<FrameData> = this._animation.frames;
+			const frameStart:uint = Math.floor(framePositon * _armature.frameRate); // uint()
+			const frames:Vector.<FrameData> = _animation.frames;
 			
 			frames.fixed = false;
 			
@@ -426,14 +441,14 @@
 				const startFrame:AnimationFrameData = BaseObject.borrowObject(AnimationFrameData) as AnimationFrameData; // Add start frame.
 				startFrame.position = 0;
 				
-				if (this._animation.frameCount > 1) {
-					frames.length = this._animation.frameCount + 1; // One more count for zero duration frame.
+				if (_animation.frameCount > 1) {
+					frames.length = _animation.frameCount + 1; // One more count for zero duration frame.
 					
 					const endFrame:AnimationFrameData = BaseObject.borrowObject(AnimationFrameData) as AnimationFrameData; // Add end frame to keep animation timeline has two different frames atleast.
-					endFrame.position = this._animation.frameCount / this._armature.frameRate;
+					endFrame.position = _animation.frameCount / _armature.frameRate;
 					
 					frames[0] = startFrame;
-					frames[this._animation.frameCount] = endFrame;
+					frames[_animation.frameCount] = endFrame;
 				}
 			}
 			
@@ -448,7 +463,7 @@
 			else 
 			{
 				insertedFrame = BaseObject.borrowObject(AnimationFrameData) as AnimationFrameData; // Create frame.
-				insertedFrame.position = frameStart / this._armature.frameRate;
+				insertedFrame.position = frameStart / _armature.frameRate;
 				frames[frameStart] = insertedFrame;
 				
 				for (i = frameStart + 1, l = frames.length; i < l; ++i) // Clear replaced frame.
@@ -509,7 +524,7 @@
 				}
 			}
 			
-			nextFrame.duration = this._animation.duration - nextFrame.position;
+			nextFrame.duration = _animation.duration - nextFrame.position;
 			
 			nextFrame = frames[0] as AnimationFrameData;
 			prevFrame.next = nextFrame;

@@ -15,66 +15,58 @@ package dragonBones.objects
 		 * @private
 		 */
 		public var inheritTranslation:Boolean;
-		
 		/**
 		 * @private
 		 */
 		public var inheritRotation:Boolean;
-		
 		/**
 		 * @private
 		 */
 		public var inheritScale:Boolean;
-		
 		/**
 		 * @private
 		 */
 		public var bendPositive:Boolean;
-		
 		/**
 		 * @private
 		 */
 		public var chain:uint;
-		
 		/**
 		 * @private
 		 */
 		public var chainIndex:uint;
-		
 		/**
 		 * @private
 		 */
 		public var weight:Number;
-		
 		/**
 		 * @private
 		 */
 		public var length:Number;
-		
 		/**
 		 * @language zh_CN
 		 * 数据名称。
 		 * @version DragonBones 3.0
 		 */
 		public var name:String;
-		
+		/**
+		 * @private
+		 */
+		public const transform:Transform = new Transform();
 		/**
 		 * @language zh_CN
 		 * 所属的父骨骼数据。
 		 * @version DragonBones 3.0
 		 */
 		public var parent:BoneData;
-		
 		/**
 		 * @private
 		 */
 		public var ik:BoneData;
-		
 		/**
 		 * @private
 		 */
-		public const transform:Transform = new Transform();
-		
+		public var userData: CustomData;
 		/**
 		 * @private
 		 */
@@ -82,24 +74,29 @@ package dragonBones.objects
 		{
 			super(this);
 		}
-		
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
 		override protected function _onClear():void
 		{
+			if (userData) 
+			{
+				userData.returnToPool();
+			}
+			
 			inheritTranslation = false;
 			inheritRotation = false;
 			inheritScale = false;
 			bendPositive = false;
 			chain = 0;
 			chainIndex = 0;
-			weight = 0;
-			length = 0;
+			weight = 0.0;
+			length = 0.0;
 			name = null;
+			transform.identity();
 			parent = null;
 			ik = null;
-			transform.identity();
+			userData = null;
 		}
 		
 		/**

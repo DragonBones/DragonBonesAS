@@ -23,13 +23,10 @@ package dragonBones.objects
 			}
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
 		override protected function _onClear():void
 		{
-			position = 0;
-			duration = 0;
+			position = 0.0;
+			duration = 0.0;
 			prev = null;
 			next = null;
 		}

@@ -3,9 +3,9 @@
 	import flash.geom.Matrix;
 	
 	import dragonBones.Slot;
-	import dragonBones.core.DragonBones;
+	import dragonBones.core.BaseObject;
 	import dragonBones.core.dragonBones_internal;
-	import dragonBones.objects.DisplayData;
+	import dragonBones.enum.BlendMode;
 	
 	import starling.display.BlendMode;
 	import starling.display.DisplayObject;
@@ -37,11 +37,9 @@
 			return _emptyEtexture;
 		}
 		
-		
 		public var transformUpdateEnabled:Boolean;
 		
 		private var _renderDisplay:DisplayObject;
-		
 		/**
 		 * @language zh_CN
 		 * 创建一个空的插槽。
@@ -51,16 +49,8 @@
 		{
 			super(this);
 		}
-		
-		private function _createTexture(textureData:StarlingTextureData, textureAtlas:Texture): SubTexture
-		{
-			const texture:SubTexture = new SubTexture(textureAtlas, textureData.region, false, null, textureData.rotated);
-			
-			return texture;
-		}
-		
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
 		override protected function _onClear():void
 		{
@@ -70,58 +60,45 @@
 			
 			_renderDisplay = null;
 		}
-		
-		// Abstract method
-		
 		/**
 		 * @private
 		 */
-		override protected function _initDisplay(value:*):void
+		override protected function _initDisplay(value:Object):void
 		{
 		}
-		
 		/**
 		 * @private
 		 */
-		override protected function _disposeDisplay(value:*):void
+		override protected function _disposeDisplay(value:Object):void
 		{
 			(value as DisplayObject).dispose();
 		}
-		
 		/**
 		 * @private
 		 */
 		override protected function _onUpdateDisplay():void
 		{
-			if (!this._rawDisplay)
-			{
-				this._rawDisplay = new Image(getEmptyTexture());	
-			}
-			
-			_renderDisplay = (this._display || this._rawDisplay) as DisplayObject;
+			_renderDisplay = (_display ? _display : _rawDisplay) as DisplayObject;
 		}
-		
 		/**
 		 * @private
 		 */
 		override protected function _addDisplay():void
 		{
-			const container:StarlingArmatureDisplay = this._armature._display as StarlingArmatureDisplay;
+			const container:StarlingArmatureDisplay = _armature.display as StarlingArmatureDisplay;
 			container.addChild(_renderDisplay);
 		}
-		
 		/**
 		 * @private
 		 */
-		override protected function _replaceDisplay(value:*):void
+		override protected function _replaceDisplay(value:Object):void
 		{
-			const container:StarlingArmatureDisplay = this._armature.display as StarlingArmatureDisplay;
+			const container:StarlingArmatureDisplay = _armature.display as StarlingArmatureDisplay;
 			const prevDisplay:DisplayObject = value as DisplayObject;
 			container.addChild(_renderDisplay);
 			container.swapChildren(_renderDisplay, prevDisplay);
 			container.removeChild(prevDisplay);
 		}
-		
 		/**
 		 * @private
 		 */
@@ -129,141 +106,135 @@
 		{
 			_renderDisplay.removeFromParent();
 		}
-		
 		/**
 		 * @private
 		 */
 		override protected function _updateZOrder():void
 		{
-			const container:StarlingArmatureDisplay = this._armature._display as StarlingArmatureDisplay;
-			container.addChildAt(this._renderDisplay, this._zOrder);
+			const container:StarlingArmatureDisplay = _armature.display as StarlingArmatureDisplay;
+			container.addChildAt(_renderDisplay, _zOrder);
 		}
-		
 		/**
 		 * @private
 		 */
 		override dragonBones_internal function _updateVisible():void
 		{
-			_renderDisplay.visible = this._parent.visible;
+			_renderDisplay.visible = _parent.visible;
 		}
-		
 		/**
 		 * @private
 		 */
 		override protected function _updateBlendMode():void
 		{
-			switch (this._blendMode) 
+			switch (_blendMode) 
 			{
-				case DragonBones.BLEND_MODE_NORMAL:
-					_renderDisplay.blendMode = BlendMode.NORMAL;
+				case dragonBones.enum.BlendMode.Normal:
+					_renderDisplay.blendMode = starling.display.BlendMode.NORMAL;
 					break;
 				
-				case DragonBones.BLEND_MODE_ADD:
-					_renderDisplay.blendMode = BlendMode.ADD;
+				case dragonBones.enum.BlendMode.Add:
+					_renderDisplay.blendMode = starling.display.BlendMode.ADD;
 					break;
 				
-				case DragonBones.BLEND_MODE_ERASE:
-					_renderDisplay.blendMode = BlendMode.ERASE;
+				case dragonBones.enum.BlendMode.Erase:
+					_renderDisplay.blendMode = starling.display.BlendMode.ERASE;
 					break;
 				
-				case DragonBones.BLEND_MODE_MULTIPLY:
-					_renderDisplay.blendMode = BlendMode.MULTIPLY;
+				case dragonBones.enum.BlendMode.Multiply:
+					_renderDisplay.blendMode = starling.display.BlendMode.MULTIPLY;
 					break;
 				
-				case DragonBones.BLEND_MODE_SCREEN:
-					_renderDisplay.blendMode = BlendMode.SCREEN;
+				case dragonBones.enum.BlendMode.Screen:
+					_renderDisplay.blendMode = starling.display.BlendMode.SCREEN;
 					break;
 				
 				default:
 					break;
 			}
 		}
-		
 		/**
 		 * @private
 		 */
 		override protected function _updateColor():void
 		{
-			_renderDisplay.alpha = this._colorTransform.alphaMultiplier;
+			_renderDisplay.alpha = _colorTransform.alphaMultiplier;
 			
 			const quad:Quad = _renderDisplay as Quad;
 			if (quad)
 			{
-				const color:uint = (uint(this._colorTransform.redMultiplier * 0xFF) << 16) + (uint(this._colorTransform.greenMultiplier * 0xFF) << 8) + uint(this._colorTransform.blueMultiplier * 0xFF);
+				const color:uint = (uint(_colorTransform.redMultiplier * 0xFF) << 16) + (uint(_colorTransform.greenMultiplier * 0xFF) << 8) + uint(_colorTransform.blueMultiplier * 0xFF);
 				if (quad.color != color)
 				{
 					quad.color = color;
 				}
 			}
 		}
-		
 		/**
 		 * @private
 		 */
 		override protected function _updateFrame():void
 		{
-			const frameDisplay:Image = this._rawDisplay as Image; // TODO
+			const isMeshDisplay:Boolean = _meshData && _renderDisplay === _meshDisplay;
+			var currentTextureData:StarlingTextureData = _textureData as StarlingTextureData;
 			
-			if (this._display && this._displayIndex >= 0)
+			if (_displayIndex >= 0 && _display && currentTextureData)
 			{
-				const rawDisplayData:DisplayData = this._displayIndex < this._displayDataSet.displays.length? this._displayDataSet.displays[this._displayIndex]: null;
-				const replacedDisplayData:DisplayData = this._displayIndex < this._replacedDisplayDataSet.length? this._replacedDisplayDataSet[this._displayIndex]: null;
-				const currentDisplayData:DisplayData = replacedDisplayData || rawDisplayData;
-				const currentTextureData:StarlingTextureData = currentDisplayData.texture as StarlingTextureData;
-				if (currentTextureData)
+				var currentTextureAtlasData:StarlingTextureAtlasData = currentTextureData.parent as StarlingTextureAtlasData;
+				
+				// Update replaced texture atlas.
+				if (_armature.replacedTexture && _displayData && currentTextureAtlasData === _displayData.texture.parent) 
 				{
-					const currentTextureAtlasData:StarlingTextureAtlasData = currentTextureData.parent as StarlingTextureAtlasData;
-					const replacedTextureAtlas:Texture = this._armature.replacedTexture as Texture;
-					const currentTextureAtlas:Texture = (replacedTextureAtlas && currentDisplayData.texture.parent == rawDisplayData.texture.parent) ?
-						replacedTextureAtlas : currentTextureAtlasData.texture;
-					
-					if (currentTextureAtlas)
+					currentTextureAtlasData = _armature._replaceTextureAtlasData as StarlingTextureAtlasData;
+					if (!currentTextureAtlasData) 
 					{
-						var currentTexture:SubTexture = currentTextureData.texture;
-						
-						if (currentTextureAtlas == replacedTextureAtlas) {
-							const armatureDisplay:StarlingArmatureDisplay = this._armature._display as StarlingArmatureDisplay;
-							const textureName:String = currentTextureData.name;
-							currentTexture = armatureDisplay._subTextures[textureName];
-							if (!currentTexture) {
-								currentTexture = _createTexture(currentTextureData, currentTextureAtlas);
-								armatureDisplay._subTextures[textureName] = currentTexture;
-							}
-						}
-						else if (!currentTextureData.texture) {
-							currentTexture = _createTexture(currentTextureData, currentTextureAtlas);
-							currentTextureData.texture = currentTexture;
-						}
-						
-						this._updatePivot(rawDisplayData, currentDisplayData, currentTextureData);
-						
-						if (this._meshData && this._display == this._meshDisplay)
-						{
-							// TODO
-						}
-						else
-						{
-							frameDisplay.texture = currentTexture;
-							frameDisplay.readjustSize();
-						}
-						
-						this._updateVisible();
-						
-						return;
+						currentTextureAtlasData = BaseObject.borrowObject(StarlingTextureAtlasData) as StarlingTextureAtlasData;
+						currentTextureAtlasData.copyFrom(_textureData.parent);
+						currentTextureAtlasData.texture = _armature.replacedTexture as Texture;
+						_armature._replaceTextureAtlasData = currentTextureAtlasData;
 					}
+					
+					currentTextureData = currentTextureAtlasData.getTexture(currentTextureData.name) as StarlingTextureData;
+				}
+				
+				const currentTextureAtlas:Texture = currentTextureAtlasData.texture;
+				if (currentTextureAtlas)
+				{
+					if (!currentTextureData.texture) // Create texture.
+					{
+						currentTextureData.texture = new SubTexture(currentTextureAtlas, currentTextureData.region, false, null, currentTextureData.rotated);
+					}
+					
+					if (isMeshDisplay) // Mesh.
+					{
+						// TODO
+					}
+					else // Normal texture.
+					{
+						var normalDisplay:Image = _renderDisplay as Image;
+						normalDisplay.texture = currentTextureData.texture;
+						normalDisplay.readjustSize();
+					}
+					
+					_updateVisible();
+					
+					return;
 				}
 			}
 			
-			this._pivotX = 0;
-			this._pivotY = 0;
-			
-			frameDisplay.visible = false;
-			frameDisplay.texture = getEmptyTexture();
-			frameDisplay.readjustSize();
-			frameDisplay.x = this.origin.x;
-			frameDisplay.y = this.origin.y;
+			if (isMeshDisplay)
+			{
+				// TODO
+			}
+			else
+			{
+				normalDisplay = _renderDisplay as Image;
+				normalDisplay.visible = false;
+				normalDisplay.texture = getEmptyTexture();
+				normalDisplay.readjustSize();
+				normalDisplay.x = 0.0;
+				normalDisplay.y = 0.0;
+			}
 		}
-		
 		/**
 		 * @private
 		 */
@@ -271,31 +242,39 @@
 		{
 			// TODO
 		}
-		
 		/**
 		 * @private
 		 */
-		override protected function _updateTransform():void
+		override protected function _updateTransform(isSkinnedMesh: Boolean):void
 		{
-			if (transformUpdateEnabled)
+			if (isSkinnedMesh)
 			{
-				_renderDisplay.transformationMatrix = this.globalTransformMatrix;
-				
-				if (this._pivotX != 0 || this._pivotY != 0)
-				{
-					_renderDisplay.pivotX = this._pivotX;
-					_renderDisplay.pivotY = this._pivotY;
-				}
+				var displayMatrix:Matrix = _renderDisplay.transformationMatrix;
+				displayMatrix.identity();
+				_renderDisplay.transformationMatrix = displayMatrix;
 			}
 			else
 			{
-				const displayMatrix:Matrix = _renderDisplay.transformationMatrix;
-				displayMatrix.a = this.globalTransformMatrix.a;
-				displayMatrix.b = this.globalTransformMatrix.b;
-				displayMatrix.c = this.globalTransformMatrix.c;
-				displayMatrix.d = this.globalTransformMatrix.d;
-				displayMatrix.tx = this.globalTransformMatrix.tx - (this.globalTransformMatrix.a * this._pivotX + this.globalTransformMatrix.c * this._pivotY);
-				displayMatrix.ty = this.globalTransformMatrix.ty - (this.globalTransformMatrix.b * this._pivotX + this.globalTransformMatrix.d * this._pivotY);
+				if (transformUpdateEnabled)
+				{
+					_renderDisplay.transformationMatrix = globalTransformMatrix;
+					
+					if (_pivotX != 0 || _pivotY != 0)
+					{
+						_renderDisplay.pivotX = _pivotX;
+						_renderDisplay.pivotY = _pivotY;
+					}
+				}
+				else
+				{
+					displayMatrix = _renderDisplay.transformationMatrix;
+					displayMatrix.a = globalTransformMatrix.a;
+					displayMatrix.b = globalTransformMatrix.b;
+					displayMatrix.c = globalTransformMatrix.c;
+					displayMatrix.d = globalTransformMatrix.d;
+					displayMatrix.tx = globalTransformMatrix.tx - (globalTransformMatrix.a * _pivotX + globalTransformMatrix.c * _pivotY);
+					displayMatrix.ty = globalTransformMatrix.ty - (globalTransformMatrix.b * _pivotX + globalTransformMatrix.d * _pivotY);
+				}
 			}
 		}
 	}

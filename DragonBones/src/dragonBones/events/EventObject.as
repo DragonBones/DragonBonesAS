@@ -5,6 +5,8 @@ package dragonBones.events
 	import dragonBones.Slot;
 	import dragonBones.animation.AnimationState;
 	import dragonBones.core.BaseObject;
+	import dragonBones.objects.AnimationFrameData;
+	import dragonBones.objects.CustomData;
 	
 	/**
 	 * @language zh_CN
@@ -69,63 +71,52 @@ package dragonBones.events
 		 * @version DragonBones 4.5
 		 */
 		public static const SOUND_EVENT:String = "soundEvent";
-		
 		/**
 		 * @language zh_CN
 		 * 事件类型。
 	 	 * @version DragonBones 4.5
 		 */
 		public var type:String;
-		
 		/**
 		 * @language zh_CN
 		 * 事件名称。 (帧标签的名称或声音的名称)
 		 * @version DragonBones 4.5
 		 */
 		public var name:String;
-		
+		/**
+		 * @private
+		 */
+		public var frame: AnimationFrameData;
 		/**
 		 * @language zh_CN
-		 * 扩展的数据。
+		 * 扩展数据。
 		 * @version DragonBones 4.5
 		 */
-		public var data:*;
-		
+		public var data:CustomData;
 		/**
 		 * @language zh_CN
 		 * 发出事件的骨架。
 		 * @version DragonBones 4.5
 		 */
 		public var armature:Armature;
-		
 		/**
 		 * @language zh_CN
 		 * 发出事件的骨骼。
 		 * @version DragonBones 4.5
 		 */
 		public var bone:Bone;
-		
 		/**
 		 * @language zh_CN
 		 * 发出事件的插槽。
 		 * @version DragonBones 4.5
 		 */
 		public var slot:Slot;
-		
 		/**
 		 * @language zh_CN
 		 * 发出事件的动画状态。
 		 * @version DragonBones 4.5
 		 */
 		public var animationState:AnimationState;
-		
-		/**
-		 * @language zh_CN
-		 * 用户数据。
-		 * @version DragonBones 4.5
-		 */
-		public var userData:*;
-		
 		/**
 		 * @private
 		 */
@@ -133,20 +124,19 @@ package dragonBones.events
 		{
 			super(this);
 		}
-		
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
 		override protected function _onClear():void
 		{
 			type = null;
 			name = null;
+			frame = null;
 			data = null;
 			armature = null;
 			bone = null;
 			slot = null;
 			animationState = null;
-			userData = null;
 		}
 	}
 }

@@ -1,56 +1,70 @@
 package dragonBones.objects
 {
+	import flash.geom.Point;
+	
 	import dragonBones.core.DragonBones;
-
+	
 	/**
 	 * @private
 	 */
 	public class TweenFrameData extends FrameData
 	{
-		public static function samplingCurve(curve:Array, frameCount:uint):Vector.<Number>
+		private static function _getCurvePoint(x1: Number, y1: Number, x2: Number, y2: Number, x3: Number, y3: Number, x4: Number, y4: Number, t: Number, result: Point): void
 		{
-			if (curve.length == 0 || frameCount == 0)
+			const l_t:Number = 1 - t;
+			const powA:Number = l_t * l_t;
+			const powB:Number = t * t;
+			const kA:Number = l_t * powA;
+			const kB:Number = 3.0 * t * powA;
+			const kC:Number = 3.0 * l_t * powB;
+			const kD:Number = t * powB;
+			
+			result.x = kA * x1 + kB * x2 + kC * x3 + kD * x4;
+			result.y = kA * y1 + kB * y2 + kC * y3 + kD * y4;
+		}
+		
+		public static function samplingEasingCurve(curve:Array, samples:Vector.<Number>): void
+		{
+			const curveCount:uint = curve.length;
+			const result:Point = new Point();
+			
+			var stepIndex:int = -2;
+			for (var i:uint = 0, l:uint = samples.length; i < l; ++i) 
 			{
-				return null;
-			}
-			
-			const samplingTimes:uint = frameCount + 2;
-			const samplingStep:Number = 1 / samplingTimes;
-			const sampling:Vector.<Number> = new Vector.<Number>((samplingTimes - 1) * 2, true);
-			
-			//
-			curve = curve.concat();
-			curve.unshift(0, 0);
-			curve.push(1, 1);
-			
-			var stepIndex:uint = 0;
-			for (var i:uint = 0; i < samplingTimes - 1; ++i)
-			{
-				const step:Number = samplingStep * (i + 1);
-				while (curve[stepIndex + 6] < step) // stepIndex + 3 * 2
+				var t:Number = (i + 1) / (l + 1);
+				while ((stepIndex + 6 < curveCount ? curve[stepIndex + 6] : 1) < t) // stepIndex + 3 * 2
 				{
-					stepIndex += 6; // stepIndex += 3 * 2
+					stepIndex += 6;
 				}
 				
-				const x1:Number = curve[stepIndex];
-				const x4:Number = curve[stepIndex + 6];
+				const isInCurve:Boolean = stepIndex >= 0 && stepIndex + 6 < curveCount;
+				const x1:Number = isInCurve ? curve[stepIndex] : 0.0;
+				const y1:Number = isInCurve ? curve[stepIndex + 1] : 0.0;
+				const x2:Number = curve[stepIndex + 2];
+				const y2:Number = curve[stepIndex + 3];
+				const x3:Number = curve[stepIndex + 4];
+				const y3:Number = curve[stepIndex + 5];
+				const x4:Number = isInCurve ? curve[stepIndex + 6] : 1.0;
+				const y4:Number = isInCurve ? curve[stepIndex + 7] : 1.0;
 				
-				const t:Number = (step - x1) / (x4 - x1);
-				const l_t:Number = 1 - t;
+				var lower:Number = 0.0;
+				var higher:Number = 1.0;
+				while (higher - lower > 0.01) 
+				{
+					const percentage:Number = (higher + lower) / 2.0;
+					_getCurvePoint(x1, y1, x2, y2, x3, y3, x4, y4, percentage, result);
+					if (t - result.x > 0.0) 
+					{
+						lower = percentage;
+					} 
+					else 
+					{
+						higher = percentage;
+					}
+				}
 				
-				const powA:Number = l_t * l_t;
-				const powB:Number = t * t;
-				
-				const kA:Number = l_t * powA;
-				const kB:Number = 3 * t * powA;
-				const kC:Number = 3 * l_t * powB;
-				const kD:Number = t * powB;
-				
-				sampling[i * 2] = kA * x1 + kB * curve[stepIndex + 2] + kC * curve[stepIndex + 4] + kD * x4;
-				sampling[i * 2 + 1] = kA * curve[stepIndex + 1] + kB * curve[stepIndex + 3] + kC * curve[stepIndex + 5] + kD * curve[stepIndex + 7];
+				samples[i] = result.y;
 			}
-			
-			return sampling;
 		}
 		
 		public var tweenEasing:Number;
@@ -66,14 +80,11 @@ package dragonBones.objects
 			}
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
 		override protected function _onClear():void
 		{
 			super._onClear();
 			
-			tweenEasing = 0;
+			tweenEasing = 0.0;
 			curve = null;
 		}
 	}

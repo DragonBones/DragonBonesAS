@@ -20,18 +20,15 @@
 		
 		private var _colorDirty:Boolean;
 		private var _tweenColor:int;
-		private var _slotColor:ColorTransform;
 		private const _color:ColorTransform = new ColorTransform();
 		private const _durationColor:ColorTransform = new ColorTransform();
+		private var _slotColor:ColorTransform;
 		
 		public function SlotTimelineState()
 		{
 			super(this);
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
 		override protected function _onClear():void
 		{
 			super._onClear();
@@ -40,7 +37,6 @@
 			
 			_colorDirty = false;
 			_tweenColor = TWEEN_TYPE_NONE;
-			_slotColor = null;
 			_color.alphaMultiplier = 1;
 			_color.redMultiplier = 1;
 			_color.greenMultiplier = 1;
@@ -57,51 +53,39 @@
 			_durationColor.redOffset = 0;
 			_durationColor.greenOffset = 0;
 			_durationColor.blueOffset = 0;
+			_slotColor = null;
 		}
 		
-		override protected function _onArriveAtFrame(isUpdate:Boolean):void
+		override protected function _onArriveAtFrame():void
 		{
-			super._onArriveAtFrame(isUpdate);
+			super._onArriveAtFrame();
 			
-			if (this._animationState._isDisabled(slot))
+			if (_animationState._isDisabled(slot))
 			{
-				this._tweenEasing = DragonBones.NO_TWEEN;
-				this._curve = null;
+				_tweenEasing = DragonBones.NO_TWEEN;
+				_curve = null;
 				_tweenColor = TWEEN_TYPE_NONE;
 				return;
 			}
 			
-			const currentFrame:SlotFrameData = this._currentFrame as SlotFrameData;
-			
-			if (slot._displayDataSet)
+			const currentFrame:SlotFrameData = _currentFrame as SlotFrameData;
+			const displayIndex:int = currentFrame.displayIndex;
+			if (_playState >= 0 && slot.displayIndex !== displayIndex) 
 			{
-				const displayIndex:int = currentFrame.displayIndex;
-				if (slot.displayIndex >= 0 && displayIndex >= 0)
-				{
-					if (slot._displayDataSet.displays.length > 1)
-					{
-						slot._setDisplayIndex(displayIndex);
-					}
-				}
-				else
-				{
-					slot._setDisplayIndex(displayIndex);
-				}
-				
-				slot._updateMeshData(true);
+				slot._setDisplayIndex(displayIndex);
 			}
 			
-			if (currentFrame.displayIndex >= 0)
+			if (displayIndex >= 0)
 			{
 				_tweenColor = TWEEN_TYPE_NONE;
 				
 				const currentColor:ColorTransform = currentFrame.color;
 				
-				if (this._keyFrameCount > 1 && (this._tweenEasing != DragonBones.NO_TWEEN || this._curve))
+				if (_tweenEasing !== DragonBones.NO_TWEEN || _curve)
 				{
-					const nextFrame:SlotFrameData = this._currentFrame.next as SlotFrameData;
+					const nextFrame:SlotFrameData = currentFrame.next as SlotFrameData;
 					const nextColor:ColorTransform = nextFrame.color;
-					if (currentColor != nextColor && nextFrame.displayIndex >= 0)
+					if (currentColor !== nextColor)
 					{
 						_durationColor.alphaMultiplier = nextColor.alphaMultiplier - currentColor.alphaMultiplier;
 						_durationColor.redMultiplier = nextColor.redMultiplier - currentColor.redMultiplier;
@@ -113,14 +97,14 @@
 						_durationColor.blueOffset = nextColor.blueOffset - currentColor.blueOffset;
 						
 						if (
-							_durationColor.alphaMultiplier != 0 ||
-							_durationColor.redMultiplier != 0 ||
-							_durationColor.greenMultiplier != 0 ||
-							_durationColor.blueMultiplier != 0 ||
-							_durationColor.alphaOffset != 0 ||
-							_durationColor.redOffset != 0 ||
-							_durationColor.greenOffset != 0 ||
-							_durationColor.blueOffset != 0
+							_durationColor.alphaMultiplier !== 0.0 ||
+							_durationColor.redMultiplier !== 0.0 ||
+							_durationColor.greenMultiplier !== 0.0 ||
+							_durationColor.blueMultiplier !== 0.0 ||
+							_durationColor.alphaOffset !== 0 ||
+							_durationColor.redOffset !== 0 ||
+							_durationColor.greenOffset !== 0 ||
+							_durationColor.blueOffset !== 0
 						)
 						{
 							_tweenColor = TWEEN_TYPE_ALWAYS;
@@ -128,17 +112,17 @@
 					}
 				}
 				
-				if (_tweenColor == TWEEN_TYPE_NONE)
+				if (_tweenColor === TWEEN_TYPE_NONE)
 				{
 					if (
-						_slotColor.alphaMultiplier != currentColor.alphaMultiplier ||
-						_slotColor.redMultiplier != currentColor.redMultiplier ||
-						_slotColor.greenMultiplier != currentColor.greenMultiplier ||
-						_slotColor.blueMultiplier != currentColor.blueMultiplier ||
-						_slotColor.alphaOffset != currentColor.alphaOffset ||
-						_slotColor.redOffset != currentColor.redOffset ||
-						_slotColor.greenOffset != currentColor.greenOffset ||
-						_slotColor.blueOffset != currentColor.blueOffset
+						_slotColor.alphaMultiplier !== currentColor.alphaMultiplier ||
+						_slotColor.redMultiplier !== currentColor.redMultiplier ||
+						_slotColor.greenMultiplier !== currentColor.greenMultiplier ||
+						_slotColor.blueMultiplier !== currentColor.blueMultiplier ||
+						_slotColor.alphaOffset !== currentColor.alphaOffset ||
+						_slotColor.redOffset !== currentColor.redOffset ||
+						_slotColor.greenOffset !== currentColor.greenOffset ||
+						_slotColor.blueOffset !== currentColor.blueOffset
 					)
 					{
 						_tweenColor = TWEEN_TYPE_ONCE;
@@ -147,30 +131,30 @@
 			}
 			else
 			{
-				this._tweenEasing = DragonBones.NO_TWEEN;
-				this._curve = null;
+				_tweenEasing = DragonBones.NO_TWEEN;
+				_curve = null;
 				_tweenColor = TWEEN_TYPE_NONE;
 			}
 		}
 		
-		override protected function _onUpdateFrame(isUpdate:Boolean):void
+		override protected function _onUpdateFrame():void
 		{
-			super._onUpdateFrame(isUpdate);
+			super._onUpdateFrame();
 			
-			const currentFrame:SlotFrameData = this._currentFrame as SlotFrameData;
+			const currentFrame:SlotFrameData = _currentFrame as SlotFrameData;
 			
-			var tweenProgress:Number = 0;
+			var tweenProgress:Number = 0.0;
 			
-			if (_tweenColor)
+			if (_tweenColor !== TWEEN_TYPE_NONE && slot.parent._blendLayer >= _animationState._layer)
 			{
-				if (_tweenColor == TWEEN_TYPE_ONCE)
+				if (_tweenColor === TWEEN_TYPE_ONCE)
 				{
 					_tweenColor = TWEEN_TYPE_NONE;
 					tweenProgress = 0;
 				}
 				else
 				{
-					tweenProgress = this._tweenProgress;
+					tweenProgress = _tweenProgress;
 				}
 				
 				const currentColor:ColorTransform = currentFrame.color;
@@ -187,9 +171,9 @@
 			}
 		}
 		
-		override public function fadeIn(armature:Armature, animationState:AnimationState, timelineData:TimelineData, time:Number):void
+		override public function _init(armature:Armature, animationState:AnimationState, timelineData:TimelineData):void
 		{
-			super.fadeIn(armature, animationState, timelineData, time);
+			super._init(armature, animationState, timelineData);
 			
 			_slotColor = slot._colorTransform;
 		}
@@ -199,44 +183,42 @@
 			_tweenColor = TWEEN_TYPE_NONE;
 		}
 		
-		override public function update(time:Number):void
+		override public function update(passedTime:Number, normalizedTime:Number):void
 		{
-			super.update(time);
+			super.update(passedTime, normalizedTime);
 			
-			if (_tweenColor != TWEEN_TYPE_NONE || _colorDirty)
+			// Fade animation.
+			if (_tweenColor !== TWEEN_TYPE_NONE || _colorDirty)
 			{
-				const weight:Number = this._animationState._weightResult;
-				if (weight > 0)
+				if (_animationState._fadeState !== 0 || _animationState._subFadeState !== 0)
 				{
-					if (this._animationState._fadeState != 0)
-					{
-						const fadeProgress:Number = this._animationState._fadeProgress;
-						
-						_slotColor.alphaMultiplier += (_color.alphaMultiplier - _slotColor.alphaMultiplier) * fadeProgress;
-						_slotColor.redMultiplier += (_color.redMultiplier - _slotColor.redMultiplier) * fadeProgress;
-						_slotColor.greenMultiplier += (_color.greenMultiplier - _slotColor.greenMultiplier) * fadeProgress;
-						_slotColor.blueMultiplier += (_color.blueMultiplier - _slotColor.blueMultiplier) * fadeProgress;
-						_slotColor.alphaOffset += (_color.alphaOffset - _slotColor.alphaOffset) * fadeProgress;
-						_slotColor.redOffset += (_color.redOffset - _slotColor.redOffset) * fadeProgress;
-						_slotColor.greenOffset += (_color.greenOffset - _slotColor.greenOffset) * fadeProgress;
-						_slotColor.blueOffset += (_color.blueOffset - _slotColor.blueOffset) * fadeProgress;
-						
-						slot._colorDirty = true;
-					}
-					else if (_colorDirty)
-					{
-						_colorDirty = false;
-						_slotColor.alphaMultiplier = _color.alphaMultiplier;
-						_slotColor.redMultiplier = _color.redMultiplier;
-						_slotColor.greenMultiplier = _color.greenMultiplier;
-						_slotColor.blueMultiplier = _color.blueMultiplier;
-						_slotColor.alphaOffset = _color.alphaOffset;
-						_slotColor.redOffset = _color.redOffset;
-						_slotColor.greenOffset = _color.greenOffset;
-						_slotColor.blueOffset = _color.blueOffset;
-						
-						slot._colorDirty = true;
-					}
+					const fadeProgress:Number = _animationState._fadeProgress;
+					
+					_slotColor.alphaMultiplier += (_color.alphaMultiplier - _slotColor.alphaMultiplier) * fadeProgress;
+					_slotColor.redMultiplier += (_color.redMultiplier - _slotColor.redMultiplier) * fadeProgress;
+					_slotColor.greenMultiplier += (_color.greenMultiplier - _slotColor.greenMultiplier) * fadeProgress;
+					_slotColor.blueMultiplier += (_color.blueMultiplier - _slotColor.blueMultiplier) * fadeProgress;
+					_slotColor.alphaOffset += (_color.alphaOffset - _slotColor.alphaOffset) * fadeProgress;
+					_slotColor.redOffset += (_color.redOffset - _slotColor.redOffset) * fadeProgress;
+					_slotColor.greenOffset += (_color.greenOffset - _slotColor.greenOffset) * fadeProgress;
+					_slotColor.blueOffset += (_color.blueOffset - _slotColor.blueOffset) * fadeProgress;
+					
+					slot._colorDirty = true;
+				}
+				else if (_colorDirty)
+				{
+					_colorDirty = false;
+					
+					_slotColor.alphaMultiplier = _color.alphaMultiplier;
+					_slotColor.redMultiplier = _color.redMultiplier;
+					_slotColor.greenMultiplier = _color.greenMultiplier;
+					_slotColor.blueMultiplier = _color.blueMultiplier;
+					_slotColor.alphaOffset = _color.alphaOffset;
+					_slotColor.redOffset = _color.redOffset;
+					_slotColor.greenOffset = _color.greenOffset;
+					_slotColor.blueOffset = _color.blueOffset;
+					
+					slot._colorDirty = true;
 				}
 			}
 		}

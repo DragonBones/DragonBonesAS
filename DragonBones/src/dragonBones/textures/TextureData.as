@@ -17,9 +17,9 @@ package dragonBones.textures
 		
 		public var rotated:Boolean;
 		public var name:String;
+		public const region:Rectangle = new Rectangle();
 		public var frame:Rectangle;
 		public var parent:TextureAtlasData;
-		public const region:Rectangle = new Rectangle();
 		
 		public function TextureData(self:TextureData)
 		{
@@ -31,19 +31,39 @@ package dragonBones.textures
 			}
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
 		override protected function _onClear():void
 		{
 			rotated = false;
 			name = null;
+			region.x = 0.0;
+			region.y = 0.0;
+			region.width = 0.0;
+			region.height = 0.0;
 			frame = null;
 			parent = null;
-			region.x = 0;
-			region.y = 0;
-			region.width = 0;
-			region.height = 0;
+		}
+		
+		public function copyFrom(value: TextureData): void 
+		{
+			rotated = value.rotated;
+			name = value.name;
+			
+			if (!frame && value.frame) 
+			{
+				frame = TextureData.generateRectangle();
+			}
+			else if (frame && !value.frame) 
+			{
+				frame = null;
+			}
+			
+			if (frame && value.frame) 
+			{
+				frame.copyFrom(value.frame);
+			}
+			
+			parent = value.parent;
+			region.copyFrom(value.region);
 		}
 	}
 }

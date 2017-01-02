@@ -16,17 +16,10 @@ package dragonBones.starling
 	public final class StarlingArmatureDisplay extends Sprite implements IArmatureDisplay
 	{
 		public static const useDefaultStarlingEvent:Boolean = false;
-		
 		/**
 		 * @private
 		 */
 		dragonBones_internal var _armature:Armature;
-		
-		/**
-		 * @private
-		 */
-		dragonBones_internal const _subTextures:Object = {};
-		
 		/**
 		 * @private
 		 */
@@ -34,85 +27,55 @@ package dragonBones.starling
 		{
 			super();
 		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function _onClear():void
-		{
-			for (var i:String in _subTextures) 
-			{
-				//th._subTextures[i].dispose();
-				delete _subTextures[i];
-			}
-			
-			if (_armature)
-			{
-				advanceTimeBySelf(false);
-			}
-			
-			_armature = null;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function _dispatchEvent(eventObject:EventObject):void
-		{
-			if (useDefaultStarlingEvent)
-			{
-				this.dispatchEventWith(eventObject.type, false, eventObject);
-			}
-			else
-			{
-				const event:StarlingEvent = new StarlingEvent(eventObject);
-				this.dispatchEvent(event);
-			}
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function _debugDraw():void
-		{
-		}
-		
 		/**
 		 * @private
 		 */
-		public function _onReplaceTexture(texture:Object):void 
+		public function _onClear():void
 		{
-			for (var i:String in _subTextures) 
+			_armature = null;
+		}
+		/**
+		 * @private
+		 */
+		public function _dispatchEvent(type:String, eventObject:EventObject):void
+		{
+			if (useDefaultStarlingEvent)
 			{
-				//th._subTextures[i].dispose();
-				delete _subTextures[i];
+				dispatchEventWith(type, false, eventObject);
+			}
+			else
+			{
+				const event:StarlingEvent = new StarlingEvent(type, eventObject);
+				dispatchEvent(event);
 			}
 		}
-		
+		/**
+		 * @private
+		 */
+		public function _debugDraw(isEnabled:Boolean):void
+		{
+		}
 		/**
 		 * @inheritDoc
 		 */
 		public function hasEvent(type:String):Boolean
 		{
-			return this.hasEventListener(type);
+			return hasEventListener(type);
 		}
-		
 		/**
 		 * @inheritDoc
 		 */
 		public function addEvent(type:String, listener:Function):void
 		{
-			this.addEventListener(type, listener);
+			addEventListener(type, listener);
 		}
-		
 		/**
 		 * @inheritDoc
 		 */
 		public function removeEvent(type:String, listener:Function):void
 		{
-			this.removeEventListener(type, listener);
+			removeEventListener(type, listener);
 		}
-		
 		/**
 		 * @inheritDoc
 		 */
@@ -120,29 +83,12 @@ package dragonBones.starling
 		{
 			if (_armature)
 			{
-				advanceTimeBySelf(false);
 				_armature.dispose();
 				_armature = null;
 			}
 			
 			super.dispose();
 		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function advanceTimeBySelf(on:Boolean):void
-		{
-			if (on)
-			{
-				StarlingFactory._clock.add(this._armature);
-			} 
-			else 
-			{
-				StarlingFactory._clock.remove(this._armature);
-			}
-		}
-		
 		/**
 		 * @inheritDoc
 		 */
@@ -150,13 +96,27 @@ package dragonBones.starling
 		{
 			return _armature;
 		}
-		
 		/**
 		 * @inheritDoc
 		 */
 		public function get animation():Animation
 		{
 			return _armature.animation;
+		}
+		
+		/**
+		 * @deprecated
+		 */
+		public function advanceTimeBySelf(on:Boolean):void
+		{
+			if (on)
+			{
+				StarlingFactory._clock.add(_armature);
+			} 
+			else 
+			{
+				StarlingFactory._clock.remove(_armature);
+			}
 		}
 	}
 }

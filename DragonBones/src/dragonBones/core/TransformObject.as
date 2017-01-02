@@ -17,41 +17,26 @@ package dragonBones.core
 	{
 		/**
 		 * @language zh_CN
-		 * 可以用于存储临时数据。
-		 * @version DragonBones 3.0
-		 */
-		public var userData:Object;
-		
-		/**
-		 * @language zh_CN
 		 * 对象的名称。
+         * @readOnly
 		 * @version DragonBones 3.0
 		 */
 		public var name:String;
-		
 		/**
 		 * @language zh_CN
 		 * 相对于骨架坐标系的矩阵。
+         * @readOnly
 		 * @version DragonBones 3.0
 		 */
-		public var globalTransformMatrix:Matrix;
-		
+		public const globalTransformMatrix:Matrix = new Matrix();
 		/**
 		 * @language zh_CN
 		 * 相对于骨架坐标系的变换。
+         * @readOnly
 		 * @see dragonBones.geom.Transform
 		 * @version DragonBones 3.0
 		 */
 		public const global:Transform = new Transform();
-		
-		/**
-		 * @language zh_CN
-		 * 相对于骨架或父骨骼坐标系的绑定变换。
-		 * @see dragonBones.geom.Transform
-		 * @version DragonBones 3.0
-		 */
-		public const origin:Transform = new Transform();
-		
 		/**
 		 * @language zh_CN
 		 * 相对于骨架或父骨骼坐标系的偏移变换。
@@ -59,22 +44,28 @@ package dragonBones.core
 		 * @version DragonBones 3.0
 		 */
 		public const offset:Transform = new Transform();
-		
+		/**
+		 * @language zh_CN
+		 * 相对于骨架或父骨骼坐标系的绑定变换。
+         * @readOnly
+		 * @see dragonBones.geom.Transform
+		 * @version DragonBones 3.0
+		 */
+		public var origin:Transform;
+		/**
+		 * @language zh_CN
+		 * 可以用于存储临时数据。
+		 * @version DragonBones 3.0
+		 */
+		public var userData:Object;
 		/**
 		 * @private
 		 */
 		dragonBones_internal var _armature:Armature;
-		
 		/**
 		 * @private
 		 */
 		dragonBones_internal var _parent:Bone;
-		
-		/**
-		 * @private
-		 */
-		protected const _globalTransformMatrix:Matrix = new Matrix(); 
-		
 		/**
 		 * @private
 		 */
@@ -87,24 +78,21 @@ package dragonBones.core
 				throw new Error(DragonBones.ABSTRACT_CLASS_ERROR);
 			}
 		}
-		
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
 		override protected function _onClear():void
 		{
-			userData = null;
 			name = null;
-			globalTransformMatrix = _globalTransformMatrix;
+			globalTransformMatrix.identity();
 			global.identity();
-			origin.identity();
 			offset.identity();
+			origin = null;
+			userData = null;
 			
 			_armature = null;
 			_parent = null;
-			_globalTransformMatrix.identity();
 		}
-		
 		/**
 		 * @private
 		 */
@@ -112,7 +100,6 @@ package dragonBones.core
 		{
 			_armature = value;
 		}
-		
 		/**
 		 * @private
 		 */
@@ -120,7 +107,6 @@ package dragonBones.core
 		{
 			_parent = value;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 所属的骨架。
@@ -131,7 +117,6 @@ package dragonBones.core
 		{
 			return _armature;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 所属的父骨骼。

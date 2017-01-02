@@ -1,17 +1,22 @@
 package dragonBones
 {
+	import flash.geom.Point;
+	
 	import dragonBones.animation.Animation;
 	import dragonBones.animation.IAnimateble;
+	import dragonBones.animation.WorldClock;
 	import dragonBones.core.BaseObject;
 	import dragonBones.core.DragonBones;
-	import dragonBones.core.IArmatureDisplay;
+	import dragonBones.core.IArmatureProxy;
 	import dragonBones.core.dragonBones_internal;
+	import dragonBones.enum.ActionType;
 	import dragonBones.events.EventObject;
 	import dragonBones.events.IEventDispatcher;
 	import dragonBones.objects.ActionData;
 	import dragonBones.objects.ArmatureData;
 	import dragonBones.objects.SkinData;
 	import dragonBones.objects.SlotData;
+	import dragonBones.textures.TextureAtlasData;
 	
 	use namespace dragonBones_internal;
 	
@@ -22,7 +27,6 @@ package dragonBones
 	 * @see dragonBones.Bone
 	 * @see dragonBones.Slot
 	 * @see dragonBones.animation.Animation
-	 * @see dragonBones.core.IArmatureDisplayContainer
 	 * @version DragonBones 3.0
 	 */
 	public final class Armature extends BaseObject implements IAnimateble
@@ -31,94 +35,58 @@ package dragonBones
 		{
 			return a._zOrder > b._zOrder ? 1 : -1;
 		}
-		
 		/**
 		 * @language zh_CN
-		 * 可以用于存储临时数据。
+		 * 是否继承父骨架的动画状态。
+		 * @default true
+		 * @version DragonBones 4.5
+		 */
+		public var inheritAnimation: Boolean;
+		/**
+		 * @private
+		 */
+		public var debugDraw: Boolean;
+		/**
+		 * @language zh_CN
+		 * 用于存储临时数据。
 		 * @version DragonBones 3.0
 		 */
 		public var userData:Object;
 		
+		private var _debugDraw:Boolean;
+		private var _delayDispose:Boolean;
+		private var _lockDispose:Boolean;
 		/**
-		 * @private Bone
+		 * @private
 		 */
 		dragonBones_internal var _bonesDirty:Boolean;
-		
+		private var _slotsDirty:Boolean;
+		private const _bones:Vector.<Bone> = new Vector.<Bone>();
+		private const _slots:Vector.<Slot> = new Vector.<Slot>();
+		private const _actions:Vector.<ActionData> = new Vector.<ActionData>();
+		private const _events:Vector.<EventObject> = new Vector.<EventObject>();
 		/**
-		 * @private AnimationState
-		 */
-		dragonBones_internal var _cacheFrameIndex:int;
-		
-		/**
-		 * @private Factory
+		 * @private
 		 */
 		dragonBones_internal var _armatureData:ArmatureData;
-		
 		/**
-		 * @private Factory AnimationState
+		 * @private
 		 */
 		dragonBones_internal var _skinData:SkinData;
-		
-		/**
-		 * @private Factory
-		 */
-		dragonBones_internal var _animation:Animation;
-		
-		/**
-		 * @private Factory
-		 */
-		dragonBones_internal var _display:IArmatureDisplay;
-		
+		private var _animation:Animation;
+		private var _proxy:IArmatureProxy;
+		private var _display:Object;
+		private var _eventManager:IEventDispatcher;
 		/**
 		 * @private Slot
 		 */
 		dragonBones_internal var _parent:Slot;
-		
-		/**
-		 * @private Slot
-		 */
-		dragonBones_internal var _replacedTexture:*;
-		
-		/**
-		 * @private Slot
-		 */
-		dragonBones_internal var _eventManager:IEventDispatcher;
-		
+		private var _clock:WorldClock;
 		/**
 		 * @private
 		 */
-		private var _delayDispose:Boolean;
-		
-		/**
-		 * @private
-		 */
-		private var _lockDispose:Boolean;
-		
-		/**
-		 * @private
-		 */
-		private var _slotsDirty:Boolean;
-		
-		/**
-		 * @private Store bones based on bones' hierarchy (From root to leaf)
-		 */
-		private const _bones:Vector.<Bone> = new Vector.<Bone>(0, true);
-		
-		/**
-		 * @private Store slots based on slots' zOrder (From low to high)
-		 */
-		private const _slots:Vector.<Slot> = new Vector.<Slot>(0, true);
-		
-		/**
-		 * @private
-		 */
-		private const _actions:Vector.<ActionData> = new Vector.<ActionData>();
-		
-		/**
-		 * @private
-		 */
-		private const _events:Vector.<EventObject> = new Vector.<EventObject>();
-		
+		dragonBones_internal var _replaceTextureAtlasData:TextureAtlasData;
+		private var _replacedTexture:Object;
 		/**
 		 * @private
 		 */
@@ -126,74 +94,73 @@ package dragonBones
 		{
 			super(this);
 		}
-		
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
 		override protected function _onClear():void
 		{
-			if (_bones.length)
+			for (var i:uint = 0, l:uint = _bones.length; i < l; ++i) 
 			{
-				for each (var bone:Bone in _bones)
-				{
-					bone.returnToPool();
-				}
-				
-				_bones.fixed = false;
-				_bones.length = 0;
-				_bones.fixed = true;
+				_bones[i].returnToPool();
 			}
 			
-			if (_slots.length)
+			for (i = 0, l = _slots.length; i < l; ++i) 
 			{
-				for each (var slot:Slot in _slots)
-				{
-					slot.returnToPool();
-				}
-				
-				_slots.fixed = false;
-				_slots.length = 0;
-				_slots.fixed = true;
+				_slots[i].returnToPool();
 			}
 			
-			for each (var event:EventObject in _events)
+			for (i = 0, l = _events.length; i < l; ++i) 
 			{
-				event.returnToPool();
+				_events[i].returnToPool();
 			}
 			
-			if (_animation)
+			if (_clock) 
+			{
+				_clock.remove(this);
+			}
+			
+			if (_proxy) 
+			{
+				_proxy._onClear();
+			}
+			
+			if (_replaceTextureAtlasData) 
+			{
+				_replaceTextureAtlasData.returnToPool();
+			}
+			
+			if (_animation) 
 			{
 				_animation.returnToPool();
 			}
 			
-			if (_display)
-			{
-				_display._onClear();
-			}
-			
+			inheritAnimation = true;
+			debugDraw = false;
 			userData = null;
 			
-			_bonesDirty = false;
-			_cacheFrameIndex = -1;
-			_armatureData = null;
-			_skinData = null;
-			
-			_animation = null;
-			_display = null;
-			_parent = null;
-			_eventManager = null;
-			
+			_debugDraw = false;
 			_delayDispose = false;
 			_lockDispose = false;
+			_bonesDirty = false;
 			_slotsDirty = false;
-			_replacedTexture = null;
+			_bones.fixed = false;
+			_bones.length = 0;
+			_slots.fixed = false;
+			_slots.length = 0;
 			_actions.length = 0;
 			_events.length = 0;
+			_armatureData = null;
+			_skinData = null;
+			_animation = null;
+			_proxy = null;
+			_display = null;
+			_eventManager = null;
+			_parent = null;
+			_clock = null;
+			_replaceTextureAtlasData = null;
+			_replacedTexture = null;
 		}
 		
-		/**
-		 * @private
-		 */
 		private function _sortBones():void
 		{
 			const total:uint = _bones.length;
@@ -232,7 +199,7 @@ package dragonBones
 					continue;
 				}
 				
-				if (bone.ik && bone.ikChain > 0 && bone.ikChainIndex == bone.ikChain)
+				if (bone.ik && bone.ikChain > 0 && bone.ikChainIndex === bone.ikChain)
 				{
 					_bones.splice(_bones.indexOf(bone.parent) + 1, 0, bone); // ik, parent, bone, children
 				}
@@ -245,50 +212,46 @@ package dragonBones
 			}
 		}
 		
-		/**
-		 * @private
-		 */
 		private function _sortSlots():void
 		{
 			_slots.sort(_onSortSlots);
 		}
 		
-		/**
-		 * @private
-		 */
 		private function _doAction(value:ActionData):void
 		{
 			switch (value.type) 
 			{
-				case DragonBones.ACTION_TYPE_PLAY:
-					_animation.play(value.data[0], value.data[1]);
-					break;
-				
-				case DragonBones.ACTION_TYPE_STOP:
-					_animation.stop(value.data[0]);
-					break;
-				
-				case DragonBones.ACTION_TYPE_GOTO_AND_PLAY:
-					_animation.gotoAndPlayByTime(value.data[0], value.data[1], value.data[2]);
-					break;
-				
-				case DragonBones.ACTION_TYPE_GOTO_AND_STOP:
-					_animation.gotoAndStopByTime(value.data[0], value.data[1]);
-					break;
-				
-				case DragonBones.ACTION_TYPE_FADE_IN:
-					_animation.fadeIn(value.data[0], value.data[1], value.data[2]);
-					break;
-				
-				case DragonBones.ACTION_TYPE_FADE_OUT:
-					// TODO fade out
+				case ActionType.Play:
+					_animation.playConfig(value.animationConfig);
 					break;
 				
 				default:
 					break;
 			}
 		}
-		
+		/**
+		 * @private
+		 */
+		public function _init(
+			armatureData: ArmatureData, skinData: SkinData,
+			display: Object, proxy: IArmatureProxy, eventManager: IEventDispatcher
+		): void 
+		{
+			if (_armatureData) 
+			{
+				return;
+			}
+			
+			_armatureData = armatureData;
+			_skinData = skinData;
+			_animation = BaseObject.borrowObject(Animation) as Animation;
+			_proxy = proxy;
+			_display = display;
+			_eventManager = eventManager;
+			
+			_animation._init(this);
+			_animation.animations = _armatureData.animations;
+		}
 		/**
 		 * @private
 		 */
@@ -296,12 +259,29 @@ package dragonBones
 		{
 			if (_bones.indexOf(value) < 0)
 			{
-				_bonesDirty = true;
 				_bones.fixed = false;
+				
+				_bonesDirty = true;
 				_bones.push(value);
+				_animation._timelineStateDirty = true;
 			}
 		}
-		
+		/**
+		 * @private
+		 */
+		dragonBones_internal function _removeBoneFromBoneList(value: Bone): void 
+		{
+			const index:int = _bones.indexOf(value);
+			if (index >= 0) 
+			{
+				_bones.fixed = false;
+				
+				_bones.splice(index, 1);
+				_animation._timelineStateDirty = true;
+				
+				_bones.fixed = true;
+			}
+		}
 		/**
 		 * @private
 		 */
@@ -309,12 +289,30 @@ package dragonBones
 		{
 			if (_slots.indexOf(value) < 0)
 			{
-				_slotsDirty = true;
 				_slots.fixed = false;
+				
+				_slotsDirty = true;
 				_slots.push(value);
+				_animation._timelineStateDirty = true;
 			}
 		}
-		
+		/**
+		 * @internal
+		 * @private
+		 */
+		dragonBones_internal function _removeSlotFromSlotList(value: Slot): void 
+		{
+			const index:int = _slots.indexOf(value);
+			if (index >= 0) 
+			{
+				_slots.fixed = false;
+				
+				_slots.splice(index, 1);
+				_animation._timelineStateDirty = true;
+				
+				_slots.fixed = true;
+			}
+		}
 		/**
 		 * @private
 		 */
@@ -329,16 +327,14 @@ package dragonBones
 				const slotData:SlotData = sortedSlots[slotIndex];
 				const slot:Slot = getSlot(slotData.name);
 				
-				if (slot && slot._zOrder != i) 
+				if (slot) 
 				{
-					slot._zOrder = i;
-					slot._zOrderDirty = true;
+					slot._setZorder(i);
 				}
 			}
 			
 			_slotsDirty = true;
 		}
-		
 		/**
 		 * @private
 		 */
@@ -346,7 +342,6 @@ package dragonBones
 		{
 			_actions.push(value);
 		}
-		
 		/**
 		 * @private
 		 */
@@ -356,69 +351,36 @@ package dragonBones
 			value.armature = this;
 			_events.push(value);
 		}
-		
-		/**
-		 * @private
-		 */
-		dragonBones_internal function _addBone(value:Bone, parentName:String = null):void
-		{
-			if (value)
-			{
-				value._setArmature(this);
-				value._setParent(parentName? getBone(parentName): null);
-			}
-		}
-		
-		/**
-		 * @private
-		 */
-		dragonBones_internal function _addSlot(value:Slot, parentName:String):void
-		{
-			const bone:Bone = getBone(parentName);
-			if (bone)
-			{
-				value._setArmature(this);
-				value._setParent(bone);
-			}
-		}
-		
 		/**
 		 * @language zh_CN
-		 * 释放骨架。 (会回收到内存池)
+         * 释放骨架。 (回收到对象池)
 		 * @version DragonBones 3.0
 		 */
 		public function dispose():void
 		{
 			_delayDispose = true;
 			
-			if (!_lockDispose && _animation) // 
+			if (!_lockDispose && _armatureData)
 			{
-				this.returnToPool();
+				returnToPool();
 			}
 		}
-		
 		/**
 		 * @language zh_CN
-		 * 更新骨架和动画。 (可以使用时钟实例或显示容器来更新)
-		 * @param passedTime 两帧之前的时间间隔。 (以秒为单位)
-		 * @see dragonBones.animation.IAnimateble
-		 * @see dragonBones.animation.WorldClock
-		 * @see dragonBones.core.IArmatureDisplay
+		 * 更新骨架和动画。
+         * @param passedTime 两帧之间的时间间隔。 (以秒为单位)
+		 * @see dragonBones.IAnimateble
+		 * @see dragonBones.WorldClock
 		 * @version DragonBones 3.0
 		 */
 		public function advanceTime(passedTime:Number):void
 		{
-			if (!_animation)
+			if (!_armatureData)
 			{
 				throw new Error("The armature has been disposed.");
 			}
 			
-			const scaledPassedTime:Number = passedTime * _animation.timeScale;
-			
-			//
-			_animation._advanceTime(scaledPassedTime);
-			
-			//
+			// Sort bones and slots.
 			if (_bonesDirty)
 			{
 				_bonesDirty = false;
@@ -433,89 +395,85 @@ package dragonBones
 				_slots.fixed = true;
 			}
 			
-			//
+			const prevCacheFrameIndex:int = _animation._cacheFrameIndex;
+			
+			// Update nimation.
+			_animation._advanceTime(passedTime);
+			
+			const currentCacheFrameIndex:int = _animation._cacheFrameIndex;
+			
 			var i:uint = 0, l:uint = 0;
 			
-			for (i = 0, l = _bones.length; i < l; ++i)
+			// Update bones and slots.
+			if (currentCacheFrameIndex < 0 || currentCacheFrameIndex !== prevCacheFrameIndex) 
 			{
-				_bones[i]._update(_cacheFrameIndex);
-			}
-			
-			for (i = 0, l = _slots.length; i < l; ++i)
-			{
-				const slot:Slot = _slots[i];
-				
-				slot._update(_cacheFrameIndex);
-				
-				const childArmature:Armature = slot._childArmature;
-				if (childArmature)
+				for (i = 0, l = _bones.length; i < l; ++i)
 				{
-					if (slot.inheritAnimation) // Animation's time scale will impact to childArmature
-					{
-						childArmature.advanceTime(scaledPassedTime);
-					}
-					else
-					{
-						childArmature.advanceTime(passedTime);
-					}
+					_bones[i]._update(currentCacheFrameIndex);
+				}
+				
+				for (i = 0, l = _slots.length; i < l; ++i)
+				{
+					_slots[i]._update(currentCacheFrameIndex);
 				}
 			}
 			
 			// 
-			if (DragonBones.debugDraw)
+			const drawed:Boolean = debugDraw || DragonBones.debugDraw;
+			if (drawed || _debugDraw) 
 			{
-				_display._debugDraw();
+				_debugDraw = drawed;
+				_proxy._debugDraw(_debugDraw);
 			}
 			
 			if (!_lockDispose)
 			{
 				_lockDispose = true;
 				
-				
-				// Actions and events.
-				if (_events.length > 0) // Dispatch event before action.
+				// Events. (Dispatch event before action.)
+				l = _events.length;
+				if (l > 0) 
 				{
-					for (i = 0, l = _events.length; i < l; ++i)
+					for (i = 0; i < l; ++i) 
 					{
-						const event:EventObject = _events[i];
+						const eventObject:EventObject = _events[i];
+						_proxy._dispatchEvent(eventObject.type, eventObject);
 						
-						if (event.type == EventObject.SOUND_EVENT)
+						if (eventObject.type === EventObject.SOUND_EVENT)
 						{
-							_eventManager._dispatchEvent(event);
-						}
-						else
-						{
-							_display._dispatchEvent(event);
+							_eventManager._dispatchEvent(eventObject.type, eventObject);
 						}
 						
-						event.returnToPool();
+						eventObject.returnToPool();
 					}
 					
 					_events.length = 0;
 				}
 				
-				if (_actions.length > 0) 
+				// Actions.
+				l = _actions.length;
+				if (l > 0) 
 				{
-					for (i = 0, l = _actions.length; i < l; ++i) 
+					for (i = 0; i < l; ++i) 
 					{
 						const action:ActionData = _actions[i];
 						if (action.slot) 
 						{
-							const eachSlot:Slot = getSlot(action.slot.name);
-							if (eachSlot) 
+							var slot:Slot = getSlot(action.slot.name);
+							if (slot) 
 							{
-								const childArmatureA:Armature = eachSlot._childArmature;
-								if (childArmatureA) 
+								var childArmature:Armature = slot.childArmature;
+								if (childArmature) 
 								{
-									childArmatureA._doAction(action);
+									childArmature._doAction(action);
 								}
 							}
 						} 
 						else if (action.bone) 
 						{
-							for (i = 0, l = _slots.length; i < l; ++i) 
+							for (var iA:uint = 0, lA:uint = _slots.length; iA < lA; ++iA) 
 							{
-								const childArmatureB:Armature = _slots[i]._childArmature;
+								childArmature = _slots[iA].childArmature;
 								if (childArmature) 
 								{
 									childArmature._doAction(action);
@@ -536,13 +494,12 @@ package dragonBones
 			
 			if (_delayDispose)
 			{
-				this.returnToPool();
+				returnToPool();
 			}
 		}
-		
 		/**
 		 * @language zh_CN
-		 * 更新骨骼和插槽的变换。 (当骨骼没有动画状态或动画状态播放完成时，骨骼将不在更新)
+		 * 更新骨骼和插槽。 (当骨骼没有动画状态或动画状态播放完成时，骨骼将不在更新)
 		 * @param boneName 指定的骨骼名称，如果未设置，将更新所有骨骼。
 		 * @param updateSlotDisplay 是否更新插槽的显示对象。
 		 * @see dragonBones.Bone
@@ -551,20 +508,19 @@ package dragonBones
 		 */
 		public function invalidUpdate(boneName:String = null, updateSlotDisplay:Boolean = false):void
 		{
-			var slot:Slot = null;
-			
 			if (boneName)
 			{
-				const bone:Bone = getBone(boneName);
+				var bone:Bone = getBone(boneName);
 				if (bone)
 				{
 					bone.invalidUpdate();
 					
 					if (updateSlotDisplay)
 					{
-						for each (slot in _slots)
+						for (var i:uint = 0, l:uint = _slots.length; i < l; ++i) 
 						{
-							if (slot.parent == bone)
+							var slot:Slot = _slots[i];
+							if (slot.parent === bone)
 							{
 								slot.invalidUpdate();
 							}
@@ -574,24 +530,162 @@ package dragonBones
 			}
 			else
 			{
-				for each (var eachBone:Bone in _bones)
+				for (i = 0, l = _bones.length; i < l; ++i) 
 				{
-					eachBone.invalidUpdate();
+					_bones[i].invalidUpdate();
 				}
 				
-				if (updateSlotDisplay)
+				if (updateSlotDisplay) 
 				{
-					for each (slot in _slots)
+					for (i = 0, l = _slots.length; i < l; ++i) 
 					{
-						slot.invalidUpdate();
+						_slots[i].invalidUpdate();
 					}
 				}
 			}
 		}
-		
 		/**
 		 * @language zh_CN
-		 * 获取指定名称的骨骼。
+         * 判断点是否在所有插槽的自定义包围盒内。
+		 * @param x 点的水平坐标。（骨架内坐标系）
+		 * @param y 点的垂直坐标。（骨架内坐标系）
+		 * @param color 指定的包围盒颜色。 [0: 与所有包围盒进行判断, N: 仅当包围盒的颜色为 N 时才进行判断]
+		 * @version DragonBones 5.0
+		 */
+		public function containsPoint(x: Number, y: Number, color: Number = 0x000000): Slot 
+		{
+			for (var i:uint = 0, l:uint = _slots.length; i < l; ++i) 
+			{
+				const slot:Slot = _slots[i];
+				if (slot.containsPoint(x, y, color)) 
+				{
+					return slot;
+				}
+			}
+			
+			return null;
+		}
+		/**
+		 * @language zh_CN
+         * 判断线段是否与骨架的所有插槽的自定义包围盒相交。
+		 * @param xA 线段起点的水平坐标。（骨架内坐标系）
+		 * @param yA 线段起点的垂直坐标。（骨架内坐标系）
+		 * @param xB 线段终点的水平坐标。（骨架内坐标系）
+		 * @param yB 线段终点的垂直坐标。（骨架内坐标系）
+		 * @param color 指定的包围盒颜色。 [0: 与所有包围盒进行判断, N: 仅当包围盒的颜色为 N 时才进行判断]
+		 * @param intersectionPointA 线段从起点到终点与包围盒相交的第一个交点。（骨架内坐标系）
+		 * @param intersectionPointB 线段从终点到起点与包围盒相交的第一个交点。（骨架内坐标系）
+		 * @param normalRadians 碰撞点处包围盒切线的法线弧度。 [x: 第一个碰撞点处切线的法线弧度, y: 第二个碰撞点处切线的法线弧度]
+		 * @returns 线段从起点到终点相交的第一个自定义包围盒的插槽。
+		 * @version DragonBones 5.0
+		 */
+		public function intersectsSegment(
+			xA: Number, yA: Number, xB: Number, yB: Number,
+			color: uint = 0x000000,
+			intersectionPointA: Point = null,
+			intersectionPointB: Point = null,
+			normalRadians: Point = null
+		): Slot 
+		{
+			const isV:Boolean = xA === xB;
+			var dMin:Number = 0.0;
+			var dMax:Number = 0.0;
+			var intXA:Number = 0.0;
+			var intYA:Number = 0.0;
+			var intXB:Number = 0.0;
+			var intYB:Number = 0.0;
+			var intAN:Number = 0.0;
+			var intBN:Number = 0.0;
+			var intSlotA: Slot = null;
+			var intSlotB: Slot = null;
+			
+			for (var i:uint = 0, l:uint = _slots.length; i < l; ++i) 
+			{
+				const slot:Slot = _slots[i];
+				const intersectionCount:int = slot.intersectsSegment(xA, yA, xB, yB, color, intersectionPointA, intersectionPointB, normalRadians);
+				if (intersectionCount > 0) 
+				{
+					if (intersectionPointA || intersectionPointB) 
+					{
+						if (intersectionPointA) 
+						{
+							var d:Number = isV ? intersectionPointA.y - yA : intersectionPointA.x - xA;
+							if (d < 0.0) 
+							{
+								d = -d;
+							}
+							
+							if (!intSlotA || d < dMin) 
+							{
+								dMin = d;
+								intXA = intersectionPointA.x;
+								intYA = intersectionPointA.y;
+								intSlotA = slot;
+								
+								if (normalRadians) 
+								{
+									intAN = normalRadians.x;
+								}
+							}
+						}
+						
+						if (intersectionPointB) 
+						{
+							d = intersectionPointB.x - xA;
+							if (d < 0.0) 
+							{
+								d = -d;
+							}
+							
+							if (!intSlotB || d > dMax) 
+							{
+								dMax = d;
+								intXB = intersectionPointB.x;
+								intYB = intersectionPointB.y;
+								intSlotB = slot;
+								
+								if (normalRadians) 
+								{
+									intBN = normalRadians.y;
+								}
+							}
+						}
+					}
+					else 
+					{
+						intSlotA = slot;
+						break;
+					}
+				}
+			}
+			
+			if (intSlotA && intersectionPointA) 
+			{
+				intersectionPointA.x = intXA;
+				intersectionPointA.y = intYA;
+				
+				if (normalRadians) 
+				{
+					normalRadians.x = intAN;
+				}
+			}
+			
+			if (intSlotB && intersectionPointB) 
+			{
+				intersectionPointB.x = intXB;
+				intersectionPointB.y = intYB;
+				
+				if (normalRadians) 
+				{
+					normalRadians.y = intBN;
+				}
+			}
+			
+			return intSlotA;
+		}
+		/**
+		 * @language zh_CN
+         * 获取骨骼。
 		 * @param name 骨骼的名称。
 		 * @return 骨骼。
 		 * @see dragonBones.Bone
@@ -599,9 +693,10 @@ package dragonBones
 		 */
 		public function getBone(name:String):Bone
 		{
-			for each(var bone:Bone in _bones)
+			for (var i:uint = 0, l:uint = _bones.length; i < l; ++i)
 			{
-				if (bone.name == name)
+				const bone:Bone = _bones[i];
+				if (bone.name === name) 
 				{
 					return bone;
 				}
@@ -609,7 +704,6 @@ package dragonBones
 			
 			return null;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 通过显示对象获取骨骼。
@@ -624,10 +718,9 @@ package dragonBones
 			
 			return slot? slot.parent: null;
 		}
-		
 		/**
 		 * @language zh_CN
-		 * 获取指定名称的插槽。
+         * 获取插槽。
 		 * @param name 插槽的名称。
 		 * @return 插槽。
 		 * @see dragonBones.Slot
@@ -635,9 +728,10 @@ package dragonBones
 		 */
 		public function getSlot(name:String):Slot
 		{
-			for each(var slot:Slot in _slots)
+			for (var i:uint = 0, l:uint = _slots.length; i < l; ++i) 
 			{
-				if (slot.name == name)
+				const slot:Slot = _slots[i];
+				if (slot.name === name) 
 				{
 					return slot;
 				}
@@ -645,7 +739,6 @@ package dragonBones
 			
 			return null;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 通过显示对象获取插槽。
@@ -658,8 +751,9 @@ package dragonBones
 		{
 			if (display)
 			{
-				for each(var slot:Slot in _slots)
+				for (var i:uint = 0, l:uint = _slots.length; i < l; ++i) 
 				{
+					const slot:Slot = _slots[i];
 					if (slot.display == display)
 					{
 						return slot;
@@ -669,18 +763,39 @@ package dragonBones
 			
 			return null;
 		}
-		
 		/**
-		 * @language zh_CN
-		 * 替换骨架的主贴图，根据渲染引擎的不同，提供不同的贴图数据。
-		 * @param texture 贴图。
+		 * @private
+		 */
+		dragonBones_internal function _addBone(value:Bone, parentName:String = null):void
+		{
+			if (value)
+			{
+				value._setArmature(this);
+				value._setParent(parentName? getBone(parentName): null);
+			}
+		}
+		/**
+		 * @private
+		 */
+		dragonBones_internal function _addSlot(value:Slot, parentName:String):void
+		{
+			const bone:Bone = getBone(parentName);
+			if (bone)
+			{
+				value._setArmature(this);
+				value._setParent(bone);
+			}
+		}
+		/**
+         * @language zh_CN
+         * 替换骨架的主贴图，根据渲染引擎的不同，提供不同的贴图类型。
+         * @param texture 贴图。
 		 * @version DragonBones 4.5
 		 */
 		public function replaceTexture(texture:Object):void
 		{
 			replacedTexture = texture;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 获取所有骨骼。
@@ -691,7 +806,6 @@ package dragonBones
 		{
 			return _bones;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 获取所有插槽。
@@ -702,7 +816,6 @@ package dragonBones
 		{
 			return _slots;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 骨架名称。
@@ -713,7 +826,6 @@ package dragonBones
 		{
 			return _armatureData? _armatureData.name: null;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 获取骨架数据。
@@ -724,7 +836,6 @@ package dragonBones
 		{
 			return _armatureData;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 获取动画控制器。
@@ -735,17 +846,24 @@ package dragonBones
 		{
 			return _animation;
 		}
-		
+		/**
+		 * @language zh_CN
+		 * 获取事件监听器。
+		 * @version DragonBones 5.0
+		 */
+		public function get eventDispatcher():IEventDispatcher
+		{
+			return _proxy;
+		}
 		/**
 		 * @language zh_CN
 		 * 获取显示容器，插槽的显示对象都会以此显示容器为父级，根据渲染平台的不同，类型会不同，通常是 DisplayObjectContainer 类型。
 		 * @version DragonBones 3.0
 		 */
-		public function get display():IArmatureDisplay
+		public function get display():Object
 		{
 			return _display;
 		}
-		
 		/**
 		 * @language zh_CN
 		 * 获取父插槽。 (当此骨架是某个骨架的子骨架时，可以通过此属性向上查找从属关系)
@@ -756,10 +874,9 @@ package dragonBones
 		{
 			return _parent;
 		}
-		
 		/**
 		 * @language zh_CN
-		 * 动画缓存的帧率，当设置一个大于 0 的帧率时，将会开启动画缓存。
+         * 动画缓存帧率，当设置的值大于 0 的时，将会开启动画缓存。
 		 * 通过将动画数据缓存在内存中来提高运行性能，会有一定的内存开销。
 		 * 帧率不宜设置的过高，通常跟动画的帧率相当且低于程序运行的帧率。
 		 * 开启动画缓存后，某些功能将会失效，比如 Bone 和 Slot 的 offset 属性等。
@@ -773,24 +890,58 @@ package dragonBones
 		}
 		public function set cacheFrameRate(value:uint):void
 		{
-			if (_armatureData.cacheFrameRate != value)
+			if (_armatureData.cacheFrameRate !== value)
 			{
 				_armatureData.cacheFrames(value);
 				
 				// Set child armature frameRate.
-				
 				for (var i:uint = 0, l:uint = _slots.length; i < l; ++i) 
 				{
-					const slot:Slot = _slots[i];
-					const childArmature:Armature = slot.childArmature;
-					if (childArmature && childArmature.cacheFrameRate == 0) 
+					const childArmature:Armature = _slots[i].childArmature;
+					if (childArmature) 
 					{
 						childArmature.cacheFrameRate = value;
 					}
 				}
 			}
 		}
-		
+		/**
+		 * @inheritDoc
+		 */
+		public function get clock(): WorldClock 
+		{
+			return _clock;
+		}
+		public function set clock(value: WorldClock) :void
+		{
+			if (_clock === value) 
+			{
+				return;
+			}
+			
+			const prevClock:WorldClock = _clock;
+			_clock = value;
+			
+			if (prevClock) 
+			{
+				prevClock.remove(this);
+			}
+			
+			if (_clock) 
+			{
+				_clock.add(this);
+			}
+			
+			// Update childArmature clock.
+			for (var i:uint = 0, l:uint = _slots.length; i < l; ++i) 
+			{
+				const childArmature:Armature = _slots[i].childArmature;
+				if (childArmature) 
+				{
+					childArmature.clock = _clock;
+				}
+			}
+		}
 		/**
 		 * @language zh_CN
 		 * 替换骨架的主贴图，根据渲染引擎的不同，提供不同的贴图数据。
@@ -802,44 +953,41 @@ package dragonBones
 		}
 		public function set replacedTexture(value:Object):void
 		{
+			if (_replaceTextureAtlasData) 
+			{
+				_replaceTextureAtlasData.returnToPool();
+				_replaceTextureAtlasData = null;
+			}
+			
 			_replacedTexture = value;
 			
 			for (var i:uint = 0, l:uint = _slots.length; i < l; ++i) 
 			{
-				_slots[i].invalidUpdate();
+				const slot:Slot = _slots[i];
+				slot.invalidUpdate();
+				slot._update(-1);
 			}
 		}
 		
 		/**
-		 * @language zh_CN
-		 * 是否包含指定类型的事件。
-		 * @param type 事件类型。
-		 * @return  [true: 包含, false: 不包含]
-		 * @version DragonBones 3.0
+		 * @deprecated
+		 * @see dragonBones.Armature#eventDispatcher
 		 */
 		public function hasEventListener(type:String):void
 		{
 			_display.hasEvent(type);
 		}
-		
 		/**
-		 * @language zh_CN
-		 * 添加指定事件。
-		 * @param type 事件类型。
-		 * @param listener 事件回调。
-		 * @version DragonBones 3.0
+		 * @deprecated
+		 * @see dragonBones.Armature#eventDispatcher
 		 */
 		public function addEventListener(type:String, listener:Function):void
 		{
 			_display.addEvent(type, listener);
 		}
-		
 		/**
-		 * @language zh_CN
-		 * 移除指定事件。
-		 * @param type 事件类型。
-		 * @param listener 事件回调。
-		 * @version DragonBones 3.0
+		 * @deprecated
+		 * @see dragonBones.Armature#eventDispatcher
 		 */
 		public function removeEventListener(type:String, listener:Function):void
 		{

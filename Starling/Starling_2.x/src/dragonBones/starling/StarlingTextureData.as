@@ -16,9 +16,6 @@ package dragonBones.starling
 			super(this);
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
 		override protected function _onClear():void
 		{
 			super._onClear();
