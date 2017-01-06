@@ -448,7 +448,7 @@
 						{
 							if (ffdTimelineStates[k]) // Remove ffd timeline from map.
 							{
-								delete ffdTimelineStates[slotTimelineName];
+								delete ffdTimelineStates[k];
 							}
 							else // Create new ffd timeline.
 							{

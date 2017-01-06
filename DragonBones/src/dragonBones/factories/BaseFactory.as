@@ -299,7 +299,6 @@
 				}
 				
 				slot.displayList = displayList;
-				slot.invalidUpdate();
 			}
 		}
 		/**

@@ -542,7 +542,9 @@
 					_ffdVertices.length = 0;
 				}
 				
+				_displayDirty = true;
 				_originalDirty = true;
+				
 				if (_displayData) 
 				{
 					origin = _displayData.transform;
@@ -914,10 +916,7 @@
 				_displayDirty = _display != null;
 			}
 			
-			if (_displayDirty)
-			{
-				_updateDisplayData();
-			}
+			_updateDisplayData();
 			
 			return _displayDirty;
 		}
