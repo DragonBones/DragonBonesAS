@@ -26,16 +26,14 @@ package dragonBones.flash
 		private var _meshTexture:BitmapData;
 		private var _path:GraphicsTrianglePath;
 		/**
-		 * @language zh_CN
-		 * 创建一个空的插槽。
-		 * @version DragonBones 3.0
+		 * @private
 		 */
 		public function FlashSlot()
 		{
 			super(this);
 		}
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
 		override protected function _onClear():void
 		{

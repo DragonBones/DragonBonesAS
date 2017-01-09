@@ -379,6 +379,10 @@ package dragonBones
 			{
 				throw new Error("The armature has been disposed.");
 			}
+			else if (!_armatureData.parent)
+			{
+				throw new Error("The armature data has been disposed.");
+			}
 			
 			// Sort bones and slots.
 			if (_bonesDirty)

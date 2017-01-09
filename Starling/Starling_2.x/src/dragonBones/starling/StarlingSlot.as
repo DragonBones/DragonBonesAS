@@ -29,7 +29,6 @@
 	public final class StarlingSlot extends Slot
 	{
 		public var transformUpdateEnabled:Boolean;
-		
 		/**
 		 * @private
 		 */
@@ -41,9 +40,7 @@
 		
 		private var _renderDisplay:DisplayObject;
 		/**
-		 * @language zh_CN
-		 * 创建一个空的插槽。
-		 * @version DragonBones 3.0
+		 * @private
 		 */
 		public function StarlingSlot()
 		{
