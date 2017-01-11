@@ -26,7 +26,7 @@ package dragonBones.objects
 		 * 自定义字符串。
 		 * @version DragonBones 5.0
 		 */
-		public const strings: Vector.<Number> = new Vector.<Number>();
+		public const strings: Vector.<String> = new Vector.<String>();
 		/**
 		 * @private
 		 */

@@ -41,13 +41,13 @@
 		protected static const DATA_VERSION_4_5:String = "4.5";
 		protected static const DATA_VERSION_5_0:String = "5.0";
 		protected static const DATA_VERSION:String = DATA_VERSION_5_0;
-		protected static const DATA_VERSIONS:Vector.<String> = Vector.<String>(
+		protected static const DATA_VERSIONS:Vector.<String> = Vector.<String>([
 			DATA_VERSION_5_0,
 			DATA_VERSION_4_5,
 			DATA_VERSION_4_0,
 			DATA_VERSION_3_0,
 			DATA_VERSION_2_3
-		);
+		]);
 		
 		protected static const TEXTURE_ATLAS:String = "TextureAtlas";
 		protected static const SUB_TEXTURE:String = "SubTexture";

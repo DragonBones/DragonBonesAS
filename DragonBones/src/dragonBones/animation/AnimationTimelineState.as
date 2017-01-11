@@ -107,7 +107,7 @@
 				if (_keyFrameCount > 1) 
 				{
 					const currentFrameIndex:uint = Math.floor(_currentTime * _frameRate);
-					const currentFrame:AnimationFrameData = _timelineData.frames[currentFrameIndex];
+					const currentFrame:AnimationFrameData = _timelineData.frames[currentFrameIndex] as AnimationFrameData;
 					if (_currentFrame !== currentFrame) 
 					{
 						const isReverse:Boolean = _currentPlayTimes === prevPlayTimes && prevTime > _currentTime;
@@ -117,7 +117,7 @@
 						if (!crossedFrame) 
 						{
 							const prevFrameIndex:uint = Math.floor(prevTime * _frameRate);
-							crossedFrame = _timelineData.frames[prevFrameIndex];
+							crossedFrame = _timelineData.frames[prevFrameIndex] as AnimationFrameData;
 							
 							if (isReverse) 
 							{

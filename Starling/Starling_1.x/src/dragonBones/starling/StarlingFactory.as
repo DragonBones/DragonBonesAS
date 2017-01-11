@@ -196,7 +196,7 @@ package dragonBones.starling
 		 * @param skinName 皮肤名称，如果未设置，则使用默认皮肤。
 		 * @param textureAtlasName 贴图集数据名称，如果未设置，则使用龙骨数据名称。
 		 * @return 骨架的显示容器。
-		 * @see dragonBones.IArmatureDisplayContainer
+		 * @see dragonBones.starling.StarlingArmatureDisplay
 		 * @version DragonBones 4.5
 		 */
 		public function buildArmatureDisplay(armatureName:String, dragonBonesName:String = null, skinName:String = null, textureAtlasName:String = null):StarlingArmatureDisplay

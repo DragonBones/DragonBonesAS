@@ -369,8 +369,8 @@ package dragonBones
 		 * @language zh_CN
 		 * 更新骨架和动画。
          * @param passedTime 两帧之间的时间间隔。 (以秒为单位)
-		 * @see dragonBones.IAnimateble
-		 * @see dragonBones.WorldClock
+		 * @see dragonBones.animation.IAnimateble
+		 * @see dragonBones.animation.WorldClock
 		 * @version DragonBones 3.0
 		 */
 		public function advanceTime(passedTime:Number):void

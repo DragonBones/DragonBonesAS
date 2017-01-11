@@ -8,7 +8,7 @@ package dragonBones.starling
 	{
 		public function StarlingEvent(type:String, data:EventObject)
 		{
-			super(false, data);
+			super(type, false, data);
 		}
 		
 		public function get eventObject():EventObject

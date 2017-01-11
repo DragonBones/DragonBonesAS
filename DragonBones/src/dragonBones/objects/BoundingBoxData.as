@@ -519,7 +519,7 @@ package dragonBones.objects
 		/**
 		 * @language zh_CN
 		 * 包围盒类型。
-		 * @see dragonBones.BoundingBoxType
+		 * @see dragonBones.enum.BoundingBoxType
 		 * @version DragonBones 5.0
 		 */
 		public var type: int;
