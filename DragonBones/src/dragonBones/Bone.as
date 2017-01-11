@@ -87,7 +87,7 @@
 		/**
 		 * @private
 		 */
-		dragonBones_internal var _cachedFrameIndices:Vector.<Number>;
+		dragonBones_internal var _cachedFrameIndices:Vector.<int>;
 		/**
 		 * @private
 		 */

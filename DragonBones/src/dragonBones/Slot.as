@@ -174,7 +174,7 @@
 		/**
 		 * @private BoneTimelineState
 		 */
-		dragonBones_internal var _cachedFrameIndices:Vector.<Number>;
+		dragonBones_internal var _cachedFrameIndices:Vector.<int>;
 		/**
 		 * @private
 		 */
@@ -415,7 +415,7 @@
 			{
 				const currentDisplayData:DisplayData = _replacedDisplayData ? _replacedDisplayData : _displayData;
 				const currentDisplay:Object = _displayIndex >= 0 && _displayIndex < _displayList.length ? _displayList[_displayIndex] : null;
-				if (currentDisplayData && currentDisplay === _rawDisplay || currentDisplay === _meshDisplay) 
+				if (currentDisplayData && (currentDisplay === _rawDisplay || currentDisplay === _meshDisplay)) 
 				{
 					_textureData = _replacedDisplayData ? _replacedDisplayData.texture : _displayData.texture;
 					if (currentDisplay === _meshDisplay) 
@@ -642,7 +642,7 @@
 				{
 					_childArmature._parent = this; // Update child armature parent.
 					_childArmature.clock = _armature.clock;
-					if (prevChildArmature.inheritAnimation)
+					if (_childArmature.inheritAnimation)
 					{
 						if (_childArmature.cacheFrameRate == 0) // Set child armature frameRate.
 						{

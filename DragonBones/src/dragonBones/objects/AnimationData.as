@@ -155,12 +155,24 @@
 			
 			for (var k:String in boneTimelines) 
 			{
-				boneCachedFrameIndices[k] = new Vector.<Number>(cacheFrameCount, true);
+				var indices:Vector.<int> = new Vector.<int>(cacheFrameCount, true)
+				for (var i:uint = 0, l:uint = indices.length; i < l; ++ i)
+				{
+					indices[i] = -1;
+				}
+				
+				boneCachedFrameIndices[k] = indices;
 			}
 			
 			for (k in slotTimelines) 
 			{
-				slotCachedFrameIndices[k] = new Vector.<Number>(cacheFrameCount, true);
+				indices = new Vector.<int>(cacheFrameCount, true)
+				for (i = 0, l = indices.length; i < l; ++ i)
+				{
+					indices[i] = -1;
+				}
+				
+				slotCachedFrameIndices[k] = indices;
 			}
 		}
 		/**
@@ -244,14 +256,14 @@
 		/**
 		 * @private
 		 */
-		public function getBoneCachedFrameIndices(name: String): Vector.<Number> 
+		public function getBoneCachedFrameIndices(name: String): Vector.<int> 
 		{
 			return boneCachedFrameIndices[name];
 		}
 		/**
 		 * @private
 		 */
-		public function getSlotCachedFrameIndices(name: String): Vector.<Number> 
+		public function getSlotCachedFrameIndices(name: String): Vector.<int> 
 		{
 			return slotCachedFrameIndices[name];
 		}

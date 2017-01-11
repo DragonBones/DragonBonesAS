@@ -3,7 +3,6 @@ package dragonBones.objects
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
 	
-	import dragonBones.animation.Animation;
 	import dragonBones.core.BaseObject;
 	import dragonBones.enum.ArmatureType;
 	import dragonBones.geom.Transform;
@@ -244,9 +243,9 @@ package dragonBones.objects
 			
 			cacheFrameRate = frameRate;
 			
-			for each (var animation:Animation in animations) 
+			for each (var animation:AnimationData in animations) 
 			{
-				animations.cacheFrames(cacheFrameRate);
+				animation.cacheFrames(cacheFrameRate);
 			}
 		}
 		/**
