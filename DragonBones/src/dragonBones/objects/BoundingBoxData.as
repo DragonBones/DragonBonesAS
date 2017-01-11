@@ -7,7 +7,7 @@ package dragonBones.objects
 	
 	/**
 	 * @language zh_CN
-	 * 包围盒数据。
+	 * 自定义包围盒数据。
 	 * @version DragonBones 5.0
 	 */
 	public final class BoundingBoxData extends BaseObject

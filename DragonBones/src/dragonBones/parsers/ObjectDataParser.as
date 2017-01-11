@@ -812,8 +812,8 @@
 			
 			if (_isOldData && (PIVOT_X in rawData || PIVOT_Y in rawData))  // Support 2.x ~ 3.x data.
 			{
-				_timelinePivot.x = _getNumber(rawData, PIVOT_X, 0.0);
-				_timelinePivot.y = _getNumber(rawData, PIVOT_Y, 0.0);
+				_timelinePivot.x = _getNumber(rawData, PIVOT_X, 0.0) * _armature.scale;
+				_timelinePivot.y = _getNumber(rawData, PIVOT_Y, 0.0) * _armature.scale;
 			} 
 			else 
 			{
@@ -954,8 +954,8 @@
 				
 				if (_isOldData) // Support 2.x ~ 3.x data.
 				{
-					_helpPoint.x = _timelinePivot.x + _getNumber(transformObject, PIVOT_X, 0.0);
-					_helpPoint.y = _timelinePivot.y + _getNumber(transformObject, PIVOT_Y, 0.0);
+					_helpPoint.x = _timelinePivot.x + _getNumber(transformObject, PIVOT_X, 0.0) * _armature.scale;
+					_helpPoint.y = _timelinePivot.y + _getNumber(transformObject, PIVOT_Y, 0.0) * _armature.scale;
 					frame.transform.toMatrix(_helpMatrix);
 					Transform.transformPoint(_helpMatrix, _helpPoint.x, _helpPoint.y, _helpPoint, true);
 					frame.transform.x += _helpPoint.x;

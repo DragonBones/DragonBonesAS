@@ -86,6 +86,11 @@
 				
 				if (prevState < 0 && _playState !== prevState) 
 				{
+					if (_animationState.displayControl)
+					{
+						_armature._sortZOrder(null);
+					}
+					
 					if (eventDispatcher.hasEvent(EventObject.START)) 
 					{
 						var eventObject:EventObject = BaseObject.borrowObject(EventObject) as EventObject;
@@ -120,8 +125,8 @@
 							else 
 							{
 								if (
-									prevTime <= crossedFrame.position ||
-									prevPlayTimes !== _currentPlayTimes
+									prevTime <= crossedFrame.position
+									// || prevPlayTimes !== _currentPlayTimes ?
 								) 
 								{
 									crossedFrame = crossedFrame.prev as AnimationFrameData;

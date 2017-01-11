@@ -319,7 +319,7 @@ package dragonBones
 		dragonBones_internal function _sortZOrder(slotIndices: Vector.<int>):void 
 		{
 			const sortedSlots:Vector.<SlotData> = _armatureData.sortedSlots;
-			const isOriginal:Boolean = slotIndices.length < 1;
+			const isOriginal:Boolean = !slotIndices || slotIndices.length < 1;
 			
 			for (var i:uint = 0, l:uint = sortedSlots.length; i < l; ++i) 
 			{
@@ -553,15 +553,14 @@ package dragonBones
          * 判断点是否在所有插槽的自定义包围盒内。
 		 * @param x 点的水平坐标。（骨架内坐标系）
 		 * @param y 点的垂直坐标。（骨架内坐标系）
-		 * @param color 指定的包围盒颜色。 [0: 与所有包围盒进行判断, N: 仅当包围盒的颜色为 N 时才进行判断]
 		 * @version DragonBones 5.0
 		 */
-		public function containsPoint(x: Number, y: Number, color: Number = 0x000000): Slot 
+		public function containsPoint(x: Number, y: Number): Slot 
 		{
 			for (var i:uint = 0, l:uint = _slots.length; i < l; ++i) 
 			{
 				const slot:Slot = _slots[i];
-				if (slot.containsPoint(x, y, color)) 
+				if (slot.containsPoint(x, y)) 
 				{
 					return slot;
 				}
@@ -576,7 +575,6 @@ package dragonBones
 		 * @param yA 线段起点的垂直坐标。（骨架内坐标系）
 		 * @param xB 线段终点的水平坐标。（骨架内坐标系）
 		 * @param yB 线段终点的垂直坐标。（骨架内坐标系）
-		 * @param color 指定的包围盒颜色。 [0: 与所有包围盒进行判断, N: 仅当包围盒的颜色为 N 时才进行判断]
 		 * @param intersectionPointA 线段从起点到终点与包围盒相交的第一个交点。（骨架内坐标系）
 		 * @param intersectionPointB 线段从终点到起点与包围盒相交的第一个交点。（骨架内坐标系）
 		 * @param normalRadians 碰撞点处包围盒切线的法线弧度。 [x: 第一个碰撞点处切线的法线弧度, y: 第二个碰撞点处切线的法线弧度]
@@ -585,7 +583,6 @@ package dragonBones
 		 */
 		public function intersectsSegment(
 			xA: Number, yA: Number, xB: Number, yB: Number,
-			color: uint = 0x000000,
 			intersectionPointA: Point = null,
 			intersectionPointB: Point = null,
 			normalRadians: Point = null
@@ -606,7 +603,7 @@ package dragonBones
 			for (var i:uint = 0, l:uint = _slots.length; i < l; ++i) 
 			{
 				const slot:Slot = _slots[i];
-				const intersectionCount:int = slot.intersectsSegment(xA, yA, xB, yB, color, intersectionPointA, intersectionPointB, normalRadians);
+				const intersectionCount:int = slot.intersectsSegment(xA, yA, xB, yB, intersectionPointA, intersectionPointB, normalRadians);
 				if (intersectionCount > 0) 
 				{
 					if (intersectionPointA || intersectionPointB) 

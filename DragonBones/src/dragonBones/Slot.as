@@ -390,6 +390,7 @@
 		{
 			const prevDisplayData:DisplayData = _displayData;
 			const prevReplaceDisplayData:DisplayData = _replacedDisplayData;
+			const prevTextureData:TextureData = _textureData;
 			const prevMeshData:MeshData = _meshData;
 			
 			if (_displayIndex >= 0 && _displayIndex < _skinSlotData.displays.length) 
@@ -530,6 +531,10 @@
 							_meshBones.length = 0;
 							_ffdVertices.length = 0;
 						}
+					}
+					else if (_textureData != prevTextureData)
+					{
+						_meshDirty = true;
 					}
 				}
 				else 
@@ -975,12 +980,11 @@
 		 * 判断指定的点是否在插槽的自定义包围盒内。
 		 * @param x 点的水平坐标。（骨架内坐标系）
 		 * @param y 点的垂直坐标。（骨架内坐标系）
-		 * @param color 指定的包围盒颜色。 [0: 与所有包围盒进行判断, N: 仅当包围盒的颜色为 N 时才进行判断]
 		 * @version DragonBones 5.0
 		 */
-		public function containsPoint(x: Number, y: Number, color: uint = 0x000000): Boolean 
+		public function containsPoint(x: Number, y: Number): Boolean 
 		{
-			if (!_boundingBoxData || (color && _boundingBoxData.color !== color)) 
+			if (!_boundingBoxData) 
 			{
 				return false;
 			}
@@ -1000,7 +1004,6 @@
 		 * @param yA 线段起点的垂直坐标。（骨架内坐标系）
 		 * @param xB 线段终点的水平坐标。（骨架内坐标系）
 		 * @param yB 线段终点的垂直坐标。（骨架内坐标系）
-		 * @param color 指定的包围盒颜色。 [0: 与所有包围盒进行判断, N: 仅当包围盒的颜色为 N 时才进行判断]
 		 * @param intersectionPointA 线段从起点到终点与包围盒相交的第一个交点。（骨架内坐标系）
 		 * @param intersectionPointB 线段从终点到起点与包围盒相交的第一个交点。（骨架内坐标系）
 		 * @param normalRadians 碰撞点处包围盒切线的法线弧度。 [x: 第一个碰撞点处切线的法线弧度, y: 第二个碰撞点处切线的法线弧度]
@@ -1009,12 +1012,11 @@
 		 */
 		public function intersectsSegment(
 			xA: Number, yA: Number, xB: Number, yB: Number,
-			color: uint = 0x000000,
 			intersectionPointA: Point = null,
 			intersectionPointB: Point = null,
 			normalRadians: Point = null
 		): int {
-			if (!_boundingBoxData || (color && _boundingBoxData.color !== color)) 
+			if (!_boundingBoxData) 
 			{
 				return 0;
 			}
@@ -1091,7 +1093,9 @@
 			return _skinSlotData;
 		}
 		/**
-		 * @private
+		 * @language zh_CN
+		 * 包含显示对象或子骨架的显示列表。
+		 * @version DragonBones 3.0
 		 */
 		public function get boundingBoxData(): BoundingBoxData 
 		{
