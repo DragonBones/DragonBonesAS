@@ -522,33 +522,30 @@
 			_weightResult = weight * _fadeProgress;
 			if (_weightResult !== 0.0) 
 			{
+				const isCacheEnabled:Boolean = _fadeState === 0 && cacheFrameRate > 0.0;
 				var isUpdatesTimeline:Boolean = true;
 				var isUpdatesBoneTimeline:Boolean = true;
 				var time:Number = _time;
 				
+				// Update main timeline.
+				_timeline.update(time);
+				
 				// Cache time internval.
-				const isCacheEnabled:Boolean = _fadeState === 0 && cacheFrameRate > 0.0;
 				if (isCacheEnabled) 
 				{
-					time = cacheFrameRate * 2.0;
-					time = Math.floor(_time * time) / time;
+					_timeline._currentTime = Math.floor(_timeline._currentTime * cacheFrameRate) / cacheFrameRate;
 				}
-				
-				// Update main timeline.
-				_timeline.update(time, -1.0);
-				
-				const normalizedTime:Number = _timeline._currentTime;
 				
 				// Update zOrder timeline.
 				if (_zOrderTimeline) 
 				{
-					_zOrderTimeline.update(time, normalizedTime);
+					_zOrderTimeline.update(time);
 				}
 				
 				// Update cache.
 				if (isCacheEnabled) 
 				{
-					const cacheFrameIndex:int = Math.floor(normalizedTime * cacheFrameRate); // uint
+					const cacheFrameIndex:int = Math.floor(_timeline._currentTime * cacheFrameRate); // uint
 					if (_armature.animation._cacheFrameIndex === cacheFrameIndex) // Same cache.
 					{
 						isUpdatesTimeline = false;
@@ -576,18 +573,18 @@
 					{
 						for (var i:uint = 0, l:uint = _boneTimelines.length; i < l; ++i) 
 						{
-							_boneTimelines[i].update(time, normalizedTime);
+							_boneTimelines[i].update(time);
 						}
 					}
 					
 					for (i = 0, l = _slotTimelines.length; i < l; ++i) 
 					{
-						_slotTimelines[i].update(time, normalizedTime);
+						_slotTimelines[i].update(time);
 					}
 					
 					for (i = 0, l = _ffdTimelines.length; i < l; ++i) 
 					{
-						_ffdTimelines[i].update(time, normalizedTime);
+						_ffdTimelines[i].update(time);
 					}
 				}
 			}

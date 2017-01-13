@@ -110,7 +110,13 @@
 		override protected function _updateZOrder():void
 		{
 			const container:StarlingArmatureDisplay = _armature.display as StarlingArmatureDisplay;
-			container.addChildAt(_renderDisplay, _zOrder);
+			const index:int = container.getChildIndex(_renderDisplay);
+			if (index === _zOrder) 
+			{
+				return;
+			}
+			
+			container.addChildAt(_renderDisplay, _zOrder < index ? _zOrder : _zOrder + 1);
 		}
 		/**
 		 * @private

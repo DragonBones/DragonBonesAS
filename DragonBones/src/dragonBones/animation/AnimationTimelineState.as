@@ -74,13 +74,13 @@
 			}
 		}
 		
-		override public function update(passedTime:Number, normalizedTime:Number):void
+		override public function update(passedTime:Number):void
 		{
 			const prevState:int = _playState;
 			const prevPlayTimes:uint = _currentPlayTimes;
 			const prevTime:Number = _currentTime;
 			
-			if (_playState <= 0 && _setCurrentTime(passedTime, normalizedTime)) 
+			if (_playState <= 0 && _setCurrentTime(passedTime)) 
 			{
 				const eventDispatcher:IEventDispatcher = _armature.eventDispatcher;
 				
@@ -179,7 +179,7 @@
 		
 		public function setCurrentTime(value: Number): void 
 		{
-			_setCurrentTime(value, -1.0);
+			_setCurrentTime(value);
 			_currentFrame = null;
 		}
 	}

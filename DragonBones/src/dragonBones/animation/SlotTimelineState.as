@@ -183,9 +183,9 @@
 			_tweenColor = TWEEN_TYPE_NONE;
 		}
 		
-		override public function update(passedTime:Number, normalizedTime:Number):void
+		override public function update(passedTime:Number):void
 		{
-			super.update(passedTime, normalizedTime);
+			super.update(passedTime);
 			
 			// Fade animation.
 			if (_tweenColor !== TWEEN_TYPE_NONE || _colorDirty)

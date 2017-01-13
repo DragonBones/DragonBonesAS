@@ -27,6 +27,7 @@
 		protected var _currentFrame:FrameData;
 		protected var _armature:Armature;
 		protected var _animationState:AnimationState;
+		protected var _mainTimeline:AnimationTimelineState;
 		
 		public function TimelineState(self:TimelineState)
 		{
@@ -56,34 +57,36 @@
 			_currentFrame = null;
 			_armature = null;
 			_animationState = null;
+			_mainTimeline = null;
 		}
 		
 		protected function _onUpdateFrame():void {}
 		protected function _onArriveAtFrame():void {}
 		
-		protected function _setCurrentTime(passedTime:Number, normalizedTime:Number):Boolean
+		protected function _setCurrentTime(passedTime:Number):Boolean
 		{
 			const prevState:int = _playState;
 			var currentPlayTimes:uint = 0;
-			var currentTime:Number = normalizedTime;
+			var currentTime:Number = 0.0;
 			
-			if (_keyFrameCount === 1 && this !== _animationState._timeline) 
+			if (_mainTimeline && _keyFrameCount === 1) 
 			{
 				_playState = _animationState._timeline._playState >= 0 ? 1 : -1;
 				currentPlayTimes = 1;
+				currentTime = _mainTimeline._currentTime;
 			}
-			else if (normalizedTime < 0.0 || _timeScale !== 1.0 || _timeOffset !== 0.0)  // Scale and offset.
+			else if (!_mainTimeline || _timeScale !== 1.0 || _timeOffset !== 0.0)  // Scale and offset.
 			{
 				const playTimes:uint = _animationState.playTimes;
 				const totalTime:Number = playTimes * _duration;
 				
-				currentTime = passedTime * _timeScale;
+				passedTime *= _timeScale;
 				if (_timeOffset !== 0.0) 
 				{
-					currentTime += _timeOffset * _animationDutation;
+					passedTime += _timeOffset * _animationDutation;
 				}
 				
-				if (playTimes > 0 && (currentTime >= totalTime || currentTime <= -totalTime)) 
+				if (playTimes > 0 && (passedTime >= totalTime || passedTime <= -totalTime)) 
 				{
 					if (_playState <= 0 && _animationState._playheadState === 3) 
 					{
@@ -92,7 +95,7 @@
 					
 					currentPlayTimes = playTimes;
 					
-					if (currentTime < 0.0) 
+					if (passedTime < 0.0) 
 					{
 						currentTime = 0.0;
 					}
@@ -108,16 +111,16 @@
 						_playState = 0;
 					}
 					
-					if (currentTime < 0.0) 
+					if (passedTime < 0.0) 
 					{
-						currentTime = -currentTime;
-						currentPlayTimes = Math.floor(currentTime / _duration);
-						currentTime = _duration - (currentTime % _duration);
+						passedTime = -passedTime;
+						currentPlayTimes = Math.floor(passedTime / _duration);
+						currentTime = _duration - (passedTime % _duration);
 					}
 					else 
 					{
-						currentPlayTimes = Math.floor(currentTime / _duration);
-						currentTime %= _duration;
+						currentPlayTimes = Math.floor(passedTime / _duration);
+						currentTime = passedTime % _duration;
 					}
 				}
 			}
@@ -125,6 +128,7 @@
 			{
 				_playState = _animationState._timeline._playState;
 				currentPlayTimes = _animationState._timeline._currentPlayTimes;
+				currentTime = _mainTimeline._currentTime;
 			}
 			
 			currentTime += _position;
@@ -154,8 +158,12 @@
 			_armature = armature;
 			_animationState = animationState;
 			_timelineData = timelineData;
+			_mainTimeline = _animationState._timeline;
 			
-			const isMainTimeline:Boolean = this === _animationState._timeline;
+			if (this === _mainTimeline)
+			{
+				_mainTimeline = null;
+			}
 			
 			_frameRate = _armature.armatureData.frameRate;
 			_keyFrameCount = _timelineData.frames.length;
@@ -163,8 +171,8 @@
 			_position = _animationState._position;
 			_duration = _animationState._duration;
 			_animationDutation = _animationState.animationData.duration;
-			_timeScale = isMainTimeline ? 1.0 : (1.0 / _timelineData.scale);
-			_timeOffset = isMainTimeline ? 0.0 : _timelineData.offset;
+			_timeScale = !_mainTimeline ? 1.0 : (1.0 / _timelineData.scale);
+			_timeOffset = !_mainTimeline ? 0.0 : _timelineData.offset;
 		}
 		
 		public function fadeOut():void {}
@@ -175,9 +183,9 @@
 			_timeOffset = this == _animationState._timeline? 0: _timelineData.offset;
 		}
 		
-		public function update(passedTime:Number, normalizedTime: Number):void
+		public function update(passedTime:Number):void
 		{
-			if (_playState <= 0 && _setCurrentTime(passedTime, normalizedTime)) 
+			if (_playState <= 0 && _setCurrentTime(passedTime)) 
 			{
 				const currentFrameIndex:uint = _keyFrameCount > 1 ? uint(_currentTime * _frameRate) : 0;
 				const currentFrame:FrameData = _timelineData.frames[currentFrameIndex];

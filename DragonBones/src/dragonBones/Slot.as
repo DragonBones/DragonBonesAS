@@ -392,6 +392,7 @@
 			const prevReplaceDisplayData:DisplayData = _replacedDisplayData;
 			const prevTextureData:TextureData = _textureData;
 			const prevMeshData:MeshData = _meshData;
+			const currentDisplay:Object = _displayIndex >= 0 && _displayIndex < _displayList.length ? _displayList[_displayIndex] : null;
 			
 			if (_displayIndex >= 0 && _displayIndex < _skinSlotData.displays.length) 
 			{
@@ -411,10 +412,9 @@
 				_replacedDisplayData = null;
 			}
 			
-			if (_displayData !== prevDisplayData || _replacedDisplayData !== prevReplaceDisplayData) 
+			if (_displayData !== prevDisplayData || _replacedDisplayData !== prevReplaceDisplayData || _display !== currentDisplay) 
 			{
 				const currentDisplayData:DisplayData = _replacedDisplayData ? _replacedDisplayData : _displayData;
-				const currentDisplay:Object = _displayIndex >= 0 && _displayIndex < _displayList.length ? _displayList[_displayIndex] : null;
 				if (currentDisplayData && (currentDisplay === _rawDisplay || currentDisplay === _meshDisplay)) 
 				{
 					_textureData = _replacedDisplayData ? _replacedDisplayData.texture : _displayData.texture;
@@ -869,6 +869,8 @@
 				}
 				
 				_updateTransform(false);
+				
+				_updateState = 0;
 			}
 		}
 		/**

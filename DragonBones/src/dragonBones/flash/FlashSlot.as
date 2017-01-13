@@ -94,7 +94,13 @@ package dragonBones.flash
 		override protected function _updateZOrder():void
 		{
 			const container:FlashArmatureDisplay = _armature.display as FlashArmatureDisplay;
-			container.addChildAt(_renderDisplay, _zOrder);
+			const index:int = container.getChildIndex(_renderDisplay);
+			if (index === _zOrder) 
+			{
+				return;
+			}
+			
+			container.addChildAt(_renderDisplay, _zOrder < index ? _zOrder : _zOrder + 1);
 		}
 		/**
 		 * @private

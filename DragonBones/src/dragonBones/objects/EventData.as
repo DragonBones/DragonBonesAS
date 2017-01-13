@@ -28,9 +28,9 @@ package dragonBones.objects
 			
 			type = EventType.None;
 			name = null;
-			data = null;
 			bone = null;
 			slot = null;
+			data = null;
 		}
 	}
 }

@@ -139,9 +139,9 @@ package dragonBones.animation
 			_tweenFFD = TWEEN_TYPE_NONE;
 		}
 		
-		override public function update(passedTime: Number, normalizedTime: Number):void
+		override public function update(passedTime: Number):void
 		{
-			super.update(passedTime, normalizedTime);
+			super.update(passedTime);
 			
 			if (slot._meshData !== (_timelineData as FFDTimelineData).display.mesh) 
 			{

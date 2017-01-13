@@ -18,6 +18,7 @@
 	{
 		public var bone:Bone;
 		
+		private var _transformDirty:Boolean;
 		private var _tweenTransform:int;
 		private var _tweenRotate:int;
 		private var _tweenScale:int;
@@ -37,6 +38,7 @@
 			
 			bone = null;
 			
+			_transformDirty = false;
 			_tweenTransform = TWEEN_TYPE_NONE;
 			_tweenRotate = TWEEN_TYPE_NONE;
 			_tweenScale = TWEEN_TYPE_NONE;
@@ -157,6 +159,8 @@
 					_transform.x = _originalTransform.x + currentTransform.x + _durationTransform.x * tweenProgress;
 					_transform.y = _originalTransform.y + currentTransform.y + _durationTransform.y * tweenProgress;
 				}
+				
+				_transformDirty = true;
 			}
 			
 			if (_tweenRotate !== TWEEN_TYPE_NONE) 
@@ -181,6 +185,8 @@
 					_transform.skewX = _originalTransform.skewX + currentTransform.skewX + _durationTransform.skewX * tweenProgress;
 					_transform.skewY = _originalTransform.skewY + currentTransform.skewY + _durationTransform.skewY * tweenProgress;
 				}
+				
+				_transformDirty = true;
 			}
 			
 			if (_tweenScale !== TWEEN_TYPE_NONE) 
@@ -205,9 +211,9 @@
 					_transform.scaleX = _originalTransform.scaleX * (currentTransform.scaleX + _durationTransform.scaleX * tweenProgress);
 					_transform.scaleY = _originalTransform.scaleY * (currentTransform.scaleY + _durationTransform.scaleY * tweenProgress);
 				}
+				
+				_transformDirty = true;
 			}
-			
-			bone.invalidUpdate();
 		}
 		
 		override public function _init(armature: Armature, animationState: AnimationState, timelineData: TimelineData): void 
@@ -224,7 +230,7 @@
 			_transform.skewY = Transform.normalizeRadian(_transform.skewY);
 		}
 		
-		override public function update(passedTime: Number, normalizedTime: Number):void	
+		override public function update(passedTime: Number):void	
 		{
 			// Blend animation state.
 			const animationLayer:int = _animationState._layer;
@@ -232,7 +238,7 @@
 			
 			if (bone._updateState <= 0) 
 			{
-				super.update(passedTime, normalizedTime);
+				super.update(passedTime);
 				
 				bone._blendLayer = animationLayer;
 				bone._blendLeftWeight = 1.0;
@@ -266,7 +272,7 @@
 				weight *= bone._blendLeftWeight;
 				if (weight >= 0.0) 
 				{
-					super.update(passedTime, normalizedTime);
+					super.update(passedTime);
 					
 					bone._blendTotalWeight += weight;
 					
@@ -283,8 +289,10 @@
 			
 			if (bone._updateState > 0) 
 			{
-				if (_animationState._fadeState !== 0 || _animationState._subFadeState !== 0) 
+				if (_transformDirty || _animationState._fadeState !== 0 || _animationState._subFadeState !== 0) 
 				{
+					_transformDirty = false;
+					
 					bone.invalidUpdate();
 				}
 			}
