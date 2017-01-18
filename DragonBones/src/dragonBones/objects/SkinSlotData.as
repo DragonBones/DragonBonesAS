@@ -29,6 +29,7 @@ package dragonBones.objects
 				delete meshs[k];
 			}
 			
+			displays.fixed = false;
 			displays.length = 0;
 			//meshs.clear();
 			slot = null;

@@ -348,7 +348,6 @@
 			{
 				const displayObjectSet:Array = rawData[DISPLAY];
 				const displayDataSet:Vector.<DisplayData> = slotDisplayDataSet.displays;
-				displayDataSet.fixed = false;
 				
 				_skinSlotData = slotDisplayDataSet;
 				

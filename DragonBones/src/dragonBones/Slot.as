@@ -1086,6 +1086,7 @@
 		public function invalidUpdate():void
 		{
 			_displayDirty = true;
+			_transformDirty = true;
 		}
 		/**
 		 * @private
