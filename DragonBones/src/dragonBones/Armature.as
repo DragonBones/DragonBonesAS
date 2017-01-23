@@ -61,6 +61,7 @@ package dragonBones
 		 */
 		dragonBones_internal var _bonesDirty:Boolean;
 		private var _slotsDirty:Boolean;
+		private var _zOrderDirty:Boolean;
 		private const _bones:Vector.<Bone> = new Vector.<Bone>();
 		private const _slots:Vector.<Slot> = new Vector.<Slot>();
 		private const _actions:Vector.<ActionData> = new Vector.<ActionData>();
@@ -143,6 +144,7 @@ package dragonBones
 			_lockDispose = false;
 			_bonesDirty = false;
 			_slotsDirty = false;
+			_zOrderDirty = false;
 			_bones.fixed = false;
 			_bones.length = 0;
 			_slots.fixed = false;
@@ -321,19 +323,23 @@ package dragonBones
 			const sortedSlots:Vector.<SlotData> = _armatureData.sortedSlots;
 			const isOriginal:Boolean = !slotIndices || slotIndices.length < 1;
 			
-			for (var i:uint = 0, l:uint = sortedSlots.length; i < l; ++i) 
+			if (_zOrderDirty || !isOriginal)
 			{
-				const slotIndex:int = isOriginal? i: slotIndices[i];
-				const slotData:SlotData = sortedSlots[slotIndex];
-				const slot:Slot = getSlot(slotData.name);
-				
-				if (slot) 
+				for (var i:uint = 0, l:uint = sortedSlots.length; i < l; ++i) 
 				{
-					slot._setZorder(i);
+					const slotIndex:int = isOriginal? i: slotIndices[i];
+					const slotData:SlotData = sortedSlots[slotIndex];
+					const slot:Slot = getSlot(slotData.name);
+					
+					if (slot) 
+					{
+						slot._setZorder(i);
+					}
 				}
+				
+				_slotsDirty = true;
+				_zOrderDirty = !isOriginal;
 			}
-			
-			_slotsDirty = true;
 		}
 		/**
 		 * @private
@@ -954,6 +960,11 @@ package dragonBones
 		}
 		public function set replacedTexture(value:Object):void
 		{
+			if (_replacedTexture === value)
+			{
+				return;
+			}
+			
 			if (_replaceTextureAtlasData) 
 			{
 				_replaceTextureAtlasData.returnToPool();

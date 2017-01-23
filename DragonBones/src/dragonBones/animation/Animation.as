@@ -177,6 +177,11 @@
 				passedTime *= _armature._parent._armature.animation.timeScale;
 			}
 			
+			if (timeScale !== 1.0) 
+			{
+				passedTime *= timeScale;
+			}
+			
 			var animationState:AnimationState = null;
 			
 			const animationStateCount:uint = _animationStates.length;
@@ -760,6 +765,7 @@
 		 */
 		public function get animationConfig(): AnimationConfig 
 		{
+			_animationConfig.clear();
 			return _animationConfig;
 		}
 		/**

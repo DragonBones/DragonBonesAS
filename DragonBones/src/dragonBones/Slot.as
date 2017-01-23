@@ -82,7 +82,7 @@
 		/**
 		 * @private
 		 */
-		dragonBones_internal var _updateState:int;
+		protected var _updateState:int;
 		/**
 		 * @private
 		 */
@@ -794,27 +794,6 @@
 				_updateLocalTransformMatrix();
 			}
 			
-			if (_meshData && _displayData && _meshData === _displayData.mesh) 
-			{
-				if (_meshDirty || (_meshData.skinned && _isMeshBonesUpdate())) 
-				{
-					_meshDirty = false;
-					
-					_updateMesh();
-				}
-				
-				if (_meshData.skinned) 
-				{
-					if (_transformDirty) 
-					{
-						_transformDirty = false;
-						_updateTransform(true);
-					}
-					
-					return;
-				}
-			}
-			
 			if (cacheFrameIndex >= 0 && _cachedFrameIndices) 
 			{
 				const cachedFrameIndex:int = _cachedFrameIndices[cacheFrameIndex];
@@ -848,6 +827,27 @@
 				cacheFrameIndex = -1;
 				_transformDirty = true;
 				_cachedFrameIndex = -1;
+			}
+			
+			if (_meshData && _displayData && _meshData === _displayData.mesh) 
+			{
+				if (_meshDirty || (_meshData.skinned && _isMeshBonesUpdate())) 
+				{
+					_meshDirty = false;
+					
+					_updateMesh();
+				}
+				
+				if (_meshData.skinned) 
+				{
+					if (_transformDirty) 
+					{
+						_transformDirty = false;
+						_updateTransform(true);
+					}
+					
+					return;
+				}
 			}
 			
 			if (_transformDirty) 

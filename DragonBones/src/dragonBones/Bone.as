@@ -543,6 +543,13 @@
 			return _slots;
 		}
 		/**
+		 * @private
+		 */
+		public function get boneData():BoneData
+		{
+			return _boneData;
+		}
+		/**
 		 * @language zh_CN
 		 * 控制此骨骼所有插槽的可见。
 		 * @default true
