@@ -122,18 +122,28 @@
 				switch (displayData.type)
 				{
 					case DisplayType.Image:
-						if (!displayData.texture || dataPackage.textureAtlasName)
+						if (!displayData.texture)
 						{
-							displayData.texture = _getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.path);
+							displayData.texture = _getTextureData(dataPackage.dataName, displayData.path);
+						}
+						
+						if (dataPackage.textureAtlasName)
+						{
+							slot._textureDatas[i] = _getTextureData(dataPackage.textureAtlasName, displayData.path)
 						}
 						
 						displayList[i] = slot.rawDisplay;
 						break;
 					
 					case DisplayType.Mesh:
-						if (!displayData.texture || dataPackage.textureAtlasName)
+						if (!displayData.texture)
 						{
-							displayData.texture = _getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.path);
+							displayData.texture = _getTextureData(dataPackage.dataName, displayData.path);
+						}
+						
+						if (dataPackage.textureAtlasName)
+						{
+							slot._textureDatas[i] = _getTextureData(dataPackage.textureAtlasName, displayData.path)
 						}
 						
 						displayList[i] = slot.meshDisplay;

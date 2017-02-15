@@ -19,7 +19,7 @@
 		private static function _returnObject(object:BaseObject):void
 		{
 			//const objectConstructor:Class = getDefinitionByName(getQualifiedClassName(object));
-			const objectConstructor:Class = object["constructor"];
+			const objectConstructor:Class = object["constructor"] as Class;
 			const maxCount:uint = _maxCountMap[objectConstructor] == null? _defaultMaxCount: _maxCountMap[objectConstructor];
 			const pool:Vector.<BaseObject> = _poolsMap[objectConstructor] = _poolsMap[objectConstructor] || new Vector.<BaseObject>;
 			

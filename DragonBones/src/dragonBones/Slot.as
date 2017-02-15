@@ -126,6 +126,10 @@
 		/**
 		 * @private
 		 */
+		dragonBones_internal const _textureDatas:Vector.<TextureData> = new Vector.<TextureData>();
+		/**
+		 * @private
+		 */
 		dragonBones_internal const _replacedDisplayDatas:Vector.<DisplayData> = new Vector.<DisplayData>();
 		/**
 		 * @private
@@ -256,6 +260,7 @@
 			_colorTransform.blueOffset = 0;
 			_ffdVertices.length = 0;
 			_displayList.length = 0;
+			_textureDatas.length = 0;
 			_replacedDisplayDatas.length = 0;
 			_meshBones.length = 0;
 			_skinSlotData = null;
@@ -417,7 +422,19 @@
 				const currentDisplayData:DisplayData = _replacedDisplayData ? _replacedDisplayData : _displayData;
 				if (currentDisplayData && (currentDisplay === _rawDisplay || currentDisplay === _meshDisplay)) 
 				{
-					_textureData = _replacedDisplayData ? _replacedDisplayData.texture : _displayData.texture;
+					if (_replacedDisplayData != null)
+					{
+						_textureData = _replacedDisplayData.texture;
+					}
+					else if (_displayIndex < _textureDatas.length && _textureDatas[_displayIndex] != null)
+					{
+						_textureData = _textureDatas[_displayIndex];
+					}
+					else
+					{
+						_textureData = _displayData.texture;
+					}
+					
 					if (currentDisplay === _meshDisplay) 
 					{
 						if (_replacedDisplayData && _replacedDisplayData.mesh) 
@@ -718,6 +735,7 @@
 			_colorTransform.blueOffset = slotData.color.blueOffset;
 			_rawDisplay = rawDisplay;
 			_meshDisplay = meshDisplay;
+			_textureDatas.length = _skinSlotData.displays.length;
 			
 			_blendModeDirty = true;
 			_colorDirty = true;

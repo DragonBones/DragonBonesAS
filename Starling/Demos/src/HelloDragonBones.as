@@ -44,7 +44,7 @@
 		{
 			// Render init.
 			_flashInit();
-			//_starlingInit();
+			_starlingInit();
 			
 			// Add event listeners.
 			this.stage.addEventListener(MouseEvent.MOUSE_UP, _mouseHandler);

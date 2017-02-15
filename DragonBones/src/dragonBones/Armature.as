@@ -329,11 +329,14 @@ package dragonBones
 				{
 					const slotIndex:int = isOriginal? i: slotIndices[i];
 					const slotData:SlotData = sortedSlots[slotIndex];
-					const slot:Slot = getSlot(slotData.name);
 					
-					if (slot) 
+					if (slotData)
 					{
-						slot._setZorder(i);
+						const slot:Slot = getSlot(slotData.name);
+						if (slot) 
+						{
+							slot._setZorder(i);
+						}
 					}
 				}
 				
