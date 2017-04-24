@@ -1,12 +1,15 @@
-package dragonBones.starling
+﻿package dragonBones.starling
 {
 	import dragonBones.core.BaseObject;
+	import dragonBones.core.dragonBones_internal;
 	import dragonBones.textures.TextureAtlasData;
 	import dragonBones.textures.TextureData;
 	
 	import starling.textures.SubTexture;
 	import starling.textures.Texture;
 	import starling.textures.TextureAtlas;
+	
+	use namespace dragonBones_internal;
 	
 	public final class StarlingTextureAtlasData extends TextureAtlasData
 	{
@@ -17,10 +20,10 @@ package dragonBones.starling
 			{
 				const textureData:StarlingTextureData = textureAtlasData.generateTexture() as StarlingTextureData;
 				textureData.name = textureName;
-				textureData.texture = textureAtlas.getTexture(textureName) as SubTexture;
+				textureData.texture = textureAtlas.getTexture(textureName) as SubTexture; // TODO
 				textureData.rotated = textureAtlas.getRotation(textureName);
 				textureData.region.copyFrom(textureAtlas.getRegion(textureName));
-				//textureData.frame = textureAtlas.getFrame(textureName);
+				//textureData.frame = textureAtlas.getFrame(textureName); // TODO
 				textureAtlasData.addTexture(textureData);
 			}
 			
@@ -32,7 +35,7 @@ package dragonBones.starling
 		/**
 		 * @private
 		 */
-		public var disposeTexture:Boolean;
+		dragonBones_internal var _disposeTexture:Boolean;
 		
 		public var texture:Texture;
 		/**
@@ -49,20 +52,13 @@ package dragonBones.starling
 		{
 			super._onClear();
 			
-			if (texture)
+			if (_disposeTexture && texture)
 			{
-				if (disposeTexture)
-				{
-					disposeTexture = false;
-					texture.dispose();
-				}
-				
-				texture = null;
+				texture.dispose();
 			}
-			else
-			{
-				disposeTexture = false;
-			}
+			
+			_disposeTexture = false;
+			texture = null;
 		}
 		/**
 		 * @private

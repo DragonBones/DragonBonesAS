@@ -367,11 +367,16 @@ package dragonBones
 		 */
 		public function dispose():void
 		{
-			_delayDispose = true;
-			
-			if (!_lockDispose && _armatureData)
+			if (_armatureData)
 			{
-				returnToPool();
+				if (_lockDispose)
+				{
+					_delayDispose = true;
+				}
+				else
+				{
+					returnToPool();
+				}
 			}
 		}
 		/**
@@ -393,6 +398,13 @@ package dragonBones
 				throw new Error("The armature data has been disposed.");
 			}
 			
+			const prevCacheFrameIndex:int = _animation._cacheFrameIndex;
+			
+			// Update nimation.
+			_animation._advanceTime(passedTime);
+			
+			const currentCacheFrameIndex:int = _animation._cacheFrameIndex;
+			
 			// Sort bones and slots.
 			if (_bonesDirty)
 			{
@@ -407,13 +419,6 @@ package dragonBones
 				_sortSlots();
 				_slots.fixed = true;
 			}
-			
-			const prevCacheFrameIndex:int = _animation._cacheFrameIndex;
-			
-			// Update nimation.
-			_animation._advanceTime(passedTime);
-			
-			const currentCacheFrameIndex:int = _animation._cacheFrameIndex;
 			
 			var i:uint = 0, l:uint = 0;
 			

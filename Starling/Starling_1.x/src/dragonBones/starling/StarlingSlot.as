@@ -116,7 +116,7 @@
 				return;
 			}
 			
-			container.addChildAt(_renderDisplay, _zOrder < index ? _zOrder : _zOrder + 1);
+			container.addChildAt(_renderDisplay, _zOrder);
 		}
 		/**
 		 * @private

@@ -28,6 +28,9 @@ package dragonBones.objects
 				events[i].returnToPool();
 			}
 			
+			actions.fixed = false;
+			events.fixed = false;
+			
 			actions.length = 0;
 			events.length = 0;
 		}

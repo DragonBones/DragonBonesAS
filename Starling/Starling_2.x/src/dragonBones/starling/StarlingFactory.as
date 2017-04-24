@@ -77,7 +77,7 @@
 				if (textureAtlas is BitmapData)
 				{
 					(textureAtlasData as StarlingTextureAtlasData).texture = Texture.fromBitmapData(textureAtlas as BitmapData, generateMipMaps, false, textureAtlasData.scale);
-					(textureAtlasData as StarlingTextureAtlasData).disposeTexture = true;
+					(textureAtlasData as StarlingTextureAtlasData)._disposeTexture = true;
 				}
 				else if (textureAtlas is Texture)
 				{

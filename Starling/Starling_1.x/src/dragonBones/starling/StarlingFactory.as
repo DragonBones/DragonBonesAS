@@ -77,7 +77,7 @@ package dragonBones.starling
 				if (textureAtlas is BitmapData)
 				{
 					starlingTextureAtlasData.texture = Texture.fromBitmapData(textureAtlas as BitmapData, generateMipMaps, false, textureAtlasData.scale);
-					starlingTextureAtlasData.disposeTexture = true;
+					starlingTextureAtlasData._disposeTexture = true;
 					
 					if (starlingTextureAtlasData.bitmapData && !Starling.handleLostContext)
 					{

@@ -127,7 +127,7 @@
 				return;
 			}
 			
-			container.addChildAt(_renderDisplay, _zOrder < index ? _zOrder : _zOrder + 1);
+			container.addChildAt(_renderDisplay, _zOrder);
 		}
 		/**
 		 * @private
@@ -240,12 +240,16 @@
 						}
 						
 						meshDisplay.texture = currentTextureData.texture;
+						meshDisplay.pivotX = _pivotX;
+						meshDisplay.pivotY = _pivotY;
 					}
 					else
 					{
 						var normalDisplay:Image = _renderDisplay as Image;
 						normalDisplay.texture = currentTextureData.texture;
 						normalDisplay.readjustSize();
+						normalDisplay.pivotX = _pivotX;
+						normalDisplay.pivotY = _pivotY;
 					}
 					
 					_updateVisible();

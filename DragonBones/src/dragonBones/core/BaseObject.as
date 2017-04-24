@@ -25,8 +25,9 @@
 			
 			if (pool.length < maxCount)
 			{
-				if (pool.indexOf(object) < 0)
+				if (!object._isInPool)
 				{
+					object._isInPool = true;
 					pool.push(object);
 				}
 				else
@@ -107,11 +108,13 @@
 			const pool:Vector.<BaseObject> = _poolsMap[objectConstructor];
 			if (pool && pool.length > 0)
 			{
-				return pool.pop();
+				object = pool.pop();
+				object._isInPool = false;
+				return object;
 			}
 			else
 			{
-				const object:BaseObject = new objectConstructor();
+				var object:BaseObject = new objectConstructor();
 				object._onClear();
 				return object;
 			}
@@ -122,6 +125,8 @@
 		 * @version DragonBones 4.5
 		 */
 		public const hashCode:uint = _hashCode++;
+		
+		private var _isInPool:Boolean = false;
 		/**
 		 * @private
 		 */

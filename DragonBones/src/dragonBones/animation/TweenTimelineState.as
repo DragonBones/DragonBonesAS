@@ -75,7 +75,7 @@ package dragonBones.animation
 			const fromValue:Number = valueIndex === 0 ? 0.0 : samples[valueIndex - 1];
 			const toValue:Number = (valueIndex === segmentCount - 1) ? 1.0 : samples[valueIndex];
 			
-			return fromValue + (toValue - fromValue) * (progress - valueIndex / segmentCount);
+			return fromValue + (toValue - fromValue) * (progress * segmentCount - valueIndex);
 		}
 		
 		protected var _tweenProgress:Number;
