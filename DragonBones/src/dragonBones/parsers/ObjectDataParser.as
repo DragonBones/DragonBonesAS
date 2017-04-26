@@ -1348,8 +1348,8 @@
 		{
 			transform.x = _getNumber(rawData, X, 0.0) * _armature.scale;
 			transform.y = _getNumber(rawData, Y, 0.0) * _armature.scale;
-			transform.skewX = _getNumber(rawData, SKEW_X, 0.0) * DragonBones.ANGLE_TO_RADIAN;
-			transform.skewY = _getNumber(rawData, SKEW_Y, 0.0) * DragonBones.ANGLE_TO_RADIAN;
+			transform.skewX = Transform.normalizeRadian(_getNumber(rawData, SKEW_X, 0.0) * DragonBones.ANGLE_TO_RADIAN);
+			transform.skewY = Transform.normalizeRadian(_getNumber(rawData, SKEW_Y, 0.0) * DragonBones.ANGLE_TO_RADIAN);
 			transform.scaleX = _getNumber(rawData, SCALE_X, 1.0);
 			transform.scaleY = _getNumber(rawData, SCALE_Y, 1.0);
 		}
