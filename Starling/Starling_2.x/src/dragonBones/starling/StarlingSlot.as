@@ -189,6 +189,10 @@
 		 */
 		override protected function _updateFrame():void
 		{
+			if (this.name === "tou")
+			{
+				trace(_displayData);
+			}
 			const isMeshDisplay:Boolean = _meshData && _renderDisplay === _meshDisplay;
 			var currentTextureData:StarlingTextureData = _textureData as StarlingTextureData;
 			

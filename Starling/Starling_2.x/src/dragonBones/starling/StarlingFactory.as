@@ -134,7 +134,7 @@
 					case DisplayType.Image:
 						if (!displayData.texture || dataPackage.textureAtlasName)
 						{
-							displayData.texture = _getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.name);
+							displayData.texture = _getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.path);
 						}
 						
 						displayList[i] = slot.rawDisplay;
@@ -143,14 +143,14 @@
 					case DisplayType.Mesh:
 						if (!displayData.texture)
 						{
-							displayData.texture = _getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.name);
+							displayData.texture = _getTextureData(dataPackage.textureAtlasName || dataPackage.dataName, displayData.path);
 						}
 						
 						displayList[i] = slot.meshDisplay;
 						break;
 					
 					case DisplayType.Armature:
-						const childArmature:Armature = buildArmature(displayData.name, dataPackage.dataName, null, dataPackage.textureAtlasName);
+						const childArmature:Armature = buildArmature(displayData.path, dataPackage.dataName, null, dataPackage.textureAtlasName);
 						if (childArmature) 
 						{
 							if (!childArmature.inheritAnimation)
