@@ -22,7 +22,7 @@ package dragonBones.objects
 		{
 			if (animationConfig)
 			{
-				animationConfig..returnToPool();
+				animationConfig.returnToPool();
 			}
 			
 			type = ActionType.None;

@@ -462,7 +462,7 @@
 			
 			var i:uint = 0, l:uint = 0;
 			var insertedFrame:AnimationFrameData = null;
-			const replacedFrame:AnimationFrameData = frames.length? frames[frameStart] as AnimationFrameData: null;
+			const replacedFrame:AnimationFrameData = (frames.length > 0 && frameStart < frames.length)? frames[frameStart] as AnimationFrameData: null;
 			
 			if (replacedFrame && (frameStart == 0 || frames[frameStart - 1] == replacedFrame.prev)) // Key frame.
 			{
