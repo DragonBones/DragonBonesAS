@@ -41,6 +41,7 @@
 		 * @private
 		 */
 		dragonBones_internal var _cacheFrameIndex: Number;
+		private var _inheritTimeScale:Number;
 		private const _animationNames:Vector.<String> = new Vector.<String>();
 		private const _animations:Object = {};
 		private const _animationStates:Vector.<AnimationState> = new Vector.<AnimationState>();
@@ -80,6 +81,7 @@
 			_animationStateDirty = false;
 			_timelineStateDirty = false;
 			_cacheFrameIndex = -1;
+			_inheritTimeScale = 1.0;
 			_animationNames.length = 0;
 			//_animations.clear();
 			_animationStates.length = 0;
@@ -172,15 +174,16 @@
 				passedTime = -passedTime;
 			}
 			
-			if (_armature.inheritAnimation && _armature._parent) // Inherit parent animation timeScale.
-			{
-				passedTime *= _armature._parent._armature.animation.timeScale;
-			}
-			
-			if (timeScale !== 1.0) 
-			{
-				passedTime *= timeScale;
-			}
+		    if (_armature.inheritAnimation && _armature._parent !== null) { // Inherit parent animation timeScale.
+			_inheritTimeScale = _armature._parent._armature.animation._inheritTimeScale * timeScale;
+		    }
+		    else {
+			_inheritTimeScale = timeScale;
+		    }
+
+		    if (_inheritTimeScale !== 1.0) {
+			passedTime *= _inheritTimeScale;
+		    }
 			
 			var animationState:AnimationState = null;
 			
